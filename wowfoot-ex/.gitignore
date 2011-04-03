@@ -1,0 +1,9 @@
+Debug/
+Release/
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.user
+ipch/
+config.h

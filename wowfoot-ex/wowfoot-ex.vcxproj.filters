@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\wowfoot-ex.cpp" />
+    <ClCompile Include="src\libs\mpq_libmpq.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\dbcfile.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\loadlib.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\common.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\explode.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\extract.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\huffman.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\mpq.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\wave.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\libs\dbcfile.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\loadlib.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\mpq_libmpq04.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\common.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\crypt_buf.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\explode.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\extract.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\huffman.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq-internal.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_begin.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_end.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\platform.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\wave.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="libs">
+      <UniqueIdentifier>{ea4d97ae-0fc8-45e2-a4e4-848fe7ab519f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\libmpq">
+      <UniqueIdentifier>{e5ece20d-b2c1-47c8-83fa-690e8004a31b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
