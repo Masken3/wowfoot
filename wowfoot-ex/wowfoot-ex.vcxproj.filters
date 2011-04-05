@@ -32,6 +32,24 @@
     <ClCompile Include="src\libs\libmpq\libmpq\wave.c">
       <Filter>libs\libmpq</Filter>
     </ClCompile>
+    <ClCompile Include="src\libs\blp\BLPConverter.cpp">
+      <Filter>libs\blp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\MemImage.cpp">
+      <Filter>libs\blp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\colorconv.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\palcreate.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\palettize.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\paloptimize.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h" />
@@ -77,6 +95,24 @@
     <ClInclude Include="src\libs\libmpq\libmpq\wave.h">
       <Filter>libs\libmpq</Filter>
     </ClInclude>
+    <ClInclude Include="src\libs\blp\MemImage.h">
+      <Filter>libs\blp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\BLP.h">
+      <Filter>libs\blp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\colorconv.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\palcreate.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\palettize.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\paloptimize.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libs">
@@ -84,6 +120,12 @@
     </Filter>
     <Filter Include="libs\libmpq">
       <UniqueIdentifier>{e5ece20d-b2c1-47c8-83fa-690e8004a31b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\blp">
+      <UniqueIdentifier>{cb78f8c3-a5d5-4752-8123-e417985fd0cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\blp\palbmp">
+      <UniqueIdentifier>{77ec1f7e-e3a8-417f-a708-d888f55c75f1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -39,6 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>src\libs\blp;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,11 +54,12 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>src\libs\libmpq;src\libs\bzip2</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4103;4996</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>zlib.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(Configuration)\crblib.lib;$(Configuration)\squish.lib;libpng15.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,13 +79,19 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>zlib.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libpng.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\libs\blp\BLPConverter.cpp" />
+    <ClCompile Include="src\libs\blp\MemImage.cpp" />
+    <ClCompile Include="src\libs\blp\palbmp\colorconv.c" />
+    <ClCompile Include="src\libs\blp\palbmp\palcreate.c" />
+    <ClCompile Include="src\libs\blp\palbmp\palettize.c" />
+    <ClCompile Include="src\libs\blp\palbmp\paloptimize.c" />
     <ClCompile Include="src\libs\dbcfile.cpp" />
     <ClCompile Include="src\libs\libmpq\libmpq\common.c" />
     <ClCompile Include="src\libs\libmpq\libmpq\explode.c" />
@@ -97,6 +105,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\libs\blp\BLP.h" />
+    <ClInclude Include="src\libs\blp\MemImage.h" />
+    <ClInclude Include="src\libs\blp\palbmp\colorconv.h" />
+    <ClInclude Include="src\libs\blp\palbmp\palcreate.h" />
+    <ClInclude Include="src\libs\blp\palbmp\palettize.h" />
+    <ClInclude Include="src\libs\blp\palbmp\paloptimize.h" />
     <ClInclude Include="src\libs\dbcfile.h" />
     <ClInclude Include="src\libs\libmpq\libmpq\common.h" />
     <ClInclude Include="src\libs\libmpq\libmpq\crypt_buf.h" />

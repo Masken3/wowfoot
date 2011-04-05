@@ -67,5 +67,8 @@ int main() {
 
 	// Now: extract them!
 
+	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth1.blp");
+	printf("size: %"PRIuPTR"\n", testBlp.getSize());
+
 	return 0;
 }
