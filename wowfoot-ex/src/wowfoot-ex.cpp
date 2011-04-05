@@ -1,6 +1,10 @@
 #include "config.h"
 #include "libs/mpq_libmpq04.h"
 #include "libs/dbcfile.h"
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
+using namespace std;
 
 struct F2 {
 	float x, y;
@@ -13,9 +17,17 @@ int main() {
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");
 	bool res = wmc.open();
-	if(!res)
+	if(!res) {
+		printf("DBC open fail, dumping mpq...\n");
+		vector<string> files;
+		locale.GetFileListTo(files);
+		printf("%"PRIuPTR" files:\n", files.size());
+		for(size_t i=0; i<files.size(); i++) {
+			printf("%s\n", files[i].c_str());
+		}
 		return 1;
-	printf("Extracting %i continents...\n", wmc.getRecordCount());
+	}
+	printf("Extracting %"PRIuPTR" continents...\n", wmc.getRecordCount());
 	for(DBCFile::Iterator itr = wmc.begin(); itr != wmc.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int cid = r.getInt(0);
@@ -32,7 +44,7 @@ int main() {
 	res = wma.open();
 	if(!res)
 		return 1;
-	printf("Extracting %i map areas...\n", wma.getRecordCount());
+	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int map = r.getInt(1);

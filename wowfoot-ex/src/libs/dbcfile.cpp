@@ -5,8 +5,8 @@
 #include "dbcfile.h"
 #include "mpq_libmpq04.h"
 
-DBCFile::DBCFile(const std::string &filename):
-    filename(filename),
+DBCFile::DBCFile(const std::string &_filename):
+    filename(_filename),
     data(0)
 {
 

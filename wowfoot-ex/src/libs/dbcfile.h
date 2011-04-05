@@ -16,7 +16,7 @@ public:
     class Exception
     {
     public:
-        Exception(const std::string &message): message(message)
+        Exception(const std::string &_message): message(_message)
         { }
         virtual ~Exception()
         { }
@@ -58,9 +58,9 @@ public:
             return reinterpret_cast<char*>(file.stringTable + stringOffset);
         }
     private:
-        Record(DBCFile &file, unsigned char *offset): file(file), offset(offset) {}
-        unsigned char *offset;
+        Record(DBCFile &_file, unsigned char *_offset): file(_file), offset(_offset) {}
         DBCFile &file;
+        unsigned char *offset;
 
         friend class DBCFile;
         friend class DBCFile::Iterator;

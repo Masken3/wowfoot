@@ -6,4 +6,5 @@ Release/
 *.suo
 *.user
 ipch/
-config.h
+/src/config.h
+/build/
