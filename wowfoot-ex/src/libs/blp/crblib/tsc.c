@@ -1,10 +1,13 @@
 
 #include <crblib/inc.h>
 #include <time.h>
+
+#ifdef MSC_VER
 #include <windows.h>
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"Advapi32.lib")
+#endif
 
 #include "tsc.h"
 
@@ -104,6 +107,12 @@ double diffTSC(ulong *tsc1,ulong *tsc2)
 return diffTSChz(tsc1,tsc2) * secondsPerTSC();
 }
 
+#ifndef WIN32	//HACK
+double secondsPerTSC() {
+	return 1;
+}
+#endif
+
 void showPopTSC(const char *tag,FILE * fp)
 {
 double time;
@@ -118,6 +127,7 @@ void showTSC(const char *tag,FILE * fp,double time)
 	fprintf(fp,"%s : %f secs\n",tag,time);
 }
 
+#ifdef WIN32
 void showPopTSCper(FILE * fp,const char *tag,int items,const char *itemTag)
 {
 double time;
@@ -339,3 +349,4 @@ int tscMHZ(void)
 	secondsPerTSC();
 return TSC_MHZ;
 }
+#endif	//WIN32

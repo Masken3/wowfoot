@@ -3,6 +3,12 @@
 #include <sys/stat.h>
 #include <crblib/inc.h>
 #include <crblib/fileutil.h>
+#ifdef LINUX
+#include <dirent.h>
+#define _stat stat
+#define a_name d_name
+#include <unistd.h>
+#endif
 
 struct WalkInfo
 	{

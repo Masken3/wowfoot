@@ -564,3 +564,80 @@ ulong range,code,r;
 
 return bit;
 }
+
+
+//--------------------------------------------------------------
+//--- range normalizers for encoder & decoder; also does the IO
+
+void arithEncRenorm(arithInfo * ari,ulong code,ulong range)
+{
+	assert( range <= One );
+
+	while( range <= MinRange )
+	{
+		ulong byte;
+		byte = (code >> SHIFT_BITS);
+	
+		if ( byte == 0xFF )
+		{
+			/** the waiting queue is incremented like :
+			*		(ari->queue), 0xFF, 0xFF, ... ,0xFF, code
+			***/
+
+			ari->overflow_bytes++;
+		}
+		else
+		{
+			ulong carry;
+			carry = code>>CODE_BITS;	
+
+				/* carry == 1 or 0 : is the top bit on ?
+				*	carry = byte>>8
+				* if ( carry )	send nextbyte+1
+				*				MinRange queue with zeros
+				* else			send nextbyte
+				*				MinRange queue with ones
+				**/					
+		
+			*(ari->outPtr)++ = (ubyte)(ari->queue + carry);	// propagate the carry.
+			// send the queue
+			if ( ari->overflow_bytes )
+			{
+				*(ari->outPtr)++ = (ubyte)(0xFF + carry);
+				while ( --(ari->overflow_bytes) ) *(ari->outPtr)++ = (ubyte)(0xFF + carry);
+			}
+			ari->queue = byte;
+		}
+
+		code = (code<<8) & CODE_MASK;
+		range <<= 8;
+	}
+
+	assert( range <= One );
+
+	ari->code  = code;
+	ari->range = range;
+}
+
+void arithDecRenorm(arithInfo * ari,ulong *pcode,ulong *prange)
+{
+	ulong range,code;
+
+	range = ari->range;
+	code  = ari->code;
+
+	assert( range <= One );
+
+	while ( range <= MinRange )
+	{
+		range <<= 8;
+		code = (code<<8) + (((ari->queue)<<EXTRA_BITS)&0xFF);	// use the top bit in the queue
+		ari->queue = *(ari->outPtr)++;
+		code += (ari->queue) >> (TAIL_EXTRA_BITS);
+	}
+	
+	assert( range <= One );
+
+	*prange = range;
+	*pcode = code;
+}

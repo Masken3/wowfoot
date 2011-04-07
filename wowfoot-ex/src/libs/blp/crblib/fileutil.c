@@ -6,10 +6,15 @@
 #include <crblib/inc.h>
 #include <crblib/strutil.h>
 #include <crblib/fileutil.h>
+#ifdef WIN32
 #include <io.h>
-
 #include <sys/utime.h>
+#else
+#include <unistd.h>
+#include <utime.h>
+#endif
 
+#if 0
 void dprintf(const char * String, ...)
 {
 	va_list			ArgPtr;
@@ -27,6 +32,7 @@ void dprintf(const char * String, ...)
 		fprintf(stderr,TempStr);
 	}
 }
+#endif
 
 ubyte * readFile(char *name)
 {
@@ -158,7 +164,7 @@ if ( *EndBase == PathDelim ) *EndBase = 0;
 return;
 }
 
-void CatPaths(char *Base,char *Add)
+void CatPaths(char *Base,const char *Add)
 {
 char * EndBase = &Base[strlen(Base)-1];
 

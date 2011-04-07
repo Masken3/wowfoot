@@ -96,14 +96,14 @@ extern void  fputub(ubyte v,FILE *FP);
 
 /*}********** END switches to get dir.h ****************/
 
-extern void dprintf(const char * String, ...); // dual printf to console & pipe
+//extern void dprintf(const char * String, ...); // dual printf to console & pipe
 
 extern bool copystat(const char * tofile,const char *fmfile);
 extern bool setstat(const char * file,const struct stat *s);
 
 extern void PrefixCurDir(char *AddTo);
 
-extern void CatPaths(char *Base,char *Add);
+extern void CatPaths(char *Base, const char *Add);
 extern void CutEndPath(char *Path);
 
   /* note: CatPaths() only works on AMIGA and PC

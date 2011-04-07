@@ -86,17 +86,17 @@ struct octNode
 
 #define RADIX_SIZE	1024
 
-void freeOctNodes(octNode *node);
-void addOctNode(octNode *root,int R,int G,int B,int *nLeavesPtr);
-void gatherLeaves(octNode *node,octNode *** leavesPtrPtr,int minCount);
-void gatherLeavesCutting(octNode *node,octNode *** leavesPtrPtr);
-int leafCompareCount(const void *a,const void *b);
-int leafCompareCost(const void *a,const void *b);
-int findClosest(int R,int G,int B,ubyte *palette,int palEntries,int *foundPalPtr);
-void computeOctRGBs(octNode *node);
-void computeCutCosts(octNode *node);
-void readLeavesToPal(octNode **leaves,int gotLeaves,ubyte *palette,int palEntries);
-void insertRadix(octNode * radix,octNode *leaf);
+static void freeOctNodes(octNode *node);
+static void addOctNode(octNode *root,int R,int G,int B,int *nLeavesPtr);
+static void gatherLeaves(octNode *node,octNode *** leavesPtrPtr,int minCount);
+static void gatherLeavesCutting(octNode *node,octNode *** leavesPtrPtr);
+static int leafCompareCount(const void *a,const void *b);
+static int leafCompareCost(const void *a,const void *b);
+static int findClosest(int R,int G,int B,ubyte *palette,int palEntries,int *foundPalPtr);
+static void computeOctRGBs(octNode *node);
+static void computeCutCosts(octNode *node);
+static void readLeavesToPal(octNode **leaves,int gotLeaves,ubyte *palette,int palEntries);
+static void insertRadix(octNode * radix,octNode *leaf);
 
 void createPaletteFast(ubyte *plane24bit,int planeLen,ubyte *palette,int palEntries)
 {

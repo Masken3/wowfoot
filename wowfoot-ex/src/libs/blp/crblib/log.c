@@ -1,4 +1,6 @@
+#ifdef WIN32
 #include <windows.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,7 +10,9 @@ static FILE * TeeFP = NULL; // should default to null ?
 
 void Log_Out(const char * string)
 {
+#ifdef WIN32
 	OutputDebugString(string);
+#endif
 	if ( TeeFP )
 		fprintf(TeeFP,string);
 }

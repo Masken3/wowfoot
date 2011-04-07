@@ -197,7 +197,15 @@ const char* blpTestList[] =
 	"BLP_DXT5"
 };
 
-bool RunTest()
+const char* encodingStrings[] =
+{
+	"[Invalid]",
+	"Palettized",
+	"Compressed",
+};
+
+#if 0
+static bool RunTest()
 {
 	MemImage aMemImage;
 
@@ -242,7 +250,7 @@ bool RunTest()
 	return true;
 }
 
-int ProcessFile(const char* pszFilenameArgument, const char* pszDestinationFilename)
+static int ProcessFile(const char* pszFilenameArgument, const char* pszDestinationFilename)
 {
 	char pszFilenameBuffer[MAX_PATH];
 	strcpy(pszFilenameBuffer, pszFilenameArgument);
@@ -299,7 +307,7 @@ int ProcessFile(const char* pszFilenameArgument, const char* pszDestinationFilen
 				ISBLP(targetFormatID) ? "blp" : "png");
 	}
 	else
-		::sprintf(pszTargetFilename, pszDestinationFilename);
+		::strcpy(pszTargetFilename, pszDestinationFilename);
 
 	// Save the file with the given format.
 	LOG("Converting: %s (%s) -> %s (%s)\n", 
@@ -312,7 +320,7 @@ int ProcessFile(const char* pszFilenameArgument, const char* pszDestinationFilen
 	return result ? 0 : -1;
 }
 
-FORMATID GetFormatFromString(const char* string)
+static FORMATID GetFormatFromString(const char* string)
 {
 	for (int iType = 1; iType < FORMAT_COUNT; ++iType)
 	{
@@ -325,6 +333,7 @@ FORMATID GetFormatFromString(const char* string)
 	LOG("ERROR: \"%s\" not a valid format string.\n", string);
 	return FORMAT_UNSPECIFIED;
 }
+#endif
 
 #if 0
 void ListFormats()

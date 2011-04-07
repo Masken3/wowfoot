@@ -11,7 +11,11 @@
 #include <crblib/fileutil.h>
 #include <crblib/chshutil.h>
 
+#ifdef WIN32
 #include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 bool chsh_Quiet=false;
 

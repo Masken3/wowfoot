@@ -752,7 +752,9 @@ else //Encode
 
 	mergePtr = o1Arrays[256];
 
+#ifdef _MSC_VER
 	assert( _heapchk() == _HEAPOK );
+#endif
 
 	for(lc=0;lc<256;lc++)
 	{
@@ -789,7 +791,9 @@ else //Encode
 			CleanUp("O0HuffArrayBII failed")
 	}
 
+#ifdef _MSC_VER
 	assert( _heapchk() == _HEAPOK );
+#endif
 
 	assert( HuffArrayLenPtr );
 	*HuffArrayLenPtr = LBitIO_FlushWrite(BII);
@@ -807,7 +811,9 @@ if ( o1Arrays )
 	{
 		if ( o1Arrays[lc] )
 		{
+#ifdef _MSC_VER
 			assert( _heapchk() == _HEAPOK );
+#endif
 			free( o1Arrays[lc] );
 		}
 	}

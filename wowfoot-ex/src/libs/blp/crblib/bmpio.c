@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include "BMPio.h"
+#include "bmpio.h"
 #include "strutil.h"
 #include "fileutil.h"
 #include "imutil.h"

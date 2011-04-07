@@ -3,6 +3,7 @@
 #include "libs/dbcfile.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include "libs/blp/MemImage.h"
 
 using namespace std;
 
@@ -54,7 +55,7 @@ int main() {
 		F2 b = { r.getFloat(7), r.getFloat(5) };
 		int vmap = r.getInt(8);
 		int dmap = r.getInt(9);
-		printf("%i, %i, '%s', %gx%g, %gx%g, %i, %i\n",
+		printf("%i, %i, '%s', %fx%f, %fx%f, %i, %i\n",
 			map, at, name, a.x, a.y, b.x, b.y, vmap, dmap);
 	}
 
@@ -69,6 +70,9 @@ int main() {
 
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth1.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
+	MemImage img;
+	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
+	img.SaveToPNG("azeroth1.png");
 
 	return 0;
 }

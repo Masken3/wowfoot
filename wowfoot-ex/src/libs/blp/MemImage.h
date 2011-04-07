@@ -6,8 +6,10 @@
 
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
-typedef unsigned long DWORD;
+typedef unsigned int DWORD;
+#ifndef NULL
 #define NULL 0
+#endif
 
 #define MEMIMAGE_PALETTEBYTES (3*256)
 
@@ -67,8 +69,8 @@ enum FORMATID
 
 	FORMAT_COUNT
 };
-const char* FORMATIDNames[];
-const char* FORMATIDDescriptions[];
+extern const char* FORMATIDNames[];
+extern const char* FORMATIDDescriptions[];
 
 #define ISBLP(format) (BLPTYPE_FIRST <= format && format <= BLPTYPE_LAST)
 #define ISPNG(format) (PNGTYPE_FIRST <= format && format <= PNGTYPE_LAST)
@@ -125,6 +127,7 @@ public:
 
 	// Load functions.
 	bool LoadFromBLP(const char* filename, FORMATID* blpTypeRet = NULL);
+	bool LoadFromBLP(const BYTE* data, DWORD dwFileBytes, FORMATID* blpTypeRet = NULL);
 	bool LoadFromPNG(const char* filename, FORMATID* pngTypeRet = NULL);
 
 	// Save functions.  All are guaranteed not to change the image data at all.  If conversions

@@ -28,11 +28,6 @@ enum
 	BLP_ENCODING_COUNT
 };
 
-static const char* encodingStrings[] =
-{
-	"[Invalid]",
-	"Palettized",
-	"Compressed",
-};
+extern const char* encodingStrings[];
 
 #endif // BLP_H

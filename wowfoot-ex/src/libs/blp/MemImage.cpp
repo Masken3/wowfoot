@@ -30,7 +30,9 @@ make it easier to add support for other file types.
 #include <list>
 
 #include <png.h>
+#ifndef LINUX
 #include <pnginfo.h>
+#endif
 #include "MemImage.h"
 #include "squish/squish.h"
 #include "BLP.h"
@@ -102,7 +104,7 @@ h = height of image
 c = "color", a byte offset.  for example, for an rgb image, specify 1 if you want the green component.
 b = bytes per pixel, ie 1 = palettized, 3 = rgb, 4 = rgba
 */
-int OFFSET_RGB(int x, int y, int w, int h, int c, int b)
+static int OFFSET_RGB(int x, int y, int w, int h, int c, int b)
 {
 	if (x >= w) 
 		x = w - 1;
@@ -146,7 +148,7 @@ struct HSB
 	}
 };
 
-HSB RGBToHSB(int r, int g, int b)
+static HSB RGBToHSB(int r, int g, int b)
 {
 	HSB hsb;
 
@@ -211,7 +213,7 @@ HSB RGBToHSB(int r, int g, int b)
 
 typedef std::list<HSB> THSBList;
 
-void SortPalette(BYTE* palette, int numEntries)
+static void SortPalette(BYTE* palette, int numEntries)
 {
 	THSBList hsbList;
 	
@@ -520,7 +522,7 @@ bool MemImage::AllocateBuffer(DWORD bytes)
 	m_buffer = new BYTE[bytes];
 	if (NULL == m_buffer)
 	{
-		LOG("ERROR: Failed to allocate buffer (%d bytes).\n", bytes);
+		LOG("ERROR: Failed to allocate buffer (%u bytes).\n", bytes);
 		return false;
 	}
 	m_bufferBytes = bytes;
@@ -530,8 +532,6 @@ bool MemImage::AllocateBuffer(DWORD bytes)
 
 bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 {
-	Clear();
-
 	FILE* fileInput = ::fopen(filename, "rb");
 	if (NULL == fileInput)
 	{
@@ -550,6 +550,12 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 	::fseek(fileInput, 0, SEEK_SET);
 	::fread(fileBuffer, dwFileBytes, 1, fileInput);
 	::fclose(fileInput);
+	
+	return LoadFromBLP(fileBuffer, dwFileBytes);
+}
+
+bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* blpTypeRet) {
+	Clear();
 
 	BLPHeader* pHeader = (BLPHeader*) fileBuffer;
 	BYTE* pPalette = (BYTE*) &(fileBuffer[sizeof(BLPHeader)]);
@@ -568,7 +574,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 		if (pHeader->hasMips)
 		{
 			int mipCount = 0;
-			while(NULL != pHeader->mipOffsets[mipCount])
+			while(0 != pHeader->mipOffsets[mipCount])
 				++mipCount;
 			LOG("\t%d mips\n", mipCount);
 		}
@@ -608,7 +614,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 			return false;
 
 		// Save image data.
-		BYTE* pImageData = &(fileBuffer[pHeader->mipOffsets[0]]);
+		const BYTE* pImageData = &(fileBuffer[pHeader->mipOffsets[0]]);
 		switch (blpType)
 		{
 		case BLPTYPE_PAL_ALPHA0:
@@ -622,7 +628,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 				::memcpy(m_buffer, pImageData, pixelCount);
 
 				// Convert the 1-bit alpha channel to 8-bit.
-				BYTE* pAlphaData = &(pImageData[pixelCount]);
+				const BYTE* pAlphaData = &(pImageData[pixelCount]);
 				for (DWORD ii = 0; ii < pixelCount; ++ii)
 				{
 					m_buffer[pixelCount + ii] = (pAlphaData[ii / 8] & (0x1 << (ii % 8))) ? 0xFF : 0;
@@ -635,7 +641,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 				::memcpy(m_buffer, pImageData, pixelCount);
 
 				// Convert the 4-bit alpha channel to 8-bit.
-				BYTE* pAlphaData = &(pImageData[pixelCount]);
+				const BYTE* pAlphaData = &(pImageData[pixelCount]);
 				for (DWORD ii = 0; ii < pixelCount; ++ii)
 				{
 					// Two alpha values per byte.
@@ -652,6 +658,8 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 
 				break;
 			}
+			default:
+				LOG("ERROR: BLP 'blpType' field an unrecognized value (%d).\n", blpType); break;
 		}
 	}
 	else if (BLP_ENCODING_COMPRESSED == pHeader->encoding)
@@ -679,7 +687,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 
 		////////////
 
-		void* Source = &(fileBuffer[pHeader->mipOffsets[0]]); 
+		const void* Source = &(fileBuffer[pHeader->mipOffsets[0]]); 
 		squish::u8* Dest = new squish::u8[ m_width * m_height * 4 ]; 
 
 		// Do the conversion.
@@ -1072,8 +1080,6 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 			// PC: What if type is alpha mask but we have none?  I'm guessing its irrelevant.
 			if ((PNGTYPE_PALETTIZED_ALPHAMASK == type) && m_bHasAlpha)
 			{
-				DWORD pixelCount = m_width * m_height;
-
 				// We need to juggle around the palette indexes to do the trans-alpha thing, so
 				// make a temp copy of the image.
 				tempBuffer = new BYTE[pixelCount];
@@ -1352,7 +1358,7 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 	aBLPFile.aHeader.yResolution = m_height;
 	aBLPFile.aHeader.hasMips = s_bNoMips ? 0 : 1;
 
-	DWORD pixelCount = m_width * m_height;
+	//DWORD pixelCount = m_width * m_height;
 	switch (destFormat)
 	{
 	case BLPTYPE_PAL_ALPHA0:
@@ -1438,7 +1444,7 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 
 		if (s_bCreateMipTestImage)
 		{
-			png_color* palette = m_bPalettized ? (png_color*) m_palette : NULL;
+			//png_color* palette = m_bPalettized ? (png_color*) m_palette : NULL;
 			MemImage debugImage;
 			debugImage.SaveMipDebugImage(filename, mips, mipInfoCount);
 		}
@@ -1954,8 +1960,8 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 
 	m_bHasAlpha = sourceMip.m_bHasAlpha;
 	m_bPalettized = sourceMip.m_bPalettized;
-	m_width = __max(sourceMip.m_width / 2, 1);
-	m_height = __max(sourceMip.m_height / 2, 1);
+	m_width = __max(sourceMip.m_width / 2, 1U);
+	m_height = __max(sourceMip.m_height / 2, 1U);
 	if (!AllocateBuffer(0))
 		return false;
 
@@ -2018,8 +2024,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 			{
 				// Get the 4 colors from the source image and store them in "colors";
 				png_color colors[4];
-				int ii;
-				for (ii = 0; ii < 4; ++ii)
+				for (int ii = 0; ii < 4; ++ii)
 				{
 					BYTE palIx = srcBuff[OFFSET_RGB(i*2+SO[ii][0], j*2+SO[ii][1], w, h, 0, 1)];
 					colors[ii].red = m_palette[palIx + 0];
@@ -2033,7 +2038,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 				{
 					// Determine weights based on alpha.
 					float alphas[4];
-					for (ii = 0; ii < 4; ++ii)
+					for (int ii = 0; ii < 4; ++ii)
 						alphas[ii] = float(srcBuff[w*h + OFFSET_RGB(i*2+SO[ii][0], j*2+SO[ii][1], w, h, 0, 1)]) / 255.0f;
 
 					for (int ii = 0; ii < 4; ++ii)
@@ -2048,7 +2053,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 				}
 
 				float averageColorFloats[3] = { 0.0f, 0.0f, 0.0f };
-				for (ii = 0; ii < 4; ++ii)
+				for (int ii = 0; ii < 4; ++ii)
 				{
 					averageColorFloats[0] += colors[ii].red * gammaWeights[ii];
 					averageColorFloats[1] += colors[ii].green * gammaWeights[ii];
@@ -2064,7 +2069,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 				int deltas[4];
 				int smallest = 10000;
 				int smallestIx = 0;
-				for (ii = 0; ii < 4; ++ii)
+				for (int ii = 0; ii < 4; ++ii)
 				{
 					deltas[ii] = abs(colors[ii].red - average.red) + abs(colors[ii].green - average.green) + abs(colors[ii].blue - average.blue);
 					if (deltas[ii] < smallest)
