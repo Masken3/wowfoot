@@ -550,8 +550,13 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 	::fseek(fileInput, 0, SEEK_SET);
 	::fread(fileBuffer, dwFileBytes, 1, fileInput);
 	::fclose(fileInput);
-	
-	return LoadFromBLP(fileBuffer, dwFileBytes);
+
+	bool res = LoadFromBLP(fileBuffer, dwFileBytes);
+
+	// Cleanup.
+	delete[] fileBuffer;
+
+	return res;
 }
 
 bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* blpTypeRet) {
@@ -726,9 +731,6 @@ bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* 
 		*blpTypeRet = blpType;
 	if (s_bVerbose)
 		LOG("\tFormat = %s (%s).\n", FORMATIDNames[blpType], FORMATIDDescriptions[blpType]);
-
-	// Cleanup.
-	delete[] fileBuffer;
 
 	return true;
 }

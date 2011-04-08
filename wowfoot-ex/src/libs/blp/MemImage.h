@@ -124,6 +124,11 @@ public:
 	bool AllocateBuffer(DWORD bytes);
 	bool HasAlpha() { return m_bHasAlpha; }
 	bool IsPalettized() { return m_bPalettized; }
+	
+	BYTE* GetBuffer() { return m_buffer; };
+	DWORD GetBufferBytes() { return m_bufferBytes; }
+	DWORD GetWidth() { return m_width; }
+	DWORD GetHeight() { return m_height; }
 
 	// Load functions.
 	bool LoadFromBLP(const char* filename, FORMATID* blpTypeRet = NULL);

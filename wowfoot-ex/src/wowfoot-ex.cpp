@@ -11,6 +11,8 @@ struct F2 {
 	float x, y;
 };
 
+static void extractWorldMap(const char* name);
+
 int main() {
 	printf("Opening locale.mpq...\n");
 	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
@@ -57,6 +59,8 @@ int main() {
 		int dmap = r.getInt(9);
 		printf("%i, %i, '%s', %fx%f, %fx%f, %i, %i\n",
 			map, at, name, a.x, a.y, b.x, b.y, vmap, dmap);
+		
+		extractWorldMap(name);
 	}
 
 	// Records of WMA where 'at' == 0 are continents.
@@ -67,12 +71,46 @@ int main() {
 	// I suspect the client would bilinear-scale these textures for higher resolutions.
 
 	// Now: extract them!
-
+#if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth1.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
 	MemImage img;
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
 	img.SaveToPNG("azeroth1.png");
-
+#endif
 	return 0;
+}
+
+static const unsigned int TILE_WIDTH = 256;
+static const unsigned int TILE_HEIGHT = 256;
+
+static void extractWorldMap(const char* name) {
+	MemImage src[12];
+	bool hasAlpha = true, isPalettized;
+	for(int i=0; i<12; i++) {
+		MemImage& img(src[i]);
+		char buf[256];
+		sprintf(buf, "interface\\worldmap\\%s\\%s%i.blp", name, name, i+1);
+		MPQFile testBlp(buf);
+		if(testBlp.getSize() <= 256) {	//sanity
+			printf("Warning: cannot extract %s\n", buf);
+			return;
+		}
+		img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
+		assert(img.GetWidth() == TILE_WIDTH);
+		assert(img.GetWidth() == TILE_HEIGHT);
+		if(hasAlpha) {
+			bool res = img.AddAlpha();
+			assert(res);
+		}
+		if(i == 0) {
+			//hasAlpha = img.HasAlpha();
+			isPalettized = img.IsPalettized();
+		} else {
+			assert(hasAlpha == img.HasAlpha());
+			assert(isPalettized == img.IsPalettized());
+		}
+		//printf("%s%i.blp: alpha: %i. palette: %i\n", name, i+1, img.HasAlpha(), img.IsPalettized());
+	}
+	printf("BLPs loaded.\n");
 }
