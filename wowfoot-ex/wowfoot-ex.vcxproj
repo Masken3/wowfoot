@@ -43,6 +43,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>src\libs\blp;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -73,13 +74,14 @@
       <PreprocessorDefinitions>BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4103;4996</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>src\libs\libmpq;src\libs\bzip2</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libpng.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(Configuration)\crblib.lib;$(Configuration)\squish.lib;$(Configuration)\zlib.lib;libpng15.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -101,6 +103,7 @@
     <ClCompile Include="src\libs\libmpq\libmpq\wave.c" />
     <ClCompile Include="src\libs\loadlib.cpp" />
     <ClCompile Include="src\libs\mpq_libmpq.cpp" />
+    <ClCompile Include="src\util.cpp" />
     <ClCompile Include="src\wowfoot-ex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +128,7 @@
     <ClInclude Include="src\libs\libmpq\libmpq\wave.h" />
     <ClInclude Include="src\libs\loadlib.h" />
     <ClInclude Include="src\libs\mpq_libmpq04.h" />
+    <ClInclude Include="src\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

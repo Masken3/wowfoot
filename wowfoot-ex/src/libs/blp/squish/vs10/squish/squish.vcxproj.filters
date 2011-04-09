@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\squish.cpp" />
+    <ClCompile Include="..\..\alpha.cpp" />
+    <ClCompile Include="..\..\clusterfit.cpp" />
+    <ClCompile Include="..\..\colourblock.cpp" />
+    <ClCompile Include="..\..\colourfit.cpp" />
+    <ClCompile Include="..\..\colourset.cpp" />
+    <ClCompile Include="..\..\maths.cpp" />
+    <ClCompile Include="..\..\rangefit.cpp" />
+    <ClCompile Include="..\..\singlecolourfit.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\alpha.h" />
+    <ClInclude Include="..\..\clusterfit.h" />
+    <ClInclude Include="..\..\colourblock.h" />
+    <ClInclude Include="..\..\colourfit.h" />
+    <ClInclude Include="..\..\colourset.h" />
+    <ClInclude Include="..\..\config.h" />
+    <ClInclude Include="..\..\maths.h" />
+    <ClInclude Include="..\..\rangefit.h" />
+    <ClInclude Include="..\..\simd.h" />
+    <ClInclude Include="..\..\simd_float.h" />
+    <ClInclude Include="..\..\simd_sse.h" />
+    <ClInclude Include="..\..\simd_ve.h" />
+    <ClInclude Include="..\..\singlecolourfit.h" />
+    <ClInclude Include="..\..\squish.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\singlecolourlookup.inl" />
+  </ItemGroup>
+</Project>

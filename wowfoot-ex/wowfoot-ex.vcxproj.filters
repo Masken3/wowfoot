@@ -50,6 +50,7 @@
     <ClCompile Include="src\libs\blp\palbmp\paloptimize.c">
       <Filter>libs\blp\palbmp</Filter>
     </ClCompile>
+    <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="src\libs\blp\palbmp\paloptimize.h">
       <Filter>libs\blp\palbmp</Filter>
     </ClInclude>
+    <ClInclude Include="src\util.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libs">

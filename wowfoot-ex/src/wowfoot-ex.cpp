@@ -4,6 +4,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include "libs/blp/MemImage.h"
+#include "util.h"
 
 using namespace std;
 
@@ -42,6 +43,8 @@ int main() {
 		printf("%i, %i, %gx%g, %gx%g\n", cid, mid, x1, y1, x2, y2);
 	}
 
+	mkdir("output");
+
 	printf("Opening WorldMapArea.dbc...\n");
 	DBCFile wma("DBFilesClient\\WorldMapArea.dbc");
 	res = wma.open();
@@ -71,12 +74,12 @@ int main() {
 	// I suspect the client would bilinear-scale these textures for higher resolutions.
 
 	// Now: extract them!
-#if 0
-	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth1.blp");
+#if 1
+	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
 	MemImage img;
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
-	img.SaveToPNG("azeroth1.png");
+	img.SaveToPNG("output/azeroth12.png");
 #endif
 	return 0;
 }
@@ -85,6 +88,15 @@ static const unsigned int TILE_WIDTH = 256;
 static const unsigned int TILE_HEIGHT = 256;
 
 static void extractWorldMap(const char* name) {
+	// check if we're done already.
+	char outputFileName[256];
+	sprintf(outputFileName, "output/%s.png", name);
+	if(fileExists(outputFileName)) {
+		printf("%s already exists, skipping...\n", outputFileName);
+		return;
+	}
+
+	// load BLPs.
 	MemImage src[12];
 	bool hasAlpha = true, isPalettized;
 	for(int i=0; i<12; i++) {
@@ -110,7 +122,29 @@ static void extractWorldMap(const char* name) {
 			assert(hasAlpha == img.HasAlpha());
 			assert(isPalettized == img.IsPalettized());
 		}
-		//printf("%s%i.blp: alpha: %i. palette: %i\n", name, i+1, img.HasAlpha(), img.IsPalettized());
+		//printf("%s%i.blp: alpha: %i. palette: %i\n",
+			//name, i+1, img.HasAlpha(), img.IsPalettized());
 	}
 	printf("BLPs loaded.\n");
+
+	// Gattai!!
+	MemImage combine;
+	combine.Init(4*TILE_WIDTH, 3*TILE_HEIGHT, hasAlpha, isPalettized);
+	for(int y=0; y<3; y++) {
+		for(int x=0; x<4; x++) {
+			int i=y*4+x;
+			MemImage& img(src[i]);
+			unsigned tilePitch = MemImage::CalculateBufferBytes(
+				TILE_WIDTH, 1, hasAlpha, isPalettized);
+			assert(img.GetBufferBytes() == tilePitch * TILE_HEIGHT);
+			for(int j=0; j<TILE_HEIGHT; j++) {
+				int dstPos = tilePitch * ((y*TILE_HEIGHT + j)*4 + x);
+				int srcPos = tilePitch * j;
+				memcpy(combine.GetBuffer() + dstPos, img.GetBuffer() + srcPos, tilePitch);
+			}
+		}
+	}
+
+	// save as png.
+	combine.SaveToPNG(outputFileName);
 }

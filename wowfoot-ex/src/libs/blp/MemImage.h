@@ -4,11 +4,15 @@
 #define BLPCONV_MAX_PATH 260
 #define LOG ::printf
 
+#ifdef WIN32
+#include <windows.h>
+#else
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
 #ifndef NULL
 #define NULL 0
+#endif
 #endif
 
 #define MEMIMAGE_PALETTEBYTES (3*256)
@@ -117,7 +121,7 @@ public:
 	MemImage(const MemImage& rhs);
 	~MemImage();
 	MemImage& operator=(const MemImage& rhs);
-	bool Init(DWORD width, DWORD height, bool hasAlpha, bool palettized);
+	void Init(DWORD width, DWORD height, bool hasAlpha, bool palettized);
 	void Copy(const MemImage& rhs);
 	void Clear();
 	// If bytes == 0 then it calculates the proper size with the CalculateBufferBytes function.

@@ -483,6 +483,14 @@ MemImage& MemImage::operator=(const MemImage& rhs)
 	return *this;
 }
 
+void MemImage::Init(DWORD width, DWORD height, bool hasAlpha, bool palettized) {
+	m_bHasAlpha = hasAlpha;
+	m_bPalettized = palettized;
+	m_width = width;
+	m_height = height;
+	AllocateBuffer(0);
+}
+
 void MemImage::Copy(const MemImage& rhs)
 {
 	m_bHasAlpha = rhs.m_bHasAlpha;

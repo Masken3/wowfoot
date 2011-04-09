@@ -2,7 +2,7 @@
 #include <crblib/inc.h>
 #include <time.h>
 
-#ifdef MSC_VER
+#ifdef _MSC_VER
 #include <windows.h>
 
 #pragma comment(lib,"winmm.lib")
