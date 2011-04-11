@@ -60,29 +60,63 @@ int main() {
 		F2 b = { r.getFloat(7), r.getFloat(5) };
 		int vmap = r.getInt(8);
 		int dmap = r.getInt(9);
-		printf("%i, %i, '%s', %fx%f, %fx%f, %i, %i\n",
+#if 1
+		printf("%i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
 			map, at, name, a.x, a.y, b.x, b.y, vmap, dmap);
 		
-		extractWorldMap(name);
+		//extractWorldMap(name);
+#endif
 	}
-
-	// Records of WMA where 'at' == 0 are continents.
-	// The world map images are found in interface/worldmap.
-	// They are numbered 1 to 12 and ordered in a 4x3 grid,
-	// left-to-right, top-to-bottom. Tiles are 256x256 pixels,
-	// making the full image 1024x768 pixels.
-	// I suspect the client would bilinear-scale these textures for higher resolutions.
-
-	// Now: extract them!
-#if 1
+#if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
 	MemImage img;
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
 	img.SaveToPNG("output/azeroth12.png");
 #endif
+
+	// now for the overlays.
+	printf("Opening WorldMapOverlay.dbc...\n");
+	DBCFile wmo("DBFilesClient\\WorldMapOverlay.dbc");
+	res = wmo.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" map overlays...\n", wmo.getRecordCount());
+	for(DBCFile::Iterator itr = wmo.begin(); itr != wmo.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int zone = r.getInt(1);
+		int area = r.getInt(2);
+		const char* name = r.getString(8);
+		int w = r.getInt(9);
+		int h = r.getInt(10);
+		int left = r.getInt(11);
+		int top = r.getInt(12);
+		int bbtop = r.getInt(13);
+		int bbleft = r.getInt(14);
+		int bbb = r.getInt(15);
+		int bbright = r.getInt(16);
+		printf("%i, %i, '%s', %ix%i, %ix%i, [%ix%i,%ix%i]\n",
+			zone, area, name, w, h, left, top, bbleft, bbtop, bbright, bbb);
+		// w,h is the size of the combined texture, in pixels.
+		// left,top is the coordinates on the area map where this texture should be drawn.
+		// texture may be split in 1, 2(2x1), 4(2x2) or 6(3x2) parts.
+		// sanity-check that the combined texture is rectangular and that all parts fit.
+		// also check that it's as at least big as w,h says.
+		// only copy the w,h part.
+		// we'll ignore the bounding box for now; I think it's for mouse pointers.
+	}
+
 	return 0;
 }
+
+// Records of WMA where 'at' == 0 are continents.
+// The world map images are found in interface/worldmap.
+// They are numbered 1 to 12 and ordered in a 4x3 grid,
+// left-to-right, top-to-bottom. Tiles are 256x256 pixels,
+// making the full image 1024x768 pixels.
+// I suspect the client would bilinear-scale these textures for higher resolutions.
+
+// Now: extract them!
 
 static const unsigned int TILE_WIDTH = 256;
 static const unsigned int TILE_HEIGHT = 256;
