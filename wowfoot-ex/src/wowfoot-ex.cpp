@@ -5,12 +5,32 @@
 #include <inttypes.h>
 #include "libs/blp/MemImage.h"
 #include "util.h"
+#include <unordered_map>
 
 using namespace std;
 
 struct F2 {
 	float x, y;
 };
+
+struct WorldMapOverlay {
+	int zone;
+	int area;
+	const char* name;
+	int w;
+	int h;
+	int left;
+	int top;
+};
+
+struct WorldMapArea {
+	int map;	// key to Map
+	int id;	// key to AreaTable
+	const char* name;
+	vector<WorldMapOverlay> overlays;
+};
+// key: WorldMapArea::id == WorldMapOverlay::zone
+typedef unordered_map<int, WorldMapArea> WmaMap;
 
 //static void extractWorldMap(const char* name);
 
@@ -44,6 +64,8 @@ int main() {
 	}
 
 	mkdir("output");
+	
+	WmaMap wmaMap;
 
 	printf("Opening WorldMapArea.dbc...\n");
 	DBCFile wma("DBFilesClient\\WorldMapArea.dbc");
@@ -51,21 +73,27 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
+	FILE* out = fopen("WorldMapArea.txt", "w");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
-		int map = r.getInt(1);
-		int at = r.getInt(2);
-		const char* name = r.getString(3);
-		F2 a = { r.getFloat(6), r.getFloat(4) };
-		F2 b = { r.getFloat(7), r.getFloat(5) };
+		WorldMapArea a;
+		a.map = r.getInt(1);
+		a.id = r.getInt(2);
+		a.name = r.getString(3);
+		F2 fa = { r.getFloat(6), r.getFloat(4) };
+		F2 fb = { r.getFloat(7), r.getFloat(5) };
 		int vmap = r.getInt(8);
 		int dmap = r.getInt(9);
 #if 1
-		printf("%i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
-			map, at, name, a.x, a.y, b.x, b.y, vmap, dmap);
+		fprintf(out, "%i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
+			a.map, a.id, a.name, fa.x, fa.y, fb.x, fb.y, vmap, dmap);
 		
 		//extractWorldMap(name);
 #endif
+		if(a.id != 0) {	//top-level zone (Azeroth, Kalimdor, Outland, Northrend)
+			assert(wmaMap.find(a.id) == wmaMap.end());
+			wmaMap[a.id] = a;
+		}
 	}
 #if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
@@ -73,6 +101,20 @@ int main() {
 	MemImage img;
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
 	img.SaveToPNG("output/azeroth12.png");
+#endif
+	
+	// looks like we may also need AreaTable.dbc.
+#if 0
+	printf("Opening AreaTable.dbc...\n");
+	DBCFile at("DBFilesClient\\AreaTable.dbc");
+	res = at.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" AreaTable entries...\n", at.getRecordCount());
+	out = fopen("AreaTable.txt", "w");
+	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+	}
 #endif
 
 	// now for the overlays.
@@ -82,21 +124,32 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map overlays...\n", wmo.getRecordCount());
+	out = fopen("WorldMapOverlay.txt", "w");
 	for(DBCFile::Iterator itr = wmo.begin(); itr != wmo.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
-		int zone = r.getInt(1);
-		int area = r.getInt(2);
-		const char* name = r.getString(8);
-		int w = r.getInt(9);
-		int h = r.getInt(10);
-		int left = r.getInt(11);
-		int top = r.getInt(12);
+		WorldMapOverlay o;
+		o.zone = r.getInt(1);
+		o.area = r.getInt(2);
+		o.name = r.getString(8);
+		// If we don't have a name, we don't have a texture.
+		if(o.name[0] == 0)
+			continue;
+		o.w = r.getInt(9);
+		o.h = r.getInt(10);
+		o.left = r.getInt(11);
+		o.top = r.getInt(12);
 		int bbtop = r.getInt(13);
 		int bbleft = r.getInt(14);
 		int bbb = r.getInt(15);
 		int bbright = r.getInt(16);
-		printf("%i, %i, '%s', %ix%i, %ix%i, [%ix%i,%ix%i]\n",
-			zone, area, name, w, h, left, top, bbleft, bbtop, bbright, bbb);
+		fprintf(out, "%i, %i, '%s', %ix%i, %ix%i, [%ix%i,%ix%i]\n",
+			o.zone, o.area, o.name, o.w, o.h, o.left, o.top, bbleft, bbtop, bbright, bbb);
+		if(wmaMap.find(o.zone) != wmaMap.end()) {
+			wmaMap[o.zone].overlays.push_back(o);
+		} else {
+			fprintf(out, "Warning: zone %i not found!\n", o.zone);
+		}
+
 		// w,h is the size of the combined texture, in pixels.
 		// left,top is the coordinates on the area map where this texture should be drawn.
 		// texture may be split in 1, 2(2x1), 4(2x2) or 6(3x2) parts.
