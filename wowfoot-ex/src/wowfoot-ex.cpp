@@ -12,7 +12,7 @@ struct F2 {
 	float x, y;
 };
 
-static void extractWorldMap(const char* name);
+//static void extractWorldMap(const char* name);
 
 int main() {
 	printf("Opening locale.mpq...\n");
@@ -108,7 +108,7 @@ int main() {
 
 	return 0;
 }
-
+#if 0
 // Records of WMA where 'at' == 0 are continents.
 // The world map images are found in interface/worldmap.
 // They are numbered 1 to 12 and ordered in a 4x3 grid,
@@ -171,7 +171,7 @@ static void extractWorldMap(const char* name) {
 			unsigned tilePitch = MemImage::CalculateBufferBytes(
 				TILE_WIDTH, 1, hasAlpha, isPalettized);
 			assert(img.GetBufferBytes() == tilePitch * TILE_HEIGHT);
-			for(int j=0; j<TILE_HEIGHT; j++) {
+			for(unsigned j=0; j<TILE_HEIGHT; j++) {
 				int dstPos = tilePitch * ((y*TILE_HEIGHT + j)*4 + x);
 				int srcPos = tilePitch * j;
 				memcpy(combine.GetBuffer() + dstPos, img.GetBuffer() + srcPos, tilePitch);
@@ -182,3 +182,4 @@ static void extractWorldMap(const char* name) {
 	// save as png.
 	combine.SaveToPNG(outputFileName);
 }
+#endif
