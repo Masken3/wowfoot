@@ -34,7 +34,8 @@ struct WorldMapArea {
 typedef unordered_map<int, WorldMapArea> WmaMap;
 
 static void extractWorldMap(const WorldMapArea&);
-static void applyOverlay(MemImage&, const WorldMapOverlay&);
+static void applyOverlay(MemImage& combine, const WorldMapArea& a,
+	const WorldMapOverlay& o);
 
 int main() {
 	printf("Opening locale.mpq...\n");
@@ -182,8 +183,11 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		}
 		res = img.LoadFromBLP((const BYTE*)blp.getBuffer(), (DWORD)blp.getSize());
 		assert(res);
-		res = img.RemoveAlpha();
+		//res = img.RemoveAlpha();
 		assert(res);
+		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
+		sprintf(buf, "output/%s_%s%i.png", a.name, o.name, srcCount+1);
+		img.SaveToPNG(buf);
 	}
 	int comboWidth, comboHeight;
 	switch(srcCount) {
@@ -226,7 +230,7 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		//memImageBlit(combine, src[0], o.left, o.top);
 		break;
 	default:
-		assert(false);
+		assert(true);
 	}
 }
 
@@ -291,14 +295,7 @@ static void extractWorldMap(const WorldMapArea& a) {
 		for(int x=0; x<4; x++) {
 			int i=y*4+x;
 			MemImage& img(src[i]);
-			unsigned tilePitch = MemImage::CalculateBufferBytes(
-				TILE_WIDTH, 1, hasAlpha, isPalettized);
-			assert(img.GetBufferBytes() == tilePitch * TILE_HEIGHT);
-			for(unsigned j=0; j<TILE_HEIGHT; j++) {
-				int dstPos = tilePitch * ((y*TILE_HEIGHT + j)*4 + x);
-				int srcPos = tilePitch * j;
-				memcpy(combine.GetBuffer() + dstPos, img.GetBuffer() + srcPos, tilePitch);
-			}
+			combine.Blit(img, x*TILE_WIDTH, y*TILE_HEIGHT);
 		}
 	}
 

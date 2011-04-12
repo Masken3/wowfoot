@@ -9,7 +9,7 @@
 #else
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
-typedef unsigned long DWORD;
+typedef unsigned int DWORD;
 #ifndef NULL
 #define NULL 0
 #endif
@@ -126,13 +126,19 @@ public:
 	void Clear();
 	// If bytes == 0 then it calculates the proper size with the CalculateBufferBytes function.
 	bool AllocateBuffer(DWORD bytes);
-	bool HasAlpha() { return m_bHasAlpha; }
-	bool IsPalettized() { return m_bPalettized; }
+	bool HasAlpha() const { return m_bHasAlpha; }
+	bool IsPalettized() const { return m_bPalettized; }
 	
 	BYTE* GetBuffer() { return m_buffer; };
-	DWORD GetBufferBytes() { return m_bufferBytes; }
-	DWORD GetWidth() { return m_width; }
-	DWORD GetHeight() { return m_height; }
+	const BYTE* GetBuffer() const { return m_buffer; };
+	DWORD GetBufferBytes() const { return m_bufferBytes; }
+	DWORD GetWidth() const { return m_width; }
+	DWORD GetHeight() const { return m_height; }
+	
+	// Asserts that src will fit into this.
+	// Alpha is overwritten, not blended.
+	// src must have same pixel format (alpha/palette) as this.
+	void Blit(const MemImage& src, unsigned x, unsigned y);
 
 	// Load functions.
 	bool LoadFromBLP(const char* filename, FORMATID* blpTypeRet = NULL);

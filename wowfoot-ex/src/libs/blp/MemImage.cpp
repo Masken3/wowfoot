@@ -1273,7 +1273,9 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 	delete[] pRowPointers;
 	delete[] tempBuffer;
 
-	LOG("...done!\n");
+	if (MemImage::s_bVerbose) {
+		LOG("...done!\n");
+	}
 
 	return true;
 }
@@ -2100,4 +2102,22 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
     }
 
 	return true;
+}
+
+void MemImage::Blit(const MemImage& src, unsigned x, unsigned y) {
+	assert(HasAlpha() == src.HasAlpha());
+	assert(IsPalettized() == src.IsPalettized());
+	assert(x + src.GetWidth() <= GetWidth());
+	assert(y + src.GetHeight() <= GetHeight());
+	unsigned srcPitch = MemImage::CalculateBufferBytes(
+		src.GetWidth(), 1, HasAlpha(), IsPalettized());
+	unsigned dstPitch = MemImage::CalculateBufferBytes(
+		GetWidth(), 1, HasAlpha(), IsPalettized());
+	unsigned bytesPerPixel = dstPitch / GetWidth();
+	assert(src.GetBufferBytes() == srcPitch * src.GetHeight());
+	for(unsigned j=0; j<src.GetHeight(); j++) {
+		int dstPos = dstPitch * (y+j) + x * bytesPerPixel;
+		int srcPos = srcPitch * j;
+		memcpy(GetBuffer() + dstPos, src.GetBuffer() + srcPos, srcPitch);
+	}
 }
