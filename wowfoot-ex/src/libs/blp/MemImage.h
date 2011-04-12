@@ -9,7 +9,7 @@
 #else
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
-typedef unsigned int DWORD;
+typedef unsigned long DWORD;
 #ifndef NULL
 #define NULL 0
 #endif

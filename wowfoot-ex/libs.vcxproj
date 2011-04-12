@@ -10,22 +10,61 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\libs\blp\BLPConverter.cpp" />
+    <ClCompile Include="src\libs\blp\MemImage.cpp" />
+    <ClCompile Include="src\libs\blp\palbmp\colorconv.c" />
+    <ClCompile Include="src\libs\blp\palbmp\palcreate.c" />
+    <ClCompile Include="src\libs\blp\palbmp\palettize.c" />
+    <ClCompile Include="src\libs\blp\palbmp\paloptimize.c" />
+    <ClCompile Include="src\libs\dbcfile.cpp" />
+    <ClCompile Include="src\libs\libmpq\libmpq\common.c" />
+    <ClCompile Include="src\libs\libmpq\libmpq\explode.c" />
+    <ClCompile Include="src\libs\libmpq\libmpq\extract.c" />
+    <ClCompile Include="src\libs\libmpq\libmpq\huffman.c" />
+    <ClCompile Include="src\libs\libmpq\libmpq\mpq.c" />
+    <ClCompile Include="src\libs\libmpq\libmpq\wave.c" />
+    <ClCompile Include="src\libs\loadlib.cpp" />
+    <ClCompile Include="src\libs\mpq_libmpq.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\libs\blp\BLP.h" />
+    <ClInclude Include="src\libs\blp\MemImage.h" />
+    <ClInclude Include="src\libs\blp\palbmp\colorconv.h" />
+    <ClInclude Include="src\libs\blp\palbmp\palcreate.h" />
+    <ClInclude Include="src\libs\blp\palbmp\palettize.h" />
+    <ClInclude Include="src\libs\blp\palbmp\paloptimize.h" />
+    <ClInclude Include="src\libs\dbcfile.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\common.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\crypt_buf.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\explode.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\extract.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\huffman.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq-internal.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_begin.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_end.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\platform.h" />
+    <ClInclude Include="src\libs\libmpq\libmpq\wave.h" />
+    <ClInclude Include="src\libs\loadlib.h" />
+    <ClInclude Include="src\libs\mpq_libmpq04.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7CCB54AC-F679-4858-9F15-0DE76DD69F55}</ProjectGuid>
+    <ProjectGuid>{CF196C38-0CA6-4AC8-916F-7183CA05E77F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>wowfootex</RootNamespace>
+    <RootNamespace>libs</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -38,65 +77,45 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>src\libs\blp;$(IncludePath)</IncludePath>
-    <LibraryPath>$(Configuration);$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
     <IncludePath>src\libs\blp;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src\libs\bzip2;src\libs\blp;src\libs\libmpq</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4103;4996;4100;4512;4611</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableSpecificWarnings>4996;4103</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>crblib.lib;squish.lib;libpng15.lib;zlib.lib;libs.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src\libs\bzip2;src\libs\blp;src\libs</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4103;4996;4100;4512;4611</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>src\libs\libmpq</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4103</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(Configuration)\libs.lib;$(Configuration)\crblib.lib;$(Configuration)\squish.lib;$(Configuration)\zlib.lib;libpng15.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\util.cpp" />
-    <ClCompile Include="src\wowfoot-ex.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\config.h" />
-    <ClInclude Include="src\util.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

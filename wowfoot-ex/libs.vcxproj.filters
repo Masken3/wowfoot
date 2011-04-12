@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libs">
+      <UniqueIdentifier>{9ba5cbc4-abc9-499b-a5b7-eb587eeace91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\libmpq">
+      <UniqueIdentifier>{c46fe797-794d-4b35-ab05-4a82810e8d36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\blp">
+      <UniqueIdentifier>{132c7afd-8854-4fa5-bd3b-a0a3092c935c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\blp\palbmp">
+      <UniqueIdentifier>{c2c8a15a-b597-4189-8b82-9668e5654e26}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\libs\dbcfile.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\loadlib.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\mpq_libmpq.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\common.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\explode.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\extract.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\huffman.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\mpq.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\libmpq\libmpq\wave.c">
+      <Filter>libs\libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\BLPConverter.cpp">
+      <Filter>libs\blp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\MemImage.cpp">
+      <Filter>libs\blp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\colorconv.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\palcreate.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\palettize.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\blp\palbmp\paloptimize.c">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\libs\dbcfile.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\loadlib.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\mpq_libmpq04.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\common.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\crypt_buf.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\explode.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\extract.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\huffman.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq-internal.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\mpq.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_begin.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\pack_end.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\platform.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\libmpq\libmpq\wave.h">
+      <Filter>libs\libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\BLP.h">
+      <Filter>libs\blp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\MemImage.h">
+      <Filter>libs\blp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\colorconv.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\palcreate.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\palettize.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\blp\palbmp\paloptimize.h">
+      <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

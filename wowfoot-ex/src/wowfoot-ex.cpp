@@ -24,15 +24,17 @@ struct WorldMapOverlay {
 };
 
 struct WorldMapArea {
+	int id;
 	int map;	// key to Map
-	int id;	// key to AreaTable
+	int area;	// key to AreaTable
 	const char* name;
 	vector<WorldMapOverlay> overlays;
 };
 // key: WorldMapArea::id == WorldMapOverlay::zone
 typedef unordered_map<int, WorldMapArea> WmaMap;
 
-//static void extractWorldMap(const char* name);
+static void extractWorldMap(const WorldMapArea&);
+static void applyOverlay(MemImage&, const WorldMapOverlay&);
 
 int main() {
 	printf("Opening locale.mpq...\n");
@@ -73,22 +75,21 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
-	FILE* out = fopen("WorldMapArea.txt", "w");
+	FILE* out = fopen("output/WorldMapArea.txt", "w");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapArea a;
+		a.id = r.getInt(0);
 		a.map = r.getInt(1);
-		a.id = r.getInt(2);
+		a.area = r.getInt(2);
 		a.name = r.getString(3);
 		F2 fa = { r.getFloat(6), r.getFloat(4) };
 		F2 fb = { r.getFloat(7), r.getFloat(5) };
 		int vmap = r.getInt(8);
 		int dmap = r.getInt(9);
 #if 1
-		fprintf(out, "%i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
-			a.map, a.id, a.name, fa.x, fa.y, fb.x, fb.y, vmap, dmap);
-		
-		//extractWorldMap(name);
+		fprintf(out, "%i, %i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
+			a.id, a.map, a.area, a.name, fa.x, fa.y, fb.x, fb.y, vmap, dmap);
 #endif
 		if(a.id != 0) {	//top-level zone (Azeroth, Kalimdor, Outland, Northrend)
 			assert(wmaMap.find(a.id) == wmaMap.end());
@@ -104,6 +105,7 @@ int main() {
 #endif
 	
 	// looks like we may also need AreaTable.dbc.
+	// not for now.
 #if 0
 	printf("Opening AreaTable.dbc...\n");
 	DBCFile at("DBFilesClient\\AreaTable.dbc");
@@ -111,9 +113,9 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" AreaTable entries...\n", at.getRecordCount());
-	out = fopen("AreaTable.txt", "w");
+	out = fopen("output/AreaTable.txt", "w");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
-		const DBCFile::Record& r(*itr);
+		//const DBCFile::Record& r(*itr);
 	}
 #endif
 
@@ -124,7 +126,7 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map overlays...\n", wmo.getRecordCount());
-	out = fopen("WorldMapOverlay.txt", "w");
+	out = fopen("output/WorldMapOverlay.txt", "w");
 	for(DBCFile::Iterator itr = wmo.begin(); itr != wmo.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapOverlay o;
@@ -144,11 +146,8 @@ int main() {
 		int bbright = r.getInt(16);
 		fprintf(out, "%i, %i, '%s', %ix%i, %ix%i, [%ix%i,%ix%i]\n",
 			o.zone, o.area, o.name, o.w, o.h, o.left, o.top, bbleft, bbtop, bbright, bbb);
-		if(wmaMap.find(o.zone) != wmaMap.end()) {
-			wmaMap[o.zone].overlays.push_back(o);
-		} else {
-			fprintf(out, "Warning: zone %i not found!\n", o.zone);
-		}
+		assert(wmaMap.find(o.zone) != wmaMap.end());
+		wmaMap[o.zone].overlays.push_back(o);
 
 		// w,h is the size of the combined texture, in pixels.
 		// left,top is the coordinates on the area map where this texture should be drawn.
@@ -159,9 +158,78 @@ int main() {
 		// we'll ignore the bounding box for now; I think it's for mouse pointers.
 	}
 
+	for(WmaMap::const_iterator itr = wmaMap.begin(); itr != wmaMap.end(); ++itr) {
+		extractWorldMap(itr->second);
+	}
+
 	return 0;
 }
-#if 0
+
+static void applyOverlay(MemImage& combine, const WorldMapArea& a,
+	const WorldMapOverlay& o)
+{
+	printf("Loading BLPs for %s/%s...\n", a.name, o.name);
+	MemImage src[6];
+	int srcCount;
+	for(srcCount=0; srcCount<6; srcCount++) {
+		MemImage& img(src[srcCount]);
+		char buf[256];
+		bool res;
+		sprintf(buf, "interface\\worldmap\\%s\\%s%i.blp", a.name, o.name, srcCount+1);
+		MPQFile blp(buf);
+		if(blp.getSize() <= 32) {	// I guess that any valid texture is at least this big.
+			break;
+		}
+		res = img.LoadFromBLP((const BYTE*)blp.getBuffer(), (DWORD)blp.getSize());
+		assert(res);
+		res = img.RemoveAlpha();
+		assert(res);
+	}
+	int comboWidth, comboHeight;
+	switch(srcCount) {
+	case 1:
+		comboWidth = src[0].GetWidth();
+		comboHeight = src[0].GetHeight();
+		break;
+	case 2:
+		assert(src[0].GetHeight() == src[1].GetHeight());
+		comboWidth = src[0].GetWidth() + src[1].GetWidth();
+		comboHeight = src[0].GetHeight();
+		break;
+	case 4:
+		assert(src[0].GetHeight() == src[1].GetHeight());	// top row
+		assert(src[2].GetHeight() == src[3].GetHeight());	// bottom row
+		assert(src[0].GetWidth() == src[2].GetWidth());	// left column
+		assert(src[1].GetWidth() == src[3].GetWidth());	// right column
+		comboWidth = src[0].GetWidth() + src[1].GetWidth();
+		comboHeight = src[0].GetHeight() + src[2].GetHeight();
+		break;
+	case 6:
+		assert(src[0].GetHeight() == src[1].GetHeight());	// top row
+		assert(src[0].GetHeight() == src[2].GetHeight());	// top row
+		assert(src[3].GetHeight() == src[4].GetHeight());	// bottom row
+		assert(src[3].GetHeight() == src[5].GetHeight());	// bottom row
+		assert(src[0].GetWidth() == src[3].GetWidth());	// left column
+		assert(src[1].GetWidth() == src[4].GetWidth());	// middle column
+		assert(src[2].GetWidth() == src[5].GetWidth());	// right column
+		comboWidth = src[0].GetWidth() + src[1].GetWidth() + src[2].GetWidth();
+		comboHeight = src[0].GetHeight() + src[3].GetHeight();
+		break;
+	default:
+		assert(false);
+	}
+	assert(comboWidth >= o.w);
+	assert(comboHeight >= o.h);
+
+	switch(srcCount) {
+	case 1:
+		//memImageBlit(combine, src[0], o.left, o.top);
+		break;
+	default:
+		assert(false);
+	}
+}
+
 // Records of WMA where 'at' == 0 are continents.
 // The world map images are found in interface/worldmap.
 // They are numbered 1 to 12 and ordered in a 4x3 grid,
@@ -174,10 +242,10 @@ int main() {
 static const unsigned int TILE_WIDTH = 256;
 static const unsigned int TILE_HEIGHT = 256;
 
-static void extractWorldMap(const char* name) {
+static void extractWorldMap(const WorldMapArea& a) {
 	// check if we're done already.
 	char outputFileName[256];
-	sprintf(outputFileName, "output/%s.png", name);
+	sprintf(outputFileName, "output/%s.png", a.name);
 	if(fileExists(outputFileName)) {
 		printf("%s already exists, skipping...\n", outputFileName);
 		return;
@@ -185,21 +253,23 @@ static void extractWorldMap(const char* name) {
 
 	// load BLPs.
 	MemImage src[12];
-	bool hasAlpha = true, isPalettized;
+	bool hasAlpha = false, isPalettized;
 	for(int i=0; i<12; i++) {
 		MemImage& img(src[i]);
 		char buf[256];
-		sprintf(buf, "interface\\worldmap\\%s\\%s%i.blp", name, name, i+1);
+		sprintf(buf, "interface\\worldmap\\%s\\%s%i.blp", a.name, a.name, i+1);
 		MPQFile testBlp(buf);
 		if(testBlp.getSize() <= 256) {	//sanity
 			printf("Warning: cannot extract %s\n", buf);
 			return;
 		}
-		img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
+		bool res = img.LoadFromBLP((const BYTE*)testBlp.getBuffer(),
+			(DWORD)testBlp.getSize());
+		assert(res);
 		assert(img.GetWidth() == TILE_WIDTH);
 		assert(img.GetWidth() == TILE_HEIGHT);
-		if(hasAlpha) {
-			bool res = img.AddAlpha();
+		if(!hasAlpha) {
+			res = img.RemoveAlpha();
 			assert(res);
 		}
 		if(i == 0) {
@@ -232,7 +302,10 @@ static void extractWorldMap(const char* name) {
 		}
 	}
 
+	for(size_t i=0; i<a.overlays.size(); i++) {
+		applyOverlay(combine, a, a.overlays[i]);
+	}
+
 	// save as png.
 	combine.SaveToPNG(outputFileName);
 }
-#endif

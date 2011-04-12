@@ -222,7 +222,7 @@ static void SortPalette(BYTE* palette, int numEntries)
 	for (ii = 0; ii < numEntries; ++ii)
 	{
 		hsb = RGBToHSB(palette[ii*3 + 0], palette[ii*3 + 1], palette[ii*3 + 2]);
-		hsb.index = ii;
+		hsb.index = (BYTE)ii;
 
 		hsbList.insert(hsbList.end(), hsb);
 	}
@@ -2027,7 +2027,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 				for (c = 0; c < bpp; ++c)
 				{
 					DWORD index = OFFSET_RGB(i, j, destWidth, destHeight, c, bpp);
-					destBuff[index] = destColor[c];
+					destBuff[index] = (BYTE)destColor[c];
 				}
 			}
 			else
