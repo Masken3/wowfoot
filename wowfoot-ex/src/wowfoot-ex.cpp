@@ -170,9 +170,14 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o)
 {
 	printf("Loading BLPs for %s/%s...\n", a.name, o.name);
-	MemImage src[6];
-	int srcCount;
-	for(srcCount=0; srcCount<6; srcCount++) {
+	MemImage src[12];
+	int srcCount=0;
+	// Gotta calculate how many rows and columns there ought to be,
+	// since that info doesn't appear to be stored anywhere.
+	// There may be surplus texture pieces; these should be discarded.
+	int columns=0, rows=0;
+	int totalWidth=0, totalHeight=0;
+	for(srcCount=0; srcCount<12; srcCount++) {
 		MemImage& img(src[srcCount]);
 		char buf[256];
 		bool res;
@@ -183,54 +188,59 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		}
 		res = img.LoadFromBLP((const BYTE*)blp.getBuffer(), (DWORD)blp.getSize());
 		assert(res);
-		//res = img.RemoveAlpha();
+		res = img.RemoveAlpha();
 		assert(res);
 		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
 		sprintf(buf, "output/%s_%s%i.png", a.name, o.name, srcCount+1);
 		img.SaveToPNG(buf);
+		if(totalWidth < o.w) {
+			totalWidth += img.GetWidth();
+			columns++;
+			assert(columns <= 4);
+		}
+		if((totalWidth >= o.w) && ((srcCount % columns) == 0 || rows == 0)) {
+			totalHeight += img.GetHeight();
+			rows++;
+			assert(columns * rows <= 12);
+		}
+		// if we have all we need, stop now.
+		if(totalHeight >= o.h && (srcCount+1) == (columns * rows))
+			break;
 	}
-	int comboWidth, comboHeight;
-	switch(srcCount) {
-	case 1:
-		comboWidth = src[0].GetWidth();
-		comboHeight = src[0].GetHeight();
-		break;
-	case 2:
-		assert(src[0].GetHeight() == src[1].GetHeight());
-		comboWidth = src[0].GetWidth() + src[1].GetWidth();
-		comboHeight = src[0].GetHeight();
-		break;
-	case 4:
-		assert(src[0].GetHeight() == src[1].GetHeight());	// top row
-		assert(src[2].GetHeight() == src[3].GetHeight());	// bottom row
-		assert(src[0].GetWidth() == src[2].GetWidth());	// left column
-		assert(src[1].GetWidth() == src[3].GetWidth());	// right column
-		comboWidth = src[0].GetWidth() + src[1].GetWidth();
-		comboHeight = src[0].GetHeight() + src[2].GetHeight();
-		break;
-	case 6:
-		assert(src[0].GetHeight() == src[1].GetHeight());	// top row
-		assert(src[0].GetHeight() == src[2].GetHeight());	// top row
-		assert(src[3].GetHeight() == src[4].GetHeight());	// bottom row
-		assert(src[3].GetHeight() == src[5].GetHeight());	// bottom row
-		assert(src[0].GetWidth() == src[3].GetWidth());	// left column
-		assert(src[1].GetWidth() == src[4].GetWidth());	// middle column
-		assert(src[2].GetWidth() == src[5].GetWidth());	// right column
-		comboWidth = src[0].GetWidth() + src[1].GetWidth() + src[2].GetWidth();
-		comboHeight = src[0].GetHeight() + src[3].GetHeight();
-		break;
-	default:
-		assert(false);
+	assert(totalWidth >= o.w);
+	assert(totalHeight >= o.h);
+	// check that all parts of each row has the same height.
+	// check that all parts of each column has the same width.
+	for(int y=0; y<rows; y++) {
+		DWORD h = src[y*columns].GetHeight();
+		for(int x=0; x<columns; x++) {
+			assert(h == src[y*columns+x].GetHeight());
+		}
 	}
-	assert(comboWidth >= o.w);
-	assert(comboHeight >= o.h);
-
-	switch(srcCount) {
-	case 1:
-		//memImageBlit(combine, src[0], o.left, o.top);
-		break;
-	default:
-		assert(true);
+	for(int x=0; x<columns; x++) {
+		DWORD w = src[x].GetWidth();
+		for(int y=0; y<rows; y++) {
+			assert(w == src[y*columns+x].GetWidth());
+		}
+	}
+	// draw
+	int py=o.top;
+	for(int y=0; y<rows; y++) {
+		int px=o.left;
+		for(int x=0; x<columns; x++) {
+			int i = y*columns+x;
+			MemImage& img(src[i]);
+			// some images are blank. don't draw those.
+			if(img.IsBlank()) {
+				printf("Blank part: %s%i.blp\n", o.name, i);
+			} else {
+				DWORD w = MIN(combine.GetWidth() - px, img.GetWidth());
+				DWORD h = MIN(combine.GetHeight() - py, img.GetHeight());
+				combine.Blit(img, px, py, w, h);
+			}
+			px += img.GetWidth();
+		}
+		py += src[y*columns].GetHeight();
 	}
 }
 

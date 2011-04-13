@@ -9,4 +9,8 @@ bool fileExists(const char* name);
 int mkdir(const char* name);
 #endif
 
+template<class T> T MIN(T a, T b) {
+	return a < b ? a : b;
+}
+
 #endif	//UTIL_H

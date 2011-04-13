@@ -128,17 +128,20 @@ public:
 	bool AllocateBuffer(DWORD bytes);
 	bool HasAlpha() const { return m_bHasAlpha; }
 	bool IsPalettized() const { return m_bPalettized; }
+	bool IsBlank() const;
 	
 	BYTE* GetBuffer() { return m_buffer; };
 	const BYTE* GetBuffer() const { return m_buffer; };
 	DWORD GetBufferBytes() const { return m_bufferBytes; }
 	DWORD GetWidth() const { return m_width; }
 	DWORD GetHeight() const { return m_height; }
-	
+
 	// Asserts that src will fit into this.
 	// Alpha is overwritten, not blended.
 	// src must have same pixel format (alpha/palette) as this.
 	void Blit(const MemImage& src, unsigned x, unsigned y);
+	void Blit(const MemImage& src, unsigned x, unsigned y,
+		unsigned w, unsigned h);
 
 	// Load functions.
 	bool LoadFromBLP(const char* filename, FORMATID* blpTypeRet = NULL);
