@@ -166,6 +166,18 @@ int main() {
 	return 0;
 }
 
+static void checkOverlayDimension(const char* name, int actual, int expected) {
+	if(actual < expected) {
+		int diff = expected - actual;
+		if(diff <= 2) {
+			printf("Warning: overlay %s is %i < %i (diff %i)\n", name, actual, expected, diff);
+		} else {
+			printf("Error: overlay %s is %i < %i (diff %i)\n", name, actual, expected, diff);
+			assert(false);
+		}
+	}
+}
+
 static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o)
 {
@@ -191,8 +203,10 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		res = img.RemoveAlpha();
 		assert(res);
 		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
+#if 0
 		sprintf(buf, "output/%s_%s%i.png", a.name, o.name, srcCount+1);
 		img.SaveToPNG(buf);
+#endif
 		if(totalWidth < o.w) {
 			totalWidth += img.GetWidth();
 			columns++;
@@ -207,8 +221,8 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		if(totalHeight >= o.h && (srcCount+1) == (columns * rows))
 			break;
 	}
-	assert(totalWidth >= o.w);
-	assert(totalHeight >= o.h);
+	checkOverlayDimension("width", totalWidth, o.w);
+	checkOverlayDimension("height", totalHeight, o.h);
 	// check that all parts of each row has the same height.
 	// check that all parts of each column has the same width.
 	for(int y=0; y<rows; y++) {
