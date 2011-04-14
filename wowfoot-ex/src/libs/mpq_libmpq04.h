@@ -68,6 +68,9 @@ class MPQFile
     void operator=(const MPQFile &f) {}
 
 public:
+    // Searches open archives for the specified file.
+    // Archive are searched in reverse order of opening,
+    // so you'll want to open the oldest archive first.
     MPQFile(const char* filename);    // filenames are not case sensitive
     ~MPQFile() { close(); }
     size_t read(void* dest, size_t bytes);

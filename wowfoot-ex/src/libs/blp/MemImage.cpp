@@ -30,7 +30,6 @@ make it easier to add support for other file types.
 #include <list>
 
 #include <png.h>
-#include <jpeglib.h>
 #ifndef LINUX
 #include <pnginfo.h>
 #endif
@@ -39,6 +38,7 @@ make it easier to add support for other file types.
 #include "BLP.h"
 #include "palbmp/palettize.h"
 #include "palbmp/palcreate.h"
+#include <jpeglib.h>
 
 const char* FORMATIDNames[] = {
 	"[UNSPECIFIED]",
@@ -2233,7 +2233,7 @@ void MemImage::DrawImage(const MemImage& src, unsigned x, unsigned y,
 				dstPixel *= 256 - srcAlpha;
 				dstPixel += srcPixel * srcAlpha;
 				dstPixel >>= 8;
-				*dstPtr = dstPixel;
+				*dstPtr = (BYTE)dstPixel;
 				dstPtr++;
 				srcPtr++;
 			}
