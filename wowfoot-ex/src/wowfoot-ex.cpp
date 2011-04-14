@@ -273,7 +273,7 @@ static const unsigned int TILE_HEIGHT = 256;
 static void extractWorldMap(const WorldMapArea& a) {
 	// check if we're done already.
 	char outputFileName[256];
-	sprintf(outputFileName, "output/%s.png", a.name);
+	sprintf(outputFileName, "output/%s.jpeg", a.name);
 	if(fileExists(outputFileName)) {
 		printf("%s already exists, skipping...\n", outputFileName);
 		return;
@@ -328,5 +328,5 @@ static void extractWorldMap(const WorldMapArea& a) {
 	}
 
 	// save as png.
-	combine.SaveToPNG(outputFileName);
+	combine.SaveToJPEG(outputFileName);
 }

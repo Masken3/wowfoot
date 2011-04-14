@@ -30,6 +30,7 @@ make it easier to add support for other file types.
 #include <list>
 
 #include <png.h>
+#include <jpeglib.h>
 #ifndef LINUX
 #include <pnginfo.h>
 #endif
@@ -936,6 +937,50 @@ bool MemImage::Save(const char* filename, FORMATID type) const
 	
 	LOG("ERROR: Save called with invalid type %d.\n", type);
 	return false;
+}
+
+bool MemImage::SaveToJPEG(const char* filename) const {
+	if(m_bPalettized || m_bHasAlpha) {
+		MemImage temp(*this);
+		if(!temp.RemoveAlpha())
+			return false;
+		temp.Depalettize();
+		return temp.SaveToJPEG(filename);
+	}
+
+	// call libjpeg
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+
+	FILE* outfile;
+	if((outfile = fopen(filename, "wb")) == NULL) {
+		fprintf(stderr, "can't open %s\n", filename);
+		return false;
+	}
+	jpeg_stdio_dest(&cinfo, outfile);
+	
+	cinfo.image_width = GetWidth(); 	/* image width and height, in pixels */
+	cinfo.image_height = GetHeight();
+	cinfo.input_components = 3;	/* # of color components per pixel */
+	cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
+	jpeg_set_defaults(&cinfo);
+	
+	jpeg_start_compress(&cinfo, TRUE);
+	
+	JSAMPROW row_pointer[1];	/* pointer to a single row */
+	int row_stride;			/* physical row width in buffer */
+	row_stride = GetWidth() * 3;	/* JSAMPLEs per row in image_buffer */
+	while (cinfo.next_scanline < cinfo.image_height) {
+		row_pointer[0] = (JSAMPLE*)&GetBuffer()[cinfo.next_scanline * row_stride];
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+	
+	fclose(outfile);
+	return true;
 }
 
 bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
@@ -2170,6 +2215,15 @@ void MemImage::DrawImage(const MemImage& src, unsigned x, unsigned y,
 		// dst bpp: 3	// RGB
 		// src bpp: 4	// RGBA
 		for(unsigned k=0; k<w; k++) {
+#if 0
+			if(k == 0 || k == w-1) {	// hack to draw red lines.
+				srcPtr += 4;
+				*(dstPtr++) = 255;
+				*(dstPtr++) = 0;
+				*(dstPtr++) = 0;
+				continue;
+			}
+#endif
 			DWORD srcAlpha = srcPtr[3];
 			if(srcAlpha == 255)
 				srcAlpha = 256;

@@ -159,6 +159,7 @@ public:
 	bool Save(const char* filename, FORMATID type) const;
 	bool SaveToBLP(const char* filename, FORMATID type = FORMAT_UNSPECIFIED) const;
 	bool SaveToPNG(const char* filename, FORMATID type = FORMAT_UNSPECIFIED) const;
+	bool SaveToJPEG(const char* filename) const;
 
 	// If palettizes or ff already palettized returns true.  Returns false on error.
 	bool Palettize();

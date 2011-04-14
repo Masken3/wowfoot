@@ -70,7 +70,7 @@ wfe.instance_eval do
 		@SPECIFIC_CFLAGS = {
 			'loadlib.cpp' => ' -Wno-multichar',
 		}
-		@LIBRARIES = ['png']
+		@LIBRARIES = ['png', 'jpeg']
 		
 		@NAME = 'wowfoot-ex'
 		
