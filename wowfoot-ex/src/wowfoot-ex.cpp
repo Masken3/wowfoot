@@ -200,7 +200,7 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		}
 		res = img.LoadFromBLP((const BYTE*)blp.getBuffer(), (DWORD)blp.getSize());
 		assert(res);
-		res = img.RemoveAlpha();
+		//res = img.RemoveAlpha();
 		assert(res);
 		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
 #if 0
@@ -250,7 +250,7 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 			} else {
 				DWORD w = MIN(combine.GetWidth() - px, img.GetWidth());
 				DWORD h = MIN(combine.GetHeight() - py, img.GetHeight());
-				combine.Blit(img, px, py, w, h);
+				combine.DrawImage(img, px, py, w, h);
 			}
 			px += img.GetWidth();
 		}

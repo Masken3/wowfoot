@@ -2141,3 +2141,49 @@ bool MemImage::IsBlank() const {
 	}
 	return true;
 }
+
+void MemImage::DrawImage(const MemImage& src, unsigned x, unsigned y,
+	unsigned w, unsigned h)
+{
+	if(!src.HasAlpha()) {
+		Blit(src, x, y, w, h);
+		return;
+	}
+	assert(!HasAlpha());
+	assert(!IsPalettized() && !src.IsPalettized());
+	assert(w <= src.GetWidth());
+	assert(h <= src.GetHeight());
+	assert(x + w <= GetWidth());
+	assert(y + h <= GetHeight());
+	unsigned srcPitch = MemImage::CalculateBufferBytes(
+		src.GetWidth(), 1, src.HasAlpha(), src.IsPalettized());
+	unsigned dstPitch = MemImage::CalculateBufferBytes(
+		GetWidth(), 1, HasAlpha(), IsPalettized());
+	unsigned bytesPerPixel = dstPitch / GetWidth();
+	assert(src.GetBufferBytes() == srcPitch * src.GetHeight());
+	for(unsigned j=0; j<h; j++) {
+		int dstPos = dstPitch * (y+j) + x * bytesPerPixel;
+		int srcPos = srcPitch * j;
+
+		BYTE* dstPtr = GetBuffer() + dstPos;
+		const BYTE* srcPtr = src.GetBuffer() + srcPos;
+		// dst bpp: 3	// RGB
+		// src bpp: 4	// RGBA
+		for(unsigned k=0; k<w; k++) {
+			DWORD srcAlpha = srcPtr[3];
+			if(srcAlpha == 255)
+				srcAlpha = 256;
+			for(int i=0; i<3; i++) {
+				DWORD dstPixel = *dstPtr;
+				DWORD srcPixel = *srcPtr;
+				dstPixel *= 256 - srcAlpha;
+				dstPixel += srcPixel * srcAlpha;
+				dstPixel >>= 8;
+				*dstPtr = dstPixel;
+				dstPtr++;
+				srcPtr++;
+			}
+			srcPtr++;	// Skip past the alpha byte.
+		}
+	}
+}

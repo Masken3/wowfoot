@@ -142,6 +142,12 @@ public:
 	void Blit(const MemImage& src, unsigned x, unsigned y);
 	void Blit(const MemImage& src, unsigned x, unsigned y,
 		unsigned w, unsigned h);
+	
+	// Does alpha blending, if src has alpha.
+	// Destination must not have alpha.
+	// Neither dst or src may be palettized.
+	void DrawImage(const MemImage& src, unsigned x, unsigned y,
+		unsigned w, unsigned h);
 
 	// Load functions.
 	bool LoadFromBLP(const char* filename, FORMATID* blpTypeRet = NULL);
