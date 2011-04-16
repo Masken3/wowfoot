@@ -1,0 +1,25 @@
+14:04 2011-04-03
+* The overall purpose is to be a replacement for Wowhead.
+* Data will be taken from an actual WoW installation, as well as a Trinity database.
+* This will be useful for modders, as their mods will show up.
+
+* Data will be taken from MPQ, DBC and BLP files, as well as from the Trinity database.
+* It's possible to extract commentary and screenshots from Wowhead.
+* It may also be possible to integrate a model viewer. All models and textures are available in the MPQ files.
+
+* Map data is found in AreaTable.dbc, WorldMapArea.dbc, WorldMapContinent.dbc, WorldMapOverlay.dbc, WorldMapTransforms.dbc and locale-*.mpq/Interface/WORLDMAP/.
+* Secondary map data is found in AreaPOI.dbc, AreaTrigger.dbc, WorldSafeLocs.dbc.
+* Minimap data is found in textures\Minimap, md5translate.trs...
+
+* Quest, NPC and Item data is found in the Trinity Database.
+* NPC data includes stats, drop tables, locations, model, but not screenshots or comments.
+* Quest data includes startpoints, endpoint, prerequisites, objectives, rewards.
+* Item data includes stats, sources (indirectly), model.
+
+* Class info, spells and abilities are not easily found. We'll skip them for now.
+* However, class-specific quests and items will still be marked as such.
+
+* The user interface will be written in Ruby on Rails.
+* A data extractor will be written in C++.
+* The extractor will be run on interface-server startup if the extractor itself or any of its data files have changed.
+* The extractor will only extract changed or un-extracted parts, for improved startup speed.
