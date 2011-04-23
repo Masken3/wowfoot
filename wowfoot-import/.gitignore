@@ -1,3 +1,5 @@
 /*.db
 /build
 config.rb
+config.h
+query.sql

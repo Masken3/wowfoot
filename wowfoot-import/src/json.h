@@ -2,6 +2,7 @@
 #define JSON_H
 
 #include <string>
+#include <unordered_map>
 
 class JsonArray;
 class JsonObject;
@@ -23,7 +24,12 @@ public:
 
 class JsonObject : public JsonValue {
 public:
-	virtual const JsonValue* operator[](const std::string& key) const = 0;
+	typedef std::unordered_map<std::string, JsonValue*> Map;
+	typedef Map::const_iterator iterator;
+	virtual iterator begin() const = 0;
+	virtual iterator end() const = 0;
+
+	virtual const JsonValue& operator[](const std::string& key) const = 0;
 };
 
 JsonValue* parseJson(const char* text);

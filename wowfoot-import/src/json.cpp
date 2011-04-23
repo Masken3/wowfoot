@@ -1,6 +1,6 @@
 #include "json.h"
 #include <vector>
-#include <unordered_map>
+#include <assert.h>
 
 using namespace std;
 
@@ -29,7 +29,6 @@ public:
 
 class JsonObjectImpl : public JsonObject {
 public:
-	typedef unordered_map<string, JsonValue*> Map;
 	Map mMap;
 public:
 	virtual ~JsonObjectImpl() {
@@ -38,13 +37,16 @@ public:
 		}
 	}
 	const JsonObject* toObject() const { return this; }
-	virtual const JsonValue* operator[](const string& key) const {
+	virtual const JsonValue& operator[](const string& key) const {
 		Map::const_iterator itr = mMap.find(key);
 		if(itr == mMap.end())
-			return NULL;
+			abort();
 		else
-			return itr->second;
+			return *itr->second;
 	}
+	
+	virtual iterator begin() const { return mMap.begin(); }
+	virtual iterator end() const { return mMap.end(); }
 };
 
 // Statics
@@ -88,7 +90,9 @@ static JsonValue* parseString(char delim) {
 		if(*sText == '\\')
 			sText++;
 		s += *sText;
+		sText++;
 	}
+	sText++;
 	JsonValueImpl* v = new JsonValueImpl;
 	v->mValue = s;
 	return v;
@@ -98,30 +102,39 @@ static JsonValue* parseInt() {
 	string s;
 	while(isJsonDigit(*sText)) {
 		s += *sText;
+		sText++;
 	}
 	JsonValueImpl* v = new JsonValueImpl;
 	v->mValue = s;
 	return v;
 }
-
+static int level = 0;
 static JsonArray* parseArray() {
+	level++;
+	assert(level < 10);
 	token('[');
 	JsonArrayImpl* arr = new JsonArrayImpl;
 	while(true) {
+		if(*sText == ']')
+			break;
 		arr->mVec.push_back(parseValue());
-		
 		if(nextInList(']'))
 			continue;
 		else
 			break;
 	}
+	level--;
 	return arr;
 }
 
 static JsonObject* parseObject() {
+	level++;
+	assert(level < 10);
 	token('{');
 	JsonObjectImpl* obj = new JsonObjectImpl;
 	while(true) {
+		if(*sText == '}')
+			break;
 		skipWhitespace();
 		string name;
 		while(isalpha(*sText)) {
@@ -136,6 +149,7 @@ static JsonObject* parseObject() {
 		else
 			break;
 	}
+	level--;
 	return obj;
 }
 
@@ -144,8 +158,8 @@ static bool isJsonDigit(char c) {
 }
 
 static void error() {
-	printf("Json parse error. current text: (%i)%s\n", *sText, sText);
-	exit(1);
+	printf("Json parse error. current text: (%i) %s\n", *sText, sText);
+	abort();
 }
 
 static void skipWhitespace() {
