@@ -79,7 +79,8 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
-	FILE* out = fopen("output/WorldMapArea.txt", "w");
+	FILE* out = fopen("output/WorldMapArea.rb", "w");
+	fprintf(out, "WORLD_MAP_AREA = {\n");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapArea a;
@@ -89,17 +90,19 @@ int main() {
 		a.name = r.getString(3);
 		F2 fa = { r.getFloat(6), r.getFloat(4) };
 		F2 fb = { r.getFloat(7), r.getFloat(5) };
-		int vmap = r.getInt(8);
-		int dmap = r.getInt(9);
 #if 1
-		fprintf(out, "%i, %i, %i, '%s', %.0fx%.0f, %.0fx%.0f, %i, %i\n",
-			a.id, a.map, a.area, a.name, fa.x, fa.y, fb.x, fb.y, vmap, dmap);
+		if(a.area != 0) {
+			fprintf(out, "\t%i => { :map => %i, :name => \"%s\", :a => {:x => %.0f, :y => %.0f},"
+				" :b => {:x => %.0f, :y => %.0f} },\n",
+				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
+		}
 #endif
 		if(a.id != 0) {	//top-level zone (Azeroth, Kalimdor, Outland, Northrend)
 			assert(wmaMap.find(a.id) == wmaMap.end());
 			wmaMap[a.id] = a;
 		}
 	}
+	fprintf(out, "}\n");
 #if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
@@ -109,18 +112,26 @@ int main() {
 #endif
 	
 	// looks like we may also need AreaTable.dbc.
-	// not for now.
-#if 0
+#if 1
 	printf("Opening AreaTable.dbc...\n");
 	DBCFile at("DBFilesClient\\AreaTable.dbc");
 	res = at.open();
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" AreaTable entries...\n", at.getRecordCount());
-	out = fopen("output/AreaTable.txt", "w");
+	out = fopen("output/AreaTable.rb", "w");
+	fprintf(out, "AREA_TABLE = {\n");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
-		//const DBCFile::Record& r(*itr);
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		int map = r.getInt(1);
+		int parentId = r.getInt(2);
+		int playerLevel = r.getInt(10);
+		const char* name = r.getString(11);
+		fprintf(out, "\t%i => { :map => %i, :parent => %i, :level => %i, :name => \"%s\" },\n",
+			id, map, parentId, playerLevel, name);
 	}
+	fprintf(out, "}\n");
 #endif
 
 	// now for the overlays.
@@ -207,8 +218,8 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		assert(res);
 		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
 #if 0
-		sprintf(buf, "output/%s_%s%i.png", a.name, o.name, srcCount+1);
-		img.SaveToPNG(buf);
+		sprintf(buf, "output/%s_%s%i.jpeg", a.name, o.name, srcCount+1);
+		img.SaveToJPEG(buf);
 #endif
 		if(totalWidth < o.w) {
 			totalWidth += img.GetWidth();
@@ -330,6 +341,7 @@ static void extractWorldMap(const WorldMapArea& a) {
 		applyOverlay(combine, a, a.overlays[i]);
 	}
 
-	// save as png.
+	// save as JPEG.
+	// Effective area: 1002 x 668 pixels.
 	combine.SaveToJPEG(outputFileName);
 }
