@@ -1,0 +1,17 @@
+
+<p>Area:</p>
+
+<p>
+
+<%=
+i = id[1].to_i
+a = WORLD_MAP_AREA[i]
+if(a)
+	a[:name]
+else
+	"Area #{i.inspect} not found"
+end
+%>
+</p>
+</body>
+</html>
