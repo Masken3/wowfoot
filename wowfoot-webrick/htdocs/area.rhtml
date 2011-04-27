@@ -2,16 +2,37 @@
 <p>Area:</p>
 
 <p>
-
 <%=
 i = id[1].to_i
 a = WORLD_MAP_AREA[i]
 if(a)
-	a[:name]
+	a.inspect
 else
 	"Area #{i.inspect} not found"
 end
 %>
 </p>
+
+<p>
+<%=
+at = AREA_TABLE[i]
+if(at)
+	at.inspect
+else
+	''
+end
+%>
+</p>
+
+<p>
+<%=
+if(a)
+	"<img width=\"40%\" src=\"output/#{a[:name]}.jpeg\">"
+else
+	''
+end
+%>
+</p>
+
 </body>
 </html>

@@ -4,6 +4,7 @@ require 'webrick'
 include WEBrick
 require 'erb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
+require '../wowfoot-ex/output/AreaTable.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
@@ -20,6 +21,12 @@ class MyPageServlet < HTTPServlet::AbstractServlet
 		end
 		response.body = getBody(req)
 		response['Content-Type'] = "text/html"
+	end
+end
+
+def serveFile(req, response, root)
+	File.open(root + req.path, 'r') do |f|
+		response.body = f.read
 	end
 end
 
@@ -51,6 +58,9 @@ class IdClassServlet < HTTPServlet::AbstractServlet
 	end
 	def do_GET(req, response)
 		md = req.path.match("([a-z/]+)=([0-9]+)")
+		if(!md)	# try to serve a regular file
+			return serveFile(req, response, 'htdocs')
+		end
 		path, id = md[1], md[2]
 		#p path
 		#p id
@@ -77,6 +87,7 @@ mountSinglePage('areas')
 mountIdPage('area')
 
 S.mount('/', IdClassServlet)
+#S.mount('/output/', HTTPServlet::DefaultFileHandler, 'htdocs/output')
 
 trap("INT"){
   S.shutdown

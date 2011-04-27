@@ -2,7 +2,7 @@
 def sortAreas
 	arr = []
 	WORLD_MAP_AREA.each_pair do |id, hash|
-		arr << {:id => id, :name => hash[:name]}
+		arr << {:id => id, :name => AREA_TABLE[id][:name]}
 	end
 	return arr.sort {|a,b| a[:name] <=> b[:name] }
 end
