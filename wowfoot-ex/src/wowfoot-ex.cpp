@@ -343,5 +343,5 @@ static void extractWorldMap(const WorldMapArea& a) {
 
 	// save as JPEG.
 	// Effective area: 1002 x 668 pixels.
-	combine.SaveToJPEG(outputFileName);
+	combine.SaveToJPEG(outputFileName, 1002, 668);
 }

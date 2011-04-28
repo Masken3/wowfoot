@@ -4,6 +4,8 @@
 #define BLPCONV_MAX_PATH 260
 #define LOG ::printf
 
+#include <limits.h>
+
 #ifdef WIN32
 #include <windows.h>
 #else
@@ -159,7 +161,7 @@ public:
 	bool Save(const char* filename, FORMATID type) const;
 	bool SaveToBLP(const char* filename, FORMATID type = FORMAT_UNSPECIFIED) const;
 	bool SaveToPNG(const char* filename, FORMATID type = FORMAT_UNSPECIFIED) const;
-	bool SaveToJPEG(const char* filename) const;
+	bool SaveToJPEG(const char* filename, unsigned width = INT_MAX, unsigned height = INT_MAX) const;
 
 	// If palettizes or ff already palettized returns true.  Returns false on error.
 	bool Palettize();

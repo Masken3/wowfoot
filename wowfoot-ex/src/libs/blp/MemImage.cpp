@@ -939,7 +939,7 @@ bool MemImage::Save(const char* filename, FORMATID type) const
 	return false;
 }
 
-bool MemImage::SaveToJPEG(const char* filename) const {
+bool MemImage::SaveToJPEG(const char* filename, unsigned width, unsigned height) const {
 	if(m_bPalettized || m_bHasAlpha) {
 		MemImage temp(*this);
 		if(!temp.RemoveAlpha())
@@ -947,6 +947,11 @@ bool MemImage::SaveToJPEG(const char* filename) const {
 		temp.Depalettize();
 		return temp.SaveToJPEG(filename);
 	}
+	
+	if(width > GetWidth())
+		width = GetWidth();
+	if(height > GetHeight())
+		height = GetHeight();
 
 	// call libjpeg
 	struct jpeg_compress_struct cinfo;
@@ -961,8 +966,8 @@ bool MemImage::SaveToJPEG(const char* filename) const {
 	}
 	jpeg_stdio_dest(&cinfo, outfile);
 	
-	cinfo.image_width = GetWidth(); 	/* image width and height, in pixels */
-	cinfo.image_height = GetHeight();
+	cinfo.image_width = width; 	/* image width and height, in pixels */
+	cinfo.image_height = height;
 	cinfo.input_components = 3;	/* # of color components per pixel */
 	cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
 	jpeg_set_defaults(&cinfo);
