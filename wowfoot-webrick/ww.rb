@@ -24,12 +24,6 @@ class MyPageServlet < HTTPServlet::AbstractServlet
 	end
 end
 
-def serveFile(req, response, root)
-	File.open(root + req.path, 'r') do |f|
-		response.body = f.read
-	end
-end
-
 class SinglePageServlet < MyPageServlet
 	def getBody(req)
 		if(req.path != @path)
@@ -58,9 +52,6 @@ class IdClassServlet < HTTPServlet::AbstractServlet
 	end
 	def do_GET(req, response)
 		md = req.path.match("([a-z/]+)=([0-9]+)")
-		if(!md)	# try to serve a regular file
-			return serveFile(req, response, 'htdocs')
-		end
 		path, id = md[1], md[2]
 		#p path
 		#p id
@@ -87,7 +78,7 @@ mountSinglePage('areas')
 mountIdPage('area')
 
 S.mount('/', IdClassServlet)
-#S.mount('/output/', HTTPServlet::DefaultFileHandler, 'htdocs/output')
+S.mount('/output', HTTPServlet::FileHandler, 'htdocs/output')
 
 trap("INT"){
   S.shutdown
