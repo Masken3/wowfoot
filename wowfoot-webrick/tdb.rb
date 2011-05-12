@@ -19,9 +19,17 @@ yMax = area[:a][:y]
 xMin = area[:b][:x]
 yMin = area[:b][:y]
 
-query = "SELECT id, position_x, position_y, position_z FROM creature WHERE map = #{map}"+
-	" AND position_x >= #{xMin} AND position_x <= #{xMax}"+
-	" AND position_y >= #{yMin} AND position_y <= #{yMax}"
+query = "SELECT creature.guid, creature.id, position_x, position_y, position_z, creature_questrelation.quest"+
+	", creature_template.name"+
+	" FROM creature"+
+	" INNER JOIN creature_questrelation ON creature.id = creature_questrelation.id"+
+	" INNER JOIN creature_template ON creature.id = creature_template.entry"+
+	" WHERE map = #{map}"+
+	" AND position_x BETWEEN #{xMin} AND #{xMax}"+
+	" AND position_y BETWEEN #{yMin} AND #{yMax}"+
+	""
+
+puts query
 
 xDiff = xMax - xMin
 yDiff = yMax - yMin
@@ -35,11 +43,16 @@ stmt.fetch do |row|
 	# values between 0 and 1.
 	x = (row[:position_x] - xMin) / xDiff
 	y = (row[:position_y] - yMin) / yDiff
+	z = row[:position_z]
+	qid = row[:quest]
+	id = row[:id]
+	name = row[:name]
+	guid = row[:guid]
 	
 	# write some sort of overlay image.
 	width = 1024
 	height = 768
-	#puts "<whatev src=\"dot.png\" x=#{x*width} y=#{y*height}>"
+	puts "<whatev src=\"dot.png\" x=#{(x*width).to_i} y=#{(y*height).to_i}> gu:#{guid} id:#{id} q:#{qid} z:#{z} name: #{name}"
 	count += 1
 end
 puts "Got #{count} rows."
