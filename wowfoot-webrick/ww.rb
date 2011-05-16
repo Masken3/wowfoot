@@ -5,6 +5,7 @@ include WEBrick
 require 'erb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
+#require './tdb.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
@@ -34,10 +35,14 @@ class SinglePageServlet < MyPageServlet
 end
 
 class IdPageServlet < MyPageServlet
+	def initialize(path, pattern)
+		super(path)
+		@pattern = "#{@path}=" + pattern
+	end
 	def getBody(req)
-		#p "#{@path}=([0-9]+)"
-		id = req.path.match("#{@path}=([0-9]+)")
-		#p id
+		p @pattern
+		id = req.path.match(@pattern)
+		p id
 		if(!id)
 			raise HTTPStatus[404], "`#{req.path}' not found."
 		end
@@ -48,13 +53,12 @@ end
 class IdClassServlet < HTTPServlet::AbstractServlet
 	@@table = {}
 	def self.mount(path, servletClass)
+		puts "Mount: #{path}"
 		@@table[path] = servletClass
 	end
 	def do_GET(req, response)
-		md = req.path.match("([a-z/]+)=([0-9]+)")
-		path, id = md[1], md[2]
-		#p path
-		#p id
+		path = req.path.match("([a-z/]+)=")[1]
+		p path
 		sc = @@table[path]
 		if(!sc)
 			raise HTTPStatus[404], "`#{req.path}' not found."
@@ -71,11 +75,19 @@ end
 
 def mountIdPage(name)
 	path = "/#{name}"
-	IdClassServlet.mount(path, IdPageServlet.new(path))
+	pattern = "([0-9]+)"
+	IdClassServlet.mount(path, IdPageServlet.new(path, pattern))
+end
+
+def mountTextIdPage(name)
+	path = "/#{name}"
+	pattern = "(.+)"
+	IdClassServlet.mount(path, IdPageServlet.new(path, pattern))
 end
 
 mountSinglePage('areas')
 mountIdPage('area')
+mountTextIdPage('search')
 
 S.mount('/', IdClassServlet)
 S.mount('/output', HTTPServlet::FileHandler, 'htdocs/output')
