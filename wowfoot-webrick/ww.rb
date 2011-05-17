@@ -6,8 +6,17 @@ require 'erb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
 #require './tdb.rb'
+require 'dbi'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
+
+module TDB
+	C = DBI::connect('dbi:Mysql:world', 'trinity', 'trinity')
+end
+
+def run(path, bind = binding)
+	eval(open(path).read, bind, path)
+end
 
 class MyPageServlet < HTTPServlet::AbstractServlet
 	def initialize(path)
@@ -40,9 +49,9 @@ class IdPageServlet < MyPageServlet
 		@pattern = "#{@path}=" + pattern
 	end
 	def getBody(req)
-		p @pattern
+		#p @pattern
 		id = req.path.match(@pattern)
-		p id
+		#p id
 		if(!id)
 			raise HTTPStatus[404], "`#{req.path}' not found."
 		end
@@ -58,7 +67,7 @@ class IdClassServlet < HTTPServlet::AbstractServlet
 	end
 	def do_GET(req, response)
 		path = req.path.match("([a-z/]+)=")[1]
-		p path
+		#p path
 		sc = @@table[path]
 		if(!sc)
 			raise HTTPStatus[404], "`#{req.path}' not found."

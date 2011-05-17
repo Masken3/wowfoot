@@ -1,3 +1,26 @@
+<html>
+<body>
+
+<%
+@id = id
+run 'search.rb'
+%>
+
+<p>Search results for: 
 <%=
 id[1]
 %>
+</p>
+
+<p>Quests:</p>
+<table><tr><td>ID</td><td>Zone</td><td>MinLevel</td><td>QuestLevel</td><td>Title</td></tr>
+
+<% @res.each do |row| %>
+<%= "<tr><td>#{row[:entry]}</td>"+
+"<td><a href=\"area=#{row[:ZoneOrSort]}\">#{AREA_TABLE[row[:ZoneOrSort]][:name]}</a></td>"+
+"<td>#{row[:MinLevel]}</td>"+
+"<td>#{row[:QuestLevel]}</td><td>#{row[:title]}</td></tr>" %>
+<% end %>
+
+</body>
+</html>
