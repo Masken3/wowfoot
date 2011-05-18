@@ -1,6 +1,11 @@
 <html>
 <body>
 
+<STYLE type="text/css">
+	TABLE { border-collapse: collapse; }
+	td { border-spacing: 1; border: solid; }
+</STYLE>
+
 <%
 @id = id
 run 'search.rb'
@@ -19,6 +24,17 @@ end
 id[1]
 %>
 </p>
+
+<p>
+<%= @zones.size %>
+Zones:</p>
+<table><tr><td>ID</td><td>Name</td></tr>
+
+<% @zones.each do |id, name| %>
+<%= "<tr><td>id</td>"+
+"<td><a href=\"area=#{id}\">#{name}</a></td></tr>" %>
+<% end %>
+</table>
 
 <p>
 <%= @quests.size %>

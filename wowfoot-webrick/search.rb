@@ -1,7 +1,17 @@
 
 #puts "Hello search!"
 
-query = '%'+@id[1]+'%'
+searchTerm = @id[1]
+
+@zones = {}
+WORLD_MAP_AREA.each do |i, h|
+	name = AREA_TABLE[i][:name]
+	#puts "Test: '#{name}'.include?('#{searchTerm}')"
+	@zones[i] = name if(name.upcase.include?(searchTerm.upcase))
+end
+
+# todo: prepare statements in advance.
+query = '%'+searchTerm+'%'
 
 stm = TDB::C.prepare('select entry, ZoneOrSort, SkillOrClassMask, MinLevel, QuestLevel'+
 	', RequiredRaces, PrevQuestId, NextQuestId, title'+
