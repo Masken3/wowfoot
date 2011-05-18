@@ -31,7 +31,7 @@ Zones:</p>
 <table><tr><td>ID</td><td>Name</td></tr>
 
 <% @zones.each do |id, name| %>
-<%= "<tr><td>id</td>"+
+<%= "<tr><td>#{id}</td>"+
 "<td><a href=\"area=#{id}\">#{name}</a></td></tr>" %>
 <% end %>
 </table>
@@ -45,13 +45,14 @@ Quests:</p>
 <%= "<tr><td>#{row[:entry]}</td>"+
 "<td>#{questArea(row)}</td>"+
 "<td>#{row[:MinLevel]}</td>"+
-"<td>#{row[:QuestLevel]}</td><td>#{row[:title]}</td></tr>" %>
+"<td>#{row[:QuestLevel]}</td>"+
+"<td><a href=\"quest=#{row[:entry]}\">#{row[:title]}</a></td></tr>" %>
 <% end %>
 </table>
 
 <p>
 <%= @creatures.size %>
-Creatures:</p>
+NPCs:</p>
 <table><tr><td>ID</td><td>MinLevel</td><td>MaxLevel</td><td>Rank</td><td>Name</td><td>Title</td></tr>
 
 <% @creatures.each do |row| %>
@@ -59,7 +60,8 @@ Creatures:</p>
 "<td>#{row[:minlevel]}</td>"+
 "<td>#{row[:maxlevel]}</td>"+
 "<td>#{row[:rank]}</td>"+
-"<td>#{row[:name]}</td><td>#{row[:subname]}</td></tr>" %>
+"<td><a href=\"npc=#{row[:entry]}\">#{row[:name]}</a></td>"+
+"<td>#{row[:subname]}</td></tr>" %>
 <% end %>
 
 </body>
