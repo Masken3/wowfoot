@@ -66,7 +66,8 @@ class IdClassServlet < HTTPServlet::AbstractServlet
 		@@table[path] = servletClass
 	end
 	def do_GET(req, response)
-		path = req.path.match("([a-z/]+)=")[1]
+		match = req.path.match("([a-z/]+)=")
+		path = match[1] if(match)
 		#p path
 		sc = @@table[path]
 		if(!sc)
