@@ -1,0 +1,29 @@
+<html>
+<body>
+
+<%
+@id = id[1]
+run 'npc.rb'
+
+#if(@coords.size > 0)
+#	a = WORLD_MAP_AREA[@coords[0][:area]]
+#	map = "#{a[:name]}\n"
+#	map += "<img width=\"40%\" src=\"output/#{a[:name]}.jpeg\">\n"
+#else
+#	map = ''
+#end
+map = @coords.size
+%>
+
+<p>NPC:</p>
+
+<p>
+<%= @template.inspect %>
+</p>
+
+<p>
+<%= map %> spawn-points.
+</p>
+
+</body>
+</html>
