@@ -2,7 +2,7 @@
 <body>
 
 <STYLE type="text/css">
-	TABLE { border-collapse: collapse; }
+	TABLE { border-collapse: collapse; display: none; }
 	td { border-spacing: 1; border: solid; }
 </STYLE>
 
@@ -25,22 +25,21 @@ id[1]
 %>
 </p>
 
-<p>
-<%= @zones.size %>
-Zones:</p>
-<table><tr><td>ID</td><td>Name</td></tr>
+<!-- Tab-table :) -->
+<table id="tabs"><tr>
+<td><a href="#" id="zone"><%= @zones.size %> Zones</a></td>
+<td><a href="#" id="quest"><%= @quests.size %> Quests</a></td>
+<td><a href="#" id="npc"><%= @creatures.size %> NPCs</a></td>
+</tr></table>
 
+<table id="zoneTable"><tr><td>ID</td><td>Name</td></tr>
 <% @zones.each do |id, name| %>
 <%= "<tr><td>#{id}</td>"+
 "<td><a href=\"area=#{id}\">#{name}</a></td></tr>" %>
 <% end %>
 </table>
 
-<p>
-<%= @quests.size %>
-Quests:</p>
-<table><tr><td>ID</td><td>Zone</td><td>MinLevel</td><td>QuestLevel</td><td>Title</td></tr>
-
+<table id="questTable"><tr><td>ID</td><td>Zone</td><td>MinLevel</td><td>QuestLevel</td><td>Title</td></tr>
 <% @quests.each do |row| %>
 <%= "<tr><td>#{row[:entry]}</td>"+
 "<td>#{questArea(row)}</td>"+
@@ -50,11 +49,7 @@ Quests:</p>
 <% end %>
 </table>
 
-<p>
-<%= @creatures.size %>
-NPCs:</p>
-<table><tr><td>ID</td><td>MinLevel</td><td>MaxLevel</td><td>Rank</td><td>Name</td><td>Title</td></tr>
-
+<table id="npcTable"><tr><td>ID</td><td>MinLevel</td><td>MaxLevel</td><td>Rank</td><td>Name</td><td>Title</td></tr>
 <% @creatures.each do |row| %>
 <%= "<tr><td>#{row[:entry]}</td>"+
 "<td>#{row[:minlevel]}</td>"+
@@ -63,6 +58,24 @@ NPCs:</p>
 "<td><a href=\"npc=#{row[:entry]}\">#{row[:name]}</a></td>"+
 "<td>#{row[:subname]}</td></tr>" %>
 <% end %>
+
+<SCRIPT type="text/javascript">
+function tab_onclick(e) {
+	document.getElementById(currentTab + "Table").style.display = "none";
+	document.getElementById(e.target.id + "Table").style.display = "block";
+	currentTab = e.target.id
+}
+function my_onload() {
+	currentTab = "npc"
+	document.getElementById("npcTable").style.display = "block";
+	document.getElementById("tabs").style.display = "block";
+	
+	document.getElementById("quest").onclick = tab_onclick;
+	document.getElementById("zone").onclick = tab_onclick;
+	document.getElementById("npc").onclick = tab_onclick;
+}
+window.onload = my_onload
+</SCRIPT>
 
 </body>
 </html>
