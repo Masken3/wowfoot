@@ -5,14 +5,12 @@
 @id = id[1]
 run 'npc.rb'
 
-#if(@coords.size > 0)
-#	a = WORLD_MAP_AREA[@coords[0][:area]]
-#	map = "#{a[:name]}\n"
-#	map += "<img width=\"40%\" src=\"output/#{a[:name]}.jpeg\">\n"
-#else
-#	map = ''
-#end
-map = @coords.size
+if(@mainZone)
+	map = "#{AREA_TABLE[@mainZone][:name]}<br>\n"
+	map += "<img width=\"40%\" src=\"output/#{WORLD_MAP_AREA[@mainZone][:name]}.jpeg\">\n"
+else
+	map = ''
+end
 %>
 
 <p>NPC:</p>
@@ -22,8 +20,10 @@ map = @coords.size
 </p>
 
 <p>
-<%= map %> spawn-points.
+<%= @coords.size %> spawn-points.
 </p>
+
+<%= map %>
 
 </body>
 </html>
