@@ -23,7 +23,16 @@ end
 <%= @coords.size %> spawn-points.
 </p>
 
+
+<STYLE type="text/css">
+	div { position:relative; }	/* Enables absolute positioning relative to div tags. */
+	#circle { position:absolute; left: 50px; top: 50px; }
+</STYLE>
+
+<div>
 <%= map %>
+<img id="circle" src="static/circle.png">
+</div>
 
 </body>
 </html>

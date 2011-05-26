@@ -102,6 +102,7 @@ mountTextIdPage('search')
 
 S.mount('/', IdClassServlet)
 S.mount('/output', HTTPServlet::FileHandler, 'htdocs/output')
+S.mount('/static', HTTPServlet::FileHandler, 'htdocs/static')
 
 trap("INT"){
   S.shutdown
