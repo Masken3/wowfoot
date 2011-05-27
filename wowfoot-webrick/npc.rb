@@ -12,6 +12,7 @@ stm.execute(@id)
 
 def zoneFromCoords(map, x, y)
 	result = nil
+	percentages = {}
 	count = 0
 	WORLD_MAP_AREA.each do |area, hash|
 		if(hash[:map] == map &&
@@ -20,30 +21,39 @@ def zoneFromCoords(map, x, y)
 			puts "Match: #{map}[#{x}, #{y}] = #{hash[:name]}"
 			result = area
 			count += 1
+			width = hash[:a][:x] - hash[:b][:x]
+			percentages[:x] = (x - hash[:b][:x]) / width
+			height = hash[:a][:y] - hash[:b][:y]
+			percentages[:y] = (y - hash[:b][:y]) / height
 		end
 	end
 	# There should only be one result, but with this data, there will ocasionally be more.
 	# We will need more accurate zone borders.
 	puts "#{count} results."
-	return result
+	return result, percentages
 end
 
 # count of coords in zone
 @zones = {}
 @coords.each do |row|
-	area = zoneFromCoords(row[:map], row[:position_x], row[:position_y])
+	area, coords = zoneFromCoords(row[:map], row[:position_x], row[:position_y])
+	puts "Area: #{area}"
 	if(!@zones[area])
-		@zones[area] = 1
-	else
-		@zones[area] += 1
+		puts "Setup: #{area}"
+		@zones[area] = []
 	end
+	@zones[area] << coords
 end
 
-@zones.each do |zone, count|
-	if(!@mainZone)
-		@mainZone = zone
-	elsif(@zones[@mainZone] < count)
-		@mainZone = zone
+@mainArea = nil
+@zones.each do |area, coords|
+	#p area, coords
+	p @mainArea
+	p @zones[@mainArea]
+	if(!@mainArea)
+		@mainArea = area
+	elsif(@zones[@mainArea].size < coords.size)
+		@mainArea = area
 	end
 end
 

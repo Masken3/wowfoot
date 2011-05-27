@@ -5,9 +5,9 @@
 @id = id[1]
 run 'npc.rb'
 
-if(@mainZone)
-	map = "#{AREA_TABLE[@mainZone][:name]}<br>\n"
-	map += "<img width=\"100%\" src=\"output/#{WORLD_MAP_AREA[@mainZone][:name]}.jpeg\">\n"
+if(@mainArea)
+	map = "#{AREA_TABLE[@mainArea][:name]}<br>\n"
+	map += "<img width=\"100%\" src=\"output/#{WORLD_MAP_AREA[@mainArea][:name]}.jpeg\">\n"
 else
 	map = ''
 end
@@ -27,12 +27,15 @@ end
 <STYLE type="text/css">
 	div { position:relative; }	/* Enables absolute positioning relative to div tags. */
 	#map { width:40% }	/* Enables use of percentages inside. */
-	#circle { position:absolute; left: 50%; top: 50%; }
+	img.coord { position:absolute; }
 </STYLE>
 
 <div id="map">
 <%= map %>
-<img id="circle" src="static/circle.png">
+<!--<img class="coord" src="static/circle.png" style="left: 50%; top: 50%;">-->
+<% @zones[@mainArea].each do |pos| %>
+<%= "<img class=\"coord\" src=\"static/circle.png\" style=\"left: #{pos[:y]*100}%; top: #{pos[:x]*100}%;\">" %>
+<% end %>
 </div>
 
 </body>
