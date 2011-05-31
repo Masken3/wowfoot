@@ -33,9 +33,11 @@ end
 <div id="map">
 <%= map %>
 <!--<img class="coord" src="static/circle.png" style="left: 50%; top: 50%;">-->
-<% @zones[@mainArea].each do |pos| %>
+<% if(@zones[@mainArea])
+@zones[@mainArea].each do |pos| %>
 <%= "<img class=\"coord\" src=\"static/circle.png\" style=\"left: #{pos[:y]*100}%; top: #{pos[:x]*100}%;\">" %>
-<% end %>
+<% end
+end %>
 </div>
 
 </body>
