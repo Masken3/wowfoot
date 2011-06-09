@@ -7,11 +7,12 @@ require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
 #require './tdb.rb'
 require 'dbi'
+require './config.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
 module TDB
-	C = DBI::connect('dbi:Mysql:world', 'trinity', 'trinity')
+	C = DBI::connect('dbi:Mysql:'+TDB_DATABASE, TDB_USER, TDB_PASSWORD)
 end
 
 def run(path, bind = binding)
@@ -101,7 +102,7 @@ mountIdPage('npc')
 mountTextIdPage('search')
 
 S.mount('/', IdClassServlet)
-S.mount('/output', HTTPServlet::FileHandler, 'htdocs/output')
+S.mount('/output', HTTPServlet::FileHandler, '../wowfoot-ex/output')
 S.mount('/static', HTTPServlet::FileHandler, 'htdocs/static')
 
 trap("INT"){

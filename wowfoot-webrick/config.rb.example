@@ -1,0 +1,3 @@
+TDB_DATABASE = 'world:localhost'
+TDB_USER = 'trinity'
+TDB_PASSWORD = 'trinity'
