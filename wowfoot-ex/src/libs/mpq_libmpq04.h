@@ -27,7 +27,7 @@ public:
     MPQArchive(const char* filename);
     void close();
 
-    void GetFileListTo(vector<string>& filelist) {
+		void GetFileListCallback(void (*callback)(const string&)) {
         uint32_t filenum;
         if(libmpq__file_number(mpq_a, "(listfile)", &filenum)) return;
         libmpq__off_t size, transferred;
@@ -46,7 +46,7 @@ public:
             //cout << token << endl;
             token[strlen(token) - 1] = 0;
             string s = token;
-            filelist.push_back(s);
+            callback(s);
             counter += strlen(token) + 2;
             token = strtok(NULL, seps);
         }

@@ -20,7 +20,7 @@ FileLoader::~FileLoader()
     free();
 }
 
-bool FileLoader::loadFile(char *filename, bool log)
+bool FileLoader::loadFile(const char *filename, bool log)
 {
     free();
     MPQFile mf(filename);

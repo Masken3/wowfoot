@@ -13,6 +13,9 @@
     <Filter Include="libs\blp\palbmp">
       <UniqueIdentifier>{c2c8a15a-b597-4189-8b82-9668e5654e26}</UniqueIdentifier>
     </Filter>
+    <Filter Include="libs\map">
+      <UniqueIdentifier>{9c40eff9-564f-435d-946c-5e29ab840dab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\libs\dbcfile.cpp">
@@ -59,6 +62,12 @@
     </ClCompile>
     <ClCompile Include="src\libs\blp\palbmp\paloptimize.c">
       <Filter>libs\blp\palbmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\map\adt.cpp">
+      <Filter>libs\map</Filter>
+    </ClCompile>
+    <ClCompile Include="src\libs\map\wdt.cpp">
+      <Filter>libs\map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +130,12 @@
     </ClInclude>
     <ClInclude Include="src\libs\blp\palbmp\paloptimize.h">
       <Filter>libs\blp\palbmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\map\adt.h">
+      <Filter>libs\map</Filter>
+    </ClInclude>
+    <ClInclude Include="src\libs\map\wdt.h">
+      <Filter>libs\map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

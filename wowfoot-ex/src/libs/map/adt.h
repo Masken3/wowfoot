@@ -1,7 +1,7 @@
 #ifndef ADT_H
 #define ADT_H
 
-#include "loadlib.h"
+#include "../loadlib.h"
 
 #define TILESIZE (533.33333f)
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
@@ -237,7 +237,7 @@ public:
         if (h->offsData2a)
             return *((uint64 *)((uint8*)this + 8 + h->offsData2a));
         else
-            return 0xFFFFFFFFFFFFFFFFLL;
+            return 0xFFFFFFFFFFFFFFFFULL;
     }
 
 };

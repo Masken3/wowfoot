@@ -53,7 +53,7 @@ public:
     file_MVER *version;
     FileLoader();
     ~FileLoader();
-    bool loadFile(char *filename, bool log = true);
+    bool loadFile(const char *filename, bool log = true);
     virtual void free();
 };
 #endif

@@ -25,6 +25,8 @@
     <ClCompile Include="src\libs\libmpq\libmpq\mpq.c" />
     <ClCompile Include="src\libs\libmpq\libmpq\wave.c" />
     <ClCompile Include="src\libs\loadlib.cpp" />
+    <ClCompile Include="src\libs\map\adt.cpp" />
+    <ClCompile Include="src\libs\map\wdt.cpp" />
     <ClCompile Include="src\libs\mpq_libmpq.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +49,8 @@
     <ClInclude Include="src\libs\libmpq\libmpq\platform.h" />
     <ClInclude Include="src\libs\libmpq\libmpq\wave.h" />
     <ClInclude Include="src\libs\loadlib.h" />
+    <ClInclude Include="src\libs\map\adt.h" />
+    <ClInclude Include="src\libs\map\wdt.h" />
     <ClInclude Include="src\libs\mpq_libmpq04.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -105,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;BZ_IMPORT;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src\libs\bzip2;src\libs\blp;src\libs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src\libs\bzip2;src\libs\blp;src\libs\libmpq</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4996;4103</DisableSpecificWarnings>
     </ClCompile>

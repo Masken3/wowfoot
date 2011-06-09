@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #endif
 #include <fcntl.h>
-#include <assert.h>
 
 bool fileExists(const char* name) {
 	int fd = open(name, O_RDWR);

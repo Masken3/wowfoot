@@ -6,6 +6,7 @@
 #include "libs/blp/MemImage.h"
 #include "util.h"
 #include "libs/map/wdt.h"
+#include "libs/map/adt.h"
 #include <unordered_map>
 #include <fcntl.h>
 #include <set>
@@ -41,56 +42,56 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o);
 
 static const char *CONF_mpq_list[]={
-    "common.MPQ",
-    "common-2.MPQ",
-    "lichking.MPQ",
-    "expansion.MPQ",
-    "patch.MPQ",
-    "patch-2.MPQ",
-    "patch-3.MPQ",
-    "patch-4.MPQ",
-    "patch-5.MPQ",
+	"common.MPQ",
+	"common-2.MPQ",
+	"lichking.MPQ",
+	"expansion.MPQ",
+	"patch.MPQ",
+	"patch-2.MPQ",
+	"patch-3.MPQ",
+	"patch-4.MPQ",
+	"patch-5.MPQ",
 };
 
 
 #if defined( __GNUC__ )
-    #define _open   open
-    #define _close close
-    #ifndef O_BINARY
-        #define O_BINARY 0
-    #endif
+#define _open   open
+#define _close close
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 #else
-    #include <io.h>
+#include <io.h>
 #endif
 
 #ifdef O_LARGEFILE
-    #define OPEN_FLAGS  (O_RDONLY | O_BINARY | O_LARGEFILE)
+#define OPEN_FLAGS  (O_RDONLY | O_BINARY | O_LARGEFILE)
 #else
-    #define OPEN_FLAGS (O_RDONLY | O_BINARY)
+#define OPEN_FLAGS (O_RDONLY | O_BINARY)
 #endif
 
 static bool FileExists( const char* FileName )
 {
-    int fp = _open(FileName, OPEN_FLAGS);
-    if(fp != -1)
-    {
-        _close(fp);
-        return true;
-    }
+	int fp = _open(FileName, OPEN_FLAGS);
+	if(fp != -1)
+	{
+		_close(fp);
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 static void LoadCommonMPQFiles()
 {
-    char filename[512];
-    int count = sizeof(CONF_mpq_list)/sizeof(char*);
-    for(int i = 0; i < count; ++i)
-    {
-        sprintf(filename, WOW_INSTALL_DIR"Data/%s", CONF_mpq_list[i]);
-        if(FileExists(filename))
-            new MPQArchive(filename);
-    }
+	char filename[512];
+	int count = sizeof(CONF_mpq_list)/sizeof(char*);
+	for(int i = 0; i < count; ++i)
+	{
+		sprintf(filename, WOW_INSTALL_DIR"Data/%s", CONF_mpq_list[i]);
+		if(FileExists(filename))
+			new MPQArchive(filename);
+	}
 }
 
 struct InsensitiveComparator {
@@ -101,45 +102,51 @@ struct InsensitiveComparator {
 };
 typedef set<string, InsensitiveComparator> InSet;
 
+static InSet sFileSet;
+static void insert(const string& s) {
+	sFileSet.insert(s);
+}
 static void dumpArchiveSet() {
 	printf("Dumping list of files in combined MPQ set...\n");
-	InSet fileSet;
 	for(ArchiveSet::const_iterator itr = gOpenArchives.begin(); itr != gOpenArchives.end(); ++itr) {
-		vector<string> fileList;
-		(*itr)->GetFileListTo(fileList);
-		for(size_t i=0; i<fileList.size(); i++) {
-			fileSet.insert(fileList[i]);
-		}
+		(*itr)->GetFileListCallback(&::insert);
 	}
-	printf("%zu files, excluding duplicates.\n", fileSet.size());
+	printf("%"PFZT" files, excluding duplicates.\n", sFileSet.size());
 	FILE* out = fopen("output/mpqSet.txt", "w");
-	for(InSet::const_iterator itr = fileSet.begin(); itr != fileSet.end(); ++itr) {
+	for(InSet::const_iterator itr = sFileSet.begin(); itr != sFileSet.end(); ++itr) {
 		fprintf(out, "%s\n", itr->c_str());
 	}
 	fclose(out);
 }
 
-static void dumpAdt(FILE* out, const char* adt_filename, int y, int x) {
+static void dumpAdt(FILE* out, const char* adt_filename) {
+	ADT_file adt;
+	if (!adt.loadFile(adt_filename, false)) {
+		printf("Error loading %s\n", adt_filename);
+		exit(1);
+	}
+	adt_MCIN* mcin = adt.a_grid->getMCIN();
+	fprintf(out, "\t[\n");
+	for(int y=0; y<ADT_CELLS_PER_GRID; y++) {
+		fprintf(out, "\t\t[");
+		for(int x=0; x<ADT_CELLS_PER_GRID; x++) {
+			adt_MCNK* mcnk = mcin->getMCNK(x, y);
+			fprintf(out, "%u,", mcnk->areaid);
+		}
+		fprintf(out, "],\n");
+	}
+	fprintf(out, "\t]");
 }
 
-int main() {
+static void dumpAreaMap() {
 	bool res;
 	FILE* out;
-	
-	printf("Opening locale.mpq...\n");
-	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
-	MPQArchive patch(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
-	MPQArchive patch2(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
-	MPQArchive patch3(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
-	LoadCommonMPQFiles();
-	
-	dumpArchiveSet();
-	
+
 	printf("Opening Map.dbc...\n");
 	DBCFile mapDbc("DBFilesClient\\Map.dbc");
 	res = mapDbc.open();
 	if(!res)
-		return 1;
+		exit(1);
 	printf("Extracting %"PRIuPTR" maps...\n", mapDbc.getRecordCount());
 	out = fopen("output/AreaMap.rb", "w");
 	fprintf(out, "AREA_MAP = {\n");
@@ -147,32 +154,31 @@ int main() {
 		const DBCFile::Record& r(*itr);
 		int mid = r.getInt(0);
 		const char* name = r.getString(1);
-		fprintf(out, "%i => [\n", mid);
-		
+
 		printf("Extract %s (%i)\n", name, mid);
 		// Loadup map grid data
 		char mpq_map_name[1024];
 		sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", name, name);
 		WDT_file wdt;
 		if (!wdt.loadFile(mpq_map_name, false)) {
-			printf("Error loading %s.wdt\n", name);
-			//continue;
-			return 1;
+			printf("Error loading %s.wdt, skipping...\n", name);
+			continue;
 		}
+		fprintf(out, "%i => [\n", mid);
 
 		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
 			fprintf(out, "\t[");
 			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
-				fprintf(out, "\t\t[");
 				if (!wdt.main->adt_list[y][x].exist) {
 					// print nil data
 					fprintf(out, "nil,");
 					continue;
 				}
+				fprintf(out, "\n");
 				char adt_filename[1024];
 				sprintf(adt_filename, "World\\Maps\\%s\\%s_%u_%u.adt", name, name, x, y);
-				dumpAdt(out, adt_filename, y, x);
-				fprintf(out, "],\n");
+				dumpAdt(out, adt_filename);
+				fprintf(out, ",\n");
 			}
 			fprintf(out, "],\n");
 		}
@@ -180,18 +186,33 @@ int main() {
 	}
 	fprintf(out, "}\n");
 	fclose(out);
+}
+
+int main() {
+	bool res;
+	FILE* out;
+
+	printf("Opening MPQ files:\n");
+	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
+	MPQArchive patch(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
+	MPQArchive patch2(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
+	MPQArchive patch3(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
+	LoadCommonMPQFiles();
+
+	if(rand() == 42)
+		dumpArchiveSet();
+
+	if(fileExists("output/AreaMap.rb")) {
+		printf("AreaMap.rb already exists, skipping...\n");
+	} else {
+		dumpAreaMap();
+	}
 
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");
 	res = wmc.open();
 	if(!res) {
-		printf("DBC open fail, dumping mpq...\n");
-		vector<string> files;
-		locale.GetFileListTo(files);
-		printf("%"PRIuPTR" files:\n", files.size());
-		for(size_t i=0; i<files.size(); i++) {
-			printf("%s\n", files[i].c_str());
-		}
+		printf("DBC open fail.\n");
 		return 1;
 	}
 	printf("Extracting %"PRIuPTR" continents...\n", wmc.getRecordCount());
@@ -207,7 +228,7 @@ int main() {
 	}
 
 	mkdir("output");
-	
+
 	WmaMap wmaMap;
 
 	printf("Opening WorldMapArea.dbc...\n");
@@ -247,7 +268,7 @@ int main() {
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
 	img.SaveToPNG("output/azeroth12.png");
 #endif
-	
+
 	// looks like we may also need AreaTable.dbc.
 #if 1
 	printf("Opening AreaTable.dbc...\n");
@@ -432,7 +453,7 @@ static void extractWorldMap(const WorldMapArea& a) {
 
 	// load BLPs.
 	MemImage src[12];
-	bool hasAlpha = false, isPalettized;
+	bool hasAlpha = false, isPalettized = false;
 	for(int i=0; i<12; i++) {
 		MemImage& img(src[i]);
 		char buf[256];
@@ -459,7 +480,7 @@ static void extractWorldMap(const WorldMapArea& a) {
 			assert(isPalettized == img.IsPalettized());
 		}
 		//printf("%s%i.blp: alpha: %i. palette: %i\n",
-			//name, i+1, img.HasAlpha(), img.IsPalettized());
+		//name, i+1, img.HasAlpha(), img.IsPalettized());
 	}
 	printf("BLPs loaded.\n");
 

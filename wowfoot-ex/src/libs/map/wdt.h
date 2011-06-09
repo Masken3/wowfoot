@@ -1,6 +1,7 @@
 #ifndef WDT_H
 #define WDT_H
-#include "loadlib.h"
+
+#include "../loadlib.h"
 
 //**************************************************************************************
 // WDT file class and structures
