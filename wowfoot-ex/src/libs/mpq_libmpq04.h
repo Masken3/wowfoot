@@ -55,6 +55,7 @@ public:
     }
 };
 typedef std::deque<MPQArchive*> ArchiveSet;
+extern ArchiveSet gOpenArchives;
 
 class MPQFile
 {

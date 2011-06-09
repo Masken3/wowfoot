@@ -5,7 +5,10 @@
 #include <inttypes.h>
 #include "libs/blp/MemImage.h"
 #include "util.h"
+#include "libs/map/wdt.h"
 #include <unordered_map>
+#include <fcntl.h>
+#include <set>
 
 using namespace std;
 
@@ -37,16 +40,150 @@ static void extractWorldMap(const WorldMapArea&);
 static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o);
 
+static const char *CONF_mpq_list[]={
+    "common.MPQ",
+    "common-2.MPQ",
+    "lichking.MPQ",
+    "expansion.MPQ",
+    "patch.MPQ",
+    "patch-2.MPQ",
+    "patch-3.MPQ",
+    "patch-4.MPQ",
+    "patch-5.MPQ",
+};
+
+
+#if defined( __GNUC__ )
+    #define _open   open
+    #define _close close
+    #ifndef O_BINARY
+        #define O_BINARY 0
+    #endif
+#else
+    #include <io.h>
+#endif
+
+#ifdef O_LARGEFILE
+    #define OPEN_FLAGS  (O_RDONLY | O_BINARY | O_LARGEFILE)
+#else
+    #define OPEN_FLAGS (O_RDONLY | O_BINARY)
+#endif
+
+static bool FileExists( const char* FileName )
+{
+    int fp = _open(FileName, OPEN_FLAGS);
+    if(fp != -1)
+    {
+        _close(fp);
+        return true;
+    }
+
+    return false;
+}
+
+static void LoadCommonMPQFiles()
+{
+    char filename[512];
+    int count = sizeof(CONF_mpq_list)/sizeof(char*);
+    for(int i = 0; i < count; ++i)
+    {
+        sprintf(filename, WOW_INSTALL_DIR"Data/%s", CONF_mpq_list[i]);
+        if(FileExists(filename))
+            new MPQArchive(filename);
+    }
+}
+
+struct InsensitiveComparator {
+	// return true if a is less than b, that is, if it goes first in order.
+	bool operator()(const string& a, const string& b) {
+		return strcasecmp(a.c_str(), b.c_str()) < 0;
+	}
+};
+typedef set<string, InsensitiveComparator> InSet;
+
+static void dumpArchiveSet() {
+	printf("Dumping list of files in combined MPQ set...\n");
+	InSet fileSet;
+	for(ArchiveSet::const_iterator itr = gOpenArchives.begin(); itr != gOpenArchives.end(); ++itr) {
+		vector<string> fileList;
+		(*itr)->GetFileListTo(fileList);
+		for(size_t i=0; i<fileList.size(); i++) {
+			fileSet.insert(fileList[i]);
+		}
+	}
+	printf("%zu files, excluding duplicates.\n", fileSet.size());
+	FILE* out = fopen("output/mpqSet.txt", "w");
+	for(InSet::const_iterator itr = fileSet.begin(); itr != fileSet.end(); ++itr) {
+		fprintf(out, "%s\n", itr->c_str());
+	}
+	fclose(out);
+}
+
+static void dumpAdt(FILE* out, const char* adt_filename, int y, int x) {
+}
+
 int main() {
+	bool res;
+	FILE* out;
+	
 	printf("Opening locale.mpq...\n");
 	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
 	MPQArchive patch(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
 	MPQArchive patch2(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
 	MPQArchive patch3(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
+	LoadCommonMPQFiles();
+	
+	dumpArchiveSet();
+	
+	printf("Opening Map.dbc...\n");
+	DBCFile mapDbc("DBFilesClient\\Map.dbc");
+	res = mapDbc.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" maps...\n", mapDbc.getRecordCount());
+	out = fopen("output/AreaMap.rb", "w");
+	fprintf(out, "AREA_MAP = {\n");
+	for(DBCFile::Iterator itr = mapDbc.begin(); itr != mapDbc.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int mid = r.getInt(0);
+		const char* name = r.getString(1);
+		fprintf(out, "%i => [\n", mid);
+		
+		printf("Extract %s (%i)\n", name, mid);
+		// Loadup map grid data
+		char mpq_map_name[1024];
+		sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", name, name);
+		WDT_file wdt;
+		if (!wdt.loadFile(mpq_map_name, false)) {
+			printf("Error loading %s.wdt\n", name);
+			//continue;
+			return 1;
+		}
+
+		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
+			fprintf(out, "\t[");
+			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
+				fprintf(out, "\t\t[");
+				if (!wdt.main->adt_list[y][x].exist) {
+					// print nil data
+					fprintf(out, "nil,");
+					continue;
+				}
+				char adt_filename[1024];
+				sprintf(adt_filename, "World\\Maps\\%s\\%s_%u_%u.adt", name, name, x, y);
+				dumpAdt(out, adt_filename, y, x);
+				fprintf(out, "],\n");
+			}
+			fprintf(out, "],\n");
+		}
+		fprintf(out, "],\n");
+	}
+	fprintf(out, "}\n");
+	fclose(out);
 
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");
-	bool res = wmc.open();
+	res = wmc.open();
 	if(!res) {
 		printf("DBC open fail, dumping mpq...\n");
 		vector<string> files;
@@ -79,7 +216,7 @@ int main() {
 	if(!res)
 		return 1;
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
-	FILE* out = fopen("output/WorldMapArea.rb", "w");
+	out = fopen("output/WorldMapArea.rb", "w");
 	fprintf(out, "WORLD_MAP_AREA = {\n");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
@@ -124,12 +261,12 @@ int main() {
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
-		int map = r.getInt(1);
+		int mapId = r.getInt(1);
 		int parentId = r.getInt(2);
 		int playerLevel = r.getInt(10);
 		const char* name = r.getString(11);
 		fprintf(out, "\t%i => { :map => %i, :parent => %i, :level => %i, :name => \"%s\" },\n",
-			id, map, parentId, playerLevel, name);
+			id, mapId, parentId, playerLevel, name);
 	}
 	fprintf(out, "}\n");
 #endif
