@@ -138,9 +138,12 @@ static void dumpAdt(FILE* out, const char* adt_filename) {
 	fprintf(out, "\t]");
 }
 
-static void dumpAreaMap() {
+static void dumpAreaMap(bool dumpArea) {
 	bool res;
 	FILE* out;
+	FILE* mapOut;
+
+	//TODO: dump Map.rb, as a companion to AreaMap.rb
 
 	printf("Opening Map.dbc...\n");
 	DBCFile mapDbc("DBFilesClient\\Map.dbc");
@@ -148,12 +151,20 @@ static void dumpAreaMap() {
 	if(!res)
 		exit(1);
 	printf("Extracting %"PRIuPTR" maps...\n", mapDbc.getRecordCount());
-	out = fopen("output/AreaMap.rb", "w");
-	fprintf(out, "AREA_MAP = {\n");
+	if(dumpArea) {
+		out = fopen("output/AreaMap.rb", "w");
+		fprintf(out, "AREA_MAP = {\n");
+	}
+	mapOut = fopen("output/Map.rb", "w");
+	fprintf(mapOut, "MAP = {\n");
 	for(DBCFile::Iterator itr = mapDbc.begin(); itr != mapDbc.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int mid = r.getInt(0);
 		const char* name = r.getString(1);
+		
+		fprintf(mapOut, "\t%i => \"%s\",\n", mid, name);
+		if(!dumpArea)
+			continue;
 
 		printf("Extract %s (%i)\n", name, mid);
 		// Loadup map grid data
@@ -184,8 +195,12 @@ static void dumpAreaMap() {
 		}
 		fprintf(out, "],\n");
 	}
-	fprintf(out, "}\n");
-	fclose(out);
+	if(dumpArea) {
+		fprintf(out, "}\n");
+		fclose(out);
+	}
+	fprintf(mapOut, "}\n");
+	fclose(mapOut);
 }
 
 int main() {
@@ -204,10 +219,11 @@ int main() {
 
 	if(fileExists("output/AreaMap.rb")) {
 		printf("AreaMap.rb already exists, skipping...\n");
+		dumpAreaMap(false);
 	} else {
-		dumpAreaMap();
+		dumpAreaMap(true);
 	}
-
+	
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");
 	res = wmc.open();
@@ -216,6 +232,8 @@ int main() {
 		return 1;
 	}
 	printf("Extracting %"PRIuPTR" continents...\n", wmc.getRecordCount());
+	out = fopen("output/WorldMapContinent.rb", "w");
+	fprintf(out, "WORLD_MAP_CONTINENT = {\n");
 	for(DBCFile::Iterator itr = wmc.begin(); itr != wmc.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int cid = r.getInt(0);
@@ -225,7 +243,10 @@ int main() {
 		float x2 = r.getFloat(11);
 		float y2 = r.getFloat(12);
 		printf("%i, %i, %gx%g, %gx%g\n", cid, mid, x1, y1, x2, y2);
+		fprintf(out, "\t%i => { :map => %i, :x1 => %g, :y1 => %g, :x2 => %g, :y2 => %g },\n",
+			cid, mid, x1, y1, x2, y2);
 	}
+	fprintf(out, "}\n");
 
 	mkdir("output");
 

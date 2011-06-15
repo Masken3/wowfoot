@@ -62,13 +62,15 @@ wfe.instance_eval do
 	def setup
 		set_defaults
 
-		@SOURCES = ['src', 'src/libs']
+		@SOURCES = ['src', 'src/libs', 'src/libs/map']
 		@EXTRA_INCLUDES = ['src', 'src/libs/libmpq']
 		@IGNORED_FILES = []
 		@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
 		@EXTRA_OBJECTS = [LIBMPQ.target, BLP.target, SQUISH.target, PALBMP.target, CRBLIB.target]
 		@SPECIFIC_CFLAGS = {
 			'loadlib.cpp' => ' -Wno-multichar',
+			'adt.cpp' => ' -Wno-multichar',
+			'wdt.cpp' => ' -Wno-multichar',
 		}
 		@LIBRARIES = ['png', 'jpeg']
 		
