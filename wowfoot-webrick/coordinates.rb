@@ -65,12 +65,33 @@ end
 require 'rubygems'
 require 'RMagick'
 
+# set up zone colors
+COLORS = [
+	'red',
+	'green',
+	'blue',
+	'cyan',
+	'yellow',
+	'magenta',
+	'brown',
+	'purple',
+]
+BLACK = Magick::Pixel.from_color('black')
+i = 0
+AREA_TABLE.each do |id, hash|
+	next unless(hash[:parent] == 0)
+	hash[:color] = Magick::Pixel.from_color(COLORS[i])
+	i += 1
+	i = 0 if(i == COLORS.size)
+end
+
 # construct a square grid. save as png.
 # I'm thinking 64x64 grids, 8x8 pixels per grid.
 def dumpMapImage(map)
 	grids = AREA_MAP[map]
-	puts "dump: #{map}"
+	puts "dump: #{MAP[map]}"
 	STDOUT.flush
+
 	nPix = MAX_NUMBER_OF_GRIDS * MAX_NUMBER_OF_CELLS
 	img = Magick::Image.new(nPix, nPix)
 	draw = Magick::Draw.new
@@ -78,21 +99,51 @@ def dumpMapImage(map)
 	while(y<MAX_NUMBER_OF_GRIDS)
 		x=0
 		while(x<MAX_NUMBER_OF_GRIDS)
-			if(grids[y][x])
-				draw.fill('white')
+			grid = grids[y][x]
+			if(grid)
+				#draw.fill('white')
+				cy=0
+				while(cy<MAX_NUMBER_OF_CELLS)
+					cx=0
+					while(cx<MAX_NUMBER_OF_CELLS)
+						# set pixel color to cell color
+						# 1. find cell color
+						# each zone has a color
+						# 1a. first find the zone id of the cell
+						aid = grid[cx][cy]
+						if(aid == 0 || !AREA_TABLE[aid])
+							puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(aid != 0)
+							color = BLACK
+						else
+						while(AREA_TABLE[aid][:parent] != 0)
+							aid = AREA_TABLE[aid][:parent]
+							puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(!AREA_TABLE[aid])
+						end
+						# 1b. get the color
+						color = AREA_TABLE[aid][:color]
+						end
+						# 2. set the color
+						img.pixel_color(x*MAX_NUMBER_OF_CELLS + cx,
+							y*MAX_NUMBER_OF_CELLS + cy, color)
+						cx += 1
+					end
+					cy += 1
+				end
 			else
 				draw.fill('black')
+				draw.rectangle(x*MAX_NUMBER_OF_CELLS, y*MAX_NUMBER_OF_CELLS,
+					(x+1)*MAX_NUMBER_OF_CELLS - 1, (y+1)*MAX_NUMBER_OF_CELLS - 1)
 			end
-			draw.rectangle(x*MAX_NUMBER_OF_CELLS, y*MAX_NUMBER_OF_CELLS,
-				(x+1)*MAX_NUMBER_OF_CELLS - 1, (y+1)*MAX_NUMBER_OF_CELLS - 1)
 			x+=1
 		end
 		y+=1
 	end
 	draw.draw(img)
-	img.write("output/#{map}.png")
+	img.write("output/#{MAP[map]}.png")
 end
 
 WORLD_MAP_CONTINENT.each do |id,hash|
 	dumpMapImage(hash[:map])
 end
+puts "Experimental mode, exiting..."
+exit(42)
