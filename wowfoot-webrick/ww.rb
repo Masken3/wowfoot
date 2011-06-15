@@ -1,13 +1,21 @@
 #!/usr/bin/ruby
 
+puts 'Loading...'
+STDOUT.flush
+START_TIME = Time.now
+
 require 'webrick'
 include WEBrick
 require 'erb'
-require '../wowfoot-ex/output/WorldMapArea.rb'
-require '../wowfoot-ex/output/AreaTable.rb'
 #require './tdb.rb'
 require 'dbi'
 require './config.rb'
+require '../wowfoot-ex/output/Map.rb'
+require '../wowfoot-ex/output/WorldMapContinent.rb'
+require '../wowfoot-ex/output/WorldMapArea.rb'
+require '../wowfoot-ex/output/AreaTable.rb'
+require '../wowfoot-ex/output/AreaMap.rb'
+require './coordinates.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
@@ -108,4 +116,6 @@ S.mount('/static', HTTPServlet::FileHandler, 'htdocs/static')
 trap("INT"){
   S.shutdown
 }
+puts "Ready to start. #{Time.now - START_TIME} seconds elapsed."
+STDOUT.flush
 S.start

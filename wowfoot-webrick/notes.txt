@@ -1,0 +1,15 @@
+On maps:
+WoW maps are either continents and instances. Both those are equal from a database point-of-view.
+Maps are stored in Maps.DBC, with some extra info in AreaTable.dbc.
+
+Each map is then subdivided into a 64x64 tile grid. Not all tiles are populated.
+For example, a small instance will have only one or two tiles.
+Even a huge map such as Kalimdor will only have about half of the tiles populated.
+I suspect that the only map that populates the majority of tiles is Outland.
+
+A tile is stored in an ADT file.
+
+A tile is subdivided into cells, 16x16 cells per tile.
+A cell appears to be tied into a single area. If we can put a coordinate inside a cell, we will know its area.
+
+We have functions ComputeGridPair() to get a grid from a coordinate pair, and GetAreaFlag() to further compute the cell.

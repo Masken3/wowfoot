@@ -10,46 +10,6 @@ stm = TDB::C.prepare('select guid, id, map, position_x, position_y, position_z'+
 stm.execute(@id)
 @coords = stm.fetch_all
 
-def zoneFromCoords(map, x, y)
-	result = nil
-	percentages = {}
-	count = 0
-	WORLD_MAP_AREA.each do |area, hash|
-		if(hash[:map] == map &&
-			hash[:a][:x] >= x && hash[:a][:y] >= y &&
-			hash[:b][:x] <= x && hash[:b][:y] <= y)
-			puts "Match: #{map}[#{x}, #{y}] = #{area} #{hash[:name]}"
-			result = area
-			count += 1
-			width = hash[:a][:x] - hash[:b][:x]
-			percentages[:x] = 1.0 - ((x - hash[:b][:x]) / width)
-			height = hash[:a][:y] - hash[:b][:y]
-			percentages[:y] = 1.0 - ((y - hash[:b][:y]) / height)
-			#return result, percentages
-		end
-	end
-	# There should only be one result, but with this data, there will ocasionally be more.
-	# We will need more accurate zone borders.
-	STDOUT.flush
-	#raise "#{count} results." if(count > 1)
-	return result, percentages
-end
-
-# unused
-def Compute(x, y, center_offset, size)
-	x_offset = (x - center_offset)/size
-	y_offset = (y - center_offset)/size
-	
-	x_val = x_offset + CENTER_VAL + 0.5
-	y_val = y_offset + CENTER_VAL + 0.5
-	return x_val, y_val
-end
-
-def ComputeGridPair(x, y)
-	return Compute(x, y, CENTER_GRID_OFFSET, SIZE_OF_GRIDS)
-end
-
-
 # count of coords in zone
 @zones = {}
 @coords.each do |row|
