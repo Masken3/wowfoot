@@ -95,6 +95,8 @@ def dumpMapImage(map)
 	nPix = MAX_NUMBER_OF_GRIDS * MAX_NUMBER_OF_CELLS
 	img = Magick::Image.new(nPix, nPix)
 	draw = Magick::Draw.new
+	text = Magick::Draw.new
+	text.fill('white')
 	y=0
 	while(y<MAX_NUMBER_OF_GRIDS)
 		x=0
@@ -111,6 +113,8 @@ def dumpMapImage(map)
 						# each zone has a color
 						# 1a. first find the zone id of the cell
 						aid = grid[cx][cy]
+						px = x*MAX_NUMBER_OF_CELLS + cx
+						py = y*MAX_NUMBER_OF_CELLS + cy
 						if(aid == 0 || !AREA_TABLE[aid])
 							puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(aid != 0)
 							color = BLACK
@@ -119,12 +123,17 @@ def dumpMapImage(map)
 							aid = AREA_TABLE[aid][:parent]
 							puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(!AREA_TABLE[aid])
 						end
+						area = AREA_TABLE[aid]
 						# 1b. get the color
-						color = AREA_TABLE[aid][:color]
+						color = area[:color]
+						# annotate
+						if(!area[:annotated])
+							area[:annotated] = true
+							text.text(px, py, area[:name])
+						end
 						end
 						# 2. set the color
-						img.pixel_color(x*MAX_NUMBER_OF_CELLS + cx,
-							y*MAX_NUMBER_OF_CELLS + cy, color)
+						img.pixel_color(px, py, color)
 						cx += 1
 					end
 					cy += 1
@@ -139,6 +148,7 @@ def dumpMapImage(map)
 		y+=1
 	end
 	draw.draw(img)
+	text.draw(img)
 	img.write("output/#{MAP[map]}.png")
 end
 
