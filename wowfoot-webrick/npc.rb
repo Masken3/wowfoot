@@ -14,9 +14,9 @@ stm.execute(@id)
 @zones = {}
 @coords.each do |row|
 	area, coords = zoneFromCoords(row[:map], row[:position_x], row[:position_y])
-	puts "Area: #{area}"
+	#puts "Area: #{area}"
 	if(!@zones[area])
-		puts "Setup: #{area}"
+		#puts "Setup: #{area}"
 		@zones[area] = []
 	end
 	@zones[area] << coords
@@ -25,8 +25,8 @@ end
 @mainArea = nil
 @zones.each do |area, coords|
 	#p area, coords
-	p @mainArea
-	p @zones[@mainArea]
+	#p @mainArea
+	#p @zones[@mainArea]
 	if(!@mainArea)
 		@mainArea = area
 	elsif(@zones[@mainArea].size < coords.size)

@@ -17,7 +17,7 @@ def Compute(x, y, center_offset, size, center_val)
 	
 	x_val = x_offset + center_val + 0.5
 	y_val = y_offset + center_val + 0.5
-	return x_val, y_val
+	return x_val.to_i, y_val.to_i
 end
 
 def ComputeGridPair(x, y)
@@ -35,7 +35,10 @@ def zoneFromCoords(map, x, y)
 	percentages = {}
 	# find areaId
 	gridX, gridY = ComputeGridPair(x, y)
-	cellX, cellY = ComputeCellPair(x, y)
+	cellX, cellY = ComputeCellPair(y, x)
+	puts "Grid: [#{gridX}][#{gridY}]"
+	puts "Cell: [#{cellX}][#{cellY}]"
+	puts "Pixel: [#{gridX*MAX_NUMBER_OF_CELLS + cellX}][#{gridY*MAX_NUMBER_OF_CELLS + cellY}]"
 	grid = AREA_MAP[map][gridY][gridX]
 	raise hell if(!grid)
 	areaId = grid[cellY][cellX]
@@ -46,8 +49,10 @@ def zoneFromCoords(map, x, y)
 	while(AREA_TABLE[zoneId][:parent] != 0)
 		zoneId = AREA_TABLE[zoneId][:parent]
 	end
-	wma = WORLD_MAP_AREA[areaId]
-	puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma[:name]}, Area #{areaId} #{AREA_TABLE[areaId][:name]}"
+	wma = WORLD_MAP_AREA[zoneId]
+	area = AREA_TABLE[areaId]
+	puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma ? wma[:name] : nil}, Area #{areaId} #{area ? area[:name] : nil}"
+	STDOUT.flush
 	if(!(wma[:map] == map &&
 		wma[:a][:x] >= x && wma[:a][:y] >= y &&
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
@@ -152,8 +157,10 @@ def dumpMapImage(map)
 	img.write("output/#{MAP[map]}.png")
 end
 
+if(false)
 WORLD_MAP_CONTINENT.each do |id,hash|
 	dumpMapImage(hash[:map])
 end
 puts "Experimental mode, exiting..."
 exit(42)
+end
