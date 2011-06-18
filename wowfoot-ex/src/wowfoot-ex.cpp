@@ -119,6 +119,14 @@ static void dumpArchiveSet() {
 	fclose(out);
 }
 
+static void writeBlob(FILE* out, void* data, size_t size) {
+	int res = fwrite(data, size, 1, out);
+	assert(res == 1);
+}
+static void writeInt(FILE* out, int data) {
+	writeBlob(out, &data, sizeof(int));
+}
+
 static void dumpAdt(FILE* out, const char* adt_filename) {
 	ADT_file adt;
 	if (!adt.loadFile(adt_filename, false)) {
@@ -126,17 +134,24 @@ static void dumpAdt(FILE* out, const char* adt_filename) {
 		exit(1);
 	}
 	adt_MCIN* mcin = adt.a_grid->getMCIN();
-	fprintf(out, "\t[\n");
 	for(int y=0; y<ADT_CELLS_PER_GRID; y++) {
-		fprintf(out, "\t\t[");
 		for(int x=0; x<ADT_CELLS_PER_GRID; x++) {
 			adt_MCNK* mcnk = mcin->getMCNK(x, y);
-			fprintf(out, "%u,", mcnk->areaid);
+			writeInt(out, mcnk->areaid);
 		}
-		fprintf(out, "],\n");
 	}
-	fprintf(out, "\t]");
 }
+
+#if 0	// Format of AreaMap.bin:
+int numberOfMaps;
+struct {
+	int mapId;
+	// arrays are row ordered, top row (y=0) first.
+	bool : 1 gridValid[64*64];	// packed boolean array: 64*64/8=64*8=512 bytes
+	// numberOfValidGrids is the number of 1-bits in gridValid[].
+	int cells[8*8][numberOfValidGrids];
+} map[numberOfMaps];
+#endif
 
 static void dumpAreaMap(bool dumpArea) {
 	bool res;
@@ -152,8 +167,8 @@ static void dumpAreaMap(bool dumpArea) {
 		exit(1);
 	printf("Extracting %"PRIuPTR" maps...\n", mapDbc.getRecordCount());
 	if(dumpArea) {
-		out = fopen("output/AreaMap.rb", "w");
-		fprintf(out, "AREA_MAP = {\n");
+		out = fopen("output/AreaMap.bin", "wb");
+		writeInt(out, mapDbc.getRecordCount());
 	}
 	mapOut = fopen("output/Map.rb", "w");
 	fprintf(mapOut, "MAP = {\n");
@@ -175,28 +190,39 @@ static void dumpAreaMap(bool dumpArea) {
 			printf("Error loading %s.wdt, skipping...\n", name);
 			continue;
 		}
-		fprintf(out, "%i => [\n", mid);
+		printf("Offset: %zi bytes.\n", ftello(out));
+		writeInt(out, mid);
+		printf("Offset: %zi bytes.\n", ftello(out));
 
+		int nValid = 0;
 		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
-			fprintf(out, "\t[");
+			assert(sizeof(uint32_t) == 4);
+			uint32_t blobs[WDT_MAP_SIZE / 32];
+			assert(WDT_MAP_SIZE % 32 == 0);
+			memset(blobs, 0, sizeof(blobs));
+			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
+				if(wdt.main->adt_list[y][x].exist) {
+					blobs[x / 32] |= (1 << (x % 32));
+					nValid++;
+				}
+			}
+			writeBlob(out, &blobs, sizeof(blobs));
+		}
+		printf("%i valid grids\n", nValid);
+		printf("Offset: %zi bytes.\n", ftello(out));
+		
+		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
 			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
 				if (!wdt.main->adt_list[y][x].exist) {
-					// print nil data
-					fprintf(out, "nil,");
 					continue;
 				}
-				fprintf(out, "\n");
 				char adt_filename[1024];
 				sprintf(adt_filename, "World\\Maps\\%s\\%s_%u_%u.adt", name, name, x, y);
 				dumpAdt(out, adt_filename);
-				fprintf(out, ",\n");
 			}
-			fprintf(out, "],\n");
 		}
-		fprintf(out, "],\n");
 	}
 	if(dumpArea) {
-		fprintf(out, "}\n");
 		fclose(out);
 	}
 	fprintf(mapOut, "}\n");
@@ -217,8 +243,8 @@ int main() {
 	if(rand() == 42)
 		dumpArchiveSet();
 
-	if(fileExists("output/AreaMap.rb")) {
-		printf("AreaMap.rb already exists, skipping...\n");
+	if(fileExists("output/AreaMap.bin")) {
+		printf("AreaMap.bin already exists, skipping...\n");
 		dumpAreaMap(false);
 	} else {
 		dumpAreaMap(true);
