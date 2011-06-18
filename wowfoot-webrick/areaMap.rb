@@ -30,7 +30,7 @@ def loadAreaMap
 	while(!file.eof)
 		#puts "Tell: #{file.tell}"
 		mapId = file.readInt
-		puts "Loading map #{mapId}"
+		#puts "Loading map #{mapId}"
 		#puts "Tell: #{file.tell}"
 		raise hell if(MAP[mapId] == nil)
 		raise hell unless(map[mapId] == nil)
@@ -44,14 +44,14 @@ def loadAreaMap
 			j = 0
 			while(j < 8)
 				if(blob & (1 << j) != 0)
-					grids[i] = Array.new(NCELLS)
+					grids[i] = true
 					validGridCount += 1
 				end
 				j += 1
 				i += 1
 			end
 		end
-		puts "#{validGridCount} valid grids"
+		#puts "#{validGridCount} valid grids"
 		#puts "Tell: #{file.tell}"
 		# read cell data
 		gridIndex = 0
@@ -63,11 +63,7 @@ def loadAreaMap
 			end
 			break if(gridIndex == NGRIDS)
 			cellIndex = 0
-			cells = grids[gridIndex]
-			while(cellIndex < NCELLS)
-				cells[cellIndex] = file.readInt
-				cellIndex += 1
-			end
+			grids[gridIndex] = file.readBlob(NCELLS * 4).unpack('L')
 			loadedGridCount += 1
 			gridIndex += 1
 		end
