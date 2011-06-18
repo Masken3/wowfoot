@@ -1,15 +1,4 @@
-
-# Grids
-SIZE_OF_GRIDS = 533.33333
-CENTER_GRID_OFFSET = (SIZE_OF_GRIDS/2)
-MAX_NUMBER_OF_GRIDS = 64
-CENTER_GRID_ID = (MAX_NUMBER_OF_GRIDS/2)
-
-# Cells
-MAX_NUMBER_OF_CELLS = 8
-SIZE_OF_GRID_CELL = (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
-CENTER_GRID_CELL_ID = (MAX_NUMBER_OF_CELLS*MAX_NUMBER_OF_GRIDS/2)
-CENTER_GRID_CELL_OFFSET = (SIZE_OF_GRID_CELL/2)
+require './coordinate-constants.rb'
 
 def Compute(x, y, center_offset, size, center_val)
 	x_offset = (x - center_offset)/size

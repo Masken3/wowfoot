@@ -1,8 +1,11 @@
 #!/usr/bin/ruby
 
+STDOUT.sync = true
 puts 'Loading...'
-STDOUT.flush
 START_TIME = Time.now
+#def hell
+#	'hell'
+#end
 
 require 'webrick'
 include WEBrick
@@ -14,7 +17,8 @@ require '../wowfoot-ex/output/Map.rb'
 require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
-require '../wowfoot-ex/output/AreaMap.rb'
+#require '../wowfoot-ex/output/AreaMap.rb'
+require './areaMap.rb'
 require './coordinates.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
