@@ -23,14 +23,23 @@ end
 def zoneFromCoords(map, x, y)
 	percentages = {}
 	# find areaId
-	gridX, gridY = ComputeGridPair(x, y)
-	cellX, cellY = ComputeCellPair(y, x)
+	
+	# compute grid and cell coordinates
+	#gridX, gridY = ComputeGridPair(x, y)
+	#cellX, cellY = ComputeCellPair(y, x)
+	globalCellX = ((MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS/2) - (y/SIZE_OF_GRID_CELL)).to_i
+	globalCellY = ((MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS/2) - (x/SIZE_OF_GRID_CELL)).to_i
+	gridX = globalCellX / MAX_NUMBER_OF_CELLS
+	gridY = globalCellY / MAX_NUMBER_OF_CELLS
+	cellX = globalCellX % MAX_NUMBER_OF_CELLS
+	cellY = globalCellY % MAX_NUMBER_OF_CELLS
+	
 	puts "Grid: [#{gridX}][#{gridY}]"
 	puts "Cell: [#{cellX}][#{cellY}]"
 	puts "Pixel: [#{gridX*MAX_NUMBER_OF_CELLS + cellX}][#{gridY*MAX_NUMBER_OF_CELLS + cellY}]"
-	grid = AREA_MAP[map][gridY][gridX]
+	grid = AREA_MAP[map][gridY * MAX_NUMBER_OF_GRIDS + gridX]
 	raise hell if(!grid)
-	areaId = grid[cellY][cellX]
+	areaId = grid[cellY + cellX * MAX_NUMBER_OF_CELLS]
 	raise hell if(!areaId)
 	
 	# find zoneId
@@ -41,18 +50,19 @@ def zoneFromCoords(map, x, y)
 	wma = WORLD_MAP_AREA[zoneId]
 	area = AREA_TABLE[areaId]
 	puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma ? wma[:name] : nil}, Area #{areaId} #{area ? area[:name] : nil}"
-	STDOUT.flush
 	if(!(wma[:map] == map &&
 		wma[:a][:x] >= x && wma[:a][:y] >= y &&
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
-		STDOUT.flush
 		raise hell
 	end
 	#puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma[:name]}, Area #{areaId} #{AREA_TABLE[areaId][:name]}"
 	width = wma[:a][:x] - wma[:b][:x]
 	percentages[:x] = 1.0 - ((x - wma[:b][:x]) / width)
-	height = hash[:a][:y] - hash[:b][:y]
+	height = wma[:a][:y] - wma[:b][:y]
 	percentages[:y] = 1.0 - ((y - wma[:b][:y]) / height)
+	#p width, height
+	#p wma[:a][:y], wma[:b][:y]
+	#p percentages
 	return zoneId, percentages
 end
 
@@ -95,7 +105,7 @@ def dumpMapImage(map)
 	while(y<MAX_NUMBER_OF_GRIDS)
 		x=0
 		while(x<MAX_NUMBER_OF_GRIDS)
-			grid = grids[y][x]
+			grid = grids[y*MAX_NUMBER_OF_GRIDS + x]
 			if(grid)
 				#draw.fill('white')
 				cy=0
@@ -106,7 +116,7 @@ def dumpMapImage(map)
 						# 1. find cell color
 						# each zone has a color
 						# 1a. first find the zone id of the cell
-						aid = grid[cx][cy]
+						aid = grid[cx * MAX_NUMBER_OF_CELLS + cy]
 						px = x*MAX_NUMBER_OF_CELLS + cx
 						py = y*MAX_NUMBER_OF_CELLS + cy
 						if(aid == 0 || !AREA_TABLE[aid])
@@ -115,7 +125,7 @@ def dumpMapImage(map)
 						else
 						while(AREA_TABLE[aid][:parent] != 0)
 							aid = AREA_TABLE[aid][:parent]
-							puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(!AREA_TABLE[aid])
+							#puts "#{aid}: #{x}x#{y}, #{cx}x#{cy}" if(!AREA_TABLE[aid])
 						end
 						area = AREA_TABLE[aid]
 						# 1b. get the color

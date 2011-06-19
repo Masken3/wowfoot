@@ -63,7 +63,8 @@ def loadAreaMap
 			end
 			break if(gridIndex == NGRIDS)
 			cellIndex = 0
-			grids[gridIndex] = file.readBlob(NCELLS * 4).unpack('L')
+			grids[gridIndex] = file.readBlob(NCELLS * 4).unpack('L*')
+			raise hell unless(grids[gridIndex].size == NCELLS)
 			loadedGridCount += 1
 			gridIndex += 1
 		end
