@@ -7,9 +7,19 @@ run 'npc.rb'
 
 if(@mainArea)
 	map = "#{AREA_TABLE[@mainArea][:name]}<br>\n"
-	map += "<img width=\"100%\" src=\"output/#{WORLD_MAP_AREA[@mainArea][:name]}.jpeg\">\n"
 else
 	map = ''
+end
+if(@mapImageName)
+	map += "<img width=\"100%\" src=\"output/#{@mapImageName}.jpeg\">\n"
+else
+	map += "No map available.<br>\n"
+	if(@coords && @coords[0])
+		row = @coords[0]
+		mapId = row[:map]
+		x, y = row[:position_x].to_i, row[:position_y].to_i
+		map += "Map #{mapId} (#{MAP[mapId]}), [#{x}][#{y}]<br>\n"
+	end
 end
 %>
 

@@ -13,13 +13,24 @@ stm.execute(@id)
 # count of coords in zone
 @zones = {}
 @coords.each do |row|
-	area, coords = zoneFromCoords(row[:map], row[:position_x], row[:position_y])
-	#puts "Area: #{area}"
-	if(!@zones[area])
-		#puts "Setup: #{area}"
-		@zones[area] = []
+	map = row[:map]
+	x, y = row[:position_x], row[:position_y]
+	zoneId, areaId = zoneFromCoords(map, x, y)
+	if(!zoneId)
+		#if(!@zones[areaId])
+		#	@zones[areaId] = 0
+		#else
+		#	@zones[areaId] += 1
+		#end
+		@zones[areaId] = false
+		next
 	end
-	@zones[area] << coords
+	#puts "Area: #{area}"
+	if(!@zones[zoneId])
+		#puts "Setup: #{area}"
+		@zones[zoneId] = []
+	end
+	@zones[zoneId] << percentagesInZone(zoneId, x, y)
 end
 
 @mainArea = nil
@@ -29,10 +40,13 @@ end
 	#p @zones[@mainArea]
 	if(!@mainArea)
 		@mainArea = area
-	elsif(@zones[@mainArea].size < coords.size)
+	elsif(coords && @zones[@mainArea].size < coords.size)
 		@mainArea = area
 	end
 end
 
-#puts "end"
-STDOUT.flush
+if(@mainArea && WORLD_MAP_CONTINENT[AREA_TABLE[@mainArea][:map]])
+	@mapImageName = WORLD_MAP_AREA[@mainArea][:name]
+else
+	@mapImageName = nil
+end

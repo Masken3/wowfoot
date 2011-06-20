@@ -31,6 +31,12 @@ def run(path, bind = binding)
 	eval(open(path).read, bind, path)
 end
 
+class ERB
+	def setFile(fname)
+		@filename = fname
+	end
+end
+
 class MyPageServlet < HTTPServlet::AbstractServlet
 	def initialize(path)
 		@path = path
@@ -39,8 +45,10 @@ class MyPageServlet < HTTPServlet::AbstractServlet
 		return self
 	end
 	def do_GET(req, response)
-		File.open("htdocs#{@path}.rhtml",'r') do |f|
+		path = "htdocs#{@path}.rhtml"
+		File.open(path,'r') do |f|
 			@template = ERB.new(f.read)
+			@template.setFile(path)
 		end
 		response.body = getBody(req)
 		response['Content-Type'] = "text/html"

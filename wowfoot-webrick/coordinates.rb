@@ -21,7 +21,6 @@ def ComputeCellPair(x, y)
 end
 
 def zoneFromCoords(map, x, y)
-	percentages = {}
 	# find areaId
 	
 	# compute grid and cell coordinates
@@ -34,28 +33,37 @@ def zoneFromCoords(map, x, y)
 	cellX = globalCellX % MAX_NUMBER_OF_CELLS
 	cellY = globalCellY % MAX_NUMBER_OF_CELLS
 	
-	puts "Grid: [#{gridX}][#{gridY}]"
-	puts "Cell: [#{cellX}][#{cellY}]"
-	puts "Pixel: [#{gridX*MAX_NUMBER_OF_CELLS + cellX}][#{gridY*MAX_NUMBER_OF_CELLS + cellY}]"
+	#puts "Grid: [#{gridX}][#{gridY}]"
+	#puts "Cell: [#{cellX}][#{cellY}]"
+	#puts "Pixel: [#{gridX*MAX_NUMBER_OF_CELLS + cellX}][#{gridY*MAX_NUMBER_OF_CELLS + cellY}]"
 	grid = AREA_MAP[map][gridY * MAX_NUMBER_OF_GRIDS + gridX]
-	raise hell if(!grid)
+	return false if(!grid)
 	areaId = grid[cellY + cellX * MAX_NUMBER_OF_CELLS]
 	raise hell if(!areaId)
 	
 	# find zoneId
-	zoneId = areaId
-	while(AREA_TABLE[zoneId][:parent] != 0)
-		zoneId = AREA_TABLE[zoneId][:parent]
+	if(WORLD_MAP_CONTINENT[map])
+		zoneId = areaId
+		while(AREA_TABLE[zoneId][:parent] != 0)
+			zoneId = AREA_TABLE[zoneId][:parent]
+		end
+	else
+		zoneId = false
 	end
 	wma = WORLD_MAP_AREA[zoneId]
-	area = AREA_TABLE[areaId]
-	puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma ? wma[:name] : nil}, Area #{areaId} #{area ? area[:name] : nil}"
-	if(!(wma[:map] == map &&
+	#area = AREA_TABLE[areaId]
+	#puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma ? wma[:name] : nil}, Area #{areaId} #{area ? area[:name] : nil}"
+	if(zoneId && !(wma[:map] == map &&
 		wma[:a][:x] >= x && wma[:a][:y] >= y &&
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
 		raise hell
 	end
-	#puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma[:name]}, Area #{areaId} #{AREA_TABLE[areaId][:name]}"
+	return zoneId, areaId
+end
+
+def percentagesInZone(zoneId, x, y)
+	percentages = {}
+	wma = WORLD_MAP_AREA[zoneId]
 	width = wma[:a][:x] - wma[:b][:x]
 	percentages[:x] = 1.0 - ((x - wma[:b][:x]) / width)
 	height = wma[:a][:y] - wma[:b][:y]
@@ -63,7 +71,7 @@ def zoneFromCoords(map, x, y)
 	#p width, height
 	#p wma[:a][:y], wma[:b][:y]
 	#p percentages
-	return zoneId, percentages
+	return percentages
 end
 
 require 'rubygems'
