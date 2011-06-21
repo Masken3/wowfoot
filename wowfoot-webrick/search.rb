@@ -28,5 +28,7 @@ stm = TDB::C.prepare('select entry, name, subname, minlevel, maxlevel, rank'+
 stm.execute(query)
 @creatures = stm.fetch_all
 
-#puts "end"
-STDOUT.flush
+stm = TDB::C.prepare('select entry, class, subclass, name, quality, sellprice'+
+	' from item_template where name like ? LIMIT 0,100')
+stm.execute(query)
+@items = stm.fetch_all

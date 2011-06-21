@@ -30,6 +30,7 @@ id[1]
 <td><a href="#" id="zone"><%= @zones.size %> Zones</a></td>
 <td><a href="#" id="quest"><%= @quests.size %> Quests</a></td>
 <td><a href="#" id="npc"><%= @creatures.size %> NPCs</a></td>
+<td><a href="#" id="item"><%= @items.size %> Items</a></td>
 </tr></table>
 
 <table id="zoneTable"><tr><td>ID</td><td>Name</td></tr>
@@ -58,6 +59,18 @@ id[1]
 "<td><a href=\"npc=#{row[:entry]}\">#{row[:name]}</a></td>"+
 "<td>#{row[:subname]}</td></tr>" %>
 <% end %>
+</table>
+
+<table id="itemTable"><tr><td>ID</td><td>Class</td><td>Subclass</td><td>Quality</td><td>Name</td><td>Sell price (copper)</td></tr>
+<% @items.each do |row| %>
+<%= "<tr><td>#{row[:entry]}</td>"+
+"<td>#{row[:class]}</td>"+
+"<td>#{row[:subclass]}</td>"+
+"<td>#{row[:quality]}</td>"+
+"<td><a href=\"item=#{row[:entry]}\">#{row[:name]}</a></td>"+
+"<td>#{row[:sellprice]}</td></tr>" %>
+<% end %>
+</table>
 
 <SCRIPT type="text/javascript">
 function tab_onclick(e) {
@@ -73,6 +86,7 @@ function my_onload() {
 	document.getElementById("quest").onclick = tab_onclick;
 	document.getElementById("zone").onclick = tab_onclick;
 	document.getElementById("npc").onclick = tab_onclick;
+	document.getElementById("item").onclick = tab_onclick;
 }
 window.onload = my_onload
 </SCRIPT>
