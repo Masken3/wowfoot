@@ -31,6 +31,7 @@ id[1]
 <td><a href="#" id="quest"><%= @quests.size %> Quests</a></td>
 <td><a href="#" id="npc"><%= @creatures.size %> NPCs</a></td>
 <td><a href="#" id="item"><%= @items.size %> Items</a></td>
+<td><a href="#" id="gobject"><%= @gobjects.size %> Objects</a></td>
 </tr></table>
 
 <table id="zoneTable"><tr><td>ID</td><td>Name</td></tr>
@@ -72,6 +73,15 @@ id[1]
 <% end %>
 </table>
 
+<table id="gobjectTable"><tr><td>ID</td><td>Type</td><td>Name</td><td>Script</td></tr>
+<% @gobjects.each do |row| %>
+<%= "<tr><td>#{row[:entry]}</td>"+
+"<td>#{row[:type]}</td>"+
+"<td><a href=\"object=#{row[:entry]}\">#{row[:name]}</a></td>"+
+"<td>#{row[:ScriptName]}</td></tr>" %>
+<% end %>
+</table>
+
 <SCRIPT type="text/javascript">
 function tab_onclick(e) {
 	document.getElementById(currentTab + "Table").style.display = "none";
@@ -87,6 +97,7 @@ function my_onload() {
 	document.getElementById("zone").onclick = tab_onclick;
 	document.getElementById("npc").onclick = tab_onclick;
 	document.getElementById("item").onclick = tab_onclick;
+	document.getElementById("gobject").onclick = tab_onclick;
 }
 window.onload = my_onload
 </SCRIPT>

@@ -32,3 +32,8 @@ stm = TDB::C.prepare('select entry, class, subclass, name, quality, sellprice'+
 	' from item_template where name like ? LIMIT 0,100')
 stm.execute(query)
 @items = stm.fetch_all
+
+stm = TDB::C.prepare('select entry, type, name, ScriptName'+
+	' from gameobject_template where name like ? LIMIT 0,100')
+stm.execute(query)
+@gobjects = stm.fetch_all
