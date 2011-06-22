@@ -119,6 +119,9 @@ end
 mountSinglePage('areas')
 mountIdPage('area')
 mountIdPage('npc')
+mountIdPage('item')
+mountIdPage('quest')
+mountIdPage('object')
 mountTextIdPage('search')
 
 S.mount('/', IdClassServlet)
