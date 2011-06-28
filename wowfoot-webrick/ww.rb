@@ -12,14 +12,14 @@ include WEBrick
 require 'erb'
 #require './tdb.rb'
 require 'dbi'
-require './config.rb'
+require 'src/config.rb'
 require '../wowfoot-ex/output/Map.rb'
 require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
 #require '../wowfoot-ex/output/AreaMap.rb'
-require './areaMap.rb'
-require './coordinates.rb'
+require 'src/areaMap.rb'
+require 'src/coordinates.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
@@ -28,7 +28,7 @@ module TDB
 end
 
 def run(path, bind = binding)
-	eval(open(path).read, bind, path)
+	eval(open('src/'+path).read, bind, path)
 end
 
 class ERB

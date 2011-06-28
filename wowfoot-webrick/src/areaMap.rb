@@ -1,4 +1,4 @@
-require './coordinate-constants.rb'
+require 'src/coordinate-constants.rb'
 
 class IO
 	def readBlob(length)

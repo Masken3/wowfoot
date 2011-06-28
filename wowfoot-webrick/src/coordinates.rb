@@ -1,4 +1,4 @@
-require './coordinate-constants.rb'
+require 'src/coordinate-constants.rb'
 
 def Compute(x, y, center_offset, size, center_val)
 	x_offset = (x - center_offset)/size
