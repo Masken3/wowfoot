@@ -84,13 +84,21 @@ id[1]
 
 <SCRIPT type="text/javascript">
 function tab_onclick(e) {
+	activateTab(e.target);
+}
+function activateTab(target) {
 	document.getElementById(currentTab + "Table").style.display = "none";
-	document.getElementById(e.target.id + "Table").style.display = "block";
-	currentTab = e.target.id
+	document.getElementById(target.id + "Table").style.display = "block";
+	document.getElementById(currentTab).style.fontWheight = "normal";
+	document.getElementById(currentTab).style.fontSize = "medium";
+	target.style.fontWheight = "bold";
+	target.style.fontSize = "x-large";
+	currentTab = target.id;
 }
 function my_onload() {
 	currentTab = "npc"
-	document.getElementById("npcTable").style.display = "block";
+	activateTab(document.getElementById(currentTab))
+
 	document.getElementById("tabs").style.display = "block";
 	
 	document.getElementById("quest").onclick = tab_onclick;
@@ -99,7 +107,7 @@ function my_onload() {
 	document.getElementById("item").onclick = tab_onclick;
 	document.getElementById("gobject").onclick = tab_onclick;
 }
-window.onload = my_onload
+window.onload = my_onload;
 </SCRIPT>
 
 </body>
