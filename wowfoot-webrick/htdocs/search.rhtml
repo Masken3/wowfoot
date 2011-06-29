@@ -89,9 +89,9 @@ function tab_onclick(e) {
 function activateTab(target) {
 	document.getElementById(currentTab + "Table").style.display = "none";
 	document.getElementById(target.id + "Table").style.display = "block";
-	document.getElementById(currentTab).style.fontWheight = "normal";
+	document.getElementById(currentTab).style.fontWeight = "normal";
 	document.getElementById(currentTab).style.fontSize = "medium";
-	target.style.fontWheight = "bold";
+	target.style.fontWeight = "bold";
 	target.style.fontSize = "x-large";
 	currentTab = target.id;
 }
