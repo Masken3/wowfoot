@@ -6,9 +6,10 @@ stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
 	' from quest_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
-@template[:details].gsub!('$b', '<br>')
-@template[:offerRewardText].gsub!('$b', '<br>')
-@template[:requestItemsText].gsub!('$b', '<br>')
+bPattern = /\$[bB]/
+@template[:details].gsub!(bPattern, '<br>')
+@template[:offerRewardText].gsub!(bPattern, '<br>')
+@template[:requestItemsText].gsub!(bPattern, '<br>')
 
 stm = TDB::C.prepare('select id, name'+
 	' from creature_questrelation'+
