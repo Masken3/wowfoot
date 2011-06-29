@@ -31,6 +31,16 @@ def run(path, bind = binding)
 	eval(open('src/'+path).read, bind, path)
 end
 
+def rhtml(path, bind = binding)
+	path = "src/#{path}.rhtml"
+	template = nil
+	File.open(path,'r') do |f|
+		template = ERB.new(f.read)
+		template.setFile(path)
+	end
+	return template.result(bind)
+end
+
 class ERB
 	def setFile(fname)
 		@filename = fname
