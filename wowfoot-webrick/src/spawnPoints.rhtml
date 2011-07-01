@@ -9,6 +9,13 @@
 	img.coord { position:absolute; }
 </STYLE>
 
+<p>
+<% sorted = @zones.sort_by { |area| -area[1].size } %>
+<% sorted.each do |area, coords| %>
+<%= "#{AREA_TABLE[area][:name]}: #{coords.size}<br>" %>
+<% end %>
+</p>
+
 <div id="map">
 <%= map %>
 <!--<img class="coord" src="static/circle.png" style="left: 50%; top: 50%;">-->
@@ -18,3 +25,13 @@
 <% end
 end %>
 </div>
+
+<SCRIPT type="text/javascript">
+function map_onclick(e) {
+	document.getElementById("map").style.width = "80%";//document.getElementById("mapImage").width + "px";
+}
+function my_onload() {
+	document.getElementById("map").onclick = map_onclick;
+}
+window.onload = my_onload;
+</SCRIPT>

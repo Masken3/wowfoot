@@ -1,27 +1,10 @@
-<html>
-<body>
-
 <%
 @id = id[1]
 run 'quest.rb'
-
-if(@mainArea)
-	map = "#{AREA_TABLE[@mainArea][:name]}<br>\n"
-else
-	map = ''
-end
-if(@mapImageName)
-	map += "<img width=\"100%\" src=\"output/#{@mapImageName}.jpeg\">\n"
-else
-	map += "No map available.<br>\n"
-	if(@coords && @coords[0])
-		row = @coords[0]
-		mapId = row[:map]
-		x, y = row[:position_x].to_i, row[:position_y].to_i
-		map += "Map #{mapId} (#{MAP[mapId]}), [#{x}][#{y}]<br>\n"
-	end
-end
 %>
+
+<html>
+<body>
 
 <p>Quest: <%= @template[:title] %></p>
 
@@ -69,22 +52,6 @@ Finisher:<br>
 <p>completedText:<br>
 <%= @template[:completedText] %>
 </p>
-
-
-<STYLE type="text/css">
-	div { position:relative; }	/* Enables absolute positioning relative to div tags. */
-	#map { width:40% }	/* Enables use of percentages inside. */
-	img.coord { position:absolute; }
-</STYLE>
-
-<div id="map">
-<%= map %>
-<% if(false)#@zones[@mainArea])
-@zones[@mainArea].each do |pos| %>
-<%= "<img class=\"coord\" src=\"static/circle.png\" style=\"left: #{pos[:y]*100}%; top: #{pos[:x]*100}%;\">" %>
-<% end
-end %>
-</div>
 
 </body>
 </html>
