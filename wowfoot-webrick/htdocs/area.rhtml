@@ -1,10 +1,22 @@
+<%
+i = id[1].to_i
+a = WORLD_MAP_AREA[i]
+if(a)
+	title = AREA_TABLE[i][:name]
+else
+	title = i
+end
+%>
+<html>
+<head>
+	<title><%= title %> - Zone - WowFoot</title>
+</head>
+<body>
 
-<p>Area:</p>
+<p>Zone:</p>
 
 <p>
 <%=
-i = id[1].to_i
-a = WORLD_MAP_AREA[i]
 if(a)
 	a.inspect
 else
@@ -27,12 +39,14 @@ end
 <p>
 <%=
 if(a)
-	"<img width=\"40%\" src=\"output/#{a[:name]}.jpeg\">"
+	"<img id=\"map\" width=\"40%\" src=\"output/#{a[:name]}.jpeg\">"
 else
 	''
 end
 %>
 </p>
+
+<%= rhtml 'mapSize' %>
 
 </body>
 </html>
