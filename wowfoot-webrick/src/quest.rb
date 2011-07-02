@@ -8,8 +8,9 @@ stm.execute(@id)
 @template = stm.fetch
 bPattern = /\$[bB]/
 @template[:details].gsub!(bPattern, '<br>')
-@template[:offerRewardText].gsub!(bPattern, '<br>')
-@template[:requestItemsText].gsub!(bPattern, '<br>')
+@template[:offerRewardText].gsub!(bPattern, '<br>') if(@template[:offerRewardText])
+@template[:requestItemsText].gsub!(bPattern, '<br>') if(@template[:requestItemsText])
+@template[:completedText].gsub!(bPattern, '<br>')
 
 stm = TDB::C.prepare('select id, name'+
 	' from creature_questrelation'+

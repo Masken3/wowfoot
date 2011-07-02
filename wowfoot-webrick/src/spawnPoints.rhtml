@@ -10,9 +10,9 @@
 </STYLE>
 
 <p>
-<% sorted = @zones.sort_by { |area| -area[1].size } %>
+<% sorted = @zones.sort_by { |area| area[1] ? -area[1].size : 0 } %>
 <% sorted.each do |area, coords| %>
-<%= "#{AREA_TABLE[area][:name]}: #{coords.size}<br>" %>
+<%= "#{AREA_TABLE[area][:name]}: #{coords ? coords.size : 'nil'}<br>" %>
 <% end %>
 </p>
 

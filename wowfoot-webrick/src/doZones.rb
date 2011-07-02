@@ -11,7 +11,7 @@
 		#else
 		#	@zones[areaId] += 1
 		#end
-		@zones[areaId] = false
+		@zones[areaId] = false if(AREA_TABLE[areaId])
 		next
 	end
 	#puts "Area: #{area}"
