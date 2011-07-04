@@ -87,8 +87,19 @@ static JsonValue* parseString(char delim) {
 	token(delim);
 	string s;
 	while(*sText != delim) {
-		if(*sText == '\\')
+		if(*sText == '\\') {
 			sText++;
+			switch(*sText) {
+			case '\'':
+			case '\\':
+				break;
+			case 'n':
+				s += '\\';
+				break;
+			default:
+				error();
+			}
+		}
 		s += *sText;
 		sText++;
 	}

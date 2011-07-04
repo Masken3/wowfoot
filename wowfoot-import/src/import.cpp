@@ -15,7 +15,7 @@ static const char* const DB_FILENAME = "imports.db";
 // helpers
 static string parseCommentLine(const string& entry, const char* line);
 static void dumpJsonValue(const JsonValue&);
-static string escape(const string&, char);
+static string escape(const string&);
 
 static bool beginsWith(const string& s, const string& with) {
 	return strncmp(s.c_str(), with.c_str(), with.length()) == 0;
@@ -116,21 +116,21 @@ static string parseCommentLine(const string& entry, const char* line) {
 		query += "INSERT INTO 'quest_comments' VALUES ("+entry+", "+
 			h["id"].toString()+");\n";
 		query += "INSERT INTO 'comments' VALUES ("+h["id"].toString()+", '"+
-			escape(h["user"].toString(), '\'')+"', '"+
-			escape(h["body"].toString(), '\'')+"', "+
+			escape(h["user"].toString())+"', '"+
+			escape(h["body"].toString())+"', "+
 			h["rating"].toString()+", '"+
-			escape(h["date"].toString(), '\'')+"', "+
+			escape(h["date"].toString())+"', "+
 			h["indent"].toString()+");\n";
 	}
 	delete root;
 	return query;
 }
 
-static string escape(const string& s, char c) {
+static string escape(const string& s) {
 	string n;
 	n.reserve(s.length()*2);
 	for(size_t i=0; i<s.length(); i++) {
-		if(s[i] == c) {
+		if(s[i] == '\'') {
 			n += '\'';
 		}
 		n += s[i];
