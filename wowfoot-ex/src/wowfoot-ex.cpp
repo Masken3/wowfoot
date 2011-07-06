@@ -229,6 +229,19 @@ static void dumpAreaMap(bool dumpArea) {
 	fclose(mapOut);
 }
 
+string escapeQuotes(const char* src) {
+	string s;
+	s.reserve(strlen(src)*2);
+	const char* ptr = src;
+	while(*ptr) {
+		if(*ptr == '"')
+			s += '\\';
+		s += *ptr;
+		ptr++;
+	}
+	return s;
+}
+
 int main() {
 	bool res;
 	FILE* out;
@@ -278,6 +291,64 @@ int main() {
 
 	WmaMap wmaMap;
 
+	printf("Opening Achievement.dbc...\n");
+	DBCFile ach("DBFilesClient\\Achievement.dbc");
+	res = ach.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" achievements...\n", ach.getRecordCount());
+	out = fopen("output/Achievement.rb", "w");
+	fprintf(out, "ACHIEVEMENT = {\n");
+	for(DBCFile::Iterator itr = ach.begin(); itr != ach.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		int faction = r.getInt(1);
+		int map = r.getInt(2);
+		int previous = r.getInt(3);
+		const char* name = r.getString(4);
+		const char* desc = r.getString(21);
+		fprintf(out, "\t%i => { :faction => %i, :map => %i, :previous => %i,"
+			" :name => \"%s\", :description => \"%s\" },\n",
+			id, faction, map, previous, escapeQuotes(name).c_str(),
+			escapeQuotes(desc).c_str());
+	}
+	fprintf(out, "}\n");
+
+	printf("Opening Faction.dbc...\n");
+	DBCFile fac("DBFilesClient\\Faction.dbc");
+	res = fac.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" factions...\n", fac.getRecordCount());
+	out = fopen("output/Faction.rb", "w");
+	fprintf(out, "FACTION = {\n");
+	for(DBCFile::Iterator itr = fac.begin(); itr != fac.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		int parent = r.getInt(18);
+		const char* name = r.getString(23);
+		fprintf(out, "\t%i => { :parent => %i, :name => \"%s\" },\n",
+			id, parent, name);
+	}
+	fprintf(out, "}\n");
+
+	printf("Opening ItemSet.dbc...\n");
+	DBCFile is("DBFilesClient\\ItemSet.dbc");
+	res = is.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" item sets...\n", is.getRecordCount());
+	out = fopen("output/ItemSet.rb", "w");
+	fprintf(out, "ITEM_SET = {\n");
+	for(DBCFile::Iterator itr = is.begin(); itr != is.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(1);
+		fprintf(out, "\t%i => { :name => \"%s\" },\n",
+			id, name);
+	}
+	fprintf(out, "}\n");
+
 	printf("Opening WorldMapArea.dbc...\n");
 	DBCFile wma("DBFilesClient\\WorldMapArea.dbc");
 	res = wma.open();
@@ -325,6 +396,7 @@ int main() {
 		return 1;
 	printf("Extracting %"PRIuPTR" AreaTable entries...\n", at.getRecordCount());
 	out = fopen("output/AreaTable.rb", "w");
+	fprintf(out, "# encoding: utf-8\n");
 	fprintf(out, "AREA_TABLE = {\n");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
 		const DBCFile::Record& r(*itr);

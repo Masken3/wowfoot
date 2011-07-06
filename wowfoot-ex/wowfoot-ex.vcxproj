@@ -46,6 +46,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>src\libs\blp;$(IncludePath)</IncludePath>
     <LibraryPath>$(Configuration);$(LibraryPath)</LibraryPath>
+    <IntDir>$(Configuration)\temp</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
