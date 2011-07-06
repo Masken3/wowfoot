@@ -4,6 +4,7 @@ run 'quest.rb'
 %>
 
 <html>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <head>
 	<title><%= @template[:title] %> - Quest - WowFoot</title>
 </head>
@@ -55,6 +56,13 @@ Finisher:<br>
 <p>completedText:<br>
 <%= @template[:completedText] %>
 </p>
+
+<p>Comments:</p>
+<% @comments.each do |c| %>
+<p><%= c[:user]+' '+c[:date]+' '+c[:rating].to_s %><br>
+<%= c[:body] %>
+</p>
+<% end %>
 
 </body>
 </html>

@@ -5,7 +5,16 @@ require 'rubygems'	# 1.8 bug workaround
 require 'dbi'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 
-#p DBI::available_drivers
+p DBI::available_drivers
+
+dbc = DBI::connect('dbi:SQLite3:../wowfoot-import/imports.db')
+stmt = dbc.prepare('SELECT COUNT(*) FROM comments')
+stmt.execute
+stmt.fetch do |row|
+	p row
+end
+exit(0)
+
 
 dbc = DBI::connect('dbi:Mysql:world', 'trinity', 'trinity')
 

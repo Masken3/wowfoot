@@ -23,8 +23,12 @@ require 'src/coordinates.rb'
 
 S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
 
-module TDB
+module TDB	# Trinity DataBase
 	C = DBI::connect('dbi:Mysql:'+TDB_DATABASE, TDB_USER, TDB_PASSWORD)
+end
+
+module CDB	# Comment DataBase
+	C = DBI::connect('dbi:SQLite3:../wowfoot-import/imports.db')
 end
 
 def run(path, bind = binding)
