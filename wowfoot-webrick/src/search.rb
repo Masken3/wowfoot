@@ -24,8 +24,8 @@ stm.execute(query)
 #p res[0][:entry]
 
 stm = TDB::C.prepare('select entry, name, subname, minlevel, maxlevel, rank'+
-	' from creature_template where name like ? LIMIT 0,100')
-stm.execute(query)
+	' from creature_template where name like ? or subname like ? LIMIT 0,100')
+stm.execute(query, query)
 @creatures = stm.fetch_all
 
 stm = TDB::C.prepare('select entry, class, subclass, name, quality, sellprice'+
