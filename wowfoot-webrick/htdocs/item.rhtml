@@ -1,0 +1,85 @@
+<%
+@id = id[1]
+run 'item.rb'
+%>
+
+<html>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+	<title><%= @template[:name] %> - Item - WowFoot</title>
+</head>
+<body>
+
+<p>
+<%= @template.inspect %>
+</p>
+
+
+<STYLE type="text/css">
+	TABLE { border-collapse: collapse; display: none; }
+	td { border-spacing: 1; border: solid; }
+</STYLE>
+
+<!-- Tab-table :) -->
+<table id="tabs"><tr>
+<% @TAB_TABLES.each do |t| %>
+<td><a href="#" id="<%= t[:id] %>"><%= t[:title] %> (<%= t[:array].size %>)</a></td>
+<% end %>
+</tr></table>
+
+
+<!-- Tables for each tab -->
+<% @TAB_TABLES.each do |t| %>
+<table id="<%= t[:id] %>Table">
+<!-- Title row -->
+<tr>
+<td>ID</td>
+<%  t[:columns].each do |c| %>
+<td><%= c[0] %></td>
+<%  end %>
+</tr>
+
+<!-- Data row -->
+<%  t[:array].each do |row| %>
+<tr>
+
+<!-- ID column -->
+<td><%= row[:entry] %></td>
+
+<!-- Other columns -->
+<%   t[:columns].each do |c| %>
+<td><%= row[c[1]] %></td>
+<%   end %>
+</tr>
+<%  end %>
+</table>
+<% end %>
+
+<SCRIPT type="text/javascript">
+function tab_onclick(e) {
+	activateTab(e.target);
+}
+function activateTab(target) {
+	document.getElementById(currentTab + "Table").style.display = "none";
+	document.getElementById(target.id + "Table").style.display = "block";
+	document.getElementById(currentTab).style.fontWeight = "normal";
+	document.getElementById(currentTab).style.fontSize = "medium";
+	target.style.fontWeight = "bold";
+	target.style.fontSize = "x-large";
+	currentTab = target.id;
+}
+function my_onload() {
+	currentTab = "disenchantTo"
+	activateTab(document.getElementById(currentTab))
+
+	document.getElementById("tabs").style.display = "block";
+
+<% @TAB_TABLES.each do |t| %>
+	document.getElementById("<%= t[:id] %>").onclick = tab_onclick;
+<% end %>
+}
+window.onload = my_onload;
+</SCRIPT>
+
+</body>
+</html>

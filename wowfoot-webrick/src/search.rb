@@ -37,3 +37,61 @@ stm = TDB::C.prepare('select entry, type, name, ScriptName'+
 	' from gameobject_template where name like ? LIMIT 0,100')
 stm.execute(query)
 @gobjects = stm.fetch_all
+
+
+# todo: use this to generate html.
+@TAB_TABLES = [
+{
+	:id => 'zone',
+	:array => @zones,
+	:title => 'Zones',
+	:columns => [
+		['Name', :name, true],
+	],
+},
+{
+	:id => 'quest',
+	:array => @quests,
+	:title => 'Quests',
+	:columns => [
+		['Zone', :questArea],
+		['MinLevel', :MinLevel],
+		['QuestLevel', :QuestLevel],
+		['Title', :title, true],
+	],
+},
+{
+	:id => 'npc',
+	:array => @creatures,
+	:title => 'NPCs',
+	:columns => [
+		['MinLevel', :minlevel],
+		['MaxLevel', :maxlevel],
+		['Rank', :rank],
+		['Name', :name, true],
+		['Title', :subname],
+	],
+},
+{
+	:id => 'item',
+	:array => @items,
+	:title => 'Items',
+	:columns => [
+		['Class', :class],
+		['Subclass', :subclass],
+		['Quality', :quality],
+		['Name', :name, true],
+		['Sell price (copper)', :sellprice],
+	],
+},
+{
+	:id => 'gobject',
+	:array => @gobjects,
+	:title => 'Objects',
+	:columns => [
+		['Type', :type],
+		['Name', :name, true],
+		['Script', :ScriptName],
+	],
+},
+]
