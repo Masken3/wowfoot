@@ -48,7 +48,15 @@ run 'item.rb'
 
 <!-- Other columns -->
 <%   t[:columns].each do |c| %>
-<td><%= row[c[1]] %></td>
+<td>
+<%    if(c[2] && c[3]) %>
+<a href="<%="/#{c[3]}=#{row[c[2]]}"%>">
+<%    end %>
+<%= row[c[1]] %>
+<%    if(c[2] && c[3])%>
+</a>
+<%    end %>
+</td>
 <%   end %>
 </tr>
 <%  end %>

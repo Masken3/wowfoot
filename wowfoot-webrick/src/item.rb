@@ -5,20 +5,42 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 stm.execute(@id)
 @template = stm.fetch
 
-stm = TDB::C.prepare('select entry, item, chanceOrQuestChance, mincountOrRef, maxcount'+
-	' from disenchant_loot_template dlt where entry = ?')
+stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
+	' from disenchant_loot_template dlt'+
+	' INNER JOIN item_template it on dlt.item = it.entry'+
+	' where dlt.entry = ?')
 stm.execute(@template[:disenchantID])
 @disenchantTo = stm.fetch_all
 #p @disenchantTo
 @disenchantTo = [] if(!@disenchantTo)	# temp hack
 
+stm = TDB::C.prepare('select it.entry, it.name, dlt.chanceOrQuestChance, dlt.mincountOrRef, dlt.maxcount'+
+	' from item_template it'+
+	' INNER JOIN disenchant_loot_template dlt on dlt.entry = it.disenchantID'+
+	' where dlt.item = ?')
+stm.execute(@id)
+@disenchantFrom = stm.fetch_all
+
+# column format: [title, array key, link array key, link page name]
+# link parts are optional.
 @TAB_TABLES = [
 {
 	:id => 'disenchantTo',
 	:array => @disenchantTo,
 	:title => 'Disenchants into',
 	:columns => [
-		['Name', :item, true],	# item name
+		['Name', :name, :item, 'item'],	# item name
+		['Chance', :chanceOrQuestChance],
+		['MinCount', :mincountOrRef],
+		['MaxCount', :maxcount],
+	],
+},
+{
+	:id => 'disenchantFrom',
+	:array => @disenchantFrom,
+	:title => 'Disenchanted from',
+	:columns => [
+		['Name', :name, :entry, 'item'],	# item name
 		['Chance', :chanceOrQuestChance],
 		['MinCount', :mincountOrRef],
 		['MaxCount', :maxcount],
@@ -58,14 +80,6 @@ stm.execute(@template[:disenchantID])
 	:columns => [
 		['Name', :name, true],	# creature name
 		['Location', :location],	# zone & area
-	],
-},
-{
-	:id => 'disenchantFrom',
-	:array => @disenchantFrom,
-	:title => 'Disenchanted from',
-	:columns => [
-		['Name', :name, true],	# item name
 	],
 },
 {
