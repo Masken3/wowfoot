@@ -22,31 +22,41 @@ loots = [
 	'milling',
 	'pickpocketing',
 	'prospecting',
-	'reference',
+#	'reference',	# what's this?
 	'skinning',
-	'spell',
+#	'spell',	# incomplete
 ]
+#todo: vendor
 
 loot_entries = ''
 loot_joins = ''
 loots.each do |l|
 	loot_entries += ", #{l[0..2]}lt.entry as #{l}Loot"
+	# works if you have an index on ?lt.item.
 	loot_joins += " LEFT JOIN #{l}_loot_template #{l[0..2]}lt on #{l[0..2]}lt.item = it.entry"
 end
 
 stm = TDB::C.prepare('select it.entry, it.name, dlt.chanceOrQuestChance, dlt.mincountOrRef, dlt.maxcount'+
-	', clt.entry as lootID'+
-	', glt.entry as gameobjectLoot'+
-	', plt.entry as pickpocketLoot'+
+	loot_entries +
 	' from item_template it'+
 	' INNER JOIN disenchant_loot_template dlt on dlt.entry = it.disenchantID'+
-	' LEFT JOIN creature_loot_template clt on clt.item = it.entry'+		# works if you have an index on clt.item.
-	' LEFT JOIN gameobject_loot_template glt on glt.item = it.entry'+
-	' LEFT JOIN pickpocketing_loot_template plt on plt.item = it.entry'+
+	loot_joins +
 	' where dlt.item = ?'+
 	' GROUP BY it.entry')
 stm.execute(@id)
 @disenchantFrom = stm.fetch_all
+
+@disenchantFrom.each do |row|
+	sources = ''
+	loots.each do |l|
+		if(row[l+'Loot'])
+			sources += ', ' if(!sources.empty?)
+			sources += l
+		end
+	end
+	# hack because row is not a hash.
+	row[:itemLoot] = sources
+end
 
 stm = TDB::C.prepare('select ct.entry, ct.name, clt.chanceOrQuestChance, clt.mincountOrRef, clt.maxcount'+
 	' from creature_template ct'+
@@ -62,9 +72,46 @@ stm = TDB::C.prepare('select ct.entry, ct.name, plt.chanceOrQuestChance, plt.min
 stm.execute(@id)
 @pickpocket = stm.fetch_all
 
+stm = TDB::C.prepare('select gt.entry, gt.name, glt.chanceOrQuestChance, glt.mincountOrRef, glt.maxcount'+
+	' from gameobject_template gt'+
+	' INNER JOIN gameobject_loot_template glt on glt.entry = gt.entry'+
+	' where glt.item = ?')
+stm.execute(@id)
+@object = stm.fetch_all
+
+stm = TDB::C.prepare('select it.entry, it.name, ilt.chanceOrQuestChance, ilt.mincountOrRef, ilt.maxcount'+
+	' from item_template it'+
+	' INNER JOIN item_loot_template ilt on ilt.entry = it.entry'+
+	' where ilt.item = ?')
+stm.execute(@id)
+@contained = stm.fetch_all
+
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
 @TAB_TABLES = [
+{
+	:id => 'object',
+	:array => @object,
+	:title => 'Contained in object',
+	:columns => [
+		['Name', :name, :entry, 'object'],
+		['Location', :location],	# zone & area
+		['Chance', :chanceOrQuestChance],
+		['MinCount', :mincountOrRef],
+		['MaxCount', :maxcount],
+	],
+},
+{
+	:id => 'contained',
+	:array => @contained,
+	:title => 'Contained in item',
+	:columns => [
+		['Name', :name, :entry, 'item'],
+		['Chance', :chanceOrQuestChance],
+		['MinCount', :mincountOrRef],
+		['MaxCount', :maxcount],
+	],
+},
 {
 	:id => 'disenchantFrom',
 	:array => @disenchantFrom,
@@ -74,9 +121,7 @@ stm.execute(@id)
 		['Chance', :chanceOrQuestChance],
 		['MinCount', :mincountOrRef],
 		['MaxCount', :maxcount],
-		['Loot', :lootID],
-		['Pickpocket', :pickpocketLoot],
-		['Contained in object', :gameobjectLoot],
+		['Sources', :itemLoot],
 	],
 },
 {
@@ -137,23 +182,6 @@ stm.execute(@id)
 		['MinLevel', :MinLevel],	# clvl or plvl
 		['Cost', :const],	# including any other reagents
 		['Result', :result],	# spell effect (damage, buff application, item creation)
-	],
-},
-{
-	:id => 'object',
-	:array => @object,
-	:title => 'Contained in object',
-	:columns => [
-		['Name', :name, true],
-		['Location', :location],	# zone & area
-	],
-},
-{
-	:id => 'contained',
-	:array => @contained,
-	:title => 'Contained in item',
-	:columns => [
-		['Name', :name, true],
 	],
 },
 {
