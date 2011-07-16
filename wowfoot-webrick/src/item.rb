@@ -26,7 +26,7 @@ loots = [
 	'skinning',
 #	'spell',	# incomplete
 ]
-#todo: vendor
+#todo: vendor, quest
 
 loot_entries = ''
 loot_joins = ''
@@ -86,9 +86,75 @@ stm = TDB::C.prepare('select it.entry, it.name, ilt.chanceOrQuestChance, ilt.min
 stm.execute(@id)
 @contained = stm.fetch_all
 
+questColumns = {
+:provided => {:name => 'SrcItemId', :title => 'Provided for quest'},
+:required => {:name => 'ReqItem', :title => 'Required for quest'},	# for successful completion
+:rewardChoice => {:name => 'RewChoiceItemId', :title => 'Reward choice'},
+:reward => {:name => 'RewItemId', :title => 'Reward'},
+}
+questColumns.each do |id, hash|
+	hash[:names] = []
+end
+
+# todo: move to util file
+class String
+	def startsWith?(str)
+		return slice(0, str.length) == str
+	end
+end
+
+# make sure all relevant columns are indexed, lest queries take too long.
+stm = TDB::C.prepare('describe quest_template')
+stm.execute()
+stm.fetch_all.each do |row|
+	f = row[:Field]
+	if(f.include?('ItemId'))
+		#p f
+		questColumns.each do |id, hash|
+			hash[:names] << f if(f.startsWith?(hash[:name]))
+		end
+		if(row[:Key] == "")
+			puts "Creating index for column: #{f}"
+			stm = TDB::C.prepare("CREATE INDEX #{f} ON quest_template (#{f})")
+			stm.execute
+		end
+	end
+end
+questColumns.each do |id, hash|
+	names = nil
+	hash[:names].each do |n|
+		if(!names)
+			names = ''
+		else
+			names += ' OR'
+		end
+		names += " qt.#{n} = ?"
+	end
+	stm = TDB::C.prepare('select qt.entry, qt.title'+
+		' from quest_template qt'+
+		' where '+names)
+	#p names
+	params = Array.new(hash[:names].size, @id)
+	#p params
+	stm.execute(*params)
+	hash[:entries] = stm.fetch_all
+end
+questTables = questColumns.collect do |id, hash|
+{
+	:id => id,
+	:array => hash[:entries],
+	:title => hash[:title],
+	:columns => [
+		['Entry', :entry],
+		['Title', :title, :entry, 'quest'],
+	],
+}
+end
+p questTables
+
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
-@TAB_TABLES = [
+@TAB_TABLES = questTables + [
 {
 	:id => 'object',
 	:array => @object,
