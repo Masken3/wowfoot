@@ -7,10 +7,10 @@ stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
 stm.execute(@id)
 @template = stm.fetch
 bPattern = /\$[bB]/
-@template[:details].gsub!(bPattern, '<br>')
+@template[:details].gsub!(bPattern, '<br>') if(@template[:details])
 @template[:offerRewardText].gsub!(bPattern, '<br>') if(@template[:offerRewardText])
 @template[:requestItemsText].gsub!(bPattern, '<br>') if(@template[:requestItemsText])
-@template[:completedText].gsub!(bPattern, '<br>')
+@template[:completedText].gsub!(bPattern, '<br>') if(@template[:completedText])
 
 stm = TDB::C.prepare('select id, name'+
 	' from creature_questrelation'+
@@ -40,7 +40,7 @@ def subSimpleTag(body, tag)
 end
 
 @comments.each do |c|
-	c[:body].gsub!('\\n', '<br>')
+	c[:body].gsub!('\\n', "<br>\n")
 	subSimpleTag(c[:body], 'b')
 	subSimpleTag(c[:body], 'i')
 	
@@ -56,6 +56,7 @@ end
 		urlStartIndex = i + urlSpec.length
 		url = b[urlStartIndex, endIndex - urlStartIndex]
 		url.gsub!(/http:\/\/.+\.wowhead\.com\/\?(.+)/, '/\1')
+		url.gsub!(/http:\/\/.+\.wowhead\.com\/(.+)/, '/\1')
 		endIndex += 1
 		b[i, endIndex - i] = "<a href=\"#{url}\">"
 		i = endIndex
