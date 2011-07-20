@@ -150,7 +150,7 @@ questTables = questColumns.collect do |id, hash|
 	],
 }
 end
-p questTables
+#p questTables
 
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.

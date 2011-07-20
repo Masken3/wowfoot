@@ -13,6 +13,20 @@ require 'erb'
 #require './tdb.rb'
 require 'dbi'
 require 'src/config.rb'
+require 'src/dbiExtras.rb'
+
+S = HTTPServer.new( :Port => 3001 )
+
+module TDB	# Trinity DataBase
+	C = DBI::connect('dbi:Mysql:'+TDB_DATABASE, TDB_USER, TDB_PASSWORD)
+	DBI::setupExtras(C)
+end
+
+module CDB	# Comment DataBase
+	C = DBI::connect('dbi:SQLite3:../wowfoot-import/imports.db')
+	DBI::setupExtras(C)
+end
+
 require '../wowfoot-ex/output/Map.rb'
 require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
@@ -20,16 +34,6 @@ require '../wowfoot-ex/output/AreaTable.rb'
 #require '../wowfoot-ex/output/AreaMap.rb'
 require 'src/areaMap.rb'
 require 'src/coordinates.rb'
-
-S = HTTPServer.new( :Port => 3001 )#, :DocumentRoot => File.dirname(__FILE__) + "/htdocs" )
-
-module TDB	# Trinity DataBase
-	C = DBI::connect('dbi:Mysql:'+TDB_DATABASE, TDB_USER, TDB_PASSWORD)
-end
-
-module CDB	# Comment DataBase
-	C = DBI::connect('dbi:SQLite3:../wowfoot-import/imports.db')
-end
 
 def run(path, bind = binding)
 	eval(open('src/'+path).read, bind, path)
