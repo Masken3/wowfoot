@@ -14,6 +14,14 @@ stm.execute(@template[:disenchantID])
 #p @disenchantTo
 @disenchantTo = [] if(!@disenchantTo)	# temp hack
 
+stm = TDB::C.prepare('select it.entry, it.name, rlt.chanceOrQuestChance, rlt.mincountOrRef, rlt.maxcount'+
+	' from item_template it'+
+	' INNER JOIN milling_loot_template mlt on mlt.entry = it.entry'+
+	' INNER JOIN reference_loot_template rlt on (-mlt.mincountOrRef) = rlt.entry'+
+	' where rlt.item = ?')
+stm.execute(@id)
+@milledFrom = stm.fetch_all
+
 loots = [
 	'creature',
 	'disenchant',
@@ -155,6 +163,17 @@ end
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
 @TAB_TABLES = questTables + [
+{
+	:id => 'milled',
+	:array => @milledFrom,
+	:title => 'Milled from',
+	:columns => [
+		['Name', :name, :entry, 'item'],
+		['Chance', :chanceOrQuestChance],
+		['MinCount', :mincountOrRef],
+		['MaxCount', :maxcount],
+	],
+},
 {
 	:id => 'object',
 	:array => @object,
