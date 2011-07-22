@@ -1,3 +1,5 @@
+# todo: move to ww.rb when stable
+run 'referenceLoot.rb'
 
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
@@ -14,13 +16,7 @@ stm.execute(@template[:disenchantID])
 #p @disenchantTo
 @disenchantTo = [] if(!@disenchantTo)	# temp hack
 
-stm = TDB::C.prepare('select it.entry, it.name, rlt.chanceOrQuestChance, rlt.mincountOrRef, rlt.maxcount'+
-	' from item_template it'+
-	' INNER JOIN milling_loot_template mlt on mlt.entry = it.entry'+
-	' INNER JOIN reference_loot_template rlt on (-mlt.mincountOrRef) = rlt.entry'+
-	' where rlt.item = ?')
-stm.execute(@id)
-@milledFrom = stm.fetch_all
+@milledFrom = getStandardLoot(@id, 'milling', 'item')
 
 loots = [
 	'creature',
@@ -66,33 +62,13 @@ stm.execute(@id)
 	row[:itemLoot] = sources
 end
 
-stm = TDB::C.prepare('select ct.entry, ct.name, clt.chanceOrQuestChance, clt.mincountOrRef, clt.maxcount'+
-	' from creature_template ct'+
-	' INNER JOIN creature_loot_template clt on clt.entry = ct.lootID'+
-	' where clt.item = ?')
-stm.execute(@id)
-@drop = stm.fetch_all
+@drop = getStandardLoot(@id, 'creature')
 
-stm = TDB::C.prepare('select ct.entry, ct.name, plt.chanceOrQuestChance, plt.mincountOrRef, plt.maxcount'+
-	' from creature_template ct'+
-	' INNER JOIN pickpocketing_loot_template plt on plt.entry = ct.pickpocketLoot'+
-	' where plt.item = ?')
-stm.execute(@id)
-@pickpocket = stm.fetch_all
+@pickpocket = getStandardLoot(@id, 'pickpocketing', 'creature')
 
-stm = TDB::C.prepare('select gt.entry, gt.name, glt.chanceOrQuestChance, glt.mincountOrRef, glt.maxcount'+
-	' from gameobject_template gt'+
-	' INNER JOIN gameobject_loot_template glt on glt.entry = gt.entry'+
-	' where glt.item = ?')
-stm.execute(@id)
-@object = stm.fetch_all
+@object = getStandardLoot(@id, 'gameobject')
 
-stm = TDB::C.prepare('select it.entry, it.name, ilt.chanceOrQuestChance, ilt.mincountOrRef, ilt.maxcount'+
-	' from item_template it'+
-	' INNER JOIN item_loot_template ilt on ilt.entry = it.entry'+
-	' where ilt.item = ?')
-stm.execute(@id)
-@contained = stm.fetch_all
+@contained = getStandardLoot(@id, 'item')
 
 questColumns = {
 :provided => {:name => 'SrcItemId', :title => 'Provided for quest'},
@@ -159,6 +135,15 @@ questTables = questColumns.collect do |id, hash|
 }
 end
 #p questTables
+
+def largestTable
+	size = 0
+	id = 'disenchantFrom'
+	@TAB_TABLES.each do |tab|
+		size, id = tab[:array].size, tab[:id] if(tab[:array].size > size)
+	end
+	return id
+end
 
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.

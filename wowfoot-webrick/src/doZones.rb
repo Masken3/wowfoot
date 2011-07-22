@@ -11,6 +11,7 @@
 		#else
 		#	@zones[areaId] += 1
 		#end
+		# todo: handle instance maps better.
 		@zones[areaId] = false if(AREA_TABLE[areaId])
 		next
 	end

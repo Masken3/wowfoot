@@ -77,7 +77,7 @@ function activateTab(target) {
 	currentTab = target.id;
 }
 function my_onload() {
-	currentTab = "disenchantTo"
+	currentTab = "<%= largestTable %>"
 	activateTab(document.getElementById(currentTab))
 
 	document.getElementById("tabs").style.display = "block";
