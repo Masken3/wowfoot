@@ -7,6 +7,8 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 stm.execute(@id)
 @template = stm.fetch
 
+raise HTTPStatus[404], "Item not found in database" if(!@template)
+
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
 	' from disenchant_loot_template dlt'+
 	' INNER JOIN item_template it on dlt.item = it.entry'+
@@ -66,7 +68,12 @@ end
 
 @pickpocket = getStandardLoot(@id, 'pickpocketing', 'creature')
 
-@object = getStandardLoot(@id, 'gameobject')
+stm = TDB::C.prepare('select gt.entry, gt.name, llt.chanceOrQuestChance, llt.mincountOrRef, llt.maxcount'+
+	" from gameobject_template gt"+
+	" INNER JOIN gameobject_loot_template llt on llt.entry = gt.data1"+
+	' where llt.item = ? AND (gt.type = 3 OR gt.type = 25)')	# chest or fishinghole
+stm.execute(@id)
+@object = stm.fetch_all
 
 @contained = getStandardLoot(@id, 'item')
 
@@ -230,6 +237,11 @@ end
 },
 ]
 
+#p Array.instance_methods
+@TAB_TABLES.reject! do |tab|
+	tab[:array].size == 0
+end
+
 @TAB_TABLES2 = [
 'Contains',
 {
@@ -258,14 +270,6 @@ end
 	:id => 'prospect',
 	:array => @prospect,
 	:title => 'Prospected from',
-	:columns => [
-		['Name', :name, true],
-	],
-},
-{
-	:id => 'mill',
-	:array => @mill,
-	:title => 'Milled from',
 	:columns => [
 		['Name', :name, true],
 	],

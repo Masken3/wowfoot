@@ -5,6 +5,8 @@ stm = TDB::C.prepare('select entry, name, type, displayId'+
 stm.execute(@id)
 @template = stm.fetch
 
+raise HTTPStatus[404], "Object not found in database" if(!@template)
+
 stm = TDB::C.prepare('select guid, map, position_x, position_y, position_z'+
 	' from gameobject where id = ?')
 stm.execute(@id)
