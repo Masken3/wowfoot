@@ -77,6 +77,13 @@ stm.execute(@id)
 
 @contained = getStandardLoot(@id, 'item')
 
+stm = TDB::C.prepare('select it.entry, it.name, chanceOrQuestChance, mincountOrRef, ilt.maxcount'+
+	' from item_loot_template ilt'+
+	' INNER JOIN item_template it on ilt.item = it.entry'+
+	' where ilt.entry = ?')
+stm.execute(@id)
+@contains = stm.fetch_all
+
 questColumns = {
 :provided => {:name => 'SrcItemId', :title => 'Provided for quest'},
 :required => {:name => 'ReqItem', :title => 'Required for quest'},	# for successful completion
@@ -179,6 +186,16 @@ end
 	],
 },
 {
+	:id => 'contains',
+	:array => @contains,
+	:title => 'Contains',
+	:columns => [
+		['Name', :name, :entry, 'item'],
+		['Chance', :chanceOrQuestChance],
+		['MinCount', :mincountOrRef],
+		['MaxCount', :maxcount],
+	],
+},{
 	:id => 'contained',
 	:array => @contained,
 	:title => 'Contained in item',
