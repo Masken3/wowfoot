@@ -1,3 +1,4 @@
+run 'coordinates.rb'
 
 # todo: prepare statements in advance.
 stm = TDB::C.prepare('select entry, name, type, displayId'+

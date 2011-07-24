@@ -42,7 +42,7 @@ def zoneFromCoords(map, x, y)
 	raise hell if(!areaId)
 	
 	# find zoneId
-	if(WORLD_MAP_CONTINENT[map])
+	if(WORLD_MAP_CONTINENT[map] && AREA_TABLE[areaId])
 		zoneId = areaId
 		while(AREA_TABLE[zoneId][:parent] != 0)
 			zoneId = AREA_TABLE[zoneId][:parent]
@@ -53,7 +53,7 @@ def zoneFromCoords(map, x, y)
 	wma = WORLD_MAP_AREA[zoneId]
 	#area = AREA_TABLE[areaId]
 	#puts "Match: #{map}[#{x}, #{y}] = Zone #{zoneId} #{wma ? wma[:name] : nil}, Area #{areaId} #{area ? area[:name] : nil}"
-	if(zoneId && !(wma[:map] == map &&
+	if(zoneId && wma && !(wma[:map] == map &&
 		wma[:a][:x] >= x && wma[:a][:y] >= y &&
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
 		raise hell
