@@ -67,6 +67,10 @@ end
 	# todo: look them up in the database, get names.
 	while(i = b.index('[', i))
 		endIndex = b.index(']', i)
+		if(!endIndex)
+			i += 1
+			next
+		end
 		path = b[i+1, (endIndex - i) - 1]
 		endIndex += 1
 		b[i, endIndex - i] = "<a href=\"/#{path}\">#{path}</a>"
