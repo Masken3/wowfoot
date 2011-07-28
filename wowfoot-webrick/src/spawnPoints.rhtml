@@ -10,20 +10,54 @@
 </STYLE>
 
 <p>
-<% sorted = @zones.sort_by { |area| area[1] ? -area[1].size : 0 } %>
+<% sorted = @zones.sort_by { |area, coords| coords ? -coords.size : 0 } %>
 <% sorted.each do |area, coords| %>
-<%= "#{AREA_TABLE[area][:name]}: #{coords ? coords.size : 'nil'}<br>" %>
+<a href="#" id="area<%= area %>" class="mapLink"><%= AREA_TABLE[area][:name] %></a>: <%= coords ? coords.size : 'nil' %>
 <% end %>
 </p>
 
 <div id="map">
-<%= map %>
-<!--<img class="coord" src="static/circle.png" style="left: 50%; top: 50%;">-->
-<% if(@zones[@mainArea])
-@zones[@mainArea].each do |pos| %>
-<%= "<img class=\"coord\" src=\"static/circle.png\" style=\"left: #{pos[:y]*100}%; top: #{pos[:x]*100}%;\">" %>
-<% end
-end %>
+<img width="100%" id="mapImage">
 </div>
+
+<SCRIPT type="text/javascript">
+zones = {};
+<% @zones.each do |zoneId, coords| %>
+zones[<%= zoneId %>] = {name:'<%= WORLD_MAP_AREA[zoneId][:name] %>',
+coords:[<% coords.each do |c| %><%= "{x:#{c[:x]},y:#{c[:y]}}," %><% end if(coords) %>]};
+<% end %>
+
+function setMap(zoneId) {
+	// change map image
+	document.getElementById("mapImage").src = "output/"+zones[zoneId].name+".jpeg";
+	
+	//add new coordinate markers
+	map = document.getElementById("map");
+	coords = zones[zoneId].coords;
+	for(i=0; i<coords.length; i++) {
+		c = coords[i];
+		img = document.createElement("img");
+		img.src = "static/circle.png";
+		img.className = "coord";
+		img.style.setProperty("left", c.x*100+"%", "important");
+		img.style.setProperty("top", c.y*100+"%", "important");
+		map.appendChild(img);
+	}
+}
+setMap(<%= @mainArea %>);
+function mapLink_onclick(e) {
+	// find new zone id
+	zoneId = e.target.id.substring(4);
+	
+	// remove old coordinate markers
+	oc = document.getElementsByClassName("coord");
+	while(oc.length > 0) {
+		o = oc.item(0);
+		o.parentNode.removeChild(o);
+	}
+	
+	setMap(zoneId)
+}
+</SCRIPT>
 
 <%= rhtml 'mapSize' %>

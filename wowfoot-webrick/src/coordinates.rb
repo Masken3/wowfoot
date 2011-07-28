@@ -56,7 +56,11 @@ def zoneFromCoords(map, x, y)
 	if(zoneId && wma && !(wma[:map] == map &&
 		wma[:a][:x] >= x && wma[:a][:y] >= y &&
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
-		raise hell
+		#puts "Bad coordinates:"
+		#p map, x, y
+		zoneId = false
+		areaId = false
+		#raise hell
 	end
 	return zoneId, areaId
 end
