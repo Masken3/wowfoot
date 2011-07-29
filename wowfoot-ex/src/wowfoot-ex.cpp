@@ -282,8 +282,8 @@ int main() {
 		float x2 = r.getFloat(11);
 		float y2 = r.getFloat(12);
 		printf("%i, %i, %gx%g, %gx%g\n", cid, mid, x1, y1, x2, y2);
-		fprintf(out, "\t%i => { :map => %i, :x1 => %g, :y1 => %g, :x2 => %g, :y2 => %g },\n",
-			cid, mid, x1, y1, x2, y2);
+		fprintf(out, "\t%i => { :x1 => %g, :y1 => %g, :x2 => %g, :y2 => %g },\n",
+			mid, x1, y1, x2, y2);
 	}
 	fprintf(out, "}\n");
 
