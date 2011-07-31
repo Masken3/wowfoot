@@ -14,6 +14,7 @@ require 'erb'
 require 'dbi'
 require './src/config.rb'
 require './src/dbiExtras.rb'
+require './src/util.rb'
 
 S = HTTPServer.new( :Port => 3001 )
 
