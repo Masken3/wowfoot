@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="src\json.h" />
+    <ClInclude Include="src\attribute.h" />
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\dirent\dirent.h">
+      <Filter>dirent</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\import.cpp" />
+    <ClCompile Include="src\json.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="dirent">
+      <UniqueIdentifier>{2dd64335-b945-4f52-9bcc-0bf3d50c1523}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

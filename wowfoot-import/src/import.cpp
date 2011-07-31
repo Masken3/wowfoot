@@ -2,10 +2,11 @@
 #include <sqlite3.h>
 #include <string>
 #include <string.h>
-#include <dirent.h>
 #include <assert.h>
 #include <fstream>
+#include "dirent.h"
 #include "json.h"
+#include "attribute.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ static bool beginsWith(const string& s, const string& with) {
 	return strncmp(s.c_str(), with.c_str(), with.length()) == 0;
 }
 
-static void handleErrno() __attribute((noreturn));
+static NORETURN(handleErrno());
 static void handleErrno() {
 	printf("Errno: %i (%s)\n", errno, strerror(errno));
 	abort();

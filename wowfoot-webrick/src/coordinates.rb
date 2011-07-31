@@ -1,4 +1,4 @@
-require 'src/coordinate-constants.rb'
+require './src/coordinate-constants.rb'
 
 def Compute(x, y, center_offset, size, center_val)
 	x_offset = (x - center_offset)/size
@@ -77,6 +77,8 @@ def percentagesInZone(zoneId, x, y)
 	#p percentages
 	return percentages
 end
+
+if(false)	# difficult to install on windows
 
 require 'rubygems'
 require 'RMagick'
@@ -174,4 +176,5 @@ WORLD_MAP_CONTINENT.each do |id,hash|
 end
 puts "Experimental mode, exiting..."
 exit(42)
+end
 end

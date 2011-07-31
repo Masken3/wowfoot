@@ -155,7 +155,7 @@ struct {
 
 static void dumpAreaMap(bool dumpArea) {
 	bool res;
-	FILE* out;
+	FILE* out = NULL;
 	FILE* mapOut;
 
 	//TODO: dump Map.rb, as a companion to AreaMap.rb
@@ -190,9 +190,9 @@ static void dumpAreaMap(bool dumpArea) {
 			printf("Error loading %s.wdt, skipping...\n", name);
 			continue;
 		}
-		printf("Offset: %zi bytes.\n", ftello(out));
+		//printf("Offset: %li bytes.\n", ftell(out));
 		writeInt(out, mid);
-		printf("Offset: %zi bytes.\n", ftello(out));
+		//printf("Offset: %li bytes.\n", ftell(out));
 
 		int nValid = 0;
 		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
@@ -209,7 +209,7 @@ static void dumpAreaMap(bool dumpArea) {
 			writeBlob(out, &blobs, sizeof(blobs));
 		}
 		printf("%i valid grids\n", nValid);
-		printf("Offset: %zi bytes.\n", ftello(out));
+		//printf("Offset: %li bytes.\n", ftell(out));
 		
 		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
 			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
@@ -252,6 +252,8 @@ int main() {
 	MPQArchive patch2(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
 	MPQArchive patch3(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
 	LoadCommonMPQFiles();
+
+	mkdir("output");
 
 	if(rand() == 42)
 		dumpArchiveSet();

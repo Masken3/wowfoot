@@ -1,4 +1,4 @@
-require 'src/coordinate-constants.rb'
+require './src/coordinate-constants.rb'
 
 class IO
 	def readBlob(length)
@@ -11,7 +11,7 @@ class IO
 		res = 0
 		i = 0
 		while(i<4)
-			res |= string[i] << i*8
+			res |= string.getbyte(i) << i*8
 			i += 1
 		end
 		return res

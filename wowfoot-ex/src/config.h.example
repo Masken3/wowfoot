@@ -1,0 +1,2 @@
+#define WOW_INSTALL_DIR "c:/Program Files/World of Warcraft/"
+#define WOW_LOCALE "enGB"

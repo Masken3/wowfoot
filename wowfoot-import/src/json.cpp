@@ -1,6 +1,7 @@
 #include "json.h"
 #include <vector>
 #include <assert.h>
+#include "attribute.h"
 
 using namespace std;
 
@@ -58,7 +59,7 @@ static JsonArray* parseArray();
 static JsonObject* parseObject();
 static JsonValue* parseInt();
 static JsonValue* parseString(char delim);
-static void error() __attribute((noreturn));
+static NORETURN(error());
 static void skipWhitespace();
 static void token(char);
 static bool isJsonDigit(char);

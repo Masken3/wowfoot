@@ -12,8 +12,8 @@ include WEBrick
 require 'erb'
 #require './tdb.rb'
 require 'dbi'
-require 'src/config.rb'
-require 'src/dbiExtras.rb'
+require './src/config.rb'
+require './src/dbiExtras.rb'
 
 S = HTTPServer.new( :Port => 3001 )
 
@@ -32,8 +32,8 @@ require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
 #require '../wowfoot-ex/output/AreaMap.rb'
-require 'src/areaMap.rb'
-require 'src/coordinates.rb'
+require './src/areaMap.rb'
+require './src/coordinates.rb'
 
 def run(path, bind = binding)
 	eval(open('src/'+path).read, bind, path)
@@ -116,7 +116,6 @@ class IdClassServlet < HTTPServlet::AbstractServlet
 	end
 end
 
-# requires the following functions to be defined by its subclasses:
 def mountSinglePage(name)
 	path = "/#{name}"
 	S.mount(path, SinglePageServlet.new(path))
@@ -146,7 +145,7 @@ S.mount('/', IdClassServlet)
 S.mount('/output', HTTPServlet::FileHandler, '../wowfoot-ex/output')
 S.mount('/static', HTTPServlet::FileHandler, 'htdocs/static')
 
-trap("INT"){
+trap("INT") {
   S.shutdown
 }
 puts "Ready to start. #{Time.now - START_TIME} seconds elapsed."

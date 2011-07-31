@@ -1,2 +1,17 @@
 config.rb
+output/
+build
+config.h
+Debug/
+Release/
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.user
+ipch/
+
 /wowhead-downloader/curl-config.txt
+
+/wowfoot-import/*.db
+/wowfoot-import/query.sql
