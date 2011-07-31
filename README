@@ -1,0 +1,42 @@
+wowfoot is intended to be an open-source database explorer for the World of Warcraft.
+
+It can currently display information and maps on zones, npcs, items, quests and objects.
+A free-text search function is available.
+
+Pages that remain todo:
+Item sets, factions and achievements.
+
+It should serve as a replacement for wowhead.
+It should support any game version, not just the latest official patch.
+
+It should have some improvements, for example:
+* Accurate quest dependencies, read directly from the database.
+* For any item that drops from npcs or objects, show possible drop-points on a map.
+
+It is currently very unfinished and bare-bone. Feel free to fork and improve it.
+
+
+Components:
+* wowfoot-ex: Extracts data, including zone map images, from WoW MPQ files.
+* wowfoot-downloader: Downloads pages from wowhead.
+* wowfoot-import: Extracts comments from wowfoot-downloader and stores them in an sqlite3 database.
+* wowfoot-webrick: A web server.
+  Uses the data provided by wowfoot-ex and wowfoot-import.
+  Connects to a TrinityCore world database.
+
+
+It is tested on these platforms:
+* Ubuntu GNU/Linux, version 10.10.
+  Works fine.
+
+* Windows 7 with Ruby 1.9 and Visual Studio 2010.
+  Most parts work, but the Ruby interpreter crashes when processing some pages.
+  Probable cause is a bug in the MySQL client library.
+
+
+Licencing:
+wowfoot itself is licensed under the terms of the GNU Affero Public License, version 3.
+See COPYING for the full text of the license.
+
+wowfoot incorporates some third-party libraries. They have their own licenses.
+See each library for details.

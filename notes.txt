@@ -1,4 +1,3 @@
-14:04 2011-04-03
 * The overall purpose is to be a replacement for Wowhead.
 * Data will be taken from an actual WoW installation, as well as a Trinity database.
 * This will be useful for modders, as their mods will show up.
@@ -19,7 +18,7 @@
 * Class info, spells and abilities are not easily found. We'll skip them for now.
 * However, class-specific quests and items will still be marked as such.
 
-* The user interface will be written in Ruby on Rails.
-* A data extractor will be written in C++.
+* The user interface is written in using Embedded Ruby on Webrick.
+* A data extractor is written in C++.
 * The extractor will be run on interface-server startup if the extractor itself or any of its data files have changed.
 * The extractor will only extract changed or un-extracted parts, for improved startup speed.
