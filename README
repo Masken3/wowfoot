@@ -25,6 +25,10 @@ Components:
   Connects to a TrinityCore world database.
 
 
+wowfoot-downloader takes a very long time to run, so its output has been collected and is available
+in the download section of this github page.
+
+
 It is tested on these platforms:
 * Ubuntu GNU/Linux, version 10.10.
   Works fine.
