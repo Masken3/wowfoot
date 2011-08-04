@@ -16,6 +16,18 @@ run 'quest.rb'
 <%= @template.inspect %>
 </p>-->
 
+<% if(@sort) %>
+<p>
+Sort: <%= QUEST_SORT[@sort] %><br>
+</p>
+<% end %>
+
+<% if(@zone) %>
+<p>
+Zone: <a href="area=<%= @zone %>"><%= if(WORLD_MAP_AREA[@zone]) then WORLD_MAP_AREA[@zone][:name]; else @zone; end %></a><br>
+</p>
+<% end %>
+
 <% if(@prevQuest) %>
 <p>
 Previous: <%= "<a href=\"quest=#{@prevQuest[:entry]}\">#{@prevQuest[:title]}</a><br>" %>

@@ -229,7 +229,7 @@ static void dumpAreaMap(bool dumpArea) {
 	fclose(mapOut);
 }
 
-string escapeQuotes(const char* src) {
+static string escapeQuotes(const char* src) {
 	string s;
 	s.reserve(strlen(src)*2);
 	const char* ptr = src;
@@ -347,6 +347,23 @@ int main() {
 		int id = r.getInt(0);
 		const char* name = r.getString(1);
 		fprintf(out, "\t%i => { :name => \"%s\" },\n",
+			id, name);
+	}
+	fprintf(out, "}\n");
+
+	printf("Opening QuestSort.dbc...\n");
+	DBCFile qs("DBFilesClient\\QuestSort.dbc");
+	res = qs.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" quest sorts...\n", qs.getRecordCount());
+	out = fopen("output/QuestSort.rb", "w");
+	fprintf(out, "QUEST_SORT = {\n");
+	for(DBCFile::Iterator itr = qs.begin(); itr != qs.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(1);
+		fprintf(out, "\t%i => \"%s\",\n",
 			id, name);
 	}
 	fprintf(out, "}\n");

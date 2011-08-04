@@ -32,7 +32,7 @@ require '../wowfoot-ex/output/Map.rb'
 require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/AreaTable.rb'
-#require '../wowfoot-ex/output/AreaMap.rb'
+require '../wowfoot-ex/output/QuestSort.rb'
 require './src/areaMap.rb'
 require './src/coordinates.rb'
 

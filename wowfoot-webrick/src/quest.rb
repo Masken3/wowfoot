@@ -12,6 +12,15 @@ bPattern = /\$[bB]/
 @template[:requestItemsText].gsub!(bPattern, '<br>') if(@template[:requestItemsText])
 @template[:completedText].gsub!(bPattern, '<br>') if(@template[:completedText])
 
+zoneOrSort = @template[:zoneOrSort]
+if(zoneOrSort < 0)
+	@sort = -zoneOrSort
+	@zone = nil
+else
+	@sort = nil
+	@zone = zoneOrSort
+end
+
 def fetchQuest(stm, id)
 	return nil if(id == 0)
 	stm.execute(id)
@@ -60,16 +69,19 @@ def subSimpleTag(body, tag)
 end
 
 @comments.each do |c|
-	c[:body].gsub!('\\n', "<br>\n")
-	subSimpleTag(c[:body], 'b')
-	subSimpleTag(c[:body], 'i')
+	b = c[:body]
+	p b
+	b.gsub!('\\n', "<br>\n")
+	subSimpleTag(b, 'b')
+	subSimpleTag(b, 'i')
+	subSimpleTag(b, 'ul')
+	subSimpleTag(b, 'li')
 	
 	# doesn't work.
 	#c[:body].gsub!(/\[url=http:\/\/.+\.wowhead\.com\/\?([^]]+)\]/, '<a href="/\1">')
 	
 	# let's do it the simple & long way instead.
 	i = 0
-	b = c[:body]
 	urlSpec = '[url='
 	while(i = b.index(urlSpec, i))
 		endIndex = b.index(']', i)
@@ -78,8 +90,9 @@ end
 		url.gsub!(/http:\/\/.+\.wowhead\.com\/\?(.+)/, '/\1')
 		url.gsub!(/http:\/\/.+\.wowhead\.com\/(.+)/, '/\1')
 		endIndex += 1
-		b[i, endIndex - i] = "<a href=\"#{url}\">"
-		i = endIndex
+		sub = "<a href=\"#{url}\">"
+		b[i, endIndex - i] = sub
+		i += sub.length
 	end
 	b.gsub!('[/url]', '</a>')
 	i = 0
@@ -93,8 +106,9 @@ end
 		end
 		path = b[i+1, (endIndex - i) - 1]
 		endIndex += 1
-		b[i, endIndex - i] = "<a href=\"/#{path}\">#{path}</a>"
-		i = endIndex
+		sub = "<a href=\"/#{path}\">#{path}</a>"
+		b[i, endIndex - i] = sub
+		i += sub.length
 	end
 	c[:body] = b
 end
