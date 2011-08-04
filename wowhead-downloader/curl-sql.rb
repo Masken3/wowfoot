@@ -3,10 +3,10 @@
 require 'mysql'
 require 'fileutils'
 require './config.rb'
-require '../../wowfoot-ex/output/Achievement.rb'
-require '../../wowfoot-ex/output/Faction.rb'
-require '../../wowfoot-ex/output/ItemSet.rb'
-require '../../wowfoot-ex/output/WorldMapArea.rb'
+require '../wowfoot-ex/output/Achievement.rb'
+require '../wowfoot-ex/output/Faction.rb'
+require '../wowfoot-ex/output/ItemSet.rb'
+require '../wowfoot-ex/output/WorldMapArea.rb'
 
 @hasPrintedVersion = false
 
