@@ -16,6 +16,30 @@ run 'quest.rb'
 <%= @template.inspect %>
 </p>-->
 
+<% if(@prevQuest) %>
+<p>
+Previous: <%= "<a href=\"quest=#{@prevQuest[:entry]}\">#{@prevQuest[:title]}</a><br>" %>
+</p>
+<% end %>
+
+<% if(@optionalPrev) %>
+<p>
+Optional previous: <%= "<a href=\"quest=#{@optionalPrev[:entry]}\">#{@optionalPrev[:title]}</a><br>" %>
+</p>
+<% end %>
+
+<% if(@nextQuest) %>
+<p>
+Next: <%= "<a href=\"quest=#{@nextQuest[:entry]}\">#{@nextQuest[:title]}</a><br>" %>
+</p>
+<% end %>
+
+<% if(@nextQuestInChain) %>
+<p>
+Next in chain: <%= "<a href=\"quest=#{@nextQuestInChain[:entry]}\">#{@nextQuestInChain[:title]}</a><br>" %>
+</p>
+<% end %>
+
 <p>
 Giver:<br>
 <% @givers.each do |g| %>

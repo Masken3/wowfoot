@@ -12,6 +12,26 @@ bPattern = /\$[bB]/
 @template[:requestItemsText].gsub!(bPattern, '<br>') if(@template[:requestItemsText])
 @template[:completedText].gsub!(bPattern, '<br>') if(@template[:completedText])
 
+def fetchQuest(stm, id)
+	return nil if(id == 0)
+	stm.execute(id)
+	return stm.fetch
+end
+
+@prevQuest = fetchQuest(stm, @template[:prevQuestId])
+@nextQuest = fetchQuest(stm, @template[:nextQuestId])
+@nextQuestInChain = fetchQuest(stm, @template[:nextQuestInChain])
+if(!@prevQuest)
+	stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
+		', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, title, details'+
+		', objectives, offerRewardText, requestItemsText, completedText'+
+		' from quest_template where (nextQuestId = ? OR nextQuestInChain = ?) AND (entry != ?)')
+	stm.execute(@id, @id, @id)
+	@optionalPrev = stm.fetch
+else
+	@optionalPrev = nil
+end
+
 stm = TDB::C.prepare('select id, name'+
 	' from creature_questrelation'+
 	' INNER JOIN creature_template ON creature_template.entry = creature_questrelation.id'+
