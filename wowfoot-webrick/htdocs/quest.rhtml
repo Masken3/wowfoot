@@ -16,6 +16,16 @@ run 'quest.rb'
 <%= @template.inspect %>
 </p>-->
 
+Money
+<% if(@template[:rewOrReqMoney] >= 0) %>
+rewarded: <%= @template[:rewOrReqMoney] %>
+<% else %>
+required: <%= -@template[:rewOrReqMoney] %>
+<% end %>
+copper.<br>
+
+Experience rewarded: <%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.<br>
+
 <% if(@sort) %>
 <p>
 Sort: <%= QUEST_SORT[@sort] %><br>
@@ -98,6 +108,7 @@ Finisher:<br>
 
 <p>Comments:</p>
 <% @comments.each do |c| %>
+<!-- <%= c[:originalBody] %> -->
 <p><%= c[:user]+' '+c[:date]+' '+c[:rating].to_s %><br>
 <%= c[:body] %>
 </p>

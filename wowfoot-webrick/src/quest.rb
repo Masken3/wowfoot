@@ -32,6 +32,7 @@ end
 stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
 	', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, exclusiveGroup, title, details'+
 	', objectives, offerRewardText, requestItemsText, completedText'+
+	', rewOrReqMoney, rewMoneyMaxLevel, rewMailTemplateId, rewMailDelaySecs'+
 	comboSelect + arraySelect +
 	' from quest_template where entry = ?')
 stm.execute(@id)
@@ -45,6 +46,22 @@ translateQuestText(:details)
 translateQuestText(:offerRewardText)
 translateQuestText(:requestItemsText)
 translateQuestText(:completedText)
+
+questLevel = @template[:questlevel]
+rewMoneyMaxLevel = @template[:rewMoneyMaxLevel]
+if(questLevel >= 65)
+	@rewXp = rewMoneyMaxLevel / 6
+elsif(questLevel == 64)
+	@rewXp = rewMoneyMaxLevel / 4.8
+elsif(questLevel == 63)
+	@rewXp = rewMoneyMaxLevel / 3.6
+elsif(questLevel == 62)
+	@rewXp = rewMoneyMaxLevel / 2.4
+elsif(questLevel == 61)
+	@rewXp = rewMoneyMaxLevel / 1.2
+else	#if(questLevel <= 60)
+	@rewXp = rewMoneyMaxLevel / 0.6
+end
 
 zoneOrSort = @template[:zoneOrSort]
 if(zoneOrSort < 0)
@@ -90,7 +107,7 @@ stm = TDB::C.prepare('select id, name'+
 stm.execute(@id)
 @finishers = stm.fetch_all
 
-stm = CDB::C.prepare('select user, body, rating, date, indent'+
+stm = CDB::C.prepare('select user, body, body as originalBody, rating, date, indent'+
 	' from comments'+
 	' INNER JOIN quest_comments on commentId = id'+
 	' where quest_comments.entry = ?')
@@ -105,6 +122,7 @@ end
 
 @comments.each do |c|
 	b = c[:body]
+	#c[:originalBody] = b
 	b.gsub!('\\n', "<br>\n")
 	subSimpleTag(b, 'b')
 	subSimpleTag(b, 'i')
