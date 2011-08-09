@@ -1,16 +1,50 @@
 
+combos = [
+	['ReqItem', 6],
+	['ReqSource', 4],
+	['ReqCreatureOrGO', 4],
+	['RewChoiceItem', 6],
+	['ReqItem', 4],
+]
+
+arrays = [
+	['RewRepFaction', 5],
+	['RewRepValueId', 5],
+	['RewRepValue', 5],
+	['ReqSpellCast', 4],
+]
+
+comboSelect = ''
+combos.each do |c|
+	(1..c[1]).each do |i|
+		comboSelect += ", #{c[0]}Id#{i}, #{c[0]}Count#{i}"
+	end
+end
+
+arraySelect = ''
+arrays.each do |c|
+	(1..c[1]).each do |i|
+		arraySelect += ", #{c[0]}#{i}"
+	end
+end
+
 # todo: prepare statements in advance.
 stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
-	', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, title, details'+
+	', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, exclusiveGroup, title, details'+
 	', objectives, offerRewardText, requestItemsText, completedText'+
+	comboSelect + arraySelect +
 	' from quest_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
-bPattern = /\$[bB]/
-@template[:details].gsub!(bPattern, '<br>') if(@template[:details])
-@template[:offerRewardText].gsub!(bPattern, '<br>') if(@template[:offerRewardText])
-@template[:requestItemsText].gsub!(bPattern, '<br>') if(@template[:requestItemsText])
-@template[:completedText].gsub!(bPattern, '<br>') if(@template[:completedText])
+def translateQuestText(sym)
+	bPattern = /\$[bB]/
+	@template[sym].gsub!(bPattern, '<br>') if(@template[sym])
+end
+translateQuestText(:objectives)
+translateQuestText(:details)
+translateQuestText(:offerRewardText)
+translateQuestText(:requestItemsText)
+translateQuestText(:completedText)
 
 zoneOrSort = @template[:zoneOrSort]
 if(zoneOrSort < 0)
@@ -28,17 +62,18 @@ def fetchQuest(stm, id)
 end
 
 @prevQuest = fetchQuest(stm, @template[:prevQuestId])
+@exclusiveGroup = fetchQuest(stm, @template[:exclusiveGroup])
 @nextQuest = fetchQuest(stm, @template[:nextQuestId])
 @nextQuestInChain = fetchQuest(stm, @template[:nextQuestInChain])
 if(!@prevQuest)
 	stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
 		', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, title, details'+
 		', objectives, offerRewardText, requestItemsText, completedText'+
-		' from quest_template where (nextQuestId = ? OR nextQuestInChain = ?) AND (entry != ?)')
-	stm.execute(@id, @id, @id)
-	@optionalPrev = stm.fetch
+		' from quest_template where (nextQuestId = ?) AND (entry != ?)')
+	stm.execute(@id, @id)
+	@prevQuest = stm.fetch_all
 else
-	@optionalPrev = nil
+	@prevQuest = [@prevQuest]
 end
 
 stm = TDB::C.prepare('select id, name'+
@@ -70,12 +105,13 @@ end
 
 @comments.each do |c|
 	b = c[:body]
-	p b
 	b.gsub!('\\n', "<br>\n")
 	subSimpleTag(b, 'b')
 	subSimpleTag(b, 'i')
+	subSimpleTag(b, 'u')
 	subSimpleTag(b, 'ul')
 	subSimpleTag(b, 'li')
+	#subSimpleTag(b, 'quote')	# doesn't work; quote tags are complex.
 	
 	# doesn't work.
 	#c[:body].gsub!(/\[url=http:\/\/.+\.wowhead\.com\/\?([^]]+)\]/, '<a href="/\1">')

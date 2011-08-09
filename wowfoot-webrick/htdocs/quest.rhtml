@@ -28,15 +28,18 @@ Zone: <a href="area=<%= @zone %>"><%= if(WORLD_MAP_AREA[@zone]) then WORLD_MAP_A
 </p>
 <% end %>
 
-<% if(@prevQuest) %>
+<% if(@prevQuest && @prevQuest.size > 0) %>
 <p>
-Previous: <%= "<a href=\"quest=#{@prevQuest[:entry]}\">#{@prevQuest[:title]}</a><br>" %>
+Previous:<br>
+<% @prevQuest.each do |row| %>
+<%= "<a href=\"quest=#{row[:entry]}\">#{row[:title]}</a><br>" %>
+<% end %>
 </p>
 <% end %>
 
-<% if(@optionalPrev) %>
+<% if(@exclusiveGroup) %>
 <p>
-Optional previous: <%= "<a href=\"quest=#{@optionalPrev[:entry]}\">#{@optionalPrev[:title]}</a><br>" %>
+Exclusive group: <%= "<a href=\"quest=#{@exclusiveGroup[:entry]}\">#{@exclusiveGroup[:title]}</a><br>" %>
 </p>
 <% end %>
 
