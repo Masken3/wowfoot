@@ -16,15 +16,26 @@ run 'quest.rb'
 <%= @template.inspect %>
 </p>-->
 
-Money
+<!-- Money
 <% if(@template[:rewOrReqMoney] >= 0) %>
 rewarded: <%= @template[:rewOrReqMoney] %>
 <% else %>
 required: <%= -@template[:rewOrReqMoney] %>
 <% end %>
-copper.<br>
+copper.<br> -->
+Rewards:<br>
+Money: <%= @template[:rewOrReqMoney] %> copper.<br>
 
-Experience rewarded: <%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.<br>
+Experience:
+<% if(@rewXp == 0) %>
+0
+<% else %>
+<%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.<br>
+<% end %>
+
+<% if(@template[:rewMailTemplateId]) %>
+Mail: <%= @template[:rewMailTemplateId] %> after <%= @template[:rewMailDelaySecs] %> seconds.<br>
+<% end %>
 
 <% if(@sort) %>
 <p>

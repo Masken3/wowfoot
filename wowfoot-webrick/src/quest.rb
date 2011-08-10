@@ -52,15 +52,15 @@ rewMoneyMaxLevel = @template[:rewMoneyMaxLevel]
 if(questLevel >= 65)
 	@rewXp = rewMoneyMaxLevel / 6
 elsif(questLevel == 64)
-	@rewXp = rewMoneyMaxLevel / 4.8
+	@rewXp = (rewMoneyMaxLevel / 4.8).to_i
 elsif(questLevel == 63)
-	@rewXp = rewMoneyMaxLevel / 3.6
+	@rewXp = (rewMoneyMaxLevel / 3.6).to_i
 elsif(questLevel == 62)
-	@rewXp = rewMoneyMaxLevel / 2.4
+	@rewXp = (rewMoneyMaxLevel / 2.4).to_i
 elsif(questLevel == 61)
-	@rewXp = rewMoneyMaxLevel / 1.2
+	@rewXp = (rewMoneyMaxLevel / 1.2).to_i
 else	#if(questLevel <= 60)
-	@rewXp = rewMoneyMaxLevel / 0.6
+	@rewXp = (rewMoneyMaxLevel / 0.6).to_i
 end
 
 zoneOrSort = @template[:zoneOrSort]
