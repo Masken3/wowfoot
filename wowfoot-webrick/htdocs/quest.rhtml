@@ -16,6 +16,7 @@ run 'quest.rb'
 <%= @template.inspect %>
 </p>-->
 
+<p>
 <!-- Money
 <% if(@template[:rewOrReqMoney] >= 0) %>
 rewarded: <%= @template[:rewOrReqMoney] %>
@@ -33,9 +34,10 @@ Experience:
 <%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.<br>
 <% end %>
 
-<% if(@template[:rewMailTemplateId]) %>
+<% if(@template[:rewMailTemplateId] != 0) %>
 Mail: <%= @template[:rewMailTemplateId] %> after <%= @template[:rewMailDelaySecs] %> seconds.<br>
 <% end %>
+</p>
 
 <% if(@sort) %>
 <p>
@@ -49,18 +51,22 @@ Zone: <a href="area=<%= @zone %>"><%= if(WORLD_MAP_AREA[@zone]) then WORLD_MAP_A
 </p>
 <% end %>
 
+<% if(@exclusiveGroup) %>
+<p>
+Exclusive with:<br>
+<% @exclusiveGroup.each do |row| %>
+<%= "<a href=\"quest=#{row[:entry]}\">#{row[:title]}</a><br>" %>
+<% end %>
+</p>
+<% end %>
+
+
 <% if(@prevQuest && @prevQuest.size > 0) %>
 <p>
 Previous:<br>
 <% @prevQuest.each do |row| %>
 <%= "<a href=\"quest=#{row[:entry]}\">#{row[:title]}</a><br>" %>
 <% end %>
-</p>
-<% end %>
-
-<% if(@exclusiveGroup) %>
-<p>
-Exclusive group: <%= "<a href=\"quest=#{@exclusiveGroup[:entry]}\">#{@exclusiveGroup[:title]}</a><br>" %>
 </p>
 <% end %>
 

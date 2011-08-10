@@ -79,7 +79,6 @@ def fetchQuest(stm, id)
 end
 
 @prevQuest = fetchQuest(stm, @template[:prevQuestId])
-@exclusiveGroup = fetchQuest(stm, @template[:exclusiveGroup])
 @nextQuest = fetchQuest(stm, @template[:nextQuestId])
 @nextQuestInChain = fetchQuest(stm, @template[:nextQuestInChain])
 if(!@prevQuest)
@@ -91,6 +90,16 @@ if(!@prevQuest)
 	@prevQuest = stm.fetch_all
 else
 	@prevQuest = [@prevQuest]
+end
+
+exclusive = @template[:exclusiveGroup]
+if(exclusive > 0)
+	stm = TDB::C.prepare('select entry, title'+
+		' from quest_template where (exclusiveGroup = ?) AND (entry != ?)')
+	stm.execute(exclusive, @id)
+	@exclusiveGroup = stm.fetch_all
+else
+	@exclusiveGroup = nil
 end
 
 stm = TDB::C.prepare('select id, name'+
@@ -143,6 +152,7 @@ end
 		url = b[urlStartIndex, endIndex - urlStartIndex]
 		url.gsub!(/http:\/\/.+\.wowhead\.com\/\?(.+)/, '/\1')
 		url.gsub!(/http:\/\/.+\.wowhead\.com\/(.+)/, '/\1')
+		url.gsub!(/http:\/\/.+\.wowwiki\.com\/(.+)/, 'http://www.wowpedia.org/\1')
 		endIndex += 1
 		sub = "<a href=\"#{url}\">"
 		b[i, endIndex - i] = sub
