@@ -9,8 +9,13 @@ stm.execute(@id)
 raise HTTPStatus[404], "Object not found in database" if(!@template)
 
 stm = TDB::C.prepare('select guid, map, position_x, position_y, position_z'+
+	', spawntimesecs'+
 	' from gameobject where id = ?')
 stm.execute(@id)
 @coords = stm.fetch_all
+
+#@coords.each do |row|
+	#p "respawn time: #{row[:spawntimesecs]}"
+#end
 
 run 'doZones.rb'

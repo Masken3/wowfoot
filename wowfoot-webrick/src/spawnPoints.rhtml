@@ -23,7 +23,7 @@
 <SCRIPT type="text/javascript">
 zones = {};
 <% @zones.each do |zoneId, coords| %>
-zones[<%= zoneId %>] = {name:'<%= WORLD_MAP_AREA[zoneId][:name] %>',
+zones[<%= zoneId %>] = {name:'<%= AREA_TABLE[zoneId][:name] %>',
 coords:[<% coords.each do |c| %><%= "{x:#{c[:x]},y:#{c[:y]}}," %><% end if(coords) %>]};
 <% end %>
 

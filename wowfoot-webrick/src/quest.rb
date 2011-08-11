@@ -88,6 +88,7 @@ if(!@prevQuest)
 		' from quest_template where (nextQuestId = ?) AND (entry != ?)')
 	stm.execute(@id, @id)
 	@prevQuest = stm.fetch_all
+	@prevQuest = nil if(@prevQuest.empty?)
 else
 	@prevQuest = [@prevQuest]
 end
@@ -101,6 +102,11 @@ if(exclusive > 0)
 else
 	@exclusiveGroup = nil
 end
+
+stm = TDB::C.prepare('select entry, title'+
+	' from quest_template where (nextQuestInChain = ?) AND (entry != ?) AND (entry != ?) AND (nextQuestId != ?)')
+stm.execute(@id, @id, @template[:PrevQuestId], @id)
+@optionalPrev = stm.fetch_all
 
 stm = TDB::C.prepare('select id, name'+
 	' from creature_questrelation'+

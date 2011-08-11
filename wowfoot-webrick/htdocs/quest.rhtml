@@ -61,7 +61,16 @@ Exclusive with:<br>
 <% end %>
 
 
-<% if(@prevQuest && @prevQuest.size > 0) %>
+<% if(@optionalPrev.size > 0) %>
+<p>
+Optional previous:<br>
+<% @optionalPrev.each do |row| %>
+<%= "<a href=\"quest=#{row[:entry]}\">#{row[:title]}</a><br>" %>
+<% end %>
+</p>
+<% end %>
+
+<% if(@prevQuest) %>
 <p>
 Previous:<br>
 <% @prevQuest.each do |row| %>

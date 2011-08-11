@@ -64,11 +64,12 @@ stm.execute(@id)
 	row[:itemLoot] = sources
 end
 
-@drop = getStandardLoot(@id, 'creature')
+@drop = getStandardLoot(@id, 'creature', 'creature', 'creature')
 
-@pickpocket = getStandardLoot(@id, 'pickpocketing', 'creature')
+@pickpocket = getStandardLoot(@id, 'pickpocketing', 'creature', 'creature')
 
 stm = TDB::C.prepare('select gt.entry, gt.name, llt.chanceOrQuestChance, llt.mincountOrRef, llt.maxcount'+
+	", (select count(*) from gameobject where gameobject.id = gt.entry) as count"+
 	" from gameobject_template gt"+
 	" INNER JOIN gameobject_loot_template llt on llt.entry = gt.data1"+
 	' where llt.item = ? AND (gt.type = 3 OR gt.type = 25)')	# chest or fishinghole
@@ -183,6 +184,7 @@ end
 		['Chance', :chanceOrQuestChance],
 		['MinCount', :mincountOrRef],
 		['MaxCount', :maxcount],
+		['Spawn count', :count],
 	],
 },
 {
@@ -228,6 +230,7 @@ end
 		['Chance', :chanceOrQuestChance],
 		['MinCount', :mincountOrRef],
 		['MaxCount', :maxcount],
+		['Spawn count', :count],
 	],
 },
 {
@@ -239,6 +242,7 @@ end
 		['Chance', :chanceOrQuestChance],
 		['MinCount', :mincountOrRef],
 		['MaxCount', :maxcount],
+		['Spawn count', :count],
 	],
 },
 {
