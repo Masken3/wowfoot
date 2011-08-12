@@ -143,6 +143,7 @@ end
 	subSimpleTag(b, 'i')
 	subSimpleTag(b, 'u')
 	subSimpleTag(b, 'ul')
+	subSimpleTag(b, 'ol')
 	subSimpleTag(b, 'li')
 	#subSimpleTag(b, 'quote')	# doesn't work; quote tags are complex.
 	
