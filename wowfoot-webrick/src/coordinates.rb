@@ -42,12 +42,14 @@ def zoneFromCoords(map, x, y)
 	raise hell if(!areaId)
 	
 	# find zoneId
-	if(WORLD_MAP_CONTINENT[map] && AREA_TABLE[areaId])
+	#if(WORLD_MAP_CONTINENT[map] && AREA_TABLE[areaId])
+	if(AREA_TABLE[areaId])
 		zoneId = areaId
 		while(AREA_TABLE[zoneId][:parent] != 0)
 			zoneId = AREA_TABLE[zoneId][:parent]
 		end
 	else
+		return zoneId, areaId
 		zoneId = false
 	end
 	wma = WORLD_MAP_AREA[zoneId]
@@ -58,8 +60,8 @@ def zoneFromCoords(map, x, y)
 		wma[:b][:x] <= x && wma[:b][:y] <= y))
 		#puts "Bad coordinates:"
 		#p map, x, y
-		zoneId = false
-		areaId = false
+		#zoneId = false
+		#areaId = false
 		#raise hell
 	end
 	return zoneId, areaId
