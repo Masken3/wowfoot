@@ -31,7 +31,8 @@ in the download section of this github page.
 
 It is tested on these platforms:
 * Ubuntu GNU/Linux, version 10.10.
-  Works fine.
+  Works fine with Ruby 1.8.
+  Ruby 1.9 causes database queries to return bad data.
 
 * Windows 7 with Ruby 1.9 and Visual Studio 2010.
   Most parts work, but the Ruby interpreter crashes when processing some pages.
