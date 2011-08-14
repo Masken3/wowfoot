@@ -8,13 +8,7 @@ class IO
 	end
 	def readInt
 		string = readBlob(4)
-		res = 0
-		i = 0
-		while(i<4)
-			res |= string.getbyte(i) << i*8
-			i += 1
-		end
-		return res
+		return string.unpack('L')[0]
 	end
 end
 
