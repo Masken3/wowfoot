@@ -70,6 +70,7 @@ end
 def percentagesInZone(zoneId, x, y)
 	percentages = {}
 	wma = WORLD_MAP_AREA[zoneId]
+	return {:x=>0,:y=>0} if(!wma)
 	width = wma[:a][:x] - wma[:b][:x]
 	percentages[:x] = 1.0 - ((x - wma[:b][:x]) / width)
 	height = wma[:a][:y] - wma[:b][:y]

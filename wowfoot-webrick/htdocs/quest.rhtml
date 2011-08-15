@@ -31,12 +31,25 @@ Experience:
 <% if(@rewXp == 0) %>
 0
 <% else %>
-<%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.<br>
+<%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.
 <% end %>
+<br>
 
 <% if(@template[:rewMailTemplateId] != 0) %>
 Mail: <%= @template[:rewMailTemplateId] %> after <%= @template[:rewMailDelaySecs] %> seconds.<br>
 <% end %>
+
+<% for i in 1..4; id = @template["rewItemId#{i}"]; if(id != 0) %>
+Item: <a href="item=<%= id %>"><%= @template["rewItemId#{i}Name"] %></a>
+<% count = @template["rewItemCount#{i}"]; if(count != 1) %> x<%= count %> <% end %>
+<br>
+<% end; end %>
+
+<% for i in 1..6; id = @template["rewChoiceItemId#{i}"]; if(id != 0)  %>
+Item choice: <a href="item=<%= id %>"><%= @template["rewChoiceItemId#{i}Name"] %></a>
+<% count = @template["rewChoiceItemCount#{i}"]; if(count != 1) %> x<%= count %> <% end %>
+<br>
+<% end; end %>
 </p>
 
 <% if(@sort) %>

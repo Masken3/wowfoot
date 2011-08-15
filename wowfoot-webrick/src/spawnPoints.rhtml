@@ -23,9 +23,11 @@
 <SCRIPT type="text/javascript">
 zones = {};
 <% @zones.each do |zoneId, coords| %>
+<% if(WORLD_MAP_AREA[zoneId]) %>
 zones[<%= zoneId %>] = {name:'<%= WORLD_MAP_AREA[zoneId][:name] %>',
 displayName:'<%= AREA_TABLE[zoneId][:name] %>',
 coords:[<% coords.each do |c| %><%= "{y:#{c[:x]},x:#{c[:y]}}," %><% end if(coords) %>]};
+<% end %>
 <% end %>
 
 function setMap(zoneId) {

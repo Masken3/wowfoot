@@ -1,44 +1,60 @@
 
-combos = [
-	['ReqItem', 6],
-	['ReqSource', 4],
-	['ReqCreatureOrGO', 4],
-	['RewChoiceItem', 6],
-	['ReqItem', 4],
+rewCombos = [
+	{:id => :rewChoiceItem, :count => 6, :type => :item},
+	{:id => :rewItem, :count => 4, :type => :item},
+]
+reqCombos = [
+	{:id => :reqItem, :count => 6, :type => :item},
+	{:id => :reqSource, :count => 4, :type => :item},
+	{:id => :reqCreatureOrGO, :count => 4},
 ]
 
+combos = rewCombos + reqCombos
+
 arrays = [
-	['RewRepFaction', 5],
-	['RewRepValueId', 5],
-	['RewRepValue', 5],
-	['ReqSpellCast', 4],
+	{:id => :rewRepFaction, :count => 5, :type => :faction},
+	{:id => :rewRepValueId, :count => 5},
+	{:id => :rewRepValue, :count => 5},
+	{:id => :reqSpellCast, :count => 4, :type => :spell},
 ]
 
 comboSelect = ''
+comboJoin = ''
 combos.each do |c|
-	(1..c[1]).each do |i|
-		comboSelect += ", #{c[0]}Id#{i}, #{c[0]}Count#{i}"
+	(1..c[:count]).each do |i|
+		id = "#{c[:id]}Id#{i}"
+		comboSelect += ", #{id}, #{c[:id]}Count#{i}"
+		if(c[:type] == :item)
+			tt = "#{c[:type]}_template"
+			comboSelect += ", (select name from #{tt}"+
+				" where #{tt}.entry = #{id}) AS #{id}Name"
+		end
 	end
 end
 
 arraySelect = ''
 arrays.each do |c|
-	(1..c[1]).each do |i|
-		arraySelect += ", #{c[0]}#{i}"
+	(1..c[:count]).each do |i|
+		arraySelect += ", #{c[:id]}#{i}"
 	end
 end
 
 # todo: prepare statements in advance.
-stm = TDB::C.prepare('select entry, zoneOrSort, minlevel, maxlevel, questlevel'+
+sql = 'select quest_template.entry, zoneOrSort, minlevel, maxlevel, questlevel'+
 	', requiredRaces, prevQuestId, nextQuestId, nextQuestInChain, exclusiveGroup, title, details'+
 	', objectives, offerRewardText, requestItemsText, completedText'+
 	', rewOrReqMoney, rewMoneyMaxLevel, rewMailTemplateId, rewMailDelaySecs'+
 	comboSelect + arraySelect +
-	' from quest_template where entry = ?')
+	' from quest_template' +
+	comboJoin +
+	' where quest_template.entry = ?'
+stm = TDB::C.prepare(sql)
 stm.execute(@id)
 @template = stm.fetch
 def translateQuestText(sym)
 	bPattern = /\$[bB]/
+	@template[sym].gsub!(/</, '&lt;') if(@template[sym])
+	@template[sym].gsub!(/>/, '&gt;') if(@template[sym])
 	@template[sym].gsub!(bPattern, '<br>') if(@template[sym])
 end
 translateQuestText(:objectives)
