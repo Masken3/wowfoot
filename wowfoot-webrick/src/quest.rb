@@ -88,6 +88,17 @@ else
 	@zone = zoneOrSort
 end
 
+def rewRepValue(i)
+	val = @template["rewRepValue#{i}"]
+	if(val == 0)
+		id = @template["rewRepValueId#{i}"]
+		val = 0 if(id == 0)
+		val = QUEST_FACTION_REWARD[1][id] if(id > 0)
+		val = QUEST_FACTION_REWARD[2][-id] if(id < 0)
+	end
+	return val
+end
+
 def fetchQuest(stm, id)
 	return nil if(id == 0)
 	stm.execute(id)

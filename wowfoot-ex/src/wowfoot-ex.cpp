@@ -334,6 +334,25 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
+	printf("Opening QuestFactionReward.dbc...\n");
+	DBCFile qfr("DBFilesClient\\QuestFactionReward.dbc");
+	res = qfr.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" QuestFactionRewards...\n", qfr.getRecordCount());
+	out = fopen("output/QuestFactionReward.rb", "w");
+	fprintf(out, "QUEST_FACTION_REWARD = {\n");
+	for(DBCFile::Iterator itr = qfr.begin(); itr != qfr.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		fprintf(out, "\t%i => [", id);
+		for(int i=1; i<11; i++) {
+			fprintf(out, "%i,", r.getInt(i));
+		}
+		fprintf(out, "],\n");
+	}
+	fprintf(out, "}\n");
+
 	printf("Opening ItemSet.dbc...\n");
 	DBCFile is("DBFilesClient\\ItemSet.dbc");
 	res = is.open();

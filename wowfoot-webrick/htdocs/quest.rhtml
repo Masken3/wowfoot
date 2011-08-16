@@ -35,6 +35,10 @@ Experience:
 <% end %>
 <br>
 
+<% for i in 1..4; id = @template["rewRepFaction#{i}"]; if(id != 0) %>
+Reputation: <a href="faction=<%= id %>"><%= FACTION[id][:name] %></a> <%= rewRepValue(i) %><br>
+<% end; end %>
+
 <% if(@template[:rewMailTemplateId] != 0) %>
 Mail: <%= @template[:rewMailTemplateId] %> after <%= @template[:rewMailDelaySecs] %> seconds.<br>
 <% end %>
