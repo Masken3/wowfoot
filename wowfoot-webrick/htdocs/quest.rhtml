@@ -67,6 +67,12 @@ Objectives:<br>
 <% for i in 1..4 %>
 <%= coObjectiveHtml(i) %>
 <% end %>
+
+<% for i in 1..6; id = @template["reqItemId#{i}"]; if(id != 0)  %>
+Item: <a href="item=<%= id %>"><%= @template["reqItemId#{i}Name"] %></a>
+<% count = @template["reqItemCount#{i}"]; if(count != 1) %> x<%= count %> <% end %>
+<br>
+<% end; end %>
 </p>
 
 <% if(@zone) %>

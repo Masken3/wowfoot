@@ -136,8 +136,8 @@ def coObjectiveHtml(i)
 	elsif(coId < 0)
 		html += ' '+link('object', -coId, name)
 	end	# (coId == 0)
-	if(count != 0)
-		html += " x #{count}"
+	if(count != 1)
+		html += " x#{count}"
 	end
 	html += '<br>'
 	return html
