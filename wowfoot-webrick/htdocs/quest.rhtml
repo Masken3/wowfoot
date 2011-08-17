@@ -62,6 +62,13 @@ Sort: <%= QUEST_SORT[@sort] %><br>
 </p>
 <% end %>
 
+<p>
+Objectives:<br>
+<% for i in 1..4 %>
+<%= coObjectiveHtml(i) %>
+<% end %>
+</p>
+
 <% if(@zone) %>
 <p>
 Zone: <a href="area=<%= @zone %>"><%= if(WORLD_MAP_AREA[@zone]) then WORLD_MAP_AREA[@zone][:name]; else @zone; end %></a><br>

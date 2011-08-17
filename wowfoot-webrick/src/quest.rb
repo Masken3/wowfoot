@@ -6,7 +6,7 @@ rewCombos = [
 reqCombos = [
 	{:id => :reqItem, :count => 6, :type => :item},
 	{:id => :reqSource, :count => 4, :type => :item},
-	{:id => :reqCreatureOrGO, :count => 4},
+	{:id => :reqCreatureOrGO, :count => 4, :type => :co},
 ]
 
 combos = rewCombos + reqCombos
@@ -18,16 +18,23 @@ arrays = [
 	{:id => :reqSpellCast, :count => 4, :type => :spell},
 ]
 
+def selectComboSql(type, id)
+	tt = "#{type}_template"
+	return "(select name from #{tt} where #{tt}.entry = #{id})"
+end
+
 comboSelect = ''
 comboJoin = ''
 combos.each do |c|
 	(1..c[:count]).each do |i|
 		id = "#{c[:id]}Id#{i}"
 		comboSelect += ", #{id}, #{c[:id]}Count#{i}"
-		if(c[:type] == :item)
-			tt = "#{c[:type]}_template"
-			comboSelect += ", (select name from #{tt}"+
-				" where #{tt}.entry = #{id}) AS #{id}Name"
+		type = c[:type]
+		if(type == :item)
+			comboSelect += ", #{selectComboSql(type, id)} AS #{id}Name"
+		elsif(type = :co)
+			comboSelect += ", COALESCE(#{selectComboSql('creature', id)}"+
+			", #{selectComboSql('gameobject', id)}) AS #{id}Name"
 		end
 	end
 end
@@ -97,6 +104,43 @@ def rewRepValue(i)
 		val = QUEST_FACTION_REWARD[2][-id] if(id < 0)
 	end
 	return val
+end
+
+def link(type, id, name)
+	"<a href=\"#{type}=#{id}\">#{name}</a>"
+end
+
+def spellHtml(spellId)
+	link('spell', spellId, spellId)
+end
+
+# co = creature/object
+def coObjectiveHtml(i)
+	coId = @template["reqCreatureOrGOId#{i}"]
+	name = @template["reqCreatureOrGOId#{i}Name"]
+	spellId = @template["reqSpellCast#{i}"]
+	count = @template["reqCreatureOrGOCount#{i}"]
+	return nil if(coId == 0 && spellId == 0)
+	if(spellId == 0)
+		if(coId > 0)
+			html = "Kill"
+		else	# (coId < 0)
+			html = "Use"
+		end
+	else
+		html = "Cast #{spellHtml(spellId)}"
+		html += " on" if(coId != 0)
+	end
+	if(coId > 0)
+		html += ' '+link('npc', coId, name)
+	elsif(coId < 0)
+		html += ' '+link('object', -coId, name)
+	end	# (coId == 0)
+	if(count != 0)
+		html += " x #{count}"
+	end
+	html += '<br>'
+	return html
 end
 
 def fetchQuest(stm, id)
