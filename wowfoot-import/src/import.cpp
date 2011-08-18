@@ -38,7 +38,7 @@ int main() {
 	SQLT(sqlite3_open(DB_FILENAME, &db));
 	
 	// create tables
-	{
+	if(CONFIG_CREATE_DB) {
 		ifstream f("create-db.sql");
 		if(!f) {
 			handleErrno();
@@ -62,9 +62,9 @@ int main() {
 		printf("%s\n", de->d_name);
 		if(de->d_name[0] == '.')
 			continue;
-		static const char QUEST[] = "quest=";
-		assert(strncmp(de->d_name, QUEST, strlen(QUEST)) == 0);
-		const char* entry = de->d_name + strlen(QUEST);
+		static const char FILENAME_BASE[] = CONFIG_TYPE"=";
+		assert(strncmp(de->d_name, FILENAME_BASE, strlen(FILENAME_BASE)) == 0);
+		const char* entry = de->d_name + strlen(FILENAME_BASE);
 		
 		ifstream f((string(CONFIG_SRCDIR "/") + de->d_name).c_str());
 		if(!f) {
@@ -114,7 +114,7 @@ static string parseCommentLine(const string& entry, const char* line) {
 		const JsonObject* hp = (*arr)[i].toObject();
 		assert(hp);
 		const JsonObject& h(*hp);
-		query += "INSERT INTO 'quest_comments' VALUES ("+entry+", "+
+		query += "INSERT INTO '"CONFIG_TYPE"_comments' VALUES ("+entry+", "+
 			h["id"].toString()+");\n";
 		query += "INSERT INTO 'comments' VALUES ("+h["id"].toString()+", '"+
 			escape(h["user"].toString())+"', '"+
