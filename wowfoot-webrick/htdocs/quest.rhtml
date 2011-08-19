@@ -162,13 +162,7 @@ Finisher:<br>
 <%= @template[:completedText] %>
 </p>
 
-<p>Comments:</p>
-<% @comments.each do |c| %>
-<!-- <%= c[:originalBody] %> -->
-<p><%= c[:user]+' '+c[:date]+' '+c[:rating].to_s %><br>
-<%= c[:body] %>
-</p>
-<% end %>
+<%= rhtml 'comments' %>
 
 </body>
 </html>

@@ -11,3 +11,6 @@ stm.execute(@id)
 @coords = stm.fetch_all
 
 run 'doZones.rb'
+
+@commentTable = 'npc'
+run 'comments.rb'

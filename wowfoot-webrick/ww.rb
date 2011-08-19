@@ -39,11 +39,12 @@ require './src/areaMap.rb'
 require './src/coordinates.rb'
 
 def run(path, bind = binding)
-	eval(open('src/'+path).read, bind, path)
+	path = File.expand_path('src/'+path)
+	eval(open(path).read, bind, path)
 end
 
 def rhtml(path, bind = binding)
-	path = "src/#{path}.rhtml"
+	path = File.expand_path("src/#{path}.rhtml")
 	template = nil
 	File.open(path,'r') do |f|
 		template = ERB.new(f.read)
