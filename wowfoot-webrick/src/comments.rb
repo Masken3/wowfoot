@@ -60,3 +60,31 @@ end
 	end
 	c[:body] = b
 end
+
+def commentClass(indent)
+	if(indent == 0)
+		 return 'rootComment'
+	else
+		return 'indentedComment'
+	end
+end
+
+@lastIndent = -1
+def indentHtmlBase(indent)
+	html = ''
+	i = indent
+	while(i <= @lastIndent)
+		html += '</div>'
+		i += 1
+	end
+	return html
+end
+def indentHtml(indent)
+	html = indentHtmlBase(indent)
+	@lastIndent = indent
+	html += "<div class=\"#{commentClass(indent)}\">"
+	return html
+end
+def indentEndHtml
+	indentHtmlBase(0)
+end

@@ -1,8 +1,16 @@
 
+<STYLE type="text/css">
+	div.rootComment { border-width: 1; border:solid; margin-left: 0 }
+	div.indentedComment { border-width: 1; border:solid; margin-left: 1em }
+</STYLE>
+
 <p>Comments:</p>
 <% @comments.each do |c| %>
+<p>
 <!-- <%= c[:originalBody] %> -->
-<p><%= c[:user]+' '+c[:date]+' '+c[:rating].to_s %><br>
+<%= indentHtml(c[:indent]) %>
+<%= c[:user]+' '+c[:date]+' Rating: '+c[:rating].to_s+' Indent: '+c[:indent].to_s %><br>
 <%= c[:body] %>
 </p>
 <% end %>
+<%= indentEndHtml %>
