@@ -14,11 +14,21 @@ run 'item.rb'
 <%= @template.inspect %>
 </p>
 
+<p>
+Info:<br>
+Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
+Equip: <%= ITEM_EQUIP[@template[:inventoryType].to_i] %>(<%= @template[:inventoryType] %>)<br>
+</p>
+
 
 <STYLE type="text/css">
 	TABLE { border-collapse: collapse; display: none; }
 	td { border-spacing: 1; border: solid; }
 </STYLE>
+
+<% if(!@largestTable) %>
+<p>Item source & use not found.</p>
+<% end %>
 
 <!-- Tab-table :) -->
 <table id="tabs"><tr>
@@ -77,13 +87,15 @@ function activateTab(target) {
 	currentTab = target.id;
 }
 function my_onload() {
-	currentTab = "<%= largestTable %>"
+<% if(@largestTable) %>
+	currentTab = "<%= @largestTable %>"
 	activateTab(document.getElementById(currentTab))
 
 	document.getElementById("tabs").style.display = "block";
 
 <% @TAB_TABLES.each do |t| %>
 	document.getElementById("<%= t[:id] %>").onclick = tab_onclick;
+<% end %>
 <% end %>
 }
 window.onload = my_onload;

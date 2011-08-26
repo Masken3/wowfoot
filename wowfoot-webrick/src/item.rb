@@ -1,13 +1,26 @@
 # todo: move to ww.rb when stable
 run 'referenceLoot.rb'
+run 'itemClass.rb'
+run 'itemEquip.rb'
 
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
+	', inventoryType'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
 
 raise HTTPStatus[404], "Item not found in database" if(!@template)
+
+
+@itemClass = ITEM_CLASS[@template[:class].to_i]
+if(@itemClass)
+	@itemSubClass = @itemClass[:subclass][@template[:subclass].to_i]
+	@itemSubClass = 'Unknown' if(!@itemSubClass)
+else
+	@itemClass = {:name => 'Unknown'}
+	@itemSubClass = 'Unknown'
+end
 
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
 	' from disenchant_loot_template dlt'+
@@ -150,15 +163,6 @@ questTables = questColumns.collect do |id, hash|
 }
 end
 #p questTables
-
-def largestTable
-	size = 0
-	id = 'disenchantFrom'
-	@TAB_TABLES.each do |tab|
-		size, id = tab[:array].size, tab[:id] if(tab[:array].size > size)
-	end
-	return id
-end
 
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
@@ -305,3 +309,9 @@ end
 	],
 },
 ]
+
+@largestTable = nil
+size = 0
+@TAB_TABLES.each do |tab|
+	size, @largestTable = tab[:array].size, tab[:id] if(tab[:array].size > size)
+end
