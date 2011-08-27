@@ -15,7 +15,7 @@ begin
 	file = open('curl-config.txt', 'w')
 	file.puts 'header = "accept-encoding: gzip"'
 	file.puts 'max-time = 10'
-	
+
 	# connect to the MySQL server
 	dbh = Mysql.real_connect(SQL_ADDRESS, SQL_USER, SQL_PASS, SQL_DATABASE)
 	# get server version string and display it
@@ -26,9 +26,9 @@ begin
 
 	res = dbh.query(query)
 	nFiles = 0
-	
+
 	dstDir = "#{DST}#{name}"
-	
+
 	FileUtils.mkdir(dstDir) if(!File.exist?(dstDir))
 
 	puts query
@@ -49,9 +49,9 @@ begin
 	puts "Number of rows returned: #{res.num_rows}"
 	puts "Number of files to retrieve: #{nFiles}"
 	res.free
-	
+
 	file.close
-	
+
 	return if(nFiles == 0)
 
 	cmd = 'C:/path/curl -K curl-config.txt'
@@ -108,6 +108,7 @@ def downloadMapId(name, map, num_length)
 	end
 end
 
+# todo: add spells
 downloadMapId('achievement', ACHIEVEMENT, 4)
 downloadMapId('zone', WORLD_MAP_AREA, 4)
 downloadMapId('faction', FACTION, 4)
