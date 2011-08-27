@@ -14,10 +14,21 @@ run 'item.rb'
 <%= @template.inspect %>
 </p>
 
+<STYLE type="text/css">
+	BODY { color:white; background-color:#202020; }
+	A { color:#0080ff; text-decoration:none; }
+	A:visited { color:#0040ff; }
+	A:hover { text-decoration:underline; }
+<% ITEM_QUALITY.each do |num, q| %>
+<%= "SPAN.q#{q[:color]} { color:#{q[:color]}; font-weight:bold; }" %>
+<% end %>
+</STYLE>
+
 <p>
 Info:<br>
 Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
 Equip: <%= ITEM_EQUIP[@template[:inventoryType].to_i] %>(<%= @template[:inventoryType] %>)<br>
+Quality: <span class="q<%= @quality[:color] %>"><%= @quality[:name] %></span><br>
 </p>
 
 

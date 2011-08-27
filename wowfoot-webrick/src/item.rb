@@ -2,6 +2,7 @@
 run 'referenceLoot.rb'
 run 'itemClass.rb'
 run 'itemEquip.rb'
+run 'itemQuality.rb'
 
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
@@ -21,6 +22,9 @@ else
 	@itemClass = {:name => 'Unknown'}
 	@itemSubClass = 'Unknown'
 end
+
+@quality = ITEM_QUALITY[@template[:quality].to_i]
+
 
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
 	' from disenchant_loot_template dlt'+
