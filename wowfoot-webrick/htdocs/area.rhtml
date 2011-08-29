@@ -7,9 +7,12 @@ else
 	title = i
 end
 %>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 	<title><%= title %> - Zone - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 
@@ -36,15 +39,11 @@ end
 %>
 </p>
 
+<% if(a) %>
 <p>
-<%=
-if(a)
-	"<img id=\"map\" width=\"40%\" src=\"output/#{a[:name]}.jpeg\">"
-else
-	''
-end
-%>
+<img id="map" width="40%" src="output/<%= a[:name] %>.jpeg" alt="<%= a[:name] %>">
 </p>
+<% end %>
 
 <%= rhtml 'mapSize' %>
 

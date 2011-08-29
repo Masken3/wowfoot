@@ -271,6 +271,7 @@ end
 	tab[:array].size == 0
 end
 
+# unused
 @TAB_TABLES2 = [
 'Contains',
 {
@@ -313,9 +314,3 @@ end
 	],
 },
 ]
-
-@largestTable = nil
-size = 0
-@TAB_TABLES.each do |tab|
-	size, @largestTable = tab[:array].size, tab[:id] if(tab[:array].size > size)
-end

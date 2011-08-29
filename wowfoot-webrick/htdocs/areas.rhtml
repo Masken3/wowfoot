@@ -10,22 +10,24 @@ end
 areas = sortAreas
 %>
 
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 	<title>Zones - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 
 <p>
 <%= areas.size %> Zones:</p>
 
-<p><table><tr><td>ID</td><td>Name</td></tr>
+<table><tr><td>ID</td><td>Name</td></tr>
 
 <% areas.each {|a| %>
 	<%= "<tr><td>#{a[:id]}</td><td><a href=\"area=#{a[:id]}\">#{a[:name]}</a></td></tr>" %>
 <% } %>
 
-</table></p>
+</table>
 
 </body>
 </html>

@@ -1,0 +1,18 @@
+/* tables */
+TABLE.tabs { border-collapse: collapse; display: none; }
+td { border-spacing: 1px; border: solid; }
+
+/* comments */
+div.rootComment { border-width: 1px; border:solid; margin-left: 0 }
+div.indentedComment { border-width: 1px; border:solid; margin-left: 1em }
+
+/* map */
+div { position:relative; }	/* Enables absolute positioning relative to div tags. */
+#map { width:40% }	/* Enables use of percentages inside. */
+img.coord { position:absolute; }
+
+/* item */
+BODY { color:white; background-color:#202020; }
+A { color:#0080ff; text-decoration:none; }
+A:visited { color:#0040ff; }
+A:hover { text-decoration:underline; }

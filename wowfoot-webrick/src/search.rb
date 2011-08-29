@@ -3,11 +3,11 @@
 
 searchTerm = @id[1]
 
-@zones = {}
+@zones = []
 WORLD_MAP_AREA.each do |i, h|
 	name = AREA_TABLE[i][:name]
 	#puts "Test: '#{name}'.include?('#{searchTerm}')"
-	@zones[i] = name if(name.upcase.include?(searchTerm.upcase))
+	@zones << {:entry => i, :name => name} if(name.upcase.include?(searchTerm.upcase))
 end
 
 # todo: prepare statements in advance.
@@ -46,7 +46,7 @@ stm.execute(query)
 	:array => @zones,
 	:title => 'Zones',
 	:columns => [
-		['Name', :name, true],
+		['Name', :name, :entry, 'area'],
 	],
 },
 {
@@ -57,7 +57,7 @@ stm.execute(query)
 		['Zone', :questArea],
 		['MinLevel', :MinLevel],
 		['QuestLevel', :QuestLevel],
-		['Title', :title, true],
+		['Title', :title, :entry, 'quest'],
 	],
 },
 {
@@ -68,7 +68,7 @@ stm.execute(query)
 		['MinLevel', :minlevel],
 		['MaxLevel', :maxlevel],
 		['Rank', :rank],
-		['Name', :name, true],
+		['Name', :name, :entry, 'npc'],
 		['Title', :subname],
 	],
 },
@@ -80,7 +80,7 @@ stm.execute(query)
 		['Class', :class],
 		['Subclass', :subclass],
 		['Quality', :quality],
-		['Name', :name, true],
+		['Name', :name, :entry, 'item'],
 		['Sell price (copper)', :sellprice],
 	],
 },
@@ -90,7 +90,7 @@ stm.execute(query)
 	:title => 'Objects',
 	:columns => [
 		['Type', :type],
-		['Name', :name, true],
+		['Name', :name, :entry, 'object'],
 		['Script', :ScriptName],
 	],
 },

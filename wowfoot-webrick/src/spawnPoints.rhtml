@@ -3,12 +3,6 @@
 <%= @coords.size %> spawn-points.
 </p>
 
-<STYLE type="text/css">
-	div { position:relative; }	/* Enables absolute positioning relative to div tags. */
-	#map { width:40% }	/* Enables use of percentages inside. */
-	img.coord { position:absolute; }
-</STYLE>
-
 <p>
 <% sorted = @zones.sort_by { |area, coords| coords ? -coords.size : 0 } %>
 <% sorted.each do |area, coords| %>
@@ -17,7 +11,7 @@
 </p>
 
 <div id="map">
-<img width="100%" id="mapImage">
+<img width="100%" id="mapImage" src="#" alt="Map image">
 </div>
 
 <SCRIPT type="text/javascript">
@@ -33,7 +27,8 @@ coords:[<% coords.each do |c| %><%= "{y:#{c[:x]},x:#{c[:y]}}," %><% end if(coord
 function setMap(zoneId) {
 	// change map image
 	document.getElementById("mapImage").src = "output/"+zones[zoneId].name+".jpeg";
-	
+	document.getElementById("mapImage").alt = zones[zoneId].name;
+
 	//add new coordinate markers
 	map = document.getElementById("map");
 	coords = zones[zoneId].coords;
@@ -51,14 +46,14 @@ setMap(<%= @mainArea %>);
 function mapLink_onclick(e) {
 	// find new zone id
 	zoneId = e.target.id.substring(4);
-	
+
 	// remove old coordinate markers
 	oc = document.getElementsByClassName("coord");
 	while(oc.length > 0) {
 		o = oc.item(0);
 		o.parentNode.removeChild(o);
 	}
-	
+
 	setMap(zoneId)
 }
 </SCRIPT>

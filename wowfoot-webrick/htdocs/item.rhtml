@@ -3,10 +3,18 @@
 run 'item.rb'
 %>
 
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <head>
 	<title><%= @template[:name] %> - Item - WowFoot</title>
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+
+<STYLE type="text/css">
+<% ITEM_QUALITY.each do |num, q| %>
+<%= "SPAN.q#{q[:color]} { color:##{q[:color]}; font-weight:bold; }" %>
+<% end %>
+</STYLE>
 </head>
 <body>
 
@@ -14,103 +22,18 @@ run 'item.rb'
 <%= @template.inspect %>
 </p>
 
-<STYLE type="text/css">
-	BODY { color:white; background-color:#202020; }
-	A { color:#0080ff; text-decoration:none; }
-	A:visited { color:#0040ff; }
-	A:hover { text-decoration:underline; }
-<% ITEM_QUALITY.each do |num, q| %>
-<%= "SPAN.q#{q[:color]} { color:#{q[:color]}; font-weight:bold; }" %>
-<% end %>
-</STYLE>
-
 <p>
 Info:<br>
 Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
 Equip: <%= ITEM_EQUIP[@template[:inventoryType].to_i] %>(<%= @template[:inventoryType] %>)<br>
-Quality: <span class="q<%= @quality[:color] %>"><%= @quality[:name] %></span><br>
+Quality: <span class="q<%= "#{@quality[:color]}" %>"><%= @quality[:name] %></span><br>
 </p>
 
-
-<STYLE type="text/css">
-	TABLE { border-collapse: collapse; display: none; }
-	td { border-spacing: 1; border: solid; }
-</STYLE>
-
 <% if(!@largestTable) %>
-<p>Item source & use not found.</p>
+<p>Item source &amp; use not found.</p>
 <% end %>
 
-<!-- Tab-table :) -->
-<table id="tabs"><tr>
-<% @TAB_TABLES.each do |t| %>
-<td><a href="#" id="<%= t[:id] %>"><%= t[:title] %> (<%= t[:array].size %>)</a></td>
-<% end %>
-</tr></table>
-
-
-<!-- Tables for each tab -->
-<% @TAB_TABLES.each do |t| %>
-<table id="<%= t[:id] %>Table">
-<!-- Title row -->
-<tr>
-<td>ID</td>
-<%  t[:columns].each do |c| %>
-<td><%= c[0] %></td>
-<%  end %>
-</tr>
-
-<!-- Data row -->
-<%  t[:array].each do |row| %>
-<tr>
-
-<!-- ID column -->
-<td><%= row[:entry] %></td>
-
-<!-- Other columns -->
-<%   t[:columns].each do |c| %>
-<td>
-<%    if(c[2] && c[3]) %>
-<a href="<%="/#{c[3]}=#{row[c[2]]}"%>">
-<%    end %>
-<%= row[c[1]] %>
-<%    if(c[2] && c[3])%>
-</a>
-<%    end %>
-</td>
-<%   end %>
-</tr>
-<%  end %>
-</table>
-<% end %>
-
-<SCRIPT type="text/javascript">
-function tab_onclick(e) {
-	activateTab(e.target);
-}
-function activateTab(target) {
-	document.getElementById(currentTab + "Table").style.display = "none";
-	document.getElementById(target.id + "Table").style.display = "block";
-	document.getElementById(currentTab).style.fontWeight = "normal";
-	document.getElementById(currentTab).style.fontSize = "medium";
-	target.style.fontWeight = "bold";
-	target.style.fontSize = "x-large";
-	currentTab = target.id;
-}
-function my_onload() {
-<% if(@largestTable) %>
-	currentTab = "<%= @largestTable %>"
-	activateTab(document.getElementById(currentTab))
-
-	document.getElementById("tabs").style.display = "block";
-
-<% @TAB_TABLES.each do |t| %>
-	document.getElementById("<%= t[:id] %>").onclick = tab_onclick;
-<% end %>
-<% end %>
-}
-window.onload = my_onload;
-</SCRIPT>
+<%= rhtml 'tabTables' %>
 
 </body>
 </html>
