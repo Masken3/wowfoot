@@ -19,10 +19,17 @@ end
 	subSimpleTag(b, 'b')
 	subSimpleTag(b, 'i')
 	subSimpleTag(b, 'u')
-	subSimpleTag(b, 'ul')
-	subSimpleTag(b, 'ol')
+	#subSimpleTag(b, 'ul')
+	b.gsub!('[ol]', '</p><ol>')
+	b.gsub!('[/ol]', '</ol><p>')
+	#subSimpleTag(b, 'ol')
 	subSimpleTag(b, 'li')
 	#subSimpleTag(b, 'quote')	# doesn't work; quote tags are complex.
+
+	# remove extra <br> in the <ul><li> no-space.
+	b.gsub!(/(<ul>[^<]*)<br>/, '\1')
+	b.gsub!(/(<ol>[^<]*)<br>/, '\1')
+	b.gsub!(/(<\/li>[^<]*)<br>/, '\1')
 
 	# doesn't work.
 	#c[:body].gsub!(/\[url=http:\/\/.+\.wowhead\.com\/\?([^]]+)\]/, '<a href="/\1">')
