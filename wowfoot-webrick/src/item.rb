@@ -6,6 +6,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', material'+
 	', flags'+
 	', maxcount'+
+	', stackable'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -33,6 +34,11 @@ def unique
 	u += "(#{mc})" if(mc > 1)
 	u += '<br>'
 	return u
+end
+def stackable
+	st = @template[:stackable].to_i
+	return nil if(st <= 1)
+	return "Stack: #{st}<br>"
 end
 
 
