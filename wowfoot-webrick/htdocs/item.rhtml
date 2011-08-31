@@ -29,19 +29,13 @@ Equip: <%= ITEM_EQUIP[@template[:inventoryType].to_i] %>(<%= @template[:inventor
 Quality: <span class="q<%= "#{@quality[:color]}" %>"><%= @quality[:name] %></span><br>
 Material: <%= ITEM_MATERIAL[@template[:material].to_i] %>(<%= @template[:material] %>)<br>
 
-<% if(@flags != 0) %>
-Flags:
-<% firstFlag = true
-ITEM_FLAGS.each do |flag, name| if(@flags& flag != 0) %>
-<% if(firstFlag)
-firstFlag = false %>
-<% else %>
-,
-<% end %>
-<%= name %>
+<% ITEM_FLAGS.each do |flag, name| if(@flags& flag != 0) %>
+<%= name %><br>
 <% end; end %>
-<br>
-<% end %>
+
+<%# todo: class & race, skill, spell, honorrank, cityrank %>
+
+<%= unique %>
 </p>
 
 <%= rhtml 'tabTables' %>

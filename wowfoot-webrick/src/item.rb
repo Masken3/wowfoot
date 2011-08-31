@@ -5,6 +5,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', inventoryType'+
 	', material'+
 	', flags'+
+	', maxcount'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -24,6 +25,15 @@ end
 @quality = ITEM_QUALITY[@template[:quality].to_i]
 
 @flags = @template[:flags].to_i
+
+def unique
+	mc = @template[:maxcount].to_i
+	return nil if(mc == 0)
+	u = 'Unique'
+	u += "(#{mc})" if(mc > 1)
+	u += '<br>'
+	return u
+end
 
 
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
