@@ -1,5 +1,4 @@
 ITEM_EQUIP = {
-0 => 'Non equipable',
 1 => 'Head',
 2 => 'Neck',
 3 => 'Shoulder',

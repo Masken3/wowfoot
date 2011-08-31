@@ -23,7 +23,7 @@ else
 end
 
 @quality = ITEM_QUALITY[@template[:quality].to_i]
-
+@equip = @template[:inventoryType].to_i
 @flags = @template[:flags].to_i
 
 def unique

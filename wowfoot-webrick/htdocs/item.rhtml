@@ -25,7 +25,9 @@ run 'item.rb'
 <p>
 Info:<br>
 Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
-Equip: <%= ITEM_EQUIP[@template[:inventoryType].to_i] %>(<%= @template[:inventoryType] %>)<br>
+<% if (@equip != 0) %>
+Equip: <%= ITEM_EQUIP[@equip] %>(<%= @equip %>)<br>
+<% end %>
 Quality: <span class="q<%= "#{@quality[:color]}" %>"><%= @quality[:name] %></span><br>
 Material: <%= ITEM_MATERIAL[@template[:material].to_i] %>(<%= @template[:material] %>)<br>
 
