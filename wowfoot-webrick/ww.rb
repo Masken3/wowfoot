@@ -93,6 +93,16 @@ class SinglePageServlet < MyPageServlet
 	end
 end
 
+class IdStruct
+	def initialize(id)
+		@id = id
+	end
+	def bind
+		id = @id
+		return binding
+	end
+end
+
 class IdPageServlet < MyPageServlet
 	def initialize(path, pattern)
 		super(path)
@@ -105,7 +115,7 @@ class IdPageServlet < MyPageServlet
 		if(!id)
 			raise HTTPStatus[404], "`#{req.path}' not found."
 		end
-		@template.result(binding())
+		@template.result(IdStruct.new(id).bind)
 	end
 end
 
