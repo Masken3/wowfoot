@@ -7,6 +7,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', flags'+
 	', maxcount'+
 	', stackable'+
+	', containerSlots'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -39,6 +40,11 @@ def stackable
 	st = @template[:stackable].to_i
 	return nil if(st <= 1)
 	return "Stack: #{st}<br>"
+end
+def containerSlots
+	cs = @template[:containerSlots].to_i
+	return nil if(cs == 0)
+	return "Bag: #{cs} slots.<br>"
 end
 
 
