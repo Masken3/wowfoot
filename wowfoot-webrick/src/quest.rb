@@ -60,9 +60,10 @@ stm.execute(@id)
 @template = stm.fetch
 def translateQuestText(sym)
 	bPattern = /\$[bB]/
-	@template[sym].gsub!(/</, '&lt;') if(@template[sym])
-	@template[sym].gsub!(/>/, '&gt;') if(@template[sym])
-	@template[sym].gsub!(bPattern, '<br>') if(@template[sym])
+	if(@template[sym])
+		@template[sym] = ERB::Util.html_escape(@template[sym])
+		@template[sym].gsub!(bPattern, '<br>')
+	end
 end
 translateQuestText(:objectives)
 translateQuestText(:details)

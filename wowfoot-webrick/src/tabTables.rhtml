@@ -42,7 +42,7 @@ end
 <%    if(c[2] && c[3]) %>
 <a href="<%="/#{c[3]}=#{row[c[2]]}"%>">
 <%    end %>
-<%= row[c[1]].to_s.gsub('&', '&amp;') %>
+<%= ERB::Util.html_escape(row[c[1]]) %>
 <%    if(c[2] && c[3])%>
 </a>
 <%    end %>
