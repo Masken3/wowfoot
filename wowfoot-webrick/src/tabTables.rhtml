@@ -4,6 +4,9 @@ size = 0
 @TAB_TABLES.each do |tab|
 	size, @largestTable = tab[:array].size, tab[:id] if(tab[:array].size > size)
 end
+#p @largestTable
+# weird: seems to vary between executions.
+# perhaps we should use a system that doesn't store variables between page-executions.
 %>
 
 <!-- Tab-table :) -->

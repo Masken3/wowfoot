@@ -4,6 +4,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
 	', inventoryType'+
 	', material'+
+	', flags'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -21,6 +22,8 @@ else
 end
 
 @quality = ITEM_QUALITY[@template[:quality].to_i]
+
+@flags = @template[:flags].to_i
 
 
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+

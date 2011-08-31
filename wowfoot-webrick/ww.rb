@@ -43,6 +43,7 @@ require './src/itemClass.rb'
 require './src/itemEquip.rb'
 require './src/itemQuality.rb'
 require './src/itemMaterial.rb'
+require './src/itemFlags.rb'
 
 def run(path, bind = binding)
 	path = File.expand_path('src/'+path)
