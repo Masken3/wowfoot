@@ -38,6 +38,12 @@ require '../wowfoot-ex/output/QuestFactionReward.rb'
 require './src/areaMap.rb'
 require './src/coordinates.rb'
 
+require './src/referenceLoot.rb'
+require './src/itemClass.rb'
+require './src/itemEquip.rb'
+require './src/itemQuality.rb'
+require './src/itemMaterial.rb'
+
 def run(path, bind = binding)
 	path = File.expand_path('src/'+path)
 	eval(open(path).read, bind, path)

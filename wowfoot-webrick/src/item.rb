@@ -1,12 +1,9 @@
-# todo: move to ww.rb when stable
-run 'referenceLoot.rb'
-run 'itemClass.rb'
-run 'itemEquip.rb'
-run 'itemQuality.rb'
 
+# todo: displayId
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
 	', inventoryType'+
+	', material'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
