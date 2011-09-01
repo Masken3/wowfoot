@@ -24,7 +24,7 @@ ITEM_EQUIP = {
 23 => 'Holdable (Tome)',
 24 => 'Ammo',
 25 => 'Thrown',
-26 => 'Ranged right',
+26 => 'Ranged (right-hand)',
 27 => 'Quiver',
 28 => 'Relic',
 }

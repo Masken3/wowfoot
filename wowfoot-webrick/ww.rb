@@ -16,6 +16,14 @@ require './src/config.rb'
 require './src/dbiExtras.rb'
 require './src/util.rb'
 
+require './src/itemClass.rb'
+require './src/itemEquip.rb'
+require './src/itemQuality.rb'
+require './src/itemMaterial.rb'
+require './src/itemFlags.rb'
+require './src/itemStat.rb'
+require './src/itemEnums.rb'
+
 S = HTTPServer.new( :Port => 3001 )
 
 module TDB	# Trinity DataBase
@@ -39,11 +47,6 @@ require './src/areaMap.rb'
 require './src/coordinates.rb'
 
 require './src/referenceLoot.rb'
-require './src/itemClass.rb'
-require './src/itemEquip.rb'
-require './src/itemQuality.rb'
-require './src/itemMaterial.rb'
-require './src/itemFlags.rb'
 
 def run(path, bind = binding)
 	path = File.expand_path('src/'+path)

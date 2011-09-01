@@ -23,7 +23,6 @@ run 'item.rb'
 </p>
 
 <p>
-Info:<br>
 Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
 <% if (@equip != 0) %>
 Equip: <%= ITEM_EQUIP[@equip] %>(<%= @equip %>)<br>
@@ -40,6 +39,18 @@ Material: <%= ITEM_MATERIAL[@template[:material].to_i] %>(<%= @template[:materia
 <%= unique %>
 <%= stackable %>
 <%= containerSlots %>
+
+<% if(@dps != 0) %>
+<% (1..2).each do |i| if(@template["dmg_max#{i}"].to_i != 0 || @template["dmg_min#{i}"].to_i != 0) %>
+<%= @template["dmg_min#{i}"] %> - <%= @template["dmg_max#{i}"] %> <%= ITEM_DAMAGE_TYPE[@template["dmg_type#{i}"].to_i] %> damage<br>
+<% end; end %>
+(<%= sprintf('%.2f', @dps) %> dps)<br>
+Speed: <%= sprintf('%.2f', @template[:delay].to_i / 1000.0) %><br>
+<% end %>
+
+<% (1..@template[:statsCount].to_i).each do |i| %>
+<span class="green"><%= statHtml(i) %></span><br>
+<% end %>
 </p>
 
 <%= rhtml 'tabTables' %>

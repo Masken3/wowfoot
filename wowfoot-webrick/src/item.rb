@@ -1,4 +1,14 @@
 
+statsSql = ''
+(1..10).each do |i|
+	statsSql += ", stat_type#{i}, stat_value#{i}"
+end
+
+dmgSql = ''
+(1..2).each do |i|
+	dmgSql += ", dmg_min#{i}, dmg_max#{i}, dmg_type#{i}"
+end
+
 # todo: displayId
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
@@ -8,12 +18,22 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', maxcount'+
 	', stackable'+
 	', containerSlots'+
+	', statsCount'+
+	statsSql+
+	dmgSql+
+	', delay'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
 
 raise HTTPStatus[404], "Item not found in database" if(!@template)
 
+
+@dps = 0.0
+(1..2).each do |i|
+	averageDmg = (@template["dmg_min#{i}"].to_i + @template["dmg_max#{i}"].to_i) / 2.0
+	@dps += averageDmg / (@template[:delay].to_i / 1000.0) if(averageDmg != 0)
+end
 
 @itemClass = ITEM_CLASS[@template[:class].to_i]
 if(@itemClass)
@@ -45,6 +65,14 @@ def containerSlots
 	cs = @template[:containerSlots].to_i
 	return nil if(cs == 0)
 	return "Bag: #{cs} slots.<br>"
+end
+def statHtml(i)
+	type = @template["stat_type#{i}"].to_i
+	html = ITEM_STAT[type]
+	val = @template["stat_value#{i}"].to_i
+	html += ' '
+	html += '+' if(val > 0)
+	html += val.to_s
 end
 
 

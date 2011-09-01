@@ -12,7 +12,12 @@ div { position:relative; }	/* Enables absolute positioning relative to div tags.
 img.coord { position:absolute; }
 
 /* item */
-BODY { color:white; background-color:#202020; }
+BODY {
+	color:white; background-color:#202020;
+	font-family:Arial,sans-serif;
+}
 A { color:#0080ff; text-decoration:none; }
 A:visited { color:#0040ff; }
 A:hover { text-decoration:underline; }
+
+span.green { color:#1eff00; }
