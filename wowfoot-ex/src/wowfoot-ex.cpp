@@ -265,6 +265,25 @@ int main() {
 		dumpAreaMap(true);
 	}
 	
+	mkdir("output");
+
+	printf("Opening Spell.dbc...\n");
+	DBCFile spell("DBFilesClient\\Spell.dbc");
+	res = spell.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" spells...\n", spell.getRecordCount());
+	out = fopen("output/Spell.rb", "w");
+	fprintf(out, "SPELL = {\n");
+	for(DBCFile::Iterator itr = spell.begin(); itr != spell.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(136);
+		fprintf(out, "\t%i => \"%s\",\n",
+			id, escapeQuotes(name).c_str());
+	}
+	fprintf(out, "}\n");
+
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");
 	res = wmc.open();
@@ -288,10 +307,6 @@ int main() {
 			mid, x1, y1, x2, y2);
 	}
 	fprintf(out, "}\n");
-
-	mkdir("output");
-
-	WmaMap wmaMap;
 
 	printf("Opening Achievement.dbc...\n");
 	DBCFile ach("DBFilesClient\\Achievement.dbc");
@@ -387,6 +402,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
+	WmaMap wmaMap;
 	printf("Opening WorldMapArea.dbc...\n");
 	DBCFile wma("DBFilesClient\\WorldMapArea.dbc");
 	res = wma.open();
