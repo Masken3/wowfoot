@@ -20,14 +20,18 @@ def getStandardLoot(id, lt, st = lt, ct = nil)
 	stm = TDB::C.prepare(sql)
 	stm.execute(@id)
 	part1 = stm.fetch_all
-	
-	stm = TDB::C.prepare('select st.entry, st.name, rlt.chanceOrQuestChance, rlt.mincountOrRef, rlt.maxcount'+
-	" from #{st}_template st"+
+
+	sql = 'select st.entry, st.name, rlt.chanceOrQuestChance, rlt.mincountOrRef, rlt.maxcount'
+	if(ct)
+		sql += ", (select count(*) from #{ct} where #{ct}.id = st.entry) as count"
+	end
+	sql += " from #{st}_template st"+
 	" INNER JOIN #{lt}_loot_template llt on llt.entry = st.entry"+
 	' INNER JOIN reference_loot_template rlt on (-llt.mincountOrRef) = rlt.entry'+
-	' where rlt.item = ?')
+	' where rlt.item = ?'
+	stm = TDB::C.prepare(sql)
 	stm.execute(@id)
 	part2 = stm.fetch_all
-	
+
 	return part1 + part2
 end
