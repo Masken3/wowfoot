@@ -9,6 +9,20 @@ dmgSql = ''
 	dmgSql += ", dmg_min#{i}, dmg_max#{i}, dmg_type#{i}"
 end
 
+# todo: make constant
+@resistances = [
+	'holy',
+	'fire',
+	'nature',
+	'frost',
+	'shadow',
+	'arcane',
+]
+resistanceSql = ''
+@resistances.each do |r|
+	resistanceSql += ", #{r}_res"
+end
+
 # todo: displayId
 stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', disenchantID'+
@@ -25,6 +39,8 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', bonding'+
 	', description'+
 	', totemCategory'+
+	', armor'+
+	resistanceSql+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -87,7 +103,7 @@ end
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
 	' from disenchant_loot_template dlt'+
 	' INNER JOIN item_template it on dlt.item = it.entry'+
-	' where dlt.entry = ?')
+	' where dlt.entry = ? LIMIT 0,100')
 stm.execute(@template[:disenchantID])
 @disenchantTo = stm.fetch_all
 #p @disenchantTo
@@ -123,7 +139,7 @@ stm = TDB::C.prepare('select it.entry, it.name, dlt.chanceOrQuestChance, dlt.min
 	' INNER JOIN disenchant_loot_template dlt on dlt.entry = it.disenchantID'+
 	loot_joins +
 	' where dlt.item = ?'+
-	' GROUP BY it.entry')
+	' GROUP BY it.entry LIMIT 0,100')
 stm.execute(@id)
 @disenchantFrom = stm.fetch_all
 
@@ -147,7 +163,7 @@ stm = TDB::C.prepare('select gt.entry, gt.name, llt.chanceOrQuestChance, llt.min
 	", (select count(*) from gameobject where gameobject.id = gt.entry) as count"+
 	" from gameobject_template gt"+
 	" INNER JOIN gameobject_loot_template llt on llt.entry = gt.data1"+
-	' where llt.item = ? AND (gt.type = 3 OR gt.type = 25)')	# chest or fishinghole
+	' where llt.item = ? AND (gt.type = 3 OR gt.type = 25) LIMIT 0,100')	# chest or fishinghole
 stm.execute(@id)
 @object = stm.fetch_all
 
@@ -156,7 +172,7 @@ stm.execute(@id)
 stm = TDB::C.prepare('select it.entry, it.name, chanceOrQuestChance, mincountOrRef, ilt.maxcount'+
 	' from item_loot_template ilt'+
 	' INNER JOIN item_template it on ilt.item = it.entry'+
-	' where ilt.entry = ?')
+	' where ilt.entry = ? LIMIT 0,100')
 stm.execute(@id)
 @contains = stm.fetch_all
 

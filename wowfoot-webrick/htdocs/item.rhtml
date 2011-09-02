@@ -53,6 +53,14 @@ Material: <%= ITEM_MATERIAL[@template[:material].to_i] %><!--(<%= @template[:mat
 Speed: <%= sprintf('%.2f', @template[:delay].to_i / 1000.0) %><br>
 <% end %>
 
+<% if(@template[:armor].to_i != 0) %>
+<%= @template[:armor] %> armor<br>
+<% end %>
+
+<% @resistances.each do |r| res = @template["#{r}_res"].to_i; if(res != 0) %>
+<%= res %> <%= r %> resistance<br>
+<% end; end %>
+
 <% (1..@template[:statsCount].to_i).each do |i| %>
 <span class="green"><%= statHtml(i) %></span><br>
 <% end %>

@@ -16,7 +16,7 @@ def getStandardLoot(id, lt, st = lt, ct = nil)
 	sql += " from #{st}_template st"+
 	" INNER JOIN #{lt}_loot_template llt on llt.entry = st.entry"+
 	' where llt.item = ? AND llt.mincountOrRef >= 0'+
-	' order by -llt.chanceOrQuestChance'
+	' order by -llt.chanceOrQuestChance LIMIT 0,100'
 	stm = TDB::C.prepare(sql)
 	stm.execute(@id)
 	part1 = stm.fetch_all
@@ -28,7 +28,7 @@ def getStandardLoot(id, lt, st = lt, ct = nil)
 	sql += " from #{st}_template st"+
 	" INNER JOIN #{lt}_loot_template llt on llt.entry = st.entry"+
 	' INNER JOIN reference_loot_template rlt on (-llt.mincountOrRef) = rlt.entry'+
-	' where rlt.item = ?'
+	' where rlt.item = ? LIMIT 0,100'
 	stm = TDB::C.prepare(sql)
 	stm.execute(@id)
 	part2 = stm.fetch_all
