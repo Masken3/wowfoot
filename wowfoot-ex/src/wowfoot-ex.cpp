@@ -176,7 +176,7 @@ static void dumpAreaMap(bool dumpArea) {
 		const DBCFile::Record& r(*itr);
 		int mid = r.getInt(0);
 		const char* name = r.getString(1);
-		
+
 		fprintf(mapOut, "\t%i => \"%s\",\n", mid, name);
 		if(!dumpArea)
 			continue;
@@ -210,7 +210,7 @@ static void dumpAreaMap(bool dumpArea) {
 		}
 		printf("%i valid grids\n", nValid);
 		//printf("Offset: %li bytes.\n", ftell(out));
-		
+
 		for(int y = 0; y < WDT_MAP_SIZE; ++y) {
 			for(int x = 0; x < WDT_MAP_SIZE; ++x) {
 				if (!wdt.main->adt_list[y][x].exist) {
@@ -264,8 +264,25 @@ int main() {
 	} else {
 		dumpAreaMap(true);
 	}
-	
+
 	mkdir("output");
+
+	printf("Opening TotemCategory.dbc...\n");
+	DBCFile totem("DBFilesClient\\TotemCategory.dbc");
+	res = totem.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" totems...\n", totem.getRecordCount());
+	out = fopen("output/TotemCategory.rb", "w");
+	fprintf(out, "TOTEM_CATEGORY = {\n");
+	for(DBCFile::Iterator itr = totem.begin(); itr != totem.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(1);
+		fprintf(out, "\t%i => \"%s\",\n",
+			id, name);
+	}
+	fprintf(out, "}\n");
 
 	printf("Opening Spell.dbc...\n");
 	DBCFile spell("DBFilesClient\\Spell.dbc");

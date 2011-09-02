@@ -43,6 +43,7 @@ require '../wowfoot-ex/output/AreaTable.rb'
 require '../wowfoot-ex/output/QuestSort.rb'
 require '../wowfoot-ex/output/Faction.rb'
 require '../wowfoot-ex/output/QuestFactionReward.rb'
+require '../wowfoot-ex/output/TotemCategory.rb'
 require './src/areaMap.rb'
 require './src/coordinates.rb'
 

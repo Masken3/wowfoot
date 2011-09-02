@@ -26,6 +26,13 @@ run 'item.rb'
 <%= name %><br>
 <% end; end %>
 
+<% tc = @template[:totemCategory].to_i; if(tc != 0) %>
+<% if(TOTEM_CATEGORY[tc]) %>
+<%= TOTEM_CATEGORY[tc] %><br>
+<% else %>
+Unknown TotemCategory: <%= tc %><br>
+<% end; end %>
+
 Class: <%= @itemClass[:name] %><!--(<%= @template[:class] %>)--> / <%= @itemSubClass %><!--(<%= @template[:subclass] %>)--><br>
 <% if (@equip != 0) %>
 Equip: <%= ITEM_EQUIP[@equip] %><!--(<%= @equip %>)--><br>
@@ -50,7 +57,7 @@ Speed: <%= sprintf('%.2f', @template[:delay].to_i / 1000.0) %><br>
 <span class="green"><%= statHtml(i) %></span><br>
 <% end %>
 
-<% if(@template[:description]) %>
+<% d = @template[:description]; if(d && !d.empty?) %>
 <span class="itemDescription">"<%= @template[:description] %>"</span><br>
 <% end %>
 </p>
