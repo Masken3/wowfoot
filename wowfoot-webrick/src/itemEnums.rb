@@ -7,3 +7,11 @@ ITEM_DAMAGE_TYPE = {
 5 => 'Shadow',
 6 => 'Arcane',
 }
+
+ITEM_BONDING = {
+1 => 'Bind on Pickup',
+2 => 'Bind on Equip',
+3 => 'Bind on Use',
+4 => 'Quest item',
+5 => 'Quest Item1',
+}

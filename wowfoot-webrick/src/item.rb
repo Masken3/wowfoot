@@ -22,6 +22,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	statsSql+
 	dmgSql+
 	', delay'+
+	', bonding'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -73,6 +74,11 @@ def statHtml(i)
 	html += ' '
 	html += '+' if(val > 0)
 	html += val.to_s
+end
+def bondingHtml
+	bonding = @template[:bonding].to_i
+	return nil if(bonding == 0)
+	return ITEM_BONDING[bonding]+'<br>'
 end
 
 

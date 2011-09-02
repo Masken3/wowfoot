@@ -15,9 +15,11 @@ img.coord { position:absolute; }
 BODY {
 	color:white; background-color:#202020;
 	font-family:Arial,sans-serif;
+	font-size:small;
 }
 A { color:#0080ff; text-decoration:none; }
 A:visited { color:#0040ff; }
 A:hover { text-decoration:underline; }
 
 span.green { color:#1eff00; }
+span.itemName { font-size:medium; }

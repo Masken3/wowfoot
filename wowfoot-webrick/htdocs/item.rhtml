@@ -19,20 +19,18 @@ run 'item.rb'
 <body>
 
 <p>
-<%= @template.inspect %>
-</p>
-
-<p>
-Class: <%= @itemClass[:name] %>(<%= @template[:class] %>) / <%= @itemSubClass %>(<%= @template[:subclass] %>)<br>
-<% if (@equip != 0) %>
-Equip: <%= ITEM_EQUIP[@equip] %>(<%= @equip %>)<br>
-<% end %>
-Quality: <span class="q<%= "#{@quality[:color]}" %>"><%= @quality[:name] %></span><br>
-Material: <%= ITEM_MATERIAL[@template[:material].to_i] %>(<%= @template[:material] %>)<br>
+<span class="itemName"><span class="q<%= "#{@quality[:color]}" %>"><%= @template[:name] %></span></span><br>
+<%= bondingHtml %>
 
 <% ITEM_FLAGS.each do |flag, name| if(@flags& flag != 0) %>
 <%= name %><br>
 <% end; end %>
+
+Class: <%= @itemClass[:name] %><!--(<%= @template[:class] %>)--> / <%= @itemSubClass %><!--(<%= @template[:subclass] %>)--><br>
+<% if (@equip != 0) %>
+Equip: <%= ITEM_EQUIP[@equip] %><!--(<%= @equip %>)--><br>
+<% end %>
+Material: <%= ITEM_MATERIAL[@template[:material].to_i] %><!--(<%= @template[:material] %>)--><br>
 
 <%# todo: class & race, skill, spell, honorrank, cityrank %>
 
