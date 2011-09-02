@@ -49,6 +49,10 @@ Speed: <%= sprintf('%.2f', @template[:delay].to_i / 1000.0) %><br>
 <% (1..@template[:statsCount].to_i).each do |i| %>
 <span class="green"><%= statHtml(i) %></span><br>
 <% end %>
+
+<% if(@template[:description]) %>
+<span class="itemDescription">"<%= @template[:description] %>"</span><br>
+<% end %>
 </p>
 
 <%= rhtml 'tabTables' %>

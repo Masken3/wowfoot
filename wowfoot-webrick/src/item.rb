@@ -23,6 +23,8 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	dmgSql+
 	', delay'+
 	', bonding'+
+	', description'+
+	', totemCategory'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
