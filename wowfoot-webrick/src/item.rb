@@ -41,6 +41,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', totemCategory'+
 	', armor'+
 	resistanceSql+
+	', bagFamily'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -97,6 +98,16 @@ def bondingHtml
 	bonding = @template[:bonding].to_i
 	return nil if(bonding == 0)
 	return ITEM_BONDING[bonding]+'<br>'
+end
+def bagFamilyHtml
+	bf = @template[:bagFamily].to_i
+	return nil if(bf == 0)
+	html = 'Bag family:'
+	ITEM_BAG_FAMILY.each do |flag, name|
+		html += ' '+name if(bf & flag != 0)
+	end
+	#html += sprintf(' (0x%x)', bf)
+	return html
 end
 
 

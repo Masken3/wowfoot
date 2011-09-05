@@ -15,3 +15,21 @@ ITEM_BONDING = {
 4 => 'Quest item',
 5 => 'Quest Item1',
 }
+
+ITEM_BAG_FAMILY = {
+1 => 'Arrows',
+2 => 'Bullets',
+4 => 'Soul Shards',
+8 => 'Leatherworking Supplies',
+16 => 'Inscription Supplies',
+32 => 'Herbs',
+64 => 'Enchanting Supplies',
+128 => 'Engineering Supplies',
+256 => 'Keys',
+512 => 'Gems',
+1024 => 'Mining Supplies',
+2048 => 'Soulbound Equipment',
+4096 => 'Vanity Pets',
+8192 => 'Currency Tokens',
+16384 => 'Quest Items',
+}

@@ -44,6 +44,7 @@ Material: <%= ITEM_MATERIAL[@template[:material].to_i] %><!--(<%= @template[:mat
 <%= unique %>
 <%= stackable %>
 <%= containerSlots %>
+<%= bagFamilyHtml %>
 
 <% if(@dps != 0) %>
 <% (1..2).each do |i| if(@template["dmg_max#{i}"].to_i != 0 || @template["dmg_min#{i}"].to_i != 0) %>
