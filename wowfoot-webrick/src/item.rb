@@ -187,6 +187,13 @@ stm = TDB::C.prepare('select it.entry, it.name, chanceOrQuestChance, mincountOrR
 stm.execute(@id)
 @contains = stm.fetch_all
 
+stm = TDB::C.prepare('select v.entry, ct.name, extendedCost'+
+	' from npc_vendor v'+
+	' INNER JOIN creature_template ct on ct.entry = v.entry'+
+	' where v.item = ? LIMIT 0,100')
+stm.execute(@id)
+@vendor = stm.fetch_all
+
 questColumns = {
 :provided => {:name => 'SrcItemId', :title => 'Provided for quest'},
 :required => {:name => 'ReqItem', :title => 'Required for quest'},	# for successful completion
@@ -256,6 +263,15 @@ end
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
 @TAB_TABLES = questTables + [
+{
+	:id => 'vendor',
+	:array => @vendor,
+	:title => 'Sold by',
+	:columns => [
+		['Name', :name, :entry, 'npc'],
+		['Cost', :extendedCost],
+	],
+},
 {
 	:id => 'milled',
 	:array => @milledFrom,
@@ -354,6 +370,20 @@ end
 #p Array.instance_methods
 @TAB_TABLES.reject! do |tab|
 	tab[:array].size == 0
+end
+
+@TAB_TABLES.each do |tt|
+	hasChance = false
+	tt[:columns].each do |col|
+		if(col[1] == :chanceOrQuestChance)
+			hasChance = true
+			break
+		end
+	end
+	next unless(hasChance)
+	tt[:array].each do |row|
+		row[:chanceOrQuestChance] = 'Group' if(row[:chanceOrQuestChance] == 0.0)
+	end
 end
 
 # unused
