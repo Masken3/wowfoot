@@ -9,17 +9,8 @@ dmgSql = ''
 	dmgSql += ", dmg_min#{i}, dmg_max#{i}, dmg_type#{i}"
 end
 
-# todo: make constant
-@resistances = [
-	'holy',
-	'fire',
-	'nature',
-	'frost',
-	'shadow',
-	'arcane',
-]
 resistanceSql = ''
-@resistances.each do |r|
+ITEM_RESISTANCES.each do |r|
 	resistanceSql += ", #{r}_res"
 end
 
@@ -107,6 +98,38 @@ def bagFamilyHtml
 		html += ' '+name if(bf & flag != 0)
 	end
 	#html += sprintf(' (0x%x)', bf)
+	return html
+end
+class String
+	def cappend(s)
+		if(self.empty?)
+			self.replace(s)
+		else
+			self << ', ' + s
+		end
+	end
+end
+def costHtml(extendedCostId)
+	html = ''
+	if(@template[:buyPrice] != 0)
+		html += "#{@template[:buyPrice]} copper"
+	elsif(extendedCostId == 0)
+		return 'No cost'
+	end
+	return html if(extendedCostId == 0)
+	html = '' if(@template[:flagsExtra] != 3)
+
+	#0 for 2v2, 1 for 3v3/5v5, 2 for 5v5 only
+	arenaSlot = { 0 => '2v2', 1 => '3v3/5v5', 2 => '5v5' }
+
+	ec = ITEM_EXTENDED_COST[extendedCostId]
+	html.cappend("#{ec[:honorPoints]} honor points") if(ec[:honorPoints] != 0)
+	html.cappend("#{ec[:arenaPoints]} arena points") if(ec[:arenaPoints] != 0)
+	html.cappend("#{ec[:arenaRating]} #{arenaSlot[ec[:arenaSlot]]} arena rating") if(ec[:arenaRating] != 0)
+	ec[:item].each do |item|
+		html.cappend("#{item.count} <a href=\"item=#{item.id}\">item #{item.id}</a>")
+	end
+
 	return html
 end
 
@@ -260,6 +283,10 @@ questTables = questColumns.collect do |id, hash|
 end
 #p questTables
 
+@vendor.each do |row|
+	row[:extendedCost] = costHtml(row[:extendedCost])
+end
+
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
 @TAB_TABLES = questTables + [
@@ -269,7 +296,7 @@ end
 	:title => 'Sold by',
 	:columns => [
 		['Name', :name, :entry, 'npc'],
-		['Cost', :extendedCost],
+		['Cost', :extendedCost, :noEscape],
 	],
 },
 {

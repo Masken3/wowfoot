@@ -58,8 +58,8 @@ Speed: <%= sprintf('%.2f', @template[:delay].to_i / 1000.0) %><br>
 <%= @template[:armor] %> armor<br>
 <% end %>
 
-<% @resistances.each do |r| res = @template["#{r}_res"].to_i; if(res != 0) %>
-<%= res %> <%= r %> resistance<br>
+<% ITEM_RESISTANCES.each do |r| res = @template["#{r}_res"].to_i; if(res != 0) %>
+<span class="green">+<%= res %> <%= r %> resistance</span><br>
 <% end; end %>
 
 <% (1..@template[:statsCount].to_i).each do |i| %>

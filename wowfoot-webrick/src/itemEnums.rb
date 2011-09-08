@@ -33,3 +33,12 @@ ITEM_BAG_FAMILY = {
 8192 => 'Currency Tokens',
 16384 => 'Quest Items',
 }
+
+ITEM_RESISTANCES = [
+'holy',
+'fire',
+'nature',
+'frost',
+'shadow',
+'arcane',
+]

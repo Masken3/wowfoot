@@ -267,6 +267,37 @@ int main() {
 
 	mkdir("output");
 
+	printf("Opening ItemExtendedCost.dbc...\n");
+	DBCFile iec("DBFilesClient\\ItemExtendedCost.dbc");
+	res = iec.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" costs...\n", iec.getRecordCount());
+	out = fopen("output/ItemExtendedCost.rb", "w");
+	fprintf(out, "IdCount = Struct.new(:id, :count)\n");
+	fprintf(out, "ITEM_EXTENDED_COST = {\n");
+	for(DBCFile::Iterator itr = iec.begin(); itr != iec.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		fprintf(out, "\t%i => {", id);
+		fprintf(out, ":honorPoints => %i, :arenaPoints => %i, :arenaSlot => %i, :arenaRating => %i",
+			r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(14));
+		fprintf(out, ", :item => [");
+		for(int i=0; i<5; i++) {
+			int iid = r.getInt(4+i);
+			int count = r.getInt(9+i);
+			if(iid != 0 || count != 0)
+				fprintf(out, "IdCount.new(%i, %i),", iid, count);
+			if((iid == 0) != (count == 0)) {
+				// this actually happens. the frontend can try to display it.
+				//printf("ItemExtendedCost error!\n");
+				//exit(1);
+			}
+		}
+		fprintf(out, "]},\n");
+	}
+	fprintf(out, "}\n");
+
 	printf("Opening TotemCategory.dbc...\n");
 	DBCFile totem("DBFilesClient\\TotemCategory.dbc");
 	res = totem.open();

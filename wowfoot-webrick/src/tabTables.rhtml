@@ -36,6 +36,9 @@ end
 <!-- Other columns -->
 <%   t[:columns].each do |c| %>
 <td>
+<% if(c[2] == :noEscape) %>
+<%= row[c[1]] %>
+<% else %>
 <%    if(c[2] && c[3]) %>
 <a href="<%="/#{c[3]}=#{row[c[2]]}"%>">
 <%    end %>
@@ -43,6 +46,7 @@ end
 <%    if(c[2] && c[3])%>
 </a>
 <%    end %>
+<% end %>
 </td>
 <%   end %>
 </tr>
