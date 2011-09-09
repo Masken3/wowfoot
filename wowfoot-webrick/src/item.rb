@@ -127,10 +127,28 @@ def costHtml(extendedCostId)
 	html.cappend("#{ec[:arenaPoints]} arena points") if(ec[:arenaPoints] != 0)
 	html.cappend("#{ec[:arenaRating]} #{arenaSlot[ec[:arenaSlot]]} arena rating") if(ec[:arenaRating] != 0)
 	ec[:item].each do |item|
-		html.cappend("#{item.count} <a href=\"item=#{item.id}\">item #{item.id}</a>")
+		html.cappend("#{item.count}x <a href=\"item=#{item.id}\">#{itemName(item.id)}</a>")
 	end
 
 	return html
+end
+
+
+# set of item IDs that need names.
+# will be populated with names.
+@itemNames = {}
+@itemNameStm = TDB::C.prepare('select name from item_template where entry = ?')
+
+def itemName(id)
+	return @itemNames[id] if(@itemNames[id])
+	@itemNameStm.execute(id)
+	t = @itemNameStm.fetch
+	if(t)
+		@itemNames[id] = t[:name]
+	else
+		@itemNames[id] = "Unknown item #{id}"
+	end
+	return @itemNames[id]
 end
 
 
