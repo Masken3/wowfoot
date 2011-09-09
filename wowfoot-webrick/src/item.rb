@@ -152,6 +152,28 @@ def itemName(id)
 end
 
 
+currencyFor = ITEM_CURRENCY[@id.to_i]
+p currencyFor
+@currencyFor = []
+stm = TDB::C.prepare(
+	'select distinct it.entry, it.name,'+
+	#'select it.entry as itemId, it.name as itemName,'+
+	#' ct.entry as ctId, ct.name as ctName,'+
+	' nv.extendedCost'+
+	' from item_template it'+
+	' INNER JOIN npc_vendor nv on it.entry = nv.item'+
+	#' INNER JOIN creature_template ct on ct.entry = nv.entry'+
+	' where nv.extendedCost = ?')
+if(currencyFor) then currencyFor.each do |costId|
+	p costId
+	stm.execute(costId)
+	items = stm.fetch_all
+	items.each do |row|
+		@currencyFor << row
+	end
+end; end
+
+
 stm = TDB::C.prepare('select dlt.entry, item, name, chanceOrQuestChance, mincountOrRef, dlt.maxcount'+
 	' from disenchant_loot_template dlt'+
 	' INNER JOIN item_template it on dlt.item = it.entry'+
@@ -305,9 +327,23 @@ end
 	row[:extendedCost] = costHtml(row[:extendedCost])
 end
 
+@currencyFor.each do |row|
+	row[:extendedCost] = costHtml(row[:extendedCost])
+end
+
 # column format: [title, array key, link array key, link page name]
 # link parts are optional.
 @TAB_TABLES = questTables + [
+{
+	:id => 'currencyFor',
+	:array => @currencyFor,
+	:title => 'Currency for',
+	:columns => [
+		['Item', :name, :entry, 'item'],
+		#['Vendor', :ctName, :ctId, 'npc'],
+		['Cost', :extendedCost, :noEscape],
+	],
+},
 {
 	:id => 'vendor',
 	:array => @vendor,
@@ -454,23 +490,6 @@ end
 		['MinLevel', :MinLevel],	# clvl or plvl
 		['Cost', :const],	# including any other reagents
 		['Result', :result],	# spell effect (damage, buff application, item creation)
-	],
-},
-{
-	:id => 'prospect',
-	:array => @prospect,
-	:title => 'Prospected from',
-	:columns => [
-		['Name', :name, true],
-	],
-},
-{
-	:id => 'seller',
-	:array => @seller,
-	:title => 'Sold by',
-	:columns => [
-		['Name', :name, true],	# creature name
-		['Location', :location],	# zone & area
 	],
 },
 ]

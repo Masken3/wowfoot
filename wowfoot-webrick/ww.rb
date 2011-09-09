@@ -47,6 +47,7 @@ require '../wowfoot-ex/output/TotemCategory.rb'
 require '../wowfoot-ex/output/ItemExtendedCost.rb'
 require './src/areaMap.rb'
 require './src/coordinates.rb'
+require './src/itemCurrency.rb'
 
 require './src/referenceLoot.rb'
 
