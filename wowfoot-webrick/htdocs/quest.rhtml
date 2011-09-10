@@ -1,6 +1,7 @@
 <%
 @id = id[1]
 run 'quest.rb'
+run 'money.rb'
 %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -17,19 +18,19 @@ run 'quest.rb'
 <p>
 <!-- Money
 <% if(@template[:rewOrReqMoney] >= 0) %>
-rewarded: <%= @template[:rewOrReqMoney] %>
+rewarded: <%= moneyHtml(@template[:rewOrReqMoney]) %>
 <% else %>
-required: <%= -@template[:rewOrReqMoney] %>
+required: <%= moneyHtml(-@template[:rewOrReqMoney]) %>
 <% end %>
-copper.<br> -->
+<br> -->
 Rewards:<br>
-Money: <%= @template[:rewOrReqMoney] %> copper.<br>
+Money: <%= moneyHtml(@template[:rewOrReqMoney]) %><br>
 
 Experience:
 <% if(@rewXp == 0) %>
 0
 <% else %>
-<%= @rewXp %> xp, or <%= @template[:rewMoneyMaxLevel] %> copper at max level.
+<%= @rewXp %> xp, or <%= moneyHtml(@template[:rewMoneyMaxLevel]) %> at max level.
 <% end %>
 <br>
 

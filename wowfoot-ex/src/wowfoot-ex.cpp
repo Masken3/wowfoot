@@ -40,6 +40,7 @@ typedef unordered_map<int, WorldMapArea> WmaMap;
 static void extractWorldMap(const WorldMapArea&);
 static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o);
+static void extractImage(const char* blpName, const char* pngName);
 
 static const char *CONF_mpq_list[]={
 	"common.MPQ",
@@ -112,11 +113,88 @@ static void dumpArchiveSet() {
 		(*itr)->GetFileListCallback(&::insert);
 	}
 	printf("%"PFZT" files, excluding duplicates.\n", sFileSet.size());
+#if 0
 	FILE* out = fopen("output/mpqSet.txt", "w");
 	for(InSet::const_iterator itr = sFileSet.begin(); itr != sFileSet.end(); ++itr) {
 		fprintf(out, "%s\n", itr->c_str());
 	}
 	fclose(out);
+#endif
+}
+
+static string switchDirSep(string dir) {
+	for(size_t i=0; i<dir.size(); i++) {
+		if(dir[i] == '\\')
+			dir[i] = '/';
+	}
+	return dir;
+}
+
+static bool beginsWith(const string& what, const string& with) {
+	if(with.size() > what.size())
+		return false;
+	return what.substr(0, with.size()) == with;
+}
+
+static bool mkdir_p(const string& path) {
+	//printf("mkdir_p(%s)\n", path.c_str());
+	size_t pos = 0;
+	while(pos < path.size()) {
+		size_t sep = path.find('/', pos);
+		//printf("mkdir(%s)\n", path.substr(0, sep).c_str());
+		if(mkdir(path.substr(0, sep).c_str()) < 0 && errno != EEXIST) {
+			printf("mkdir(%s) failed: %m\n", path.substr(0, sep).c_str());
+			return false;
+		}
+		pos = sep + 2;
+	}
+	return true;
+}
+
+static void extractImages() {
+	static const char* dumpImageDirectories[] = {
+		"Interface\\MoneyFrame\\",
+		"Interface\\Minimap\\",
+	};
+	static const int nImageDirs = sizeof(dumpImageDirectories) / sizeof(char*);
+	for(int i=0; i<nImageDirs; i++) {
+		const char* did = dumpImageDirectories[i];
+		InSet::const_iterator itr = sFileSet.lower_bound(did);
+		for(; itr != sFileSet.end() && beginsWith(*itr, did); ++itr) {
+			const char* blpFileName = strrchr(itr->c_str(), '\\') + 1;
+			const char* blpEnd = strrchr(blpFileName, '.');
+			bool skip = false;
+			if(!blpEnd)
+				skip = true;
+			else if(strcasecmp(blpEnd, ".blp") != 0)
+				skip = true;
+			if(skip) {
+				printf("Skipping %s\n", itr->c_str());
+				continue;
+			}
+			string pngName = "output/" + switchDirSep(did);
+			mkdir_p(pngName);
+			pngName += string(blpFileName, blpEnd - blpFileName) + ".png";
+			extractImage(itr->c_str(), pngName.c_str());
+		}
+	}
+}
+
+static void extractImage(const char* blpName, const char* pngName) {
+	printf("extractImage(%s)\n", blpName);
+
+	MemImage img;
+	MPQFile blpFile(blpName);
+	if(blpFile.getSize() <= 256) {	//sanity
+		printf("Warning: cannot extract %s\n", blpName);
+		return;
+	}
+	bool res = img.LoadFromBLP((const BYTE*)blpFile.getBuffer(),
+		(DWORD)blpFile.getSize());
+	assert(res);
+
+	// save as PNG.
+	img.SaveToPNG(pngName);
 }
 
 static void writeBlob(FILE* out, void* data, size_t size) {
@@ -255,8 +333,11 @@ int main() {
 
 	mkdir("output");
 
-	if(rand() == 42)
+	//if(rand() == 42)
+	{
 		dumpArchiveSet();
+		extractImages();
+	}
 
 	if(fileExists("output/AreaMap.bin")) {
 		printf("AreaMap.bin already exists, skipping...\n");

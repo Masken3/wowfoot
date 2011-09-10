@@ -1,3 +1,4 @@
+run 'money.rb'
 
 statsSql = ''
 (1..10).each do |i|
@@ -33,6 +34,7 @@ stm = TDB::C.prepare('select class, subclass, name, quality, sellprice'+
 	', armor'+
 	resistanceSql+
 	', bagFamily'+
+	', buyPrice'+
 	' from item_template where entry = ?')
 stm.execute(@id)
 @template = stm.fetch
@@ -95,9 +97,10 @@ def bagFamilyHtml
 	return nil if(bf == 0)
 	html = 'Bag family:'
 	ITEM_BAG_FAMILY.each do |flag, name|
-		html += ' '+name if(bf & flag != 0)
+		html << ' '+name if(bf & flag != 0)
 	end
 	#html += sprintf(' (0x%x)', bf)
+	html << "<br>"
 	return html
 end
 class String
@@ -112,7 +115,7 @@ end
 def costHtml(extendedCostId)
 	html = ''
 	if(@template[:buyPrice] != 0)
-		html += "#{@template[:buyPrice]} copper"
+		html << moneyHtml(@template[:buyPrice])
 	elsif(extendedCostId == 0)
 		return 'No cost'
 	end

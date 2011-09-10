@@ -38,6 +38,9 @@ stm = TDB::C.prepare('select entry, type, name, ScriptName'+
 stm.execute(query)
 @gobjects = stm.fetch_all
 
+@items.each do |row|
+	row[:sellprice] = moneyHtml(row[:sellprice])
+end
 
 # todo: use this to generate html.
 @TAB_TABLES = [
@@ -81,7 +84,7 @@ stm.execute(query)
 		['Subclass', :subclass],
 		['Quality', :quality],
 		['Name', :name, :entry, 'item'],
-		['Sell price (copper)', :sellprice],
+		['Sell price', :sellprice, :noEscape],
 	],
 },
 {
