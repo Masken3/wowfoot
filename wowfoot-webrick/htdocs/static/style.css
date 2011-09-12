@@ -9,7 +9,11 @@ div.indentedComment { border-width: 1px; border:solid; margin-left: 1em }
 /* map */
 div { position:relative; }	/* Enables absolute positioning relative to div tags. */
 #map { width:40% }	/* Enables use of percentages inside. */
-img.coord { position:absolute; }
+div.coord { position:absolute; }
+
+/*img.oiDefault { position:absolute; width:auto; height:auto; clip:rect(32px,32px,64px,0px); top:-48px; left:-16px; }*/
+/* half size */
+img.oiDefault { position:absolute; width:128px; height:32px; clip:rect(16px,16px,32px,0px); top:-24px; left:-8px; }
 
 /* item */
 BODY {

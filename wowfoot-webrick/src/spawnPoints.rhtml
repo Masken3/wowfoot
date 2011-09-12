@@ -34,12 +34,15 @@ function setMap(zoneId) {
 	coords = zones[zoneId].coords;
 	for(i=0; i<coords.length; i++) {
 		c = coords[i];
+		div = document.createElement("div");
+		div.className = "coord";
+		div.style.setProperty("left", c.x*100+"%", "important");
+		div.style.setProperty("top", c.y*100+"%", "important");
 		img = document.createElement("img");
-		img.src = "static/circle.png";
-		img.className = "coord";
-		img.style.setProperty("left", c.x*100+"%", "important");
-		img.style.setProperty("top", c.y*100+"%", "important");
-		map.appendChild(img);
+		img.src = "output/Interface/Minimap/OBJECTICONS.png";
+		img.className = "oiDefault";
+		div.appendChild(img);
+		map.appendChild(div);
 	}
 }
 setMap(<%= @mainArea %>);

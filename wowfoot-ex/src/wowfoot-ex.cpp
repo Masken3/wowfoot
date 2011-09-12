@@ -130,10 +130,10 @@ static string switchDirSep(string dir) {
 	return dir;
 }
 
-static bool beginsWith(const string& what, const string& with) {
+static bool beginsWithCase(const string& what, const string& with) {
 	if(with.size() > what.size())
 		return false;
-	return what.substr(0, with.size()) == with;
+	return strcasecmp(what.substr(0, with.size()).c_str(), with.c_str()) == 0;
 }
 
 static bool mkdir_p(const string& path) {
@@ -160,7 +160,7 @@ static void extractImages() {
 	for(int i=0; i<nImageDirs; i++) {
 		const char* did = dumpImageDirectories[i];
 		InSet::const_iterator itr = sFileSet.lower_bound(did);
-		for(; itr != sFileSet.end() && beginsWith(*itr, did); ++itr) {
+		for(; itr != sFileSet.end() && beginsWithCase(*itr, did); ++itr) {
 			const char* blpFileName = strrchr(itr->c_str(), '\\') + 1;
 			const char* blpEnd = strrchr(blpFileName, '.');
 			bool skip = false;
@@ -172,7 +172,8 @@ static void extractImages() {
 				printf("Skipping %s\n", itr->c_str());
 				continue;
 			}
-			string pngName = "output/" + switchDirSep(did);
+			string subDir = itr->substr(strlen(did), blpFileName - (itr->c_str() + strlen(did)));
+			string pngName = "output/" + switchDirSep(did + subDir);
 			mkdir_p(pngName);
 			pngName += string(blpFileName, blpEnd - blpFileName) + ".png";
 			extractImage(itr->c_str(), pngName.c_str());
