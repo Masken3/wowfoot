@@ -13,3 +13,13 @@ A tile is subdivided into cells, 16x16 cells per tile.
 A cell appears to be tied into a single area. If we can put a coordinate inside a cell, we will know its area.
 
 We have functions ComputeGridPair() to get a grid from a coordinate pair, and GetAreaFlag() to further compute the cell.
+
+
+On tests:
+A good test suite should use the database to generate the addresses of every possible page,
+except for search, which obviously has an infinite number of possible addresses.
+A few hard-coded search pages should be tested.
+It should retrieve those pages and ensure that it gets HTTP status 200 for the page and every linked object on that page.
+(images, a hrefs, css, scripts)
+It may cache the results so that pages are not tested twice per test-run.
+It should not test external addresses.
