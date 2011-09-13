@@ -24,9 +24,11 @@ stm.execute(query)
 #p res[0][:entry]
 
 stm = TDB::C.prepare('select entry, name, subname, minlevel, maxlevel, rank'+
-	' from creature_template where name like ? or subname like ? LIMIT 0,100')
+	', (select count(*) from creature where creature.id = ct.entry) as count'+
+	' from creature_template ct where name like ? or subname like ? LIMIT 0,100')
 stm.execute(query, query)
 @creatures = stm.fetch_all
+# todo: add spawn count
 
 stm = TDB::C.prepare('select entry, class, subclass, name, quality, sellprice'+
 	' from item_template where name like ? LIMIT 0,100')
@@ -34,7 +36,8 @@ stm.execute(query)
 @items = stm.fetch_all
 
 stm = TDB::C.prepare('select entry, type, name, ScriptName'+
-	' from gameobject_template where name like ? LIMIT 0,100')
+	', (select count(*) from gameobject where gameobject.id = gt.entry) as count'+
+	' from gameobject_template gt where name like ? LIMIT 0,100')
 stm.execute(query)
 @gobjects = stm.fetch_all
 
@@ -73,6 +76,7 @@ end
 		['Rank', :rank],
 		['Name', :name, :entry, 'npc'],
 		['Title', :subname],
+		['Spawn count', :count],
 	],
 },
 {
@@ -95,6 +99,7 @@ end
 		['Type', :type],
 		['Name', :name, :entry, 'object'],
 		['Script', :ScriptName],
+		['Spawn count', :count],
 	],
 },
 ]
