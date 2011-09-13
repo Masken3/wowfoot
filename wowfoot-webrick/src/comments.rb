@@ -19,6 +19,8 @@ end
 	subSimpleTag(b, 'b')
 	subSimpleTag(b, 'i')
 	subSimpleTag(b, 'u')
+	b.gsub!('[ul]', '</p><ul>')
+	b.gsub!('[/ul]', '</ul><p>')
 	#subSimpleTag(b, 'ul')
 	b.gsub!('[ol]', '</p><ol>')
 	b.gsub!('[/ol]', '</ol><p>')
@@ -61,9 +63,27 @@ end
 		end
 		path = b[i+1, (endIndex - i) - 1]
 		endIndex += 1
-		sub = "<a href=\"/#{path}\">#{path}</a>"
-		b[i, endIndex - i] = sub
-		i += sub.length
+		validLink = false
+		linkRoots = [
+			'item',
+			'search',
+			'npc',
+			'object',
+			'quest',
+			'faction',
+			'achievement',
+			'area',
+		]
+		linkRoots.each do |lr|
+			validLink = true if(path.beginsWith(lr))
+		end
+		if(validLink)
+			sub = "<a href=\"/#{path}\">#{path}</a>"
+			b[i, endIndex - i] = sub
+			i += sub.length
+		else
+			i = endIndex
+		end
 	end
 	c[:body] = b
 end
