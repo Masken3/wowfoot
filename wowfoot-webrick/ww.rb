@@ -24,7 +24,7 @@ require './src/itemFlags.rb'
 require './src/itemStat.rb'
 require './src/itemEnums.rb'
 
-S = HTTPServer.new( :Port => 3001 )
+S = HTTPServer.new( :Port => WEBRICK_PORT )
 
 module TDB	# Trinity DataBase
 	C = DBI::connect('dbi:Mysql:'+TDB_DATABASE, TDB_USER, TDB_PASSWORD)

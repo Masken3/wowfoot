@@ -1,3 +1,5 @@
 TDB_DATABASE = 'world:localhost'
 TDB_USER = 'trinity'
 TDB_PASSWORD = 'trinity'
+
+WEBRICK_PORT = 3001
