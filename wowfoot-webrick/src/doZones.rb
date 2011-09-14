@@ -35,7 +35,7 @@ end
 	end
 end
 
-if(@mainArea && WORLD_MAP_CONTINENT[AREA_TABLE[@mainArea][:map]])
+if(@mainArea && WORLD_MAP_CONTINENT[AREA_TABLE[@mainArea][:map]] && WORLD_MAP_AREA[@mainArea])
 	@mapImageName = WORLD_MAP_AREA[@mainArea][:name]
 else
 	@mapImageName = nil
