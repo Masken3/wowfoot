@@ -15,3 +15,5 @@ ipch/
 
 /wowfoot-import/*.db
 /wowfoot-import/query.sql
+
+/wowfoot-webrick/testedUrls.*

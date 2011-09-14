@@ -41,6 +41,17 @@ URLS_TO_TEST = {
 }
 
 
+puts "Reading previous results..."
+successFile = open('testedUrls.txt', 'rb+')
+RESULT_CODES[200] = 0
+successFile.each do |url|
+	TESTED_URLS[url] = 200
+	RESULT_CODES[200] += 1
+end
+puts "#{RESULT_CODES[200]} results read."
+# I hope successFile writes will append now.
+
+
 # populate test list
 SEARCHES.each do |s|
 	url = "#{BASE_URL}search=#{s}"
@@ -83,9 +94,11 @@ end
 
 
 # run the tests
+
 URLS_TO_TEST.each do |url, dummy|
 	code = testUrl(url)
 	break if(code.to_i != 200)
+	successFile.puts(url)
 end
 
 # print results
