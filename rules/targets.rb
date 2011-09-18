@@ -1,14 +1,14 @@
 # Copyright (C) 2009 Mobile Sorcery AB
-# 
+#
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License, version 2, as published by
 # the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to the Free
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
@@ -27,7 +27,7 @@ class Targets
 			@preqs = preqs
 			@block = block
 		end
-		
+
 		def invoke
 			#puts "preqs of '#{@name}'"
 			@preqs.each do |p| p.invoke end
@@ -35,19 +35,19 @@ class Targets
 			@block.call if(@block)
 		end
 	end
-	
+
 	@@targets = {}
 	@@goals = []
-	
+
 	def Targets.reset(args)
 		@@targets = {}
 		@@args = args
 		@@goals = []
 	end
-	
+
 	def Targets.size() @@targets.size end
 	def Targets.goals() @@goals end
-	
+
 	def Targets.add(args, &block)
 		case args
 		when Hash
@@ -74,7 +74,7 @@ class Targets
 		#puts "Target add '#{name}'"
 		@@targets.store(name, Target.new(name, preqs, &block))
 	end
-	
+
 	# parse ARGV
 	def Targets.setup
 		return if(@@goals.size != 0)
@@ -99,7 +99,7 @@ class Targets
 		default_const(:NATIVE_RUNTIME, false)
 		default_const(:PROFILING, false)
 	end
-	
+
 	def Targets.handle_arg(a)
 		i = a.index('=')
 		if(i) then
@@ -111,7 +111,7 @@ class Targets
 			@@goals += [a.to_sym]
 		end
 	end
-	
+
 	def Targets.invoke
 		setup
 		@@goals.each { |t|

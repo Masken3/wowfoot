@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
-require File.expand_path 'rules/exe.rb'
-require File.expand_path 'rules/targets.rb'
+require File.expand_path '../rules/exe.rb'
+require File.expand_path '../rules/targets.rb'
 
 work = ExeWork.new
 work.instance_eval do

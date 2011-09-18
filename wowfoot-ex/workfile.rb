@@ -1,10 +1,10 @@
 #!/usr/bin/ruby
 
-require File.expand_path 'rules/host.rb'
-require File.expand_path 'rules/exe.rb'
-require File.expand_path 'rules/dll.rb'
-require File.expand_path 'rules/native_lib.rb'
-require File.expand_path 'rules/targets.rb'
+require File.expand_path '../rules/host.rb'
+require File.expand_path '../rules/exe.rb'
+require File.expand_path '../rules/dll.rb'
+require File.expand_path '../rules/native_lib.rb'
+require File.expand_path '../rules/targets.rb'
 
 LIBMPQ = DllWork.new
 LIBMPQ.instance_eval do
@@ -73,9 +73,9 @@ wfe.instance_eval do
 			'wdt.cpp' => ' -Wno-multichar',
 		}
 		@LIBRARIES = ['png', 'jpeg']
-		
+
 		@NAME = 'wowfoot-ex'
-		
+
 		super
 	end
 end

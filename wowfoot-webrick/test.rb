@@ -49,7 +49,8 @@ successFile.each do |url|
 	RESULT_CODES[200] += 1
 end
 puts "#{RESULT_CODES[200]} results read."
-# I hope successFile writes will append now.
+# successFile writes will append now.
+successFile.sync = true
 
 
 # populate test list
