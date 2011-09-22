@@ -1,15 +1,18 @@
 /* Contains main() and attendant code.
 */
 
+#include "dllInterface.h"
+
 #include "config.h"
-#include <set>
+#include <string>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <microhttpd.h>
+#include "wowfoot.h"
 
 using namespace std;
 
@@ -18,12 +21,25 @@ static void runHttpd() __attribute__((noreturn));
 static int requestHandler(void *cls, MHD_Connection *connection, const char *url,
 	const char *method, const char *version,
 	const char *upload_data, size_t *upload_data_size, void **con_cls);
-static void mountIdPage(const char* name);
-static void mountTextIdPage(const char* name);
+static void requestCompletedCallback(void* cls, MHD_Connection*, void** con_cls,
+	MHD_RequestTerminationCode);
 
-int main() {
+static string sDllDir;
+
+const string& dllDir() {
+	return sDllDir;
+}
+
+int main(int argc, const char** argv) {
+	if(argc != 2) {
+		printf("Usage: wowfoot-cpp <dll directory>\n");
+		exit(1);
+	}
+	sDllDir = argv[1];
+
 	prepareHttpd(CONFIG_PORT);
 
+#if 0
 	mountIdPage("npc");
 	mountIdPage("quest");
 	mountIdPage("item");
@@ -32,13 +48,19 @@ int main() {
 	mountIdPage("faction");
 	mountIdPage("achievement");
 	mountTextIdPage("search");
+#endif
+	mountStaticDirectory("output", "../wowfoot-ex/output");
+	mountStaticDirectory("static", "htdocs/static");
 
 	runHttpd();
 }
 
 static MHD_Daemon* sMhd;
 static void prepareHttpd(int port) {
-	sMhd = MHD_start_daemon(MHD_USE_DEBUG | MHD_USE_THREAD_PER_CONNECTION, port, NULL, NULL, requestHandler, NULL);
+	sMhd = MHD_start_daemon(MHD_USE_DEBUG | MHD_USE_THREAD_PER_CONNECTION,
+		port, NULL, NULL, requestHandler, NULL,
+		MHD_OPTION_NOTIFY_COMPLETED, requestCompletedCallback, NULL, MHD_OPTION_END);
+	printf("%p\n", requestCompletedCallback);
 	assert(sMhd);
 }
 
@@ -58,13 +80,15 @@ static void runHttpd() {
 		unsigned long long timeout;
 		struct timeval tv, *tvp;
 
-		/*res = MHD_run(sMhd);
+#if 0
+		res = MHD_run(sMhd);
 		printf("MHD_run: %i\n", res);
 		assert(res == MHD_YES);
 
 		res = MHD_get_fdset(sMhd, &rf, &wf, &ef, &max_fd);
 		printf("MHD_get_fdset: %i (%i)\n", res, max_fd);
-		assert(res == MHD_YES);*/
+		assert(res == MHD_YES);
+#endif
 
 		res = MHD_get_timeout(sMhd, &timeout);
 		printf("MHD_get_timeout: %i (%llu)\n", res, timeout);
@@ -78,27 +102,53 @@ static void runHttpd() {
 	}
 }
 
-set<const char*> sIdPages;
+static PatternMap sRootPatterns;
 
-static int requestHandler(void *cls, MHD_Connection *connection, const char *url,
-	const char *method, const char *version,
-	const char *upload_data, size_t *upload_data_size, void **con_cls)
+void insertPattern(PatternPair p) {
+	sRootPatterns.insert(p);
+}
+
+static int requestHandler(void* cls, MHD_Connection* conn, const char* url,
+	const char* method, const char* version,
+	const char* upload_data, size_t* upload_data_size, void** con_cls)
 {
 	printf("requestHandler %s\n", url);
-	int res;
-	MHD_Response* resp;
-	resp = MHD_create_response_from_data(2, (void*)"yo", 0, 0);
-	res = MHD_queue_response(connection, 200, resp);
-	assert(res == MHD_YES);
+
+	// find handler
+	RequestHandler* handler = NULL;
+	const char* urlPart;
+	PatternMap::const_iterator itr = sRootPatterns.begin();
+	while(itr != sRootPatterns.end()) {
+		const string& pattern(itr->first);
+		if(strncmp(url, pattern.c_str(), pattern.size()) == 0) {
+			handler = itr->second;
+			urlPart = url + pattern.size();
+		}
+		++itr;
+	}
+	if(handler == NULL) {
+		// 404
+		static char s404[] = "Request handler not found.";
+		MHD_Response* resp = MHD_create_response_from_data(sizeof(s404)-1, s404, 0, 0);
+		int res = MHD_queue_response(conn, 404, resp);
+		assert(res == MHD_YES);
+		MHD_destroy_response(resp);
+		*con_cls = NULL;
+		return MHD_YES;
+	}
+
+	ResponseData* rd = handler->handleRequest(urlPart, conn);
+	if(rd)
+		rd->handler = handler;
+	*con_cls = rd;
+
 	return MHD_YES;
 }
 
-static void mountIdPage(const char* name) {
-	sIdPages.insert(name);
-	// load dll
-}
-
-static void mountTextIdPage(const char* name) {
-	sIdPages.insert(name);
-	// load dll
+void requestCompletedCallback(void* cls, MHD_Connection*, void** con_cls,
+	MHD_RequestTerminationCode)
+{
+	ResponseData* rd = (ResponseData*)*con_cls;
+	if(rd)
+		rd->handler->cleanup(rd);
 }

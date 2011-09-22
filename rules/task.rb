@@ -71,7 +71,7 @@ class Work < TaskBase
 
 		# If you invoke a work without setting up any targets,
 		# we will check for the "clean" goal here.
-		# also for "run".
+		# also for "run" and gdb.
 		if(Targets.size == 0)
 			Targets.setup
 			if(Targets.goals == [:clean])
@@ -81,6 +81,11 @@ class Work < TaskBase
 			if(Targets.goals == [:run])
 				@prerequisites.each do |p| p.invoke end
 				sh @TARGET
+				return
+			end
+			if(Targets.goals == [:gdb])
+				@prerequisites.each do |p| p.invoke end
+				sh "gdb #{@TARGET}"
 				return
 			end
 		end
