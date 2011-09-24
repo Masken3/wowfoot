@@ -4,6 +4,13 @@ require File.expand_path '../rules/host.rb'
 require File.expand_path '../rules/exe.rb'
 require File.expand_path '../rules/dll.rb'
 
+zone = DllWork.new
+zone.instance_eval do
+	@EXTRA_SOURCEFILES = ['handlers/zone.cpp']
+	@EXTRA_INCLUDES = ['.']
+	@NAME = 'zone'
+end
+
 @wfc = ExeWork.new
 @wfc.instance_eval do
 	@SOURCES = ['.']
@@ -32,6 +39,7 @@ def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 
 target :default do
 	@wfc.invoke
+	zone.invoke
 end
 
 target :run => :default do

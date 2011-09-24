@@ -3,7 +3,6 @@
 
 #include <inttypes.h>
 
-class IdHandler;
 class RequestHandler;
 
 struct ResponseData {
@@ -19,9 +18,15 @@ struct DllResponseData : ResponseData {
 	void* user;
 };
 
+extern "C" {
 typedef void (*DllGetResponse)(const char* urlPart, DllResponseData*);
+void getResponse(const char* urlPart, DllResponseData* drd)
+__attribute__((visibility("default")));
 
 // must not attempt to delete[] or free() \a drd.
 typedef void (*DllCleanup)(DllResponseData* drd);
+void cleanup(DllResponseData* drd)
+__attribute__((visibility("default")));
+}
 
 #endif	//DLL_INTERFACE_H

@@ -39,11 +39,11 @@ int main(int argc, const char** argv) {
 
 	prepareHttpd(CONFIG_PORT);
 
+	mountIdPage("zone");
 #if 0
 	mountIdPage("npc");
 	mountIdPage("quest");
 	mountIdPage("item");
-	mountIdPage("zone");
 	mountIdPage("object");
 	mountIdPage("faction");
 	mountIdPage("achievement");
