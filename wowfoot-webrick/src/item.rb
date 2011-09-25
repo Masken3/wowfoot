@@ -253,7 +253,7 @@ stm = TDB::C.prepare('select it.entry, it.name, chanceOrQuestChance, mincountOrR
 stm.execute(@id)
 @contains = stm.fetch_all
 
-stm = TDB::C.prepare('select v.entry, ct.name, extendedCost'+
+stm = TDB::C.prepare('select v.entry, ct.name, extendedCost, incrtime'+
 	' from npc_vendor v'+
 	' INNER JOIN creature_template ct on ct.entry = v.entry'+
 	' where v.item = ? LIMIT 0,100')
@@ -327,6 +327,7 @@ end
 #p questTables
 
 @vendor.each do |row|
+	puts "incrTime: #{row[:incrtime]}"
 	row[:extendedCost] = costHtml(row[:extendedCost])
 end
 

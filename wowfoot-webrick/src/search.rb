@@ -1,3 +1,4 @@
+run 'money.rb'
 
 #puts "Hello search!"
 

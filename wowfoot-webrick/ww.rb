@@ -36,7 +36,7 @@ module CDB	# Comment DataBase
 	DBI::setupExtras(C)
 end
 
-require '../wowfoot-ex/rules/util.rb'
+require '../rules/util.rb'
 require '../wowfoot-ex/output/Map.rb'
 require '../wowfoot-ex/output/WorldMapContinent.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
