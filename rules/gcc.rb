@@ -70,13 +70,13 @@ class CompileGccTask < FileTask
 	end
 
 	def cFlags
-		return "#{@FLAGS} #{@work.gccmode} #{File.expand_path_fix(@SOURCE)}"
+		return "#{@FLAGS} #{@work.gccmode} \"#{File.expand_path_fix(@SOURCE)}\""
 	end
 
 	def execute
 		execFlags
 		begin
-			sh "#{@work.gcc} -o #{@NAME}#{cFlags}"
+			sh "#{@work.gcc} -o \"#{@NAME}\"#{cFlags}"
 		rescue => e
 			# in case gcc output a broken object file
 			FileUtils.rm_f(@NAME)
@@ -173,7 +173,7 @@ class GccWork < BuildWork
 		@source_objects = objects(@all_sourcefiles)
 		all_objects = @source_objects + @EXTRA_OBJECTS
 
-		setup3(all_objects)
+		setup3(all_objects, !cppfiles.empty?)
 	end
 
 	def check_extra_sourcefile(file, ending)

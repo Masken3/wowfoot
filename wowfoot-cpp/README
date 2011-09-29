@@ -8,3 +8,9 @@ Graphics can be improved, as icons from MPQs can be accessed directly.
 
 The server will not be monolithic; it will have a core, but all the page renderers will be DLLs
 that can be reloaded as they change, without the need to restart the entire server.
+
+Databases are copied from a MySQL server into hash tables. These tables should be self-contained
+and reloadable, much like the page renderer DLLs.
+
+Pages will be written in CHTML, an embedding format much like RHTML/erb, except this one's compiled into C++.
+The CHTML compiler itself will probably be very simple, and written in Ruby.

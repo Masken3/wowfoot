@@ -21,7 +21,7 @@ require "#{File.dirname(__FILE__)}/host.rb"
 # Removing header files without modifying the source files that include them
 # will still cause compile errors.
 class HeaderFileTask < FileTask
-	def execute
+	def invoke
 	end
 end
 
@@ -33,6 +33,7 @@ class MakeDependLoader
 	# Return an array of Tasks.
 	def MakeDependLoader.load(fn, target)
 		res = nil
+		target = target.gsub(' ', SPACE_MARK)
 		open(fn) do |mf|
 			lines = mf.read
 			lines.gsub!(/\\ /, SPACE_MARK)

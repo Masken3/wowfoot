@@ -1,0 +1,34 @@
+<%
+int id = toInt(urlPart);
+WorldMapAreas::ptr a = gWorldMapAreas.find(id);
+string title;
+if(a) {
+	title = gAreaTable[id].name;
+} else {
+	title = urlPart;
+	returnCode = 404;
+}
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= title %> - Zone - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<p>Zone:</p>
+
+% if(a) {
+<p>
+<img id="map" width="40%" src="output/<%= a->name %>.jpeg" alt="<%= a->name %>">
+</p>
+% } else {
+<%= id %> not found.
+% }
+
+% returnCode = mapSizeChtml().run(stream);
+
+</body>
+</html>

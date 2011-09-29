@@ -324,6 +324,7 @@ static string escapeQuotes(const char* src) {
 int main() {
 	bool res;
 	FILE* out;
+	FILE* out2;
 
 	printf("Opening MPQ files:\n");
 	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
@@ -541,6 +542,7 @@ int main() {
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
 	out = fopen("output/WorldMapArea.rb", "w");
 	fprintf(out, "WORLD_MAP_AREA = {\n");
+	out2 = fopen("output/WorldMapArea.inl", "w");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapArea a;
@@ -554,6 +556,9 @@ int main() {
 		if(a.area != 0) {
 			fprintf(out, "\t%i => { :map => %i, :name => \"%s\", :a => {:x => %.0f, :y => %.0f},"
 				" :b => {:x => %.0f, :y => %.0f} },\n",
+				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
+			fprintf(out2, "{ int id = %i; WorldMapArea a = { %i, \"%s\", {%.0f, %.0f},{%.0f, %.0f} };"
+				" this->insert(pair<int, WorldMapArea>(id, a)); }\n",
 				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
 		}
 #endif
@@ -582,6 +587,7 @@ int main() {
 	out = fopen("output/AreaTable.rb", "w");
 	fprintf(out, "# encoding: utf-8\n");
 	fprintf(out, "AREA_TABLE = {\n");
+	out2 = fopen("output/AreaTable.inl", "w");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
@@ -590,6 +596,9 @@ int main() {
 		int playerLevel = r.getInt(10);
 		const char* name = r.getString(11);
 		fprintf(out, "\t%i => { :map => %i, :parent => %i, :level => %i, :name => \"%s\" },\n",
+			id, mapId, parentId, playerLevel, name);
+		fprintf(out2, "{ int id = %i; Area a = { %i, %i, %i, \"%s\" };"
+			" this->insert(pair<int, Area>(id, a)); }\n",
 			id, mapId, parentId, playerLevel, name);
 	}
 	fprintf(out, "}\n");

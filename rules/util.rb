@@ -65,19 +65,38 @@ class String
 		return self[doti..self.length]
 	end
 
+	def noExt
+		doti = rindex('.')
+		return self[0, doti]
+	end
+
 	# Returns true if self begins with with.
 	def beginsWith(with)
 		return false if(self.length < with.length)
 		return self[0, with.length] == with
 	end
+
+	def endsWith(with)
+		return false if(self.length < with.length)
+		return self[-with.length, with.length] == with
+	end
 end
 
 def sh(cmd)
-	#TODO: optimize by removing the extra shell
-	#the Process class should be useful.
-	$stderr.puts cmd
-	if(!system(cmd)) then
-		error "Command failed: '#{$?}'"
+	# Print the command to stdout.
+	puts cmd
+	# Open a process.
+	IO::popen(cmd) do |io|
+		# Pipe the process's output to our stdout.
+		while !io.eof?
+			line = io.gets
+			puts line
+	    end
+	    # Check the return code
+	    exitCode = Process::waitpid2(io.pid)[1].exitstatus
+	    if(exitCode != 0) then
+			error "Command failed, code #{exitCode}"
+	    end
 	end
 end
 
@@ -185,4 +204,13 @@ class File
 			alias_method(:expand_path_fix, :expand_path)
 		end
 	end
+end
+
+def min(a, b)
+	return a if(a < b)
+	return b
+end
+
+def max(a, b)
+	return (a > b) ? a : b
 end
