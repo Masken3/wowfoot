@@ -1,13 +1,15 @@
-#include "AreaTable.h"
+#include "AreaTable.data.h"
 
 class AT : public AreaTable {
 public:
-void load() {
-#include "../../wowfoot-ex/output/AreaTable.inl"
-}
+	void load() {
+		for(size_t i=0; i<gnAT; i++) {
+			insert(pair<int, Area>(gAT[i].id, gAT[i].a));
+		}
+	}
 };
 
-static bool sLoaded;
+static bool sLoaded = false;
 static AT sAT;
 const AreaTable& gAreaTable(sAT);
 

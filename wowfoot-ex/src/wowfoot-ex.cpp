@@ -542,7 +542,9 @@ int main() {
 	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
 	out = fopen("output/WorldMapArea.rb", "w");
 	fprintf(out, "WORLD_MAP_AREA = {\n");
-	out2 = fopen("output/WorldMapArea.inl", "w");
+	out2 = fopen("output/WorldMapArea.data.cpp", "w");
+	fprintf(out2, "#include \"WorldMapArea.data.h\"\n");
+	fprintf(out2, "const WMAi gWMA[] = {\n");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapArea a;
@@ -557,8 +559,7 @@ int main() {
 			fprintf(out, "\t%i => { :map => %i, :name => \"%s\", :a => {:x => %.0f, :y => %.0f},"
 				" :b => {:x => %.0f, :y => %.0f} },\n",
 				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
-			fprintf(out2, "{ int id = %i; WorldMapArea a = { %i, \"%s\", {%.0f, %.0f},{%.0f, %.0f} };"
-				" this->insert(pair<int, WorldMapArea>(id, a)); }\n",
+			fprintf(out2, "{ %i, { %i, \"%s\", {%.0f, %.0f},{%.0f, %.0f} } },\n",
 				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
 		}
 #endif
@@ -568,6 +569,8 @@ int main() {
 		}
 	}
 	fprintf(out, "}\n");
+	fprintf(out2, "};\n");
+	fprintf(out2, "const size_t gnWMA = sizeof(gWMA) / sizeof(WMAi);\n");
 #if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
@@ -587,7 +590,9 @@ int main() {
 	out = fopen("output/AreaTable.rb", "w");
 	fprintf(out, "# encoding: utf-8\n");
 	fprintf(out, "AREA_TABLE = {\n");
-	out2 = fopen("output/AreaTable.inl", "w");
+	out2 = fopen("output/AreaTable.data.cpp", "w");
+	fprintf(out2, "#include \"AreaTable.data.h\"\n");
+	fprintf(out2, "const ATi gAT[] = {\n");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
@@ -597,11 +602,12 @@ int main() {
 		const char* name = r.getString(11);
 		fprintf(out, "\t%i => { :map => %i, :parent => %i, :level => %i, :name => \"%s\" },\n",
 			id, mapId, parentId, playerLevel, name);
-		fprintf(out2, "{ int id = %i; Area a = { %i, %i, %i, \"%s\" };"
-			" this->insert(pair<int, Area>(id, a)); }\n",
+		fprintf(out2, "{ %i, { %i, %i, %i, \"%s\" } },\n",
 			id, mapId, parentId, playerLevel, name);
 	}
 	fprintf(out, "}\n");
+	fprintf(out2, "};\n");
+	fprintf(out2, "const size_t gnAT = sizeof(gAT) / sizeof(ATi);\n");
 #endif
 
 	// now for the overlays.

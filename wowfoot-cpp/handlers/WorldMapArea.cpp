@@ -1,13 +1,15 @@
-#include "WorldMapArea.h"
+#include "WorldMapArea.data.h"
 
 class WMA : public WorldMapAreas {
 public:
-void load() {
-#include "../../wowfoot-ex/output/WorldMapArea.inl"
-}
+	void load() {
+		for(size_t i=0; i<gnWMA; i++) {
+			insert(pair<int, WorldMapArea>(gWMA[i].id, gWMA[i].a));
+		}
+	}
 };
 
-static bool sLoaded;
+static bool sLoaded = false;
 static WMA sWMA;
 const WorldMapAreas& gWorldMapAreas(sWMA);
 

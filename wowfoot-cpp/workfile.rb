@@ -149,6 +149,10 @@ zone.instance_eval do
 		ChtmlCompileTask.new(self, CHTML_BUILDDIR, chtml)
 	end
 	#@EXTRA_SOURCEFILES = ['handlers/zone.cpp']
+	@EXTRA_SOURCEFILES = [
+		'../wowfoot-ex/output/AreaTable.data.cpp',
+		'../wowfoot-ex/output/WorldMapArea.data.cpp',
+		]
 	@SOURCES = ['handlers']
 	@EXTRA_INCLUDES = ['.', CHTML_BUILDDIR, 'handlers']
 	#@EXTRA_CPPFLAGS = ' --save-temps'
