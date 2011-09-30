@@ -40,6 +40,7 @@ int main(int argc, const char** argv) {
 	prepareHttpd(CONFIG_PORT);
 
 	mountIdPage("zone");
+	//mountTextIdPage("search");
 #if 0
 	mountIdPage("npc");
 	mountIdPage("quest");
@@ -47,7 +48,6 @@ int main(int argc, const char** argv) {
 	mountIdPage("object");
 	mountIdPage("faction");
 	mountIdPage("achievement");
-	mountTextIdPage("search");
 #endif
 	mountStaticDirectory("output", "../wowfoot-ex/output/");
 	mountStaticDirectory("static", "htdocs/static/");
