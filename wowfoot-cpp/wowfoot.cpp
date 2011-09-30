@@ -49,8 +49,8 @@ int main(int argc, const char** argv) {
 	mountIdPage("achievement");
 	mountTextIdPage("search");
 #endif
-	mountStaticDirectory("output", "../wowfoot-ex/output");
-	mountStaticDirectory("static", "htdocs/static");
+	mountStaticDirectory("output", "../wowfoot-ex/output/");
+	mountStaticDirectory("static", "htdocs/static/");
 
 	runHttpd();
 }

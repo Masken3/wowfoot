@@ -31,7 +31,8 @@ static void* readFileForHTTP(const string& filename, uint64_t& size, int& code) 
 	int fd = open(filename.c_str(), O_RDONLY);
 	if(fd < 0) {
 		if(errno == ENOENT) {
-			size = asprintf(&buf, "File not found.");
+			size = asprintf(&buf, "File not found: %s\n", filename.c_str());
+			puts(buf);
 			code = 404;
 		} else {
 			buf = handleErrno(size, code);
@@ -53,7 +54,7 @@ static void* readFileForHTTP(const string& filename, uint64_t& size, int& code) 
 	if(offset < 0) {
 		return handleErrno(size, code);
 	}
-	uint64_t pos;
+	uint64_t pos = 0;
 	while(pos < size) {
 		ssize_t res = read(fd, buf + pos, size - pos);
 		if(res <= 0) {
