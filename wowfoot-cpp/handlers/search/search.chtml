@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= urlPart %> - Search results - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<%/*
+static string questArea(row) {
+	z = row.zoneOrSort
+	if(!z)
+		return "";
+	a = gAreaTable.find(z)
+	if(!a)
+		return "";
+	return "<a href=\"area="+z+"\">"+a.name+"</a>";
+}*/
+%>
+
+<p>Search results for: <%= urlPart %></p>
+
+%// returnCode = tabTablesChtml().run(stream);
+
+</body>
+</html>

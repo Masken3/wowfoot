@@ -85,18 +85,22 @@ end
 def sh(cmd)
 	# Print the command to stdout.
 	puts cmd
+	if(!system(cmd)) then
+		error "Command failed: '#{$?}'"
+	end
+	return
 	# Open a process.
-	IO::popen(cmd) do |io|
+	IO::popen(cmd, :err=>[:child, :out]) do |io|
 		# Pipe the process's output to our stdout.
 		while !io.eof?
 			line = io.gets
 			puts line
-	    end
-	    # Check the return code
-	    exitCode = Process::waitpid2(io.pid)[1].exitstatus
-	    if(exitCode != 0) then
+		end
+		# Check the return code
+		exitCode = Process::waitpid2(io.pid)[1].exitstatus
+		if(exitCode != 0) then
 			error "Command failed, code #{exitCode}"
-	    end
+		end
 	end
 end
 

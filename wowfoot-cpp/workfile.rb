@@ -48,6 +48,7 @@ HandlerWork.new('WorldMapArea').instance_eval do
 	@EXTRA_SOURCEFILES = ['../wowfoot-ex/output/WorldMapArea.data.cpp']
 end
 HandlerWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
+HandlerWork.new('search', ['AreaTable', 'WorldMapArea'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do
