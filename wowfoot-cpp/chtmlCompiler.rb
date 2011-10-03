@@ -55,7 +55,10 @@ class ChtmlCompileTask < MultiFileTask
 				if(chtml[pos,1] == '=')	# stream C++ expression
 					pos += 1
 					cpp << 'stream <<' if(status == :idle)
-					cpp << '"<<' if(status == :cdata)
+					if(status == :cdata)
+						cpp << '"' unless(pos == lineStart+3)
+						cpp << '<<'
+					end
 					status = :exp
 				else
 					cpp << ';' if(status == :cdata)

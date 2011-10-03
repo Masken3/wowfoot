@@ -15,5 +15,16 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 
 	searchChtml context;
 	context.urlPart = urlPart;
+
+	string searchString = toupper(urlPart);
+
+	for(AreaTable::citr itr = gAreaTable.begin(); itr != gAreaTable.end(); ++itr) {
+		if(itr->second.parent == 0 &&
+			toupper(itr->second.name).find(searchString) != string::npos)
+		{
+			context.areas.push_back(*itr);
+		}
+	}
+
 	getResponse(drd, context);
 }

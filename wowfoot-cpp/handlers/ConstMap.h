@@ -10,10 +10,13 @@ template<class Key, class Value>
 class ConstMap : protected unordered_map<Key, Value> {
 protected:
 	typedef unordered_map<Key, Value> super;
-	typedef typename super::const_iterator citr;
 public:
 	typedef const Value* ptr;
 	typedef const Value& ref;
+	typedef typename super::const_iterator citr;
+
+	citr begin() const { return this->super::begin(); }
+	citr end() const { return this->super::end(); }
 
 	// returns NULL if key is not found.
 	ptr find(const Key&) const;
