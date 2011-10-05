@@ -20,12 +20,7 @@ static string questArea(quest) {
 
 <p>Search results for: <%= urlPart %></p>
 
-<p><%= areas.size() %> areas:</p>
-% for(size_t i=0; i<areas.size(); i++) { int id = areas[i].first; const Area& a(areas[i].second);
-<%= id %>: <a href="zone=<%= id %>"><%= a.name %></a><br>
-% }
-
-%// returnCode = tabTablesChtml().run(stream);
+% returnCode = tabTablesChtml::run(stream);
 
 </body>
 </html>

@@ -36,7 +36,7 @@ class ChtmlCompileTask < MultiFileTask
 				eol = chtml.index("\n", pos)
 				if(chtml[pos,1] == '=')	# stream C++ expression
 					pos += 1
-					cpp << 'stream <<'<<chtml[pos..eol-1]<<"\n"
+					cpp << 'stream <<'<<chtml[pos..eol-1]<<";\n"
 				else	# C++ code
 					# skip whitespace
 					while(chtml[pos,1] == ' ')

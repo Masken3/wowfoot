@@ -19,3 +19,19 @@ string toupper(string s) {
 	}
 	return s;
 }
+
+string htmlEscape(const string& src) {
+	//s.to_s.gsub(/&/, "&amp;").gsub(/\"/, "&quot;").gsub(/>/, "&gt;").gsub(/</, "&lt;")
+	string dst;
+	dst.reserve(src.size()*6);	// ensure no reallocs
+	for(size_t i=0; i<src.size(); i++) {
+		switch(src[i]) {
+		case '&': dst += "&amp;"; break;
+		case '\"': dst += "&quot;"; break;
+		case '>': dst += "&gt;"; break;
+		case '<': dst += "&lt;"; break;
+		default: dst += src[i];
+		}
+	}
+	return dst;
+}
