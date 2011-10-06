@@ -10,5 +10,4 @@ class searchChtml : public tabTablesChtml {
 public:
 	int run(ostream& stream);
 	const char* urlPart;
-	vector<pair<int, Area> > areas;
 };

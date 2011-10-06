@@ -34,7 +34,7 @@ VECTOR_EACH(Table, mTables, t)
 <tr>
 
 <!-- ID column -->
-<td><%= row.entry %></td>
+<td><%= row[ENTRY] %></td>
 
 <!-- Other columns -->
 %   VECTOR_EACH(Column, t.columns, c)

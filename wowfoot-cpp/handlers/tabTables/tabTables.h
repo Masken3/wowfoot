@@ -16,9 +16,11 @@ struct Column {
 	string linkTarget;
 };
 
+enum RowId {
+	ENTRY,
+};
+
 struct Row : public unordered_map<int, string> {
-	int entry;
-	//string operator[](int);
 };
 
 struct Table {

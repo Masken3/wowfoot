@@ -9,10 +9,11 @@
 
 using namespace std;
 
-enum {
+enum TableId {
 	ZONE,
-	ENTRY,
-	NAME,
+};
+enum TableRowId {
+	NAME = ENTRY+1,
 };
 
 extern "C"
@@ -32,16 +33,13 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	t.columns.push_back(c);
 
 	for(AreaTable::citr itr = gAreaTable.begin(); itr != gAreaTable.end(); ++itr) {
-		if(itr->second.parent == 0 &&
-			toupper(itr->second.name).find(searchString) != string::npos)
+		const Area& a(itr->second);
+		if(a.parent == 0 &&
+			toupper(a.name).find(searchString) != string::npos)
 		{
-			context.areas.push_back(*itr);
 			Row r;
-			r.entry = itr->first;
-			r[NAME] = itr->second.name;
-			char buf[32];
-			sprintf(buf, "%i", r.entry);
-			r[ENTRY] = buf;
+			r[ENTRY] = toString(itr->first);
+			r[NAME] = a.name;
 			t.array.push_back(r);
 		}
 	}
