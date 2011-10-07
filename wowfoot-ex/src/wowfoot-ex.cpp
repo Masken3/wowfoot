@@ -406,14 +406,21 @@ int main() {
 	printf("Extracting %"PRIuPTR" spells...\n", spell.getRecordCount());
 	out = fopen("output/Spell.rb", "w");
 	fprintf(out, "SPELL = {\n");
+	out2 = fopen("output/Spell.data.cpp", "w");
+	fprintf(out2, "#include \"Spell.data.h\"\n");
+	fprintf(out2, "const Spelli gSpell[] = {\n");
 	for(DBCFile::Iterator itr = spell.begin(); itr != spell.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
 		const char* name = r.getString(136);
 		fprintf(out, "\t%i => \"%s\",\n",
 			id, escapeQuotes(name).c_str());
+		fprintf(out2, "{ %i, { \"%s\" } },\n",
+			id, escapeQuotes(name).c_str());
 	}
 	fprintf(out, "}\n");
+	fprintf(out2, "};\n");
+	fprintf(out2, "const size_t gnSpell = sizeof(gSpell) / sizeof(Spelli);\n");
 
 	printf("Opening WorldMapContinent.dbc...\n");
 	DBCFile wmc("DBFilesClient\\WorldMapContinent.dbc");

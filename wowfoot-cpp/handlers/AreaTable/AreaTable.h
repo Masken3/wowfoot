@@ -8,7 +8,7 @@ struct Area {
 	int map;
 	int parent;
 	int level;
-	string name;	//encoding: utf-8
+	const char* name;	//encoding: utf-8
 };
 typedef ConstMap<int, Area> AreaTable;
 const extern AreaTable& gAreaTable VISIBLE;

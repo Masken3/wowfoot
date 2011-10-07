@@ -40,8 +40,9 @@ typename ConstMap<Key, Value>::ref
 ConstMap<Key, Value>::operator[](const Key& key) const {
 	citr itr = super::find(key);
 	if(itr != super::end())
-			return itr->second;
-		else
-			throw logic_error("ConstMap[]");
-	}
+		return itr->second;
+	else
+		throw logic_error("ConstMap[]");
+}
+
 #endif	//CONST_MAP_H

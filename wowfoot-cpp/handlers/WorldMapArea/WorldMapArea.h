@@ -7,7 +7,7 @@
 
 struct WorldMapArea {
 	int map;
-	string name;
+	const char* name;
 	Coord2D a, b;
 };
 typedef ConstMap<int, WorldMapArea> WorldMapAreas;
