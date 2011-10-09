@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string>
 #include <sstream>
+#include "win32.h"
 
 using namespace std;
 

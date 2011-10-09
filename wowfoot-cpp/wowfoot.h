@@ -3,6 +3,19 @@
 
 #include <string>
 #include <unordered_map>
+
+// microhttpd prerequisites
+#include <inttypes.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#ifdef WIN32
+#include <winsock2.h>
+typedef int socklen_t;
+#else
+#include <sys/socket.h>
+#endif
 #include <microhttpd.h>
 
 #include "dllInterface.h"

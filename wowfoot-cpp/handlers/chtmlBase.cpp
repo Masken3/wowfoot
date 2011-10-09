@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string>
 #include <sstream>
+#include <stdio.h>
 #include "chtmlBase.h"
 
 using namespace std;
@@ -26,6 +27,7 @@ void getResponse(DllResponseData* drd, ChtmlContext& context) {
 // must not attempt to delete[] or free() the drd itself.
 extern "C"
 void cleanup(DllResponseData* drd) {
+	printf("cleanup. code %i. size: %I64i\n", drd->code, drd->size);
 	string* s = (string*)drd->user;
 	delete s;
 }

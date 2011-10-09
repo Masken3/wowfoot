@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "win32.h"
 
 using namespace std;
 
@@ -15,9 +16,14 @@ private:
 	const string mLocalDir;
 };
 
-static char* handleErrno(uint64_t& size, int& code) {
+#define HANDLE_ERRNO return handleErrno(size, code, __FILE__, __LINE__)
+
+static char* handleErrno(uint64_t& size, int& code, const char* file, int line) {
 	char* buf;
-	size = asprintf(&buf, "Internal server error. errno: %i (%s)", errno, strerror(errno));
+	size = asprintf(&buf, "Internal server error. errno: %i (%s)\n"
+		"%s:%i\n",
+		errno, strerror(errno),
+		file, line);
 	code = 500;
 	return buf;
 }
@@ -28,37 +34,37 @@ static char* handleErrno(uint64_t& size, int& code) {
 // \a code is the appropriate HTTP status code.
 static void* readFileForHTTP(const string& filename, uint64_t& size, int& code) {
 	char* buf;
-	int fd = open(filename.c_str(), O_RDONLY);
+	int fd = open(filename.c_str(), O_RDONLY | O_BINARY);
 	if(fd < 0) {
 		if(errno == ENOENT) {
 			size = asprintf(&buf, "File not found: %s\n", filename.c_str());
 			puts(buf);
 			code = 404;
 		} else {
-			buf = handleErrno(size, code);
+			HANDLE_ERRNO;
 		}
 		return buf;
 	}
 	off_t offset = lseek(fd, 0, SEEK_END);
 	if(offset < 0) {
-		return handleErrno(size, code);
+		HANDLE_ERRNO;
 	}
 	size = offset;
 	buf = (char*)malloc(size);
 	if(!buf) {
-		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %lu", size);
+		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %I64u", size);
 		code = 500;
 		return buf;
 	}
 	offset = lseek(fd, 0, SEEK_SET);
 	if(offset < 0) {
-		return handleErrno(size, code);
+		HANDLE_ERRNO;
 	}
 	uint64_t pos = 0;
 	while(pos < size) {
 		ssize_t res = read(fd, buf + pos, size - pos);
 		if(res <= 0) {
-			return handleErrno(size, code);
+			HANDLE_ERRNO;
 		}
 		pos += res;
 	}

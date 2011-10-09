@@ -1,0 +1,5 @@
+LIBRARY "zone.dll"
+
+EXPORTS
+cleanup
+getResponse

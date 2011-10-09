@@ -5,13 +5,6 @@
 
 #include "config.h"
 #include <string>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <microhttpd.h>
 #include "wowfoot.h"
 
 using namespace std;
@@ -75,10 +68,8 @@ static void runHttpd() {
 		FD_ZERO(&wf);
 		fd_set ef;
 		FD_ZERO(&ef);
-		int max_fd = 0;
 		int res;
 		unsigned long long timeout;
-		struct timeval tv, *tvp;
 
 #if 0
 		res = MHD_run(sMhd);
@@ -91,14 +82,21 @@ static void runHttpd() {
 #endif
 
 		res = MHD_get_timeout(sMhd, &timeout);
-		printf("MHD_get_timeout: %i (%llu)\n", res, timeout);
+		printf("MHD_get_timeout: %i (%I64u)\n", res, timeout);
+
+#ifdef WIN32
+		Sleep(10000000);
+#else
+		struct timeval tv;
+		struct timeval* tvp;
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout % 1000) * 1000;
 		tvp = (res == MHD_YES) ? &tv : NULL;
-
+		int max_fd = 0;
 		res = select(max_fd, &rf, &wf, &ef, tvp);
 		printf("select: %i\n", res);
 		assert(res > 0);
+#endif
 	}
 }
 

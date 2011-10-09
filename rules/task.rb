@@ -289,7 +289,7 @@ end
 # If any of the files are out-of-date, the Task will be executed.
 # The first file is designated primary, and acts as the single file in the parent class, FileTask.
 class MultiFileTask < FileTask
-	def initialize(work, name, files)
+	def initialize(work, name, *files)
 		super(work, name)
 		@files = files.collect do |f|
 			fn = f.to_s

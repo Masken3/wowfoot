@@ -1,0 +1,5 @@
+LIBRARY "search.dll"
+
+EXPORTS
+cleanup
+getResponse
