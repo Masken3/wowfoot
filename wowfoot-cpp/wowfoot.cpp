@@ -1,11 +1,20 @@
 /* Contains main() and attendant code.
 */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "dllInterface.h"
 
 #include "config.h"
 #include <string>
 #include "wowfoot.h"
+
+#ifdef WIN32
+#define PRIxLL "I64x"
+#else
+#define PRIxLL "llx"
+#endif
 
 using namespace std;
 
@@ -82,7 +91,7 @@ static void runHttpd() {
 #endif
 
 		res = MHD_get_timeout(sMhd, &timeout);
-		printf("MHD_get_timeout: %i (%I64u)\n", res, timeout);
+		printf("MHD_get_timeout: %i (%"PRIxLL")\n", res, timeout);
 
 #ifdef WIN32
 		Sleep(10000000);

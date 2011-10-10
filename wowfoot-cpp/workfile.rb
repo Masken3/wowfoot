@@ -65,10 +65,10 @@ HandlerWork.new('Spell').instance_eval do
 	@EXTRA_SOURCEFILES << '../wowfoot-ex/output/Spell.data.cpp'
 end
 HandlerWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize']).instance_eval do
-	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/zone/zone.def')]
+	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/zone/zone.def')] if(HOST == :win32)
 end
 HandlerWork.new('search', ['AreaTable', 'WorldMapArea', 'tabTables', 'Spell']).instance_eval do
-	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/zone/zone.def')]
+	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/zone/zone.def')] if(HOST == :win32)
 end
 
 @wfc = ExeWork.new

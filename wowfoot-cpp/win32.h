@@ -9,6 +9,9 @@ int vasprintf( char **, const char *, va_list );
 
 #define strcasecmp stricmp
 const char* strcasestr(const char* s1, const char* s2);
+
+#else
+#define O_BINARY 0
 #endif
 
 #endif	//WIN32_H
