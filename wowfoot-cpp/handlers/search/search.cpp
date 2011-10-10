@@ -18,6 +18,7 @@ enum TableId {
 enum TableRowId {
 	NAME = ENTRY+1,
 };
+#define MAX_COUNT 100
 
 extern "C"
 void getResponse(const char* urlPart, DllResponseData* drd) {
@@ -56,7 +57,10 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 		t.title = "Spells";
 		Column c = { NAME, "Name", false, true, ENTRY, "spell" };
 		t.columns.push_back(c);
-		for(Spells::citr itr = gSpells.begin(); itr != gSpells.end(); ++itr) {
+		for(Spells::citr itr = gSpells.begin();
+			itr != gSpells.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
 			const Spell& s(itr->second);
 			if(strcasestr(s.name, urlPart))
 			{
