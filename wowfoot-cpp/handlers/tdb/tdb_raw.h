@@ -10,6 +10,7 @@ enum ColumnDataType {
 struct ColumnFormat {
 	ColumnDataType type;
 	const char* name;
+	int offset;
 };
 
 // Called before each row has been fetched.

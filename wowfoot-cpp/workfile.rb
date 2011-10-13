@@ -66,6 +66,7 @@ class TdbWork < HandlerWork
 	def initialize(name)
 		super(name, ['tdb'])
 		#@EXTRA_SOURCETASKS << TdbSourceTask.new(self, name)
+		@EXTRA_CPPFLAGS = ' -Wno-invalid-offsetof'
 		@PREREQUISITES = [
 			TdbStructHeaderTask.new(self, name),
 			TdbFormatHeaderTask.new(self, name),

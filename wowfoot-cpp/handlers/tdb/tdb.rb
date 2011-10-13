@@ -63,7 +63,7 @@ class TdbFormatHeaderTask < MemoryGeneratedFileTask
 #define <%=upName%>_FORMAT_H
 
 static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col| %>
-{<%=FORMATS[col[0]]%>, "<%=col[1]%>"},<%end%>
+{<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<%end%>
 };
 
 #endif	//<%= upName %>_FORMAT_H

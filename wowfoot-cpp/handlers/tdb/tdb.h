@@ -21,6 +21,7 @@ void TDB<T>::fetchTable(const char* tableName, const ColumnFormat* cf, size_t nC
 {
 	assert(sMap == NULL);
 
+#if 0
 	// sanity check
 	size_t size = 0;
 	for(size_t i=0; i<nCol; i++) {
@@ -38,6 +39,7 @@ void TDB<T>::fetchTable(const char* tableName, const ColumnFormat* cf, size_t nC
 	}
 	printf("%lu == %lu\n", size, sizeof(T));
 	assert(size == sizeof(T));
+#endif
 
 	sMap = &map;
 	::fetchTable(tableName, cf, nCol, tableFetchCallback);

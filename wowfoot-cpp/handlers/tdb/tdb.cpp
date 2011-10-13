@@ -37,22 +37,19 @@ void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 		char* dst = (char*)tfc(entry);
 
 		//entry
-		*(int*)dst = entry;
-		char* ptr = dst + sizeof(int);
+		*(int*)(dst + cf[0].offset) = entry;
 
 		for(size_t i=1; i<nCol; i++) {
+			char* ptr = dst + cf[i].offset;
 			switch(cf[i].type) {
 			case CDT_INT:
 				*(int*)ptr = row[cf[i].name];
-				ptr += sizeof(int);
 				break;
 			case CDT_STRING:
 				*(string*)ptr = string(row[cf[i].name]);
-				ptr += sizeof(string);
 				break;
 			case CDT_FLOAT:
 				*(float*)ptr = row[cf[i].name];
-				ptr += sizeof(float);
 				break;
 			}
 		}
