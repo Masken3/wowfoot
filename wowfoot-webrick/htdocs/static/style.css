@@ -21,8 +21,8 @@ BODY {
 	font-family:Arial,sans-serif;
 	font-size:small;
 }
-A { color:#0080ff; text-decoration:none; }
-A:visited { color:#0040ff; }
+A { color:#00c0ff; text-decoration:none; }
+A:visited { color:#0080ff; }
 A:hover { text-decoration:underline; }
 
 span.green { color:#1eff00; }
