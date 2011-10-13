@@ -154,4 +154,8 @@ target :mc => :default do
 	sh "valgrind --leak-check=full #{cmd}"
 end
 
+target :callgrind => :default do
+	sh "valgrind --tool=callgrind #{cmd}"
+end
+
 Targets.invoke

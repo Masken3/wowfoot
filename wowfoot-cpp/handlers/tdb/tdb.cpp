@@ -29,7 +29,7 @@ void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	int count = 0;
 	while(Row row = res.fetch_row()) {
 		count++;
-		if(count % 1000 == 0) {
+		if(count % 100 == 0) {
 			printf("%i\n", count);
 		}
 		assert(strcmp(cf[0].name, "entry") == 0);

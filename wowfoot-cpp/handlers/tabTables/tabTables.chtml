@@ -1,5 +1,5 @@
 <%
-size_t largestTable;
+size_t largestTable = -1;
 size_t maxSize = 0;
 VECTOR_EACH(Table, mTables, t)
 	if(t.array.size() > maxSize) {
