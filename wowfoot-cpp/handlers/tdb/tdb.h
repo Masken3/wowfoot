@@ -20,6 +20,25 @@ void TDB<T>::fetchTable(const char* tableName, const ColumnFormat* cf, size_t nC
 	Map& map)
 {
 	assert(sMap == NULL);
+
+	// sanity check
+	size_t size = 0;
+	for(size_t i=0; i<nCol; i++) {
+		switch(cf[i].type) {
+		case CDT_INT:
+			size += sizeof(int);
+			break;
+		case CDT_STRING:
+			size += sizeof(string);
+			break;
+		case CDT_FLOAT:
+			size += sizeof(float);
+			break;
+		}
+	}
+	printf("%lu == %lu\n", size, sizeof(T));
+	assert(size == sizeof(T));
+
 	sMap = &map;
 	::fetchTable(tableName, cf, nCol, tableFetchCallback);
 	sMap = NULL;

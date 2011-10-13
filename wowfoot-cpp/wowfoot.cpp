@@ -123,7 +123,7 @@ static int requestHandler(void* cls, MHD_Connection* conn, const char* url,
 
 	// find handler
 	RequestHandler* handler = NULL;
-	const char* urlPart;
+	const char* urlPart = NULL;
 	PatternMap::const_iterator itr = sRootPatterns.begin();
 	while(itr != sRootPatterns.end()) {
 		const string& pattern(itr->first);

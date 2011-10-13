@@ -1,6 +1,8 @@
 #ifndef TDB_RAW_H
 #define TDB_RAW_H
 
+#include "dllHelpers.h"
+
 enum ColumnDataType {
 	CDT_INT, CDT_STRING, CDT_FLOAT,
 };
@@ -15,6 +17,6 @@ struct ColumnFormat {
 typedef void* (*TableFetchCallback)(int entry);
 
 void fetchTable(const char* tableName, const ColumnFormat*, size_t nCol,
-	TableFetchCallback);
+	TableFetchCallback) VISIBLE;
 
 #endif	//TDB_RAW_H
