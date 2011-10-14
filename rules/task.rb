@@ -156,6 +156,7 @@ class BuildWork < Work
 		if(@TARGETDIR)
 			@prerequisites << DirTask.new(self, @TARGETDIR)
 		end
+		@prerequisites += @PREREQUISITES
 		setup2
 		#dump(0)
 		if(@INSTALLDIR)

@@ -40,6 +40,9 @@ def set_defaults
 	default(:PRECOMPILER_HEADERS, [])
 	# Array of FileTasks, precompiled object files, to link with.
 	default(:EXTRA_OBJECTS, [])
+	# Array of Tasks that should be invoked before the others.
+	# For example, resource generation.
+	default(:PREREQUISITES, [])
 	# Array of Strings, names of static libraries built earlier, to link with.
 	default(:LOCAL_LIBS, [])
 	# Array of Strings, names of shared libraries built earlier, to link with.

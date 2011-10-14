@@ -5,8 +5,12 @@ require File.expand_path '../rules/exe.rb'
 require File.expand_path '../rules/dll.rb'
 
 require './chtmlCompiler.rb'
+require 'erb'
+require './handlers/tdb/tdb.rb'
+require './config.rb'
 
 CHTML_BUILDDIR = 'build/chtml'
+TDB_BUILDDIR = 'build/tdb'
 WORKS = []
 
 common = DllWork.new
@@ -41,10 +45,15 @@ class HandlerWork < DllWork
 		@EXTRA_SOURCEFILES = []
 		@EXTRA_INCLUDES = [
 			'.', CHTML_BUILDDIR,
+			TDB_BUILDDIR,
 			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
 		] + handlerDeps.collect do |dll|
 			"handlers/#{dll}"
 		end
+		@PREREQUISITES = [
+			DirTask.new(self, CHTML_BUILDDIR),
+			DirTask.new(self, TDB_BUILDDIR),
+		]
 		@LOCAL_DLLS = handlerDeps
 		@LOCAL_DLLS << 'common' if(hasChtml)
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
@@ -53,6 +62,32 @@ class HandlerWork < DllWork
 	end
 end
 
+class TdbWork < HandlerWork
+	def initialize(name)
+		super(name, ['tdb'])
+		#@EXTRA_SOURCETASKS << TdbSourceTask.new(self, name)
+		@PREREQUISITES = [
+			TdbStructHeaderTask.new(self, name),
+			TdbFormatHeaderTask.new(self, name),
+		]
+	end
+end
+
+HandlerWork.new('tdb').instance_eval do
+	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
+	@LIBRARIES = ['mysqlpp']
+	if(HOST == :win32)
+		@EXTRA_INCLUDES += CONFIG_MYSQL_INCLUDES
+		@EXTRA_LINKFLAGS = CONFIG_MYSQL_LIBDIRS
+		@LIBRARIES << 'libmysql'
+	else
+		@EXTRA_INCLUDES << '/usr/include/mysql'
+		@EXTRA_INCLUDES << '/usr/include/mysql++'
+		@LIBRARIES << 'mysqlclient'
+	end
+end
+
+TdbWork.new('db_item')
 HandlerWork.new('tabTables')
 HandlerWork.new('mapSize')
 HandlerWork.new('AreaTable').instance_eval do
