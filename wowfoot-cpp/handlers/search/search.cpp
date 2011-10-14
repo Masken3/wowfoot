@@ -2,6 +2,7 @@
 #include "dllInterface.h"
 #include "tabTables.h"
 #include "Spell.h"
+#include "db_item.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@ using namespace std;
 enum TableId {
 	ZONE,
 	SPELL,
+	ITEM,
 };
 enum TableRowId {
 	NAME = ENTRY+1,
@@ -25,6 +27,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	WorldMapAreas_ensureLoad();
 	AreaTable_ensureLoad();
 	gSpells.load();
+	gItems.load();
 
 	searchChtml context;
 	context.urlPart = urlPart;
@@ -63,6 +66,27 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 		{
 			const Spell& s(itr->second);
 			if(strcasestr(s.name, urlPart))
+			{
+				Row r;
+				r[ENTRY] = toString(itr->first);
+				r[NAME] = s.name;
+				t.array.push_back(r);
+			}
+		}
+		context.mTables.push_back(t);
+	}
+	{
+		Table t;
+		t.id = ITEM;
+		t.title = "Items";
+		Column c = { NAME, "Name", false, true, ENTRY, "item" };
+		t.columns.push_back(c);
+		for(Items::citr itr = gItems.begin();
+			itr != gItems.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
+			const Item& s(itr->second);
+			if(strcasestr(s.name.c_str(), urlPart))
 			{
 				Row r;
 				r[ENTRY] = toString(itr->first);

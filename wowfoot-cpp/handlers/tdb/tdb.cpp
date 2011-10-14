@@ -12,6 +12,7 @@ Connection gConn(TDB_WORLD, TDB_SERVER, TDB_USER, TDB_PASS);
 void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	TableFetchCallback tfc)
 {
+	printf("fetching table %s...\n", tableName);
 	ostringstream oss;
 	oss << "SELECT ";
 	for(size_t i=0; i<nCol; i++) {
@@ -25,7 +26,12 @@ void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	if(!res) {
 		throw logic_error("Query.use failed");
 	}
+	int count = 0;
 	while(Row row = res.fetch_row()) {
+		count++;
+		if(count % 1000 == 0) {
+			printf("%i\n", count);
+		}
 		assert(strcmp(cf[0].name, "entry") == 0);
 		int entry = row["entry"];
 		char* dst = (char*)tfc(entry);
@@ -51,6 +57,7 @@ void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 			}
 		}
 	}
+	printf("%i\n", count);
 	if(gConn.errnum()) {
 		printf("Error fetching row: %s\n", gConn.error());
 		throw logic_error("Error fetching row");

@@ -22,8 +22,9 @@
 	[:int, :maxCount],
 	[:int, :stackable],
 	[:int, :containerSlots],
-] + sql_pair(:int, [:stat_type, :stat_value], 10) + [
-] + sql_pair(:int, [:dmg_min, :dmg_max, :dmg_type], 2) + [
+] + sql_pair(:int, [:stat_type, :stat_value], 10) +
+sql_pair(:float, [:dmg_min, :dmg_max], 2) +
+sql_pair(:int, [:dmg_type], 2) + [
 	[:int, :armor],
 	[:int, :holy_res],
 	[:int, :fire_res],

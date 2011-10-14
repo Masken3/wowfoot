@@ -23,7 +23,7 @@ end
 
 class TdbStructHeaderTask < MemoryGeneratedFileTask
 	def initialize(work, name)
-		@src = FileTask.new(self, "handlers/#{name}.rb")
+		@src = FileTask.new(self, "handlers/#{name}/#{name}.rb")
 		@dst = "#{TDB_BUILDDIR}/#{name}.struct.h"
 		super(work, @dst)
 		@prerequisites << DirTask.new(self, TDB_BUILDDIR)
@@ -51,7 +51,7 @@ class TdbFormatHeaderTask < MemoryGeneratedFileTask
 		:float => 'CDT_FLOAT',
 	}
 	def initialize(work, name)
-		@src = FileTask.new(self, "handlers/#{name}.rb")
+		@src = FileTask.new(self, "handlers/#{name}/#{name}.rb")
 		@dst = "#{TDB_BUILDDIR}/#{name}.format.h"
 		super(work, @dst)
 		@prerequisites << DirTask.new(self, TDB_BUILDDIR)
