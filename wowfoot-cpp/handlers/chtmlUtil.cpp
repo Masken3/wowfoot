@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string.h>
 #include <string>
+#include <math.h>
 
 int toInt(const char* s) {
 	int i, n;
@@ -34,4 +35,8 @@ string htmlEscape(const string& src) {
 		}
 	}
 	return dst;
+}
+
+bool fnz(float f) {
+	return fabs(f) > 0.0001;
 }

@@ -1,12 +1,6 @@
 
 def sql_pair(type, array, count)
-	a = []
-	(1..count).each do |i|
-		array.each do |c|
-			a << [type, "#{c}#{i}"]
-		end
-	end
-	return a
+	return [[type, array, count]]
 end
 
 class ERB
@@ -34,8 +28,11 @@ class TdbStructHeaderTask < MemoryGeneratedFileTask
 #ifndef <%=upName%>_STRUCT_H
 #define <%=upName%>_STRUCT_H
 
-struct <%=@structName%> {<% @struct.each do |col| %>
-	<%=col[0]%> <%=cEscape(col[1])%>;<%end%>
+struct <%=@structName%> {<% @struct.each do |col|
+	if(col.size == 2) %>
+	<%=col[0]%> <%=cEscape(col[1])%>;<%else
+	col[1].each do |name| %>
+	<%=col[0]%> <%=cEscape(name)%>[<%=col[2]%>];<%end; end; end%>
 };
 
 #endif	//<%= upName %>_STRUCT_H
@@ -64,8 +61,11 @@ class TdbFormatHeaderTask < MemoryGeneratedFileTask
 
 #include <stddef.h>
 
-static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col| %>
-{<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<%end%>
+static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
+	if(col.size == 2) %>
+{<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<% else
+	(1..col[2]).each do |i| col[1].each do |name| %>
+{<%=FORMATS[col[0]]%>, "<%=name%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
 };
 
 #endif	//<%= upName %>_FORMAT_H

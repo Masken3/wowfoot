@@ -22,6 +22,7 @@ using namespace std;
 
 static MYSQL* sMysql;
 
+static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
 	printf("%s: %s\n", funcName, mysql_error(sMysql));
 	throw logic_error(funcName);

@@ -21,6 +21,9 @@ template<class T> string toString(const T& t) {
 	return oss.str();
 }
 
+// float not zero (epsilon)
+bool fnz(float f) VISIBLE;
+
 #define VECTOR_EACH(etype, vector, element) \
 for(size_t element##_i=0; element##_i<vector.size(); element##_i++) { etype& element(vector[element##_i]);
 

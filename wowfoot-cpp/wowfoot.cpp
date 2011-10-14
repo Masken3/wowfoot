@@ -43,10 +43,10 @@ int main(int argc, const char** argv) {
 
 	mountIdPage("zone");
 	mountTextIdPage("search");
+	mountIdPage("item");
 #if 0
 	mountIdPage("npc");
 	mountIdPage("quest");
-	mountIdPage("item");
 	mountIdPage("object");
 	mountIdPage("faction");
 	mountIdPage("achievement");

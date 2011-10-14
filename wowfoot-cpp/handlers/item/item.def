@@ -1,0 +1,5 @@
+LIBRARY "item.dll"
+
+EXPORTS
+cleanup
+getResponse

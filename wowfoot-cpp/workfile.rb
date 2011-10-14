@@ -74,17 +74,22 @@ class TdbWork < HandlerWork
 	end
 end
 
+class PageWork < HandlerWork
+	def initialize(name, handlerDeps = [])
+		super
+		@EXTRA_OBJECTS = [FileTask.new(self, "handlers/#{name}/#{name}.def")] if(HOST == :win32)
+	end
+end
+
 HandlerWork.new('tdb').instance_eval do
 	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
-	@LIBRARIES = ['mysqlpp']
+	@LIBRARIES = ['mysqlclient']
 	if(HOST == :win32)
 		@EXTRA_INCLUDES += CONFIG_MYSQL_INCLUDES
 		@EXTRA_LINKFLAGS = CONFIG_MYSQL_LIBDIRS
-		@LIBRARIES << 'libmysql'
+		@LIBRARIES << 'ws2_32'
 	else
 		@EXTRA_INCLUDES << '/usr/include/mysql'
-		@EXTRA_INCLUDES << '/usr/include/mysql++'
-		@LIBRARIES << 'mysqlclient'
 	end
 end
 
@@ -100,13 +105,9 @@ end
 HandlerWork.new('Spell').instance_eval do
 	@EXTRA_SOURCEFILES << '../wowfoot-ex/output/Spell.data.cpp'
 end
-HandlerWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize']).instance_eval do
-	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/zone/zone.def')] if(HOST == :win32)
-end
-HandlerWork.new('search', ['AreaTable', 'WorldMapArea', 'tabTables', 'Spell', 'db_item',
-]).instance_eval do
-	@EXTRA_OBJECTS = [FileTask.new(self, 'handlers/search/search.def')] if(HOST == :win32)
-end
+PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
+PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabTables', 'Spell', 'db_item'])
+PageWork.new('item', ['tabTables', 'db_item'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do

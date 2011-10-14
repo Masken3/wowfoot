@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= mTitle %> - Item - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+% if(!a) {
+Item <%=mTitle%> does not exist.
+% } else {
+<p>
+<span class="itemName"><span class="q<%= ITEM_QUALITY(a->quality).color %>"><%= a->name %></span></span><br>
+
+%// bondingHtml
+% if(a->bonding != 0) {
+<%= ITEM_BONDING(a->bonding) %><br>
+% }
+
+% for(int i=0; i!=nITEM_FLAGS; i++) { if((a->flags & ITEM_FLAGS[i].flag) != 0) {
+<%= ITEM_FLAGS[i].name %><br>
+% }}
+
+% const char* tc = TOTEM_CATEGORY(a->totemCategory); if(tc) {
+<%= tc %><br>
+% }
+
+Class: <%= ITEM_CLASS(a->class_) %><!--(<%= a->class_ %>)--> / <%= ITEM_SUBCLASS(a->class_, a->subclass) %><!--(<%= a->subclass %>)--><br>
+% if(a->inventoryType != 0) {
+Equip: <%= ITEM_EQUIP(a->inventoryType) %><!--(<%= a->inventoryType %>)--><br>
+% }
+Material: <%= ITEM_MATERIAL(a->material) %><!--(<%= a->material %>)--><br>
+
+%// todo: class & race, skill, spell, honorrank, cityrank
+
+%// unique
+% if(a->maxCount != 0) {
+Unique
+% if(a->maxCount != 1) {
+(<%= a->maxCount %>)
+% }}
+<br>
+
+%// stackable
+% if(a->stackable > 1) {
+Stack: <%= a->stackable %><br>
+% }
+
+%// containerSlots
+% if(a->containerSlots != 0) {
+Bag: <%= a->containerSlots %> slots<br>
+% }
+
+%// bagFamily
+% if(a->bagFamily != 0) {
+Bag family:
+% for(int i=0; i!=nITEM_BAG_FAMILY; i++) { if(a->bagFamily & ITEM_BAG_FAMILY[i].flag) {
+%= ITEM_BAG_FAMILY[i].name
+% }}
+<br>
+% }
+
+% if(fnz(dps)) {
+% for(int i=0; i<1; i++) { if(fnz(a->dmg_min[i]) || fnz(a->dmg_max[i])) {
+<%= a->dmg_min[i] %> - <%= a->dmg_max[i] %> <%= ITEM_DAMAGE_TYPE(a->dmg_type[i]) %> damage<br>
+% }
+(<%= dps %> dps)<br>
+Speed: <%= a->delay / 1000.0 %><br>
+% }}
+
+% if(a->armor != 0) {
+<%= a->armor %> armor<br>
+% }
+
+% for(int i=0; i<mnResistances; i++) { int v = a->*mResistances[i].value; if(v != 0) {
+<span class="green">+<%= v %> <%= mResistances[i].name %> resistance</span><br>
+% }}
+
+% for(int i=0; i<a->statsCount; i++) { int val = a->stat_value[i];
+<span class="green"><%= ITEM_STAT(a->stat_type[i]) %> <%if(val>0){%>+<%}%><%=val%></span><br>
+% }
+
+% if(!a->description.empty()) {
+<span class="itemDescription">"<%= a->description %>"</span><br>
+% }
+</p>
+
+% returnCode = tabTablesChtml::run(stream);
+
+% if(mTables.size() == 0) {
+<p>Item source &amp; use not found.</p>
+% }
+
+% }	//if(a)
+
+</body>
+</html>

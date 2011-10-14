@@ -48,7 +48,7 @@ class ChtmlCompileTask < MultiFileTask
 				lineStart = pos
 				status = :idle
 			elsif(chtml[pos,2] == '<%')	# C++ code
-				cpp << "\n" if(pos == lineStart)
+				cpp << "\n" if(pos == lineStart && status != :idle)
 				pos += 2
 				raise hell if(status == :exp || status == :code)
 				prevStatus = status
@@ -61,7 +61,10 @@ class ChtmlCompileTask < MultiFileTask
 					end
 					status = :exp
 				else
-					cpp << ';' if(status == :cdata)
+					if(status == :cdata)
+						cpp << '"' unless(pos == lineStart+2)
+						cpp << ';'
+					end
 					status = :code
 				end
 			elsif(chtml[pos,2] == '%>')
