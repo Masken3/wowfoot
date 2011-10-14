@@ -54,7 +54,7 @@ static void* readFileForHTTP(const string& filename, uint64_t& size, int& code) 
 	size = offset;
 	buf = (char*)malloc(size);
 	if(!buf) {
-		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %"PRIuPTR, size);
+		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %"PRIu64, size);
 		code = 500;
 		return buf;
 	}

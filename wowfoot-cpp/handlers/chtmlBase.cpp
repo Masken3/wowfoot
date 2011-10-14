@@ -29,7 +29,7 @@ void getResponse(DllResponseData* drd, ChtmlContext& context) {
 // must not attempt to delete[] or free() the drd itself.
 extern "C"
 void cleanup(DllResponseData* drd) {
-	printf("cleanup. code %i. size: %"PRIuPTR"\n", drd->code, drd->size);
+	printf("cleanup. code %i. size: %"PRIu64"\n", drd->code, drd->size);
 	string* s = (string*)drd->user;
 	delete s;
 }
