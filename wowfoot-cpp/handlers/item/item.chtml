@@ -12,7 +12,6 @@ Item <%=mTitle%> does not exist.
 <p>
 <span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span></span><br>
 
-%// bondingHtml
 % if(a->bonding != 0) {
 <%= ITEM_BONDING(a->bonding) %><br>
 % }
@@ -78,6 +77,14 @@ Speed: <%= a->delay / 1000.0 %><br>
 
 % for(int i=0; i<a->statsCount; i++) { int val = a->stat_value[i];
 <span class="green"><%= ITEM_STAT(a->stat_type[i]) %> <%if(val>0){%>+<%}%><%=val%></span><br>
+% }
+
+% if(a->randomProperty != 0) {
+Random property: <%= a->randomProperty %><br>
+% }
+
+% if(a->randomSuffix != 0) {
+Random suffix: <%= a->randomSuffix %><br>
 % }
 
 % if(!a->description.empty()) {

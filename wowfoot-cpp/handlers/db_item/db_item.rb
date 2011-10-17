@@ -41,6 +41,8 @@ sql_pair(:int, [:dmg_type], 2) + [
 	[:int, :lockId],
 	[:int, :material],
 	[:int, :sheath],
+	[:int, :randomProperty],
+	[:int, :randomSuffix],
 	[:int, :block],
 	[:int, :itemset],
 	[:int, :maxDurability],
