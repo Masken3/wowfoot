@@ -2,6 +2,7 @@
 #include "chtmlUtil.h"
 #include "tabTables.h"
 #include "db_item.h"
+#include "TotemCategory.h"
 
 class itemChtml : public tabTablesChtml {
 public:
@@ -23,7 +24,6 @@ public:
 	};
 
 	static const Quality& ITEM_QUALITY(int id);
-	static const char* TOTEM_CATEGORY(int id);
 	static const char* ITEM_CLASS(int id);
 	static const char* ITEM_SUBCLASS(int c, int sc);
 	static const char* ITEM_EQUIP(int id);

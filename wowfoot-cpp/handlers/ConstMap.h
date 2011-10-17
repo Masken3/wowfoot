@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <stdexcept>
+#include <assert.h>
 using namespace std;
 
 // Syntactic sugar for accessing a const unordered_map.
@@ -28,6 +29,7 @@ public:
 template<class Key, class Value>
 typename ConstMap<Key, Value>::ptr
 ConstMap<Key, Value>::find(const Key& key) const {
+	assert(!super::empty());
 	citr itr = this->super::find(key);
 	if(itr != this->super::end())
 		return &itr->second;
@@ -38,6 +40,7 @@ ConstMap<Key, Value>::find(const Key& key) const {
 template<class Key, class Value>
 typename ConstMap<Key, Value>::ref
 ConstMap<Key, Value>::operator[](const Key& key) const {
+	assert(!super::empty());
 	citr itr = super::find(key);
 	if(itr != super::end())
 		return itr->second;

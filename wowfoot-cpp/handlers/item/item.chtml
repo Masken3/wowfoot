@@ -20,8 +20,9 @@ Item <%=mTitle%> does not exist.
 <%= ITEM_FLAGS[i].name %><br>
 % }}
 
-% const char* tc = TOTEM_CATEGORY(a->totemCategory); if(tc) {
-<%= tc %><br>
+<!--(<%= a->totemCategory %>)-->
+% const TotemCategory* tc = gTotemCategories.find(a->totemCategory); if(tc) {
+<%= tc->name %><br>
 % }
 
 Class: <%= ITEM_CLASS(a->class_) %><!--(<%= a->class_ %>)--> / <%= ITEM_SUBCLASS(a->class_, a->subclass) %><!--(<%= a->subclass %>)--><br>

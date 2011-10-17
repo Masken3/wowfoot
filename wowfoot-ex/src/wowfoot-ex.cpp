@@ -389,14 +389,21 @@ int main() {
 	printf("Extracting %"PRIuPTR" totems...\n", totem.getRecordCount());
 	out = fopen("output/TotemCategory.rb", "w");
 	fprintf(out, "TOTEM_CATEGORY = {\n");
+	out2 = fopen("output/TotemCategory.data.cpp", "w");
+	fprintf(out2, "#include \"TotemCategory.data.h\"\n");
+	fprintf(out2, "const TotemCategoryi gTotemCategory[] = {\n");
 	for(DBCFile::Iterator itr = totem.begin(); itr != totem.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
 		const char* name = r.getString(1);
 		fprintf(out, "\t%i => \"%s\",\n",
 			id, name);
+		fprintf(out2, "{ %i, { \"%s\" } },\n",
+			id, escapeQuotes(name).c_str());
 	}
 	fprintf(out, "}\n");
+	fprintf(out2, "};\n");
+	fprintf(out2, "const size_t gnTotemCategory = sizeof(gTotemCategory) / sizeof(TotemCategoryi);\n");
 
 	printf("Opening Spell.dbc...\n");
 	DBCFile spell("DBFilesClient\\Spell.dbc");
@@ -551,7 +558,7 @@ int main() {
 	fprintf(out, "WORLD_MAP_AREA = {\n");
 	out2 = fopen("output/WorldMapArea.data.cpp", "w");
 	fprintf(out2, "#include \"WorldMapArea.data.h\"\n");
-	fprintf(out2, "const WMAi gWMA[] = {\n");
+	fprintf(out2, "const WorldMapAreai gWorldMapArea[] = {\n");
 	for(DBCFile::Iterator itr = wma.begin(); itr != wma.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		WorldMapArea a;
@@ -577,7 +584,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 	fprintf(out2, "};\n");
-	fprintf(out2, "const size_t gnWMA = sizeof(gWMA) / sizeof(WMAi);\n");
+	fprintf(out2, "const size_t gnWorldMapArea = sizeof(gWorldMapArea) / sizeof(WorldMapAreai);\n");
 #if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
 	printf("size: %"PRIuPTR"\n", testBlp.getSize());
@@ -599,7 +606,7 @@ int main() {
 	fprintf(out, "AREA_TABLE = {\n");
 	out2 = fopen("output/AreaTable.data.cpp", "w");
 	fprintf(out2, "#include \"AreaTable.data.h\"\n");
-	fprintf(out2, "const ATi gAT[] = {\n");
+	fprintf(out2, "const Areai gArea[] = {\n");
 	for(DBCFile::Iterator itr = at.begin(); itr != at.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
@@ -614,7 +621,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 	fprintf(out2, "};\n");
-	fprintf(out2, "const size_t gnAT = sizeof(gAT) / sizeof(ATi);\n");
+	fprintf(out2, "const size_t gnArea = sizeof(gArea) / sizeof(Areai);\n");
 #endif
 
 	// now for the overlays.

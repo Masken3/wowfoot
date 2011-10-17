@@ -5,6 +5,7 @@ require File.expand_path '../rules/exe.rb'
 require File.expand_path '../rules/dll.rb'
 
 require './chtmlCompiler.rb'
+require './ex_template.rb'
 require 'erb'
 require './handlers/tdb/tdb.rb'
 require './config.rb'
@@ -47,8 +48,11 @@ class HandlerWork < DllWork
 			'.', CHTML_BUILDDIR,
 			TDB_BUILDDIR,
 			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
-		] + handlerDeps.collect do |dll|
-			"handlers/#{dll}"
+		]
+		handlerDeps.each do |dll|
+			@EXTRA_INCLUDES << "handlers/#{dll}"
+			f ="build/#{dll}"
+			@EXTRA_INCLUDES << f if(File.exist?(f))
 		end
 		@PREREQUISITES = [
 			DirTask.new(self, CHTML_BUILDDIR),
@@ -81,6 +85,18 @@ class PageWork < HandlerWork
 	end
 end
 
+class ExTemplateWork < HandlerWork
+	def initialize(name, singular, plural, upperCase)
+		super(name)
+		@SOURCES = []
+		@EXTRA_INCLUDES << "build/#{name}"
+		@EXTRA_SOURCETASKS << ExTemplateCpp.new(self, name, singular, plural, upperCase)
+		@EXTRA_SOURCEFILES << "../wowfoot-ex/output/#{name}.data.cpp"
+	end
+end
+
+# HandlerWorks
+
 HandlerWork.new('tdb').instance_eval do
 	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
 	@LIBRARIES = ['mysqlclient']
@@ -94,20 +110,18 @@ HandlerWork.new('tdb').instance_eval do
 end
 
 TdbWork.new('db_item')
+
+ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
+ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
+ExTemplateWork.new('Spell', 'Spell', 'Spells', 'SPELL')
+ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
+
 HandlerWork.new('tabTables')
 HandlerWork.new('mapSize')
-HandlerWork.new('AreaTable').instance_eval do
-	@EXTRA_SOURCEFILES << '../wowfoot-ex/output/AreaTable.data.cpp'
-end
-HandlerWork.new('WorldMapArea').instance_eval do
-	@EXTRA_SOURCEFILES << '../wowfoot-ex/output/WorldMapArea.data.cpp'
-end
-HandlerWork.new('Spell').instance_eval do
-	@EXTRA_SOURCEFILES << '../wowfoot-ex/output/Spell.data.cpp'
-end
+
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
 PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabTables', 'Spell', 'db_item'])
-PageWork.new('item', ['tabTables', 'db_item'])
+PageWork.new('item', ['tabTables', 'db_item', 'TotemCategory'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do

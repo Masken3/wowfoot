@@ -10,6 +10,7 @@ using namespace std;
 extern "C"
 void getResponse(const char* urlPart, DllResponseData* drd) {
 	gItems.load();
+	gTotemCategories.load();
 
 	itemChtml context;
 
@@ -47,9 +48,6 @@ const itemChtml::Resistance itemChtml::mResistances[] = {
 };
 const int itemChtml::mnResistances = sizeof(itemChtml::mResistances) / sizeof(itemChtml::Resistance);
 
-const char* itemChtml::TOTEM_CATEGORY(int id) {
-	return "not implemented";
-}
 const char* itemChtml::ITEM_CLASS(int id) {
 	switch(id) {
 	case 0: return "Consumable";

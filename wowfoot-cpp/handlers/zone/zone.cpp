@@ -9,8 +9,8 @@ using namespace std;
 
 extern "C"
 void getResponse(const char* urlPart, DllResponseData* drd) {
-	WorldMapAreas_ensureLoad();
-	AreaTable_ensureLoad();
+	gWorldMapAreas.load();
+	gAreaTable.load();
 
 	zoneChtml context;
 	context.urlPart = urlPart;
