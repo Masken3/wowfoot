@@ -43,4 +43,4 @@ public:
 	static const int nITEM_BAG_FAMILY;
 };
 
-#define CA_EACH(type, name, a) for(int i=0; i<n##name; i++) { const Flag& a(name[i]);
+#define FOR(i, n) for(int i=0; i<n; i++)

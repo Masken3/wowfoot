@@ -10,7 +10,7 @@
 Item <%=mTitle%> does not exist.
 % } else {
 <p>
-<span class="itemName"><span class="q<%= ITEM_QUALITY(a->quality).color %>"><%= a->name %></span></span><br>
+<span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span></span><br>
 
 %// bondingHtml
 % if(a->bonding != 0) {
