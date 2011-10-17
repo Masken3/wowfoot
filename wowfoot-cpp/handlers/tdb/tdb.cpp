@@ -46,24 +46,17 @@ static void init() {
 }
 
 static int safe_atoi(const char* str, unsigned long len) {
-	int i;
-	unsigned int n;
-	int res = sscanf(str, "%i%n", &i, &n);
-	assert(res == 1);
-	assert(len == n);
+	char* end;
+	int i = strtol(str, &end, 10);
+	assert(end == str + len);
 	return i;
 }
 
-static int safe_atof(const char* str, unsigned long len) {
-	float f;
-	unsigned int n;
-	int res = sscanf(str, "%f%n", &f, &n);
-	if(len != n) {
-		printf("atof: '%s' len %lu, n %i\n", str, len, n);
-	}
-	assert(res == 1);
-	assert(len == n);
-	return f;
+static float safe_atof(const char* str, unsigned long len) {
+	char* end;
+	double d = strtod(str, &end);
+	assert(end == str + len);
+	return (float)d;
 }
 
 void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
