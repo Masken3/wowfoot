@@ -20,7 +20,7 @@ static string questArea(quest) {
 
 <p>Search results for: <%= urlPart %></p>
 
-% returnCode = tabTablesChtml::run(stream);
+% returnCode = tabsChtml::run(stream);
 
 </body>
 </html>

@@ -1,0 +1,36 @@
+
+<table class="tab">
+<!-- Title row -->
+<tr>
+<td>ID</td>
+% VECTOR_EACH(columns, i) { Column& c(columns[i]);
+<td><%= c.title %></td>
+% }
+</tr>
+
+<!-- Data row -->
+% VECTOR_EACH(array, i) { Row& row(array[i]);
+<tr>
+
+<!-- ID column -->
+<td><%= row[ENTRY] %></td>
+
+<!-- Other columns -->
+%  VECTOR_EACH(columns, j) { Column& c(columns[j]);
+<td>
+%   if(c.noEscape) {
+%= row[c.rowId]
+%   } else {
+%    if(c.hasLink) {
+<a href="<%= c.linkTarget<<"="<<row[c.linkId] %>">
+%    }
+%= htmlEscape(row[c.rowId])
+%    if(c.hasLink) {
+</a>
+%    }
+%   }
+</td>
+%  }
+</tr>
+% }
+</table>

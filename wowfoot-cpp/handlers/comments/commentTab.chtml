@@ -1,0 +1,9 @@
+% VECTOR_EACH(mComments, i) { Comment& c(mComments[i]);
+%//<!-- <%= c[:originalBody] %> -->
+% indentHtml(stream, c.indent);
+<%=c.user%> <%=c.date%> (Patch <%=patch(c.date.c_str())%>) Rating: <%=c.rating%> Indent: <%=c.indent%><br>
+<p>
+%= c.body
+</p>
+% }
+% indentEndHtml(stream);

@@ -2,6 +2,9 @@
 TABLE.tabs { border-collapse: collapse; display: none; }
 td { border-spacing: 1px; border: solid; }
 
+TABLE.tab { border-collapse: collapse; }
+div.tab { display: none; }
+
 /* comments */
 div.rootComment { border-width: 1px; border:solid; margin-left: 0 }
 div.indentedComment { border-width: 1px; border:solid; margin-left: 1em }

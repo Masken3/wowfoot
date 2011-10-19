@@ -10,7 +10,7 @@
 Item <%=mTitle%> does not exist.
 % } else {
 <p>
-<span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span></span><br>
+<span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span><br>
 
 % if(a->bonding != 0) {
 <%= ITEM_BONDING(a->bonding) %><br>
@@ -81,11 +81,11 @@ Speed: <%= a->delay / 1000.0 %><br>
 % }
 
 % if(a->randomProperty != 0) {
-Random property: <%= a->randomProperty %><br>
+Random property <%= a->randomProperty %><br>
 % }
 
 % if(a->randomSuffix != 0) {
-Random suffix: <%= a->randomSuffix %><br>
+Random suffix <%= a->randomSuffix %><br>
 % }
 
 % if(!a->description.empty()) {
@@ -93,9 +93,9 @@ Random suffix: <%= a->randomSuffix %><br>
 % }
 </p>
 
-% returnCode = tabTablesChtml::run(stream);
+% returnCode = tabsChtml::run(stream);
 
-% if(mTables.size() == 0) {
+% if(mTabs.size() == 0) {
 <p>Item source &amp; use not found.</p>
 % }
 

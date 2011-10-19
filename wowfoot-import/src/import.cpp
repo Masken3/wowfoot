@@ -7,6 +7,8 @@
 #include "dirent.h"
 #include "json.h"
 #include "attribute.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -36,7 +38,7 @@ int main() {
 	// open db
 	sqlite3* db;
 	SQLT(sqlite3_open(DB_FILENAME, &db));
-	
+
 	// create tables
 	if(CONFIG_CREATE_DB) {
 		ifstream f("create-db.sql");
@@ -50,7 +52,7 @@ int main() {
 			SQLT(sqlite3_exec(db, s.c_str(), NULL, NULL, &err));
 		}
 	}
-	
+
 	// list files in src dir
 	DIR* dir = opendir(CONFIG_SRCDIR);
 	if(!dir) {
@@ -65,7 +67,7 @@ int main() {
 		static const char FILENAME_BASE[] = CONFIG_TYPE"=";
 		assert(strncmp(de->d_name, FILENAME_BASE, strlen(FILENAME_BASE)) == 0);
 		const char* entry = de->d_name + strlen(FILENAME_BASE);
-		
+
 		ifstream f((string(CONFIG_SRCDIR "/") + de->d_name).c_str());
 		if(!f) {
 			handleErrno();
@@ -95,7 +97,7 @@ int main() {
 		printf("Error: %s\n", err);
 		abort();
 	}
-	
+
 	printf("closing...\n");
 	SQLT(sqlite3_close(db));
 	printf("done.\n");

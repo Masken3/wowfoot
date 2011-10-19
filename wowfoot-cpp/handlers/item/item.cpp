@@ -1,4 +1,5 @@
 #include "item.chtml.h"
+#include "comments.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -25,6 +26,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 			if(fnz(averageDmg))
 				context.dps += averageDmg / (a->delay / 1000.0);
 		}
+		context.mTabs.push_back(getComments("item", id));
 	} else {
 		context.mTitle = urlPart;
 		drd->code = 404;

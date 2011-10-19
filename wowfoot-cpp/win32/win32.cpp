@@ -57,3 +57,18 @@ const char* strcasestr(const char* s1, const char* s2)
 	}
 	return NULL;
 }
+
+time_t timegm (struct tm* brokentime) {
+	const char* old = getenv("TZ");
+	_putenv("TZ=UTC");
+	_tzset();
+	time_t t = mktime(brokentime);
+
+	// restore old TZ, or remove it if it did not exist.
+	char buf[128] = "TZ=";
+	if(old)
+		strcat(buf, old);
+	_putenv(buf);
+	_tzset();
+	return t;
+}

@@ -1,6 +1,6 @@
 #include "search.chtml.h"
 #include "dllInterface.h"
-#include "tabTables.h"
+#include "tabTable.h"
 #include "Spell.h"
 #include "db_item.h"
 
@@ -12,11 +12,6 @@
 
 using namespace std;
 
-enum TableId {
-	ZONE,
-	SPELL,
-	ITEM,
-};
 enum TableRowId {
 	NAME = ENTRY+1,
 };
@@ -35,8 +30,9 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	string searchString = toupper(urlPart);
 
 	{
-	Table t;
-	t.id = ZONE;
+	tabTableChtml* tp = new tabTableChtml;
+	tabTableChtml& t(*tp);
+	t.id = "zone";
 	t.title = "Zones";
 	Column c = { NAME, "Name", false, true, ENTRY, "zone" };
 	t.columns.push_back(c);
@@ -52,11 +48,13 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 			t.array.push_back(r);
 		}
 	}
-	context.mTables.push_back(t);
+	t.count = t.array.size();
+	context.mTabs.push_back(tp);
 	}
 	{
-		Table t;
-		t.id = SPELL;
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "spell";
 		t.title = "Spells";
 		Column c = { NAME, "Name", false, true, ENTRY, "spell" };
 		t.columns.push_back(c);
@@ -73,11 +71,13 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 				t.array.push_back(r);
 			}
 		}
-		context.mTables.push_back(t);
+		t.count = t.array.size();
+		context.mTabs.push_back(tp);
 	}
 	{
-		Table t;
-		t.id = ITEM;
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "item";
 		t.title = "Items";
 		Column c = { NAME, "Name", false, true, ENTRY, "item" };
 		t.columns.push_back(c);
@@ -94,7 +94,8 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 				t.array.push_back(r);
 			}
 		}
-		context.mTables.push_back(t);
+		t.count = t.array.size();
+		context.mTabs.push_back(tp);
 	}
 
 	getResponse(drd, context);

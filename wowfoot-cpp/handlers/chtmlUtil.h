@@ -24,7 +24,7 @@ template<class T> string toString(const T& t) {
 // float not zero (epsilon)
 bool fnz(float f) VISIBLE;
 
-#define VECTOR_EACH(etype, vector, element) \
-for(size_t element##_i=0; element##_i<vector.size(); element##_i++) { etype& element(vector[element##_i]);
+#define VECTOR_EACH(vector, itr) \
+for(size_t itr=0; itr<vector.size(); itr++)
 
 #endif	//CHTML_UTIL_H

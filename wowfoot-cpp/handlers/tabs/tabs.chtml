@@ -1,0 +1,59 @@
+<%
+const char* largestTabId = NULL;
+int maxSize = 0;
+VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
+	if(t.count > maxSize) {
+		maxSize = t.count;
+		largestTabId = t.id;
+	}
+}
+%>
+
+<!-- Tab-table :) -->
+% if(!mTabs.empty()) {
+<table id="tabs" class="tabs"><tr>
+% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
+<td><a href="#" id="<%= t.id %>"><%= t.title %> (<%= t.count %>)</a></td>
+% }
+</tr></table>
+% }
+
+
+<!-- a tag for each tab -->
+% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]); if(t.count != 0) {
+<div id="<%= t.id %>Tab" class="tab">
+% returnCode = t.run(stream);
+</div>
+% }}
+
+<SCRIPT type="text/javascript">
+function tab_onclick(e) {
+	activateTab(e.target);
+}
+function activateTab(target) {
+	document.getElementById(currentTab + "Tab").style.display = "none";
+	document.getElementById(target.id + "Tab").style.display = "block";
+	document.getElementById(currentTab).style.fontWeight = "normal";
+	document.getElementById(currentTab).style.fontSize = "medium";
+	target.style.fontWeight = "bold";
+	target.style.fontSize = "x-large";
+	currentTab = target.id;
+}
+function my_onload() {
+% if(largestTabId) {
+	currentTab = "<%= largestTabId %>"
+	activateTab(document.getElementById(currentTab))
+
+	document.getElementById("tabs").style.display = "block";
+
+% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
+	document.getElementById("<%= t.id %>").onclick = tab_onclick;
+% }
+% }
+}
+window.onload = my_onload;
+</SCRIPT>
+
+% VECTOR_EACH(mTabs, i) { Tab* t(mTabs[i]);
+% delete t;
+% }

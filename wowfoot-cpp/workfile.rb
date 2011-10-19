@@ -24,9 +24,8 @@ end
 
 win32 = DllWork.new
 win32.instance_eval do
-	@SOURCES = []
-	@EXTRA_INCLUDES = ['.']
-	@EXTRA_SOURCEFILES = ['win32.cpp']
+	@SOURCES = ['win32']
+	@EXTRA_INCLUDES = ['win32']
 	@SPECIFIC_CFLAGS = {
 		'win32.cpp' => ' -Wno-missing-format-attribute',
 	}
@@ -47,6 +46,7 @@ class HandlerWork < DllWork
 		@EXTRA_INCLUDES = [
 			'.', CHTML_BUILDDIR,
 			TDB_BUILDDIR,
+			'win32',
 			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
 		]
 		handlerDeps.each do |dll|
@@ -116,19 +116,31 @@ ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_A
 ExTemplateWork.new('Spell', 'Spell', 'Spells', 'SPELL')
 ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
 
-HandlerWork.new('tabTables')
+HandlerWork.new('tabs')
+HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
+HandlerWork.new('comments', ['tabs']).instance_eval do
+	@LIBRARIES = ['sqlite3']
+	patch = FileTask.new(self, 'build/patch.cpp')
+	patch.instance_eval do
+		@src = 'handlers/comments/patch.rb'
+		@prerequisites = [FileTask.new(@work, @src)]
+		def execute
+			sh "ruby #{@src} #{@NAME}"
+		end
+	end
+	@EXTRA_SOURCETASKS << patch
+end
 
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
-PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabTables', 'Spell', 'db_item'])
-PageWork.new('item', ['tabTables', 'db_item', 'TotemCategory'])
+PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'Spell', 'db_item'])
+PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do
 	@SOURCES = ['.']
 	@LIBRARIES = ['microhttpd']
-	#@EXTRA_INCLUDES = ['src', 'src/libs/libmpq']
-	@IGNORED_FILES = ['win32.cpp']
+	@EXTRA_INCLUDES = ['win32']#'src', 'src/libs/libmpq']
 	#@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
 
 	if(HOST == :win32)

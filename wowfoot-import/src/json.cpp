@@ -2,6 +2,8 @@
 #include <vector>
 #include <assert.h>
 #include "attribute.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -45,7 +47,7 @@ public:
 		else
 			return *itr->second;
 	}
-	
+
 	virtual iterator begin() const { return mMap.begin(); }
 	virtual iterator end() const { return mMap.end(); }
 };
@@ -127,8 +129,10 @@ static JsonArray* parseArray() {
 	token('[');
 	JsonArrayImpl* arr = new JsonArrayImpl;
 	while(true) {
-		if(*sText == ']')
+		if(*sText == ']') {
+			sText++;
 			break;
+		}
 		arr->mVec.push_back(parseValue());
 		if(nextInList(']'))
 			continue;
@@ -155,7 +159,7 @@ static JsonObject* parseObject() {
 		}
 		token(':');
 		obj->mMap[name] = parseValue();
-		
+
 		if(nextInList('}'))
 			continue;
 		else

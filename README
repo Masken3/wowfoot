@@ -23,6 +23,8 @@ Components:
 * wowfoot-webrick: A web server.
   Uses the data provided by wowfoot-ex and wowfoot-import.
   Connects to a TrinityCore world database.
+* wowfoot-cpp: A web server, much like wowfoot-webrick, except written in C++.
+  Has superior performance, but not yet all the features of wowfoot-webrick.
 
 
 wowfoot-downloader takes a very long time to run, so its output has been collected and is available

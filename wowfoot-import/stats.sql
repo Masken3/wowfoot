@@ -1,0 +1,11 @@
+SELECT 'comments', COUNT(*) FROM comments;
+SELECT 'quest_comments', COUNT(*) FROM quest_comments;
+SELECT 'achievement_comments', COUNT(*) FROM achievement_comments;
+SELECT 'npc_comments', COUNT(*) FROM npc_comments;
+SELECT 'object_comments', COUNT(*) FROM object_comments;
+SELECT 'faction_comments', COUNT(*) FROM faction_comments;
+SELECT 'spell_comments', COUNT(*) FROM spell_comments;
+SELECT 'zone_comments', COUNT(*) FROM zone_comments;
+SELECT 'itemset_comments', COUNT(*) FROM itemset_comments;
+SELECT 'item_comments', COUNT(*) FROM item_comments;
+SELECT 'zone_comments', COUNT(*) FROM zone_comments;
