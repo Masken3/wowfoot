@@ -88,6 +88,8 @@ Random property <%= a->randomProperty %><br>
 Random suffix <%= a->randomSuffix %><br>
 % }
 
+%// todo: spell effects
+
 % if(!a->description.empty()) {
 <span class="itemDescription">"<%= a->description %>"</span><br>
 % }

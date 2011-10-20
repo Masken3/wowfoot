@@ -12,12 +12,30 @@
 using namespace std;
 
 struct Column {
+	enum NoEscapeEnum {
+		Escape,
+		NoEscape,
+	};
+#if 0
+	// Generic
+	Column(int rid, const char* t, NoEscapeEnum e = Escape, const char* lt = NULL, int lid = -1)
+	: rowId(rid), title(t), noEscape(e == NoEscape), hasLink(lid >= 0), linkId(lid), linkTarget(lt)
+	{}
+#endif
+	// NoEscape
+	Column(int rid, const char* t, NoEscapeEnum e = Escape)
+	: rowId(rid), title(t), noEscape(e == NoEscape), hasLink(false), linkId(-1)
+	{}
+	// Link
+	Column(int rid, const char* t, int lid, const char* lt)
+	: rowId(rid), title(t), noEscape(false), hasLink(lid >= 0), linkId(lid), linkTarget(lt)
+	{}
 	int rowId;
-	string title;
+	const char* title;
 	bool noEscape;
 	bool hasLink;
 	int linkId;
-	string linkTarget;
+	const char* linkTarget;
 };
 
 enum RowId {

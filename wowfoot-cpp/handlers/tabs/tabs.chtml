@@ -40,11 +40,11 @@ function activateTab(target) {
 	currentTab = target.id;
 }
 function my_onload() {
+	document.getElementById("tabs").style.display = "block";
+
 % if(largestTabId) {
 	currentTab = "<%= largestTabId %>"
 	activateTab(document.getElementById(currentTab))
-
-	document.getElementById("tabs").style.display = "block";
 
 % VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
 	document.getElementById("<%= t.id %>").onclick = tab_onclick;

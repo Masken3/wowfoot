@@ -34,8 +34,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	tabTableChtml& t(*tp);
 	t.id = "zone";
 	t.title = "Zones";
-	Column c = { NAME, "Name", false, true, ENTRY, "zone" };
-	t.columns.push_back(c);
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "zone"));
 
 	for(AreaTable::citr itr = gAreaTable.begin(); itr != gAreaTable.end(); ++itr) {
 		const Area& a(itr->second);
@@ -56,8 +55,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 		tabTableChtml& t(*tp);
 		t.id = "spell";
 		t.title = "Spells";
-		Column c = { NAME, "Name", false, true, ENTRY, "spell" };
-		t.columns.push_back(c);
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "spell"));
 		for(Spells::citr itr = gSpells.begin();
 			itr != gSpells.end() && t.array.size() < MAX_COUNT;
 			++itr)
@@ -79,8 +77,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 		tabTableChtml& t(*tp);
 		t.id = "item";
 		t.title = "Items";
-		Column c = { NAME, "Name", false, true, ENTRY, "item" };
-		t.columns.push_back(c);
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
 		for(Items::citr itr = gItems.begin();
 			itr != gItems.end() && t.array.size() < MAX_COUNT;
 			++itr)
