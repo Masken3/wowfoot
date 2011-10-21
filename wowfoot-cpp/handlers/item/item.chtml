@@ -30,6 +30,7 @@ Class: <%= ITEM_CLASS(a->class_) %><!--(<%= a->class_ %>)--> / <%= ITEM_SUBCLASS
 Equip: <%= ITEM_EQUIP(a->inventoryType) %><!--(<%= a->inventoryType %>)--><br>
 % }
 Material: <%= ITEM_MATERIAL(a->material) %><!--(<%= a->material %>)--><br>
+Item level <%= a->itemLevel %><br>
 
 %// todo: class & race, skill, spell, honorrank, cityrank
 
