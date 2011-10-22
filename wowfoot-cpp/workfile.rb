@@ -157,6 +157,7 @@ end
 
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
+TdbWork.new('db_creature_template')
 
 ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
 ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
@@ -181,7 +182,8 @@ end
 
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
 PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'Spell', 'db_item'])
-PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments', 'db_npc_vendor'])
+PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments',
+	'db_npc_vendor', 'db_creature_template'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do

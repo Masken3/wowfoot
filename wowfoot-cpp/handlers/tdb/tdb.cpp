@@ -21,6 +21,7 @@ typedef int socklen_t;
 using namespace std;
 
 static MYSQL* sMysql;
+static const char* sColName;
 
 static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
@@ -48,6 +49,9 @@ static void init() {
 static int safe_atoi(const char* str, unsigned long len) {
 	char* end;
 	int i = strtol(str, &end, 10);
+	if(end != str + len) {
+		printf("%s: %s\n", sColName, str);
+	}
 	assert(end == str + len);
 	return i;
 }
@@ -55,6 +59,9 @@ static int safe_atoi(const char* str, unsigned long len) {
 static float safe_atof(const char* str, unsigned long len) {
 	char* end;
 	double d = strtod(str, &end);
+	if(end != str + len) {
+		printf("%s: %s\n", sColName, str);
+	}
 	assert(end == str + len);
 	return (float)d;
 }
@@ -97,6 +104,7 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 		char* dst = dstGet(cf[0], row, lengths, t);
 
 		for(size_t i=ColCountStart; i<nCol; i++) {
+			sColName = cf[i].name;
 			char* ptr = dst + cf[i].offset;
 			switch(cf[i].type) {
 			case CDT_INT:

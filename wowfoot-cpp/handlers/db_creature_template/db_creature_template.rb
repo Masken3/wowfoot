@@ -1,0 +1,51 @@
+@mysql_db_name = 'creature_template'
+@structName = 'Npc'
+
+@struct = [
+	[:int, :entry],
+	[:string, :name],
+	[:string, :subName],
+	[:string, :iconName],
+	[:int, :minLevel],
+	[:int, :maxLevel],
+	[:int, :exp],	# expansion
+	[:int, :npcflag],
+	[:int, :rank],
+	[:float, :minDmg],
+	[:float, :maxDmg],
+	[:int, :dmgSchool],
+	[:int, :attackPower],
+	[:float, :dmg_multiplier],
+	[:int, :baseAttackTime],
+	[:int, :rangeAttackTime],
+	[:int, :unit_flags],
+	[:int, :dynamicFlags],
+	[:int, :family],	# if type is Beast
+	[:int, :trainer_type],
+	[:int, :trainer_spell],
+	[:int, :trainer_class],
+	[:int, :trainer_race],
+	[:float, :minRangeDmg],
+	[:float, :maxRangeDmg],
+	[:int, :rangedAttackPower],
+	[:int, :type],
+	[:int, :type_flags],
+	[:int, :lootid],
+	[:int, :pickpocketloot],
+	[:int, :skinloot],
+] + sql_pair(:int, [:resistance], 6) +
+sql_pair(:int, [:spell], 8) + [
+	[:int, :petSpellDataId],
+	[:int, :vehicleId],
+	[:int, :minGold],
+	[:int, :maxGold],
+	[:string, :aiName],
+	[:int, :movementType],
+	[:int, :inhabitType],
+	[:int, :racialLeader],
+	[:int, :regenHealth],
+	[:int, :equipment_id],
+	[:int, :mechanic_immune_mask],
+	[:int, :flags_extra],
+	[:string, :scriptName],
+]

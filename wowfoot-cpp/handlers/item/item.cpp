@@ -3,6 +3,7 @@
 #include "comments.h"
 //#include "extendedCost.h"
 #include "db_npc_vendor.h"
+#include "db_creature_template.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -20,6 +21,7 @@ static Tab* currencyFor(const Item& a);
 
 extern "C"
 void getResponse(const char* urlPart, DllResponseData* drd) {
+	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
 	gTotemCategories.load();
@@ -118,14 +120,12 @@ static Tab* soldBy(const Item& a) {
 	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
 	t.columns.push_back(Column(STOCK, "Stock"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
-	printf("gNpcVendors.findItem(%i);\n", a.entry);
 	NpcVendors::ItemPair res = gNpcVendors.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const NpcVendor& nv(*res.first->second);
 		Row r;
 		r[ENTRY] = toString(nv.entry);
-		printf("nv.entry: %i;\n", nv.entry);
-		r[NAME] = "not implemented";//gNpcs[nv.entry].name;
+		r[NAME] = gNpcs[nv.entry].name;
 		r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
 		r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
 		//todo: add nv.incrtime, a.buyCount;
