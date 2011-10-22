@@ -3,16 +3,26 @@
 
 #include "tdb_raw.h"
 #include <assert.h>
+#include <unordered_map>
+#include <unordered_set>
+
+using namespace std;
 
 template<class T>
 class TDB {
 private:
-	typedef std::unordered_map<int, T> Map;
-	static void* tableFetchCallback(int entry);
+	typedef unordered_map<int, T> Map;
+	typedef unordered_set<T, T> Set;
+	static void* tableFetchMap(int entry);
+	static void tableFetchSet();
 	static Map* sMap;
+	static Set* sSet;
+	static T sT;
 public:
 	static void fetchTable(const char* tableName, const ColumnFormat*, size_t nCol,
 		Map&);
+	static void fetchTable(const char* tableName, const ColumnFormat*, size_t nCol,
+		Set&);
 };
 
 template<class T>
@@ -42,19 +52,40 @@ void TDB<T>::fetchTable(const char* tableName, const ColumnFormat* cf, size_t nC
 #endif
 
 	sMap = &map;
-	::fetchTable(tableName, cf, nCol, tableFetchCallback);
+	::fetchTable(tableName, cf, nCol, tableFetchMap);
 	sMap = NULL;
 }
 
 template<class T> std::unordered_map<int, T>* TDB<T>::sMap;
 
 template<class T>
-void* TDB<T>::tableFetchCallback(int entry) {
+void* TDB<T>::tableFetchMap(int entry) {
 	assert(sMap != NULL);
 	pair<typename Map::iterator, bool> res = sMap->insert(pair<int, T>(entry, T()));
 	assert(res.second);
 	T* ptr = &res.first->second;	// assignment provides compile-time type safety.
 	return ptr;
+}
+
+
+template<class T>
+void TDB<T>::fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
+	Set& set)
+{
+	assert(sSet == NULL);
+	sSet = &set;
+	::fetchTable(tableName, cf, nCol, tableFetchSet, &sT);
+	sSet = NULL;
+}
+
+template<class T> std::unordered_set<T, T>* TDB<T>::sSet;
+template<class T> T TDB<T>::sT;
+
+template<class T>
+void TDB<T>::tableFetchSet() {
+	assert(sSet != NULL);
+	pair<typename Set::iterator, bool> res = sSet->insert(sT);
+	assert(res.second);
 }
 
 #endif	//TDB_H

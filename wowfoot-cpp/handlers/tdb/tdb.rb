@@ -22,14 +22,20 @@ class TdbGenTask < MemoryGeneratedFileTask
 		:float => 'CDT_FLOAT',
 	}
 	def capitalize(foo)
-		return foo[0,1].upcase + foo[1..-1]
+		s = foo.to_s
+		return s[0,1].upcase + s[1..-1]
+	end
+	def load(work, name, dstName)
+		return if(@loaded)
+		src = "handlers/#{name}/#{name}.rb"
+		@prerequisites = [DirTask.new(self, TDB_BUILDDIR)]
+		instance_eval(open(src).read, src)
+		@loaded = true
 	end
 	def initialize(work, name, template, dstName)
-		src = FileTask.new(self, "handlers/#{name}/#{name}.rb")
+		load(work, name, dstName)
 		dst = "#{TDB_BUILDDIR}/#{dstName}"
 		super(work, dst)
-		@prerequisites << DirTask.new(self, TDB_BUILDDIR)
-		instance_eval(open(src).read, src)
 		upName = name.upcase
 
 		@types = {}
@@ -37,25 +43,47 @@ class TdbGenTask < MemoryGeneratedFileTask
 			@types[col[1]] = col[0]
 		end
 
+		#p self.class.to_s
+		#puts template
 		@buf = ERB.new(template).result(binding)
 	end
 end
 
+IF_INDEX = %q{
+<% if(@index) then @index.each do |args|
+capArgs = args.collect {|arg| capitalize(arg); }.join
+iitr = capArgs + 'Itr'
+imap = capArgs + 'Map'
+istruct = capArgs + 'Struct'
+ipair = capArgs + 'Pair'
+%>
+}
+
 class TdbStructHeaderTask < TdbGenTask
 	def initialize(work, name)
-		template = %q{
+		template = %q(
 #ifndef <%=upName%>_STRUCT_H
 #define <%=upName%>_STRUCT_H
 
 struct <%=@structName%> {<% @struct.each do |col|
-	if(col.size == 2) %>
+	if(col.size == 2 || col[2] == :key) %>
 	<%=col[0]%> <%=cEscape(col[1])%>;<%else
 	col[1].each do |name| %>
-	<%=col[0]%> <%=cEscape(name)%>[<%=col[2]%>];<%end; end; end%>
+	<%=col[0]%> <%=cEscape(name)%>[<%=col[2]%>];<%end; end; end; if(@containerType == :set)%>
+	bool operator==(const <%=@structName%>& o) const {
+		return<% @struct.each_with_index do |col, i| if(col[2] == :key) %>
+			<%if(i!=0)%>&& <%end%>this-><%=cEscape(col[1])%> == o.<%=cEscape(col[1])%><%end; end%>;
+	}
+	size_t operator()(const <%=@structName%>& o) const {
+		return<% @struct.each do |col| if(col[2] == :key) %>
+			hash<int>()(o.<%=cEscape(col[1])%> + <%end; end%>0
+			<% @struct.each do |col| if(col[2] == :key) %>)<%end; end%>;
+	}
+<%end%>
 };
 
 #endif	//<%= upName %>_STRUCT_H
-}
+)
 		super(work, name, template, "#{name}.struct.h")
 	end
 end
@@ -69,7 +97,7 @@ class TdbFormatHeaderTask < TdbGenTask
 #include <stddef.h>
 
 static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
-	if(col.size == 2) %>
+	if(col.size == 2 || col[2] == :key) %>
 {<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<% else
 	(1..col[2]).each do |i| col[1].each do |name| %>
 {<%=FORMATS[col[0]]%>, "<%=name%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
@@ -83,19 +111,46 @@ end
 
 class TdbExtHeaderTask < TdbGenTask
 	def initialize(work, name)
-		template = %q{
+		dstName = "#{name}.h"
+		load(work, name, dstName)
+		@cppContainerName = 'ConstMap'
+		@cppContainer = "ConstMap<int, #{@structName}>"
+		if(@containerType == :set)
+			@cppContainerName = 'ConstSet'
+			@cppContainer = "ConstSet<#{@structName}>"
+		end
+		template = %q(
 #ifndef <%=upName%>_H
 #define <%=upName%>_H
 
-#include "ConstMap.h"
+#include "<%=@cppContainerName%>.h"
 #include "dllHelpers.h"
 #include "<%=name%>.struct.h"
+#include <unordered_map>
 
-class <%=@structName%>s : public ConstMap<int, <%=@structName%>> {
+using namespace std;
+
+class <%=@structName%>s : public <%=@cppContainer%> {
 public:
 	void load() VISIBLE;
-<% if(@index) then @index.each do |args| %>
-	void* find<%args.each do |arg|%><%=capitalize(arg)%><%end%>(<%args.each_with_index do |arg, i|%>
+) + IF_INDEX + %q(
+	struct <%=istruct%> {<%args.each do |arg|%>
+		<%=@types[arg]%> <%=arg%>;<%end%>
+		bool operator==(const <%=istruct%>& o) const {
+			return<% args.each_with_index do |arg, i| %>
+				<%if(i!=0)%>&& <%end%>this-><%=arg%> == o.<%=arg%><%end%>;
+		}
+		size_t operator()(const <%=istruct%>& o) const {
+			return<% args.each do |arg| %>
+				hash<int>()(o.<%=arg%> + <%end%>0
+				<% args.each do |arg| %>)<%end%>;
+		}
+	};
+	typedef unordered_multimap<<%=istruct%>, const <%=@structName%>*, <%=istruct%>> <%=imap%>;
+	typedef <%=imap%>::const_iterator <%=iitr%>;
+	typedef pair<<%=iitr%>, <%=iitr%>> <%=ipair%>;
+	<%=imap%> m<%=imap%>;
+	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
 		);
 <%end; end%>
@@ -104,16 +159,19 @@ public:
 extern <%=@structName%>s g<%=@structName%>s VISIBLE;
 
 #endif	//<%=upName%>_H
-}
-		super(work, name, template, "#{name}.h")
+)
+		super(work, name, template, dstName)
 	end
 end
 
 class TdbCppTask < TdbGenTask
 	def initialize(work, name)
-		template = %q{
+		template = %q(
+#define __STDC_FORMAT_MACROS
 #include "<%=name%>.h"
 #include "tdb.h"
+#include <stdio.h>
+#include <inttypes.h>
 #include "<%=name%>.format.h"
 
 static bool sLoaded = false;
@@ -124,10 +182,35 @@ void <%=@structName%>s::load() {
 	sLoaded = true;
 	TDB<<%=@structName%>>::fetchTable("<%=@mysql_db_name%>", s<%=@structName%>Formats,
 		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);
+) + IF_INDEX + %q(
+	for(<%=@structName%>s::citr itr = g<%=@structName%>s.begin();
+		itr != g<%=@structName%>s.end();
+		++itr)
+	{
+		const <%=@structName%>& ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);
+		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
+			<%if(i!=0)%>,<%end%>ref.<%=arg%><%end%>
+		};
+		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &ref));
+	}
+	printf("Loaded %"PRIuPTR" rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
+<%end; end%>
 }
 
 <%=@structName%>s g<%=@structName%>s;
+
+) + IF_INDEX + %q(
+<%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
+	<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
+	)
+{
+	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
+		<%if(i!=0)%>,<%end%><%=arg%><%end%>
+	};
+	return m<%=imap%>.equal_range(key);
 }
+<%end; end%>
+)
 		super(work, name, template, "#{name}.cpp")
 	end
 end

@@ -15,9 +15,16 @@ struct ColumnFormat {
 
 // Called before each row has been fetched.
 // Returns a pointer to a struct matching the ColumnFormat array.
-typedef void* (*TableFetchCallback)(int entry);
+typedef void* (*TableFetchMap)(int entry);
 
 void fetchTable(const char* tableName, const ColumnFormat*, size_t nCol,
-	TableFetchCallback) VISIBLE;
+	TableFetchMap) VISIBLE;
+
+
+// Called after each row has been fetched.
+typedef void (*TableFetchSet)();
+
+void fetchTable(const char* tableName, const ColumnFormat*, size_t nCol,
+	TableFetchSet, void* dst) VISIBLE;
 
 #endif	//TDB_RAW_H

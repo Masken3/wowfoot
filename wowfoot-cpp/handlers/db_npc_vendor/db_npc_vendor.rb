@@ -1,12 +1,13 @@
 @mysql_db_name = 'npc_vendor'
 @structName = 'NpcVendor'
+@containerType = :set
 
 @struct = [
-	[:int, :entry],
+	[:int, :entry, :key],
 	[:int, :slot],
-	[:int, :item],
+	[:int, :item, :key],
 	[:int, :maxcount],
-	[:int, :extendedCost],
+	[:int, :extendedCost, :key],
 ]
 
 @index = [

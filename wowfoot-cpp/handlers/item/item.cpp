@@ -1,15 +1,26 @@
+#define __STDC_FORMAT_MACROS
 #include "item.chtml.h"
 #include "comments.h"
+//#include "extendedCost.h"
+#include "db_npc_vendor.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string>
 #include <sstream>
+#include <unordered_map>
+#include <inttypes.h>
 
 using namespace std;
 
+static void createTabs(vector<Tab*>& tabs, const Item& a);
+static Tab* soldBy(const Item& a);
+static Tab* currencyFor(const Item& a);
+
 extern "C"
 void getResponse(const char* urlPart, DllResponseData* drd) {
+	gNpcVendors.load();
 	gItems.load();
 	gTotemCategories.load();
 
@@ -26,6 +37,8 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 			if(fnz(averageDmg))
 				context.dps += averageDmg / (a->delay / 1000.0);
 		}
+		createTabs(context.mTabs, *a);
+		//printf("sizeof(string): %" PRIuPTR "\n", sizeof(string));
 		context.mTabs.push_back(getComments("item", id));
 	} else {
 		context.mTitle = urlPart;
@@ -34,6 +47,115 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 
 	getResponse(drd, context);
 }
+
+static void createTabs(vector<Tab*>& tabs, const Item& a) {
+	// Sold by (npc)
+	tabs.push_back(soldBy(a));
+	// Currency for (item)
+	tabs.push_back(currencyFor(a));
+	// Disenchants to (item)
+	// Disenchanted from (item)
+	// Dropped by (npc)
+	// Contained in (gameobject)
+	// Contained in (item)
+	// Milled from (item)
+	// Mills to (item)
+	// Pickpocketed from (npc)
+	// Prospected from (item)
+	// Prospects (item)
+	// Skinned from (npc)
+	// Created by (spell)
+	// Reagent for (spell)
+	// Provided for quest
+	// Required for quest
+	// Quest reward choice
+	// Quest reward
+}
+
+enum TableRowId {
+	NAME = ENTRY+1,
+	VENDOR,
+	COST,
+	LOCATION,
+	ZONE,
+	STOCK,
+	ILEVEL,
+	CLEVEL,
+	SIDE,
+	SLOT,
+	TYPE,
+};
+
+static string costHtml(const Item& a, int extendedCostId) {
+	return "not implemented";
+#if 0
+	if(@template[:buyPrice] != 0)
+		html << moneyHtml(@template[:buyPrice])
+	elsif(extendedCostId == 0)
+		return 'No cost'
+	end
+	return html if(extendedCostId == 0)
+	html = '' if(@template[:flagsExtra] != 3)
+
+	#0 for 2v2, 1 for 3v3/5v5, 2 for 5v5 only
+	arenaSlot = { 0 => '2v2', 1 => '3v3/5v5', 2 => '5v5' }
+
+	ec = ITEM_EXTENDED_COST[extendedCostId]
+	html.cappend("#{ec[:honorPoints]} honor points") if(ec[:honorPoints] != 0)
+	html.cappend("#{ec[:arenaPoints]} arena points") if(ec[:arenaPoints] != 0)
+	html.cappend("#{ec[:arenaRating]} #{arenaSlot[ec[:arenaSlot]]} arena rating") if(ec[:arenaRating] != 0)
+	ec[:item].each do |item|
+		html.cappend("#{item.count}x <a href=\"item=#{item.id}\">#{itemName(item.id)}</a>")
+	end
+#endif
+}
+
+static Tab* soldBy(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "soldBy";
+	t.title = "Sold by";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
+	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
+	t.columns.push_back(Column(STOCK, "Stock"));
+	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
+	printf("gNpcVendors.findItem(%i);\n", a.entry);
+	NpcVendors::ItemPair res = gNpcVendors.findItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const NpcVendor& nv(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(nv.entry);
+		printf("nv.entry: %i;\n", nv.entry);
+		r[NAME] = "not implemented";//gNpcs[nv.entry].name;
+		r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
+		r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+		//todo: add nv.incrtime, a.buyCount;
+		if(nv.maxcount == 0)
+			r[STOCK] = "8";
+		else
+			r[STOCK] = toString(nv.maxcount);
+		r[COST] = costHtml(a, nv.extendedCost);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* currencyFor(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "currencyFor";
+	t.title = "Currency for";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	// name of and link to single vendor, or number of vendors.
+	t.columns.push_back(Column(VENDOR, "Vendor", Column::NoEscape));
+	t.columns.push_back(Column(ILEVEL, "iLevel"));
+	t.columns.push_back(Column(CLEVEL, "Req."));	//Required character level
+	t.columns.push_back(Column(SIDE, "Side"));	// Horde, Alliance, or none
+	t.columns.push_back(Column(SLOT, "Slot"));
+	t.columns.push_back(Column(TYPE, "Type"));
+	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
+	return &t;
+}
+
 
 #define ITEM_RESISTANCES(m)\
 	m(holy)\
