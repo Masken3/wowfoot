@@ -9,10 +9,55 @@ require './ex_template.rb'
 require 'erb'
 require './handlers/tdb/tdb.rb'
 require './config.rb'
+require 'net/http'
 
 CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
 WORKS = []
+
+if(HOST == :win32)
+
+def rootSendSignal(works)
+	puts "Signalling (#{works})..."
+	res = Net::HTTP.get_response('localhost', '/unload=' + works, 3002)
+	p res
+	p res.body
+end
+
+# force server to unload DLLs,
+# to remove the write protection.
+class DllTask
+	alias_method :old_execute, :execute
+	def sendSignal
+		# send a signal containing all the
+		# idHandlers that depends on this DLL (including itself).
+		# wait for a "finished" signal from the server.
+		idHandlerWorks = ''
+		main = File.basename(self.to_s, '.dll')
+		# wrong: this is this DLL's dependencies, not the other way around.
+		WORKS.each do |w| w.prerequisites.each do |pre|
+			name = pre.to_s;
+			next unless(name.endsWith('.dll'))
+			# this is the work's primary output. now we must look at its dependencies.
+			pre.prerequisites.each do |pp|
+				pn = File.basename(pp.to_s, '.dll')
+				idHandlerWorks << File.basename(name, '.dll')+',' if(pn == main)
+			end
+		end; end
+		idHandlerWorks << main
+		rootSendSignal(idHandlerWorks)
+	end
+	def execute
+		# try to remove target file.
+		# if that fails, send a signal.
+		FileUtils.rm_f(@NAME)
+		sendSignal if(File.exist?(@NAME))
+
+		old_execute
+	end
+end
+
+end	# WIN32
 
 common = DllWork.new
 common.instance_eval do
@@ -166,6 +211,10 @@ def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 target :default do
 	win32.invoke if(HOST == :win32)
 	@wfc.invoke
+	# required for unload to function properly
+	WORKS.each do |w|
+		w.setup
+	end
 	WORKS.each do |w|
 		w.invoke
 	end

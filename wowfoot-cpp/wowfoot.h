@@ -33,6 +33,10 @@ public:
 	// RequestData::handler will be filled by caller.
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*) = 0;
 	virtual void cleanup(ResponseData*) = 0;
+
+	// Unload any DLLs the Handler may have loaded.
+	// Used only on systems that lock its executable files (Windows).
+	virtual void unload() = 0;
 };
 
 typedef std::unordered_map<std::string, RequestHandler*> PatternMap;

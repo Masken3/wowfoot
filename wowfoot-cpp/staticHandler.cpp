@@ -14,6 +14,7 @@ public:
 	StaticDirHandler(const string& localDir);
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*) __attribute__((noreturn));
+	virtual void unload() {}
 private:
 	const string mLocalDir;
 };
@@ -89,7 +90,7 @@ ResponseData* StaticDirHandler::handleRequest(const char* urlPart, MHD_Connectio
 	int code;
 	void* text = readFileForHTTP(mLocalDir + urlPart, size, code);
 
-	resp = MHD_create_response_from_data(size, text, 0, 1);
+	resp = MHD_create_response_from_data(size, text, 1, 0);
 	if(code != 200)
 		MHD_add_response_header(resp, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain");
 	res = MHD_queue_response(conn, code, resp);

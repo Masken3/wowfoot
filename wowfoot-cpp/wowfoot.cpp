@@ -16,6 +16,10 @@
 #define PRIxLL "llx"
 #endif
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
 using namespace std;
 
 static void prepareHttpd(int port);
@@ -25,6 +29,7 @@ static int requestHandler(void *cls, MHD_Connection *connection, const char *url
 	const char *upload_data, size_t *upload_data_size, void **con_cls);
 static void requestCompletedCallback(void* cls, MHD_Connection*, void** con_cls,
 	MHD_RequestTerminationCode);
+static void mountUnload();
 
 static string sDllDir;
 
@@ -51,6 +56,7 @@ int main(int argc, const char** argv) {
 	mountIdPage("faction");
 	mountIdPage("achievement");
 #endif
+	mountUnload();
 	mountStaticDirectory("output", "../wowfoot-ex/output/");
 	mountStaticDirectory("static", "../wowfoot-webrick/htdocs/static/");
 
@@ -158,4 +164,59 @@ void requestCompletedCallback(void* cls, MHD_Connection*, void** con_cls,
 	ResponseData* rd = (ResponseData*)*con_cls;
 	if(rd)
 		rd->handler->cleanup(rd);
+}
+
+
+class UnloadHandler : public RequestHandler {
+public:
+	ResponseData* handleRequest(const char* urlPart, MHD_Connection* conn) {
+		int res;
+		MHD_Response* resp;
+
+		// parse & unload
+		string responseText = "Unloaded:";
+		const char* ptr = urlPart;
+		while(*ptr) {
+			// find next unload request
+			const char* end = strchr(ptr, ',');
+			size_t len = end ? end - ptr : strlen(ptr);
+			// search root patterns
+			for(PatternMap::const_iterator itr = sRootPatterns.begin();
+				itr != sRootPatterns.end(); ++itr)
+			{
+				const string& pattern(itr->first);
+				size_t min = MIN(len, pattern.size() - 2);
+				// if request was found in patterns
+				if(strncmp(ptr, pattern.c_str() + 1, min) == 0) {
+					// prepare to report it
+					responseText += ' ';
+					responseText.append(ptr, len);
+					// perform the unload
+					printf("Unloading %.*s...\n", len, ptr);
+					itr->second->unload();
+				}
+			}
+			ptr += len;
+			if(*ptr == ',')
+				ptr++;
+		}
+		printf("Unload complete.\n");
+
+		// send the response
+		resp = MHD_create_response_from_data(responseText.size(), (void*)responseText.c_str(), 0, 1);
+		MHD_add_response_header(resp, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain");
+		res = MHD_queue_response(conn, 200, resp);
+		assert(res == MHD_YES);
+		MHD_destroy_response(resp);
+		return NULL;
+	}
+	void cleanup(ResponseData*) __attribute__((noreturn)) {
+		// this function should never be called.
+		abort();
+	}
+	void unload() {}
+};
+
+static void mountUnload() {
+	insertPattern(PatternPair("/unload=", new UnloadHandler()));
 }

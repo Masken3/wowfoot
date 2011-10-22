@@ -10,6 +10,7 @@ public:
 	IdHandler(const char* name);
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*);
+	virtual void unload();
 private:
 	DllGetResponse mDllGetResponse;
 	DllCleanup mDllCleanup;
@@ -76,6 +77,10 @@ ResponseData* IdHandler::handleRequest(const char* urlPart, MHD_Connection* conn
 void IdHandler::cleanup(ResponseData* rd) {
 	mDllCleanup((DllResponseData*)rd);
 	delete rd;
+}
+
+void IdHandler::unload() {
+	mDll.close();
 }
 
 void mountIdPage(const char* name) {
