@@ -132,9 +132,8 @@ class PageWork < HandlerWork
 end
 
 class ExTemplateWork < HandlerWork
-	def initialize(name, singular, plural, upperCase)
-		super(name)
-		@SOURCES = []
+	def initialize(name, singular, plural, upperCase, handlerDeps = [])
+		super(name, handlerDeps)
 		@EXTRA_INCLUDES << "build/#{name}"
 		@EXTRA_SOURCETASKS << ExTemplateCpp.new(self, name, singular, plural, upperCase)
 		@EXTRA_SOURCEFILES << "../wowfoot-ex/output/#{name}.data.cpp"
@@ -163,7 +162,8 @@ ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
 ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
 ExTemplateWork.new('Spell', 'Spell', 'Spells', 'SPELL')
 ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
-ExTemplateWork.new('ItemExtendedCost', 'ItemExtendedCost', 'ItemExtendedCosts', 'ITEM_EXTENDED_COST')
+ExTemplateWork.new('ItemExtendedCost', 'ItemExtendedCost', 'ItemExtendedCosts',
+	'ITEM_EXTENDED_COST', ['db_npc_vendor', 'db_creature_template', 'db_item'])
 
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])

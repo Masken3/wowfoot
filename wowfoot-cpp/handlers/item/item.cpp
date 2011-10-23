@@ -5,6 +5,7 @@
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"
 #include "ItemExtendedCost.h"
+#include "ItemExtendedCost.index.h"
 #include "money.h"
 
 #include <string.h>
@@ -28,6 +29,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	gItems.load();
 	gTotemCategories.load();
 	gItemExtendedCosts.load();
+	ItemExtendedCostIndex::load();
 
 	itemChtml context;
 
@@ -165,6 +167,20 @@ static Tab* currencyFor(const Item& a) {
 	t.columns.push_back(Column(SLOT, "Slot"));
 	t.columns.push_back(Column(TYPE, "Type"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
+	ItemExtendedCostIndex::ItemItemPair res = ItemExtendedCostIndex::findItemItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		Row r;
+		const Item& i(*res.first->second);
+		r[ENTRY] = toString(i.entry);
+		r[NAME] = i.name;
+		r[ILEVEL] = toString(i.itemLevel);
+		r[CLEVEL] = toString(i.requiredLevel);
+		r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
+		r[TYPE] = itemChtml::ITEM_CLASS(i.class_) + string("/") +
+			itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
 	return &t;
 }
 
@@ -196,7 +212,7 @@ const char* itemChtml::ITEM_CLASS(int id) {
 	case 7: return "Trade Goods";
 	case 8: return "Generic(OBSOLETE)";
 	case 9: return "Recipe";
-	case 10: return "Money(OBSOLETE)";
+	case 10: return "Money";
 	case 11: return "Quiver";
 	case 12: return "Quest";
 	case 13: return "Key";
@@ -332,12 +348,12 @@ const char* itemChtml::ITEM_SUBCLASS(int c, int sc) {
 		default: return "bad ITEM_SUBCLASS";
 		}
 	case 10: switch(sc) {
-		case 0: return "Money(OBSOLETE)";
+		case 0: return "Money";
 		default: return "bad ITEM_SUBCLASS";
 		}
 	case 11: switch(sc) {
-		case 0: return "Quiver(OBSOLETE)";
-		case 1: return "Quiver(OBSOLETE)";
+		case 0: return "Quiver(OBSOLETE 0)";
+		case 1: return "Quiver(OBSOLETE 1)";
 		case 2: return "Quiver (Can hold arrows)";
 		case 3: return "Ammo Pouch (Can hold bullets)";
 		default: return "bad ITEM_SUBCLASS";
@@ -382,6 +398,7 @@ const char* itemChtml::ITEM_SUBCLASS(int c, int sc) {
 }
 const char* itemChtml::ITEM_EQUIP(int id) {
 	switch(id) {
+	case 0: return "";
 	case 1: return "Head";
 	case 2: return "Neck";
 	case 3: return "Shoulder";

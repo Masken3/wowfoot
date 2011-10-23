@@ -12,4 +12,5 @@
 
 @index = [
 	[:item],
+	[:extendedCost],
 ]

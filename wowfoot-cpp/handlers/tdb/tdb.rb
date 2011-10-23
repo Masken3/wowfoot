@@ -149,7 +149,9 @@ public:
 	typedef unordered_multimap<<%=istruct%>, const <%=@structName%>*, <%=istruct%>> <%=imap%>;
 	typedef <%=imap%>::const_iterator <%=iitr%>;
 	typedef pair<<%=iitr%>, <%=iitr%>> <%=ipair%>;
+private:
 	<%=imap%> m<%=imap%>;
+public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
 		);
