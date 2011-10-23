@@ -178,6 +178,24 @@ static Tab* currencyFor(const Item& a) {
 		r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
 		r[TYPE] = itemChtml::ITEM_CLASS(i.class_) + string("/") +
 			itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
+
+		// check every vendor selling this item, to make sure costs are identical.
+		NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
+		int ec = -1;
+		bool identicalCost = true;
+		for(; nip.first != nip.second; ++nip.first) {
+			const NpcVendor& nv(*nip.first->second);
+			if(ec == -1)
+				ec = nv.extendedCost;
+			else if(ec != nv.extendedCost)
+				identicalCost = false;
+		}
+		if(identicalCost) {
+			r[COST] = costHtml(i, ec);
+		} else {
+			r[COST] = "Differs between vendors";
+		}
+
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();
@@ -533,7 +551,7 @@ const itemChtml::Flag itemChtml::ITEM_FLAGS[] = {
 	{524288, "Unique-equipped"},
 	{4194304, "Throwable"},
 	{8388608, "Special Use"},
-	{134221824, "Bind to Account"},
+	//{134221824, "Bind to Account"},
 	{268435456, "Enchanting scroll"},
 	{536870912, "Millable"},
 	{2147483648u, "Bind on Pickup tradeable"},
