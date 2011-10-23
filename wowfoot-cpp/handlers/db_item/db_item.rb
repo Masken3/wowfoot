@@ -9,6 +9,7 @@
 	[:int, :displayid],
 	[:int, :quality],
 	[:int, :flags],
+	[:int, :flagsExtra],
 	[:int, :buyCount],
 	[:int, :buyPrice],
 	[:int, :sellPrice],

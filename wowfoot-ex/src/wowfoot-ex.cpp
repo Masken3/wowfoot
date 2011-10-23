@@ -359,6 +359,9 @@ int main() {
 	out = fopen("output/ItemExtendedCost.rb", "w");
 	fprintf(out, "IdCount = Struct.new(:id, :count)\n");
 	fprintf(out, "ITEM_EXTENDED_COST = {\n");
+	out2 = fopen("output/ItemExtendedCost.data.cpp", "w");
+	fprintf(out2, "#include \"ItemExtendedCost.data.h\"\n");
+	fprintf(out2, "const ItemExtendedCosti gItemExtendedCost[] = {\n");
 	for(DBCFile::Iterator itr = iec.begin(); itr != iec.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(0);
@@ -366,6 +369,8 @@ int main() {
 		fprintf(out, ":honorPoints => %i, :arenaPoints => %i, :arenaSlot => %i, :arenaRating => %i",
 			r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(14));
 		fprintf(out, ", :item => [");
+		fprintf(out2, "{ %i, { %i,%i,%i,%i, {",
+			id, r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(14));
 		for(int i=0; i<5; i++) {
 			int iid = r.getInt(4+i);
 			int count = r.getInt(9+i);
@@ -376,10 +381,14 @@ int main() {
 				//printf("ItemExtendedCost error!\n");
 				//exit(1);
 			}
+			fprintf(out2, " {%i,%i},", iid, count);
 		}
 		fprintf(out, "]},\n");
+		fprintf(out2, "} } },\n");
 	}
 	fprintf(out, "}\n");
+	fprintf(out2, "};\n");
+	fprintf(out2, "const size_t gnItemExtendedCost = sizeof(gItemExtendedCost) / sizeof(ItemExtendedCosti);\n");
 
 	printf("Opening TotemCategory.dbc...\n");
 	DBCFile totem("DBFilesClient\\TotemCategory.dbc");

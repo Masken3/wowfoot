@@ -81,6 +81,7 @@ void IdHandler::cleanup(ResponseData* rd) {
 
 void IdHandler::unload() {
 	mDll.close();
+	mDllTime = 0;	// in case the build fails
 }
 
 void mountIdPage(const char* name) {
