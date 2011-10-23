@@ -29,6 +29,12 @@ gcc43_c_warnings = " -Wmissing-declarations"
 #only valid in GCC 4.0 and later
 gcc4_warnings = " -Wvariadic-macros -Wmissing-include-dirs"
 
+#valid in C only, in GCC 4.5 and later
+gcc_45_c_warnings = " -Wc++-compat"
+
+#valid in C++ only, in GCC 4.6 and later
+gcc_46_cpp_warnings = " -Wnoexcept"
+
 lesser_warnings = " -Wpointer-arith -Wundef -Wfloat-equal -Winit-self"
 
 pedantic_warnings = " -Wmissing-noreturn -Wmissing-format-attribute"
@@ -68,13 +74,19 @@ if(PROFILING)
 end
 
 if(@GCC_IS_V4) then
-	if(HOST != :win32)
-		base_flags += " -fvisibility=hidden"
-	end
+	base_flags += " -fvisibility=hidden"
 	version_warnings += gcc4_warnings
 	if(@GCC_V4_SUB >= 3) then
 		version_warnings += gcc43_c_warnings + gcc43_warnings
 		cpp_flags += " -std=gnu++0x -DHAVE_TR1"
+	end
+	if(@GCC_V4_SUB >= 5)
+		#valid in C only, in GCC 4.5 and later
+		c_flags << gcc_45_c_warnings
+	end
+	if(@GCC_V4_SUB >= 6)
+		#valid in C only, in GCC 4.5 and later
+		cpp_flags << gcc_46_cpp_warnings
 	end
 end
 if(!(@GCC_IS_V4 && @GCC_V4_SUB >= 3)) then
