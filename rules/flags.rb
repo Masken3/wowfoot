@@ -39,11 +39,10 @@ module FlagsChanged
 
 	# Call from needed?.
 	def flagsNeeded?(log=true)
-		#puts "Oldflags: #{@OLDFLAGS.inspect} newflags: #{@FLAGS.inspect}"
 		if(@OLDFLAGS != cFlags)
 			puts "Because the flags have changed:" if(log)
 			puts "Old: #{@OLDFLAGS}" if(log)
-			puts "New: #{@FLAGS}" if(log)
+			puts "New: #{cFlags}" if(log)
 			return true
 		end
 		return false

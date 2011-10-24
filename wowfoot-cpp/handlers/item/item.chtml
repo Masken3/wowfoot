@@ -92,7 +92,17 @@ Random property <%= a->randomProperty %><br>
 Random suffix <%= a->randomSuffix %><br>
 % }
 
-%// todo: spell effects
+%// spell effects
+% for(int i=0; i<5; i++) { int id = a->spellId[i]; if(id) {
+<span class="green"><%= SPELLTRIGGER(a->spellTrigger[i]) %>: <a href="spell=<%=id%>"><%= gSpells[id].name %></a></span>
+% if(a->spellTrigger[i] == 2) {	// Chance on Hit
+(<%= a->spellPpmRate[i] %> Procs per minute)
+% }
+% if(a->spellCooldown[i] != -1) {
+(Cooldown: <%= a->spellCooldown[i] %> ms)
+% }
+<br>
+% } }
 
 % if(!a->description.empty()) {
 <span class="itemDescription">"<%= a->description %>"</span><br>

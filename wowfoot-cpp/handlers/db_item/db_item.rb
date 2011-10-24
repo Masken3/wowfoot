@@ -55,4 +55,6 @@ sql_pair(:int, [:dmg_type], 2) + [
 	[:int, :foodType],
 	[:int, :minMoneyLoot],
 	[:int, :maxMoneyLoot],
-]
+] + sql_pair(:int, [:spellId, :spellTrigger, :spellCharges, :spellCooldown,
+	:spellCategory, :spellCategoryCooldown], 5, '_') +
+sql_pair(:float, [:spellPpmRate], 5, '_')

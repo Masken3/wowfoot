@@ -192,7 +192,7 @@ public:
 					responseText += ' ';
 					responseText.append(ptr, len);
 					// perform the unload
-					printf("Unloading %.*s...\n", len, ptr);
+					printf("Unloading %.*s...\n", (int)len, ptr);
 					itr->second->unload();
 				}
 			}

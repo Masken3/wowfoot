@@ -184,7 +184,7 @@ end
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
 PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'Spell', 'db_item'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost'])
+	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'Spell'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do

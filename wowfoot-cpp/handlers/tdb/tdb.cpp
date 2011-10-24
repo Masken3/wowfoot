@@ -47,6 +47,8 @@ static void init() {
 }
 
 static int safe_atoi(const char* str, unsigned long len) {
+	if(!str)
+		return 0;
 	char* end;
 	int i = strtol(str, &end, 10);
 	if(end != str + len) {
@@ -57,6 +59,8 @@ static int safe_atoi(const char* str, unsigned long len) {
 }
 
 static float safe_atof(const char* str, unsigned long len) {
+	if(!str)
+		return 0;
 	char* end;
 	double d = strtod(str, &end);
 	if(end != str + len) {

@@ -30,6 +30,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	gTotemCategories.load();
 	gItemExtendedCosts.load();
 	ItemExtendedCostIndex::load();
+	gSpells.load();
 
 	itemChtml context;
 
@@ -81,7 +82,7 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 
 enum TableRowId {
 	NAME = ENTRY+1,
-	VENDOR,
+	SOURCE,
 	COST,
 	LOCATION,
 	ZONE,
@@ -160,12 +161,13 @@ static Tab* currencyFor(const Item& a) {
 	t.title = "Currency for";
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
 	// name of and link to single vendor, or number of vendors.
-	t.columns.push_back(Column(VENDOR, "Vendor", Column::NoEscape));
+	//t.columns.push_back(Column(VENDOR, "Vendor", Column::NoEscape));
 	t.columns.push_back(Column(ILEVEL, "iLevel"));
 	t.columns.push_back(Column(CLEVEL, "Req."));	//Required character level
 	t.columns.push_back(Column(SIDE, "Side"));	// Horde, Alliance, or none
 	t.columns.push_back(Column(SLOT, "Slot"));
 	t.columns.push_back(Column(TYPE, "Type"));
+	t.columns.push_back(Column(SOURCE, "Source"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
 	ItemExtendedCostIndex::ItemItemPair res = ItemExtendedCostIndex::findItemItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
@@ -532,6 +534,17 @@ const char* itemChtml::ITEM_STAT(int id) {
 	case 47: return "Spell penetration";
 	case 48: return "Block value";
 	default: return "bad ITEM_STAT";
+	}
+}
+const char* itemChtml::SPELLTRIGGER(int id) {
+	switch(id) {
+	case 0: return "Use";
+	case 1: return "Equip";
+	case 2: return "Chance on Hit";
+	case 4: return "Soulstone";
+	case 5: return "Use with no delay";
+	case 6: return "Learn";
+	default: return "bad SPELLTRIGGER";
 	}
 }
 

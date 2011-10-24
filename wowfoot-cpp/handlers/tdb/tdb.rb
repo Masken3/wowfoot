@@ -1,6 +1,6 @@
 
-def sql_pair(type, array, count)
-	return [[type, array, count]]
+def sql_pair(type, array, count, postfix = '')
+	return [[type, array, count, postfix]]
 end
 
 class ERB
@@ -100,7 +100,7 @@ static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
 	if(col.size == 2 || col[2] == :key) %>
 {<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<% else
 	(1..col[2]).each do |i| col[1].each do |name| %>
-{<%=FORMATS[col[0]]%>, "<%=name%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
+{<%=FORMATS[col[0]]%>, "<%=name%><%=col[3]%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
 };
 
 #endif	//<%= upName %>_FORMAT_H
@@ -154,7 +154,7 @@ private:
 public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
-		);
+		) VISIBLE;
 <%end; end%>
 };
 
@@ -189,11 +189,11 @@ void <%=@structName%>s::load() {
 		itr != g<%=@structName%>s.end();
 		++itr)
 	{
-		const <%=@structName%>& ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);
+		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);
 		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-			<%if(i!=0)%>,<%end%>ref.<%=arg%><%end%>
+			<%if(i!=0)%>,<%end%>_ref.<%=arg%><%end%>
 		};
-		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &ref));
+		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
 	}
 	printf("Loaded %"PRIuPTR" rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
 <%end; end%>

@@ -3,6 +3,7 @@
 #include "tabTable.h"
 #include "db_item.h"
 #include "TotemCategory.h"
+#include "Spell.h"
 
 class itemChtml : public tabsChtml {
 public:
@@ -31,6 +32,7 @@ public:
 	static const char* ITEM_MATERIAL(int id);
 	static const char* ITEM_DAMAGE_TYPE(int id);
 	static const char* ITEM_STAT(int id);
+	static const char* SPELLTRIGGER(int id);
 
 	struct Flag {
 		int flag;
