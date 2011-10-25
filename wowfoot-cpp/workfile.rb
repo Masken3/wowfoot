@@ -160,7 +160,7 @@ TdbWork.new('db_creature_template')
 
 ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
 ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
-ExTemplateWork.new('Spell', 'Spell', 'Spells', 'SPELL')
+ExTemplateWork.new('exSpell', 'Spell', 'Spells', 'SPELL')
 ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
 ExTemplateWork.new('ItemExtendedCost', 'ItemExtendedCost', 'ItemExtendedCosts',
 	'ITEM_EXTENDED_COST', ['db_npc_vendor', 'db_creature_template', 'db_item'])
@@ -182,9 +182,11 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 end
 
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
-PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'Spell', 'db_item'])
+PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'exSpell', 'db_item'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'Spell'])
+	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'exSpell'])
+PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'exSpell',
+	'db_creature_template'])
 
 @wfc = ExeWork.new
 @wfc.instance_eval do

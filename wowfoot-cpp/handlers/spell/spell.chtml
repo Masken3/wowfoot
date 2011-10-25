@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= mTitle %> - Spell - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+% if(!a) {
+Spell <%=mTitle%> does not exist.
+% } else {
+<p>
+<span class="itemName"><%=a->name%></span><br>
+
+% /*if(!a->description.empty()) {
+<span class="spellDescription"><%=a->description%></span><br>
+% }*/
+</p>
+
+% returnCode = tabsChtml::run(stream);
+
+% }	//if(a)
+
+</body>
+</html>

@@ -49,6 +49,7 @@ int main(int argc, const char** argv) {
 	mountIdPage("zone");
 	mountTextIdPage("search");
 	mountIdPage("item");
+	mountIdPage("spell");
 #if 0
 	mountIdPage("npc");
 	mountIdPage("quest");

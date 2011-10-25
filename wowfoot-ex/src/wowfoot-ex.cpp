@@ -422,7 +422,7 @@ int main() {
 	printf("Extracting %"PRIuPTR" spells...\n", spell.getRecordCount());
 	out = fopen("output/Spell.rb", "w");
 	fprintf(out, "SPELL = {\n");
-	out2 = fopen("output/Spell.data.cpp", "w");
+	out2 = fopen("output/exSpell.data.cpp", "w");
 	fprintf(out2, "#include \"Spell.data.h\"\n");
 	fprintf(out2, "const Spelli gSpell[] = {\n");
 	for(DBCFile::Iterator itr = spell.begin(); itr != spell.end(); ++itr) {

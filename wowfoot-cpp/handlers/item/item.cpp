@@ -36,7 +36,6 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 
 	int id = toInt(urlPart);
 	const Item* a = context.a = gItems.find(id);
-	string title;
 	if(a) {
 		context.mTitle = context.a->name.c_str();
 		context.dps = 0.0;
