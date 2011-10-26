@@ -21,8 +21,12 @@
 #ifndef _PLATFORM_H
 #define _PLATFORM_H
 
-#ifdef _MSC_VER
-  #define fseeko _fseeki64
+#ifdef WIN32
+	#ifdef _MSC_VER
+		#define fseeko _fseeki64
+	#else
+		#define fseeko fseeko64
+	#endif
 #endif
 
 #endif								/* _PLATFORM_H */

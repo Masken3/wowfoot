@@ -3,7 +3,7 @@
 #include "comments.h"
 #include "db_creature_template.h"
 #include "money.h"
-#include "exSpell.h"
+#include "dbcSpell.h"
 
 #if 0
 #include <string.h>

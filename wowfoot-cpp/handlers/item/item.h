@@ -3,7 +3,7 @@
 #include "tabTable.h"
 #include "db_item.h"
 #include "TotemCategory.h"
-#include "exSpell.h"
+#include "dbcSpell.h"
 
 class itemChtml : public tabsChtml {
 public:

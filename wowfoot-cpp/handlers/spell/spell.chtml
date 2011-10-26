@@ -12,10 +12,12 @@ Spell <%=mTitle%> does not exist.
 <p>
 <span class="itemName"><%=a->name%></span><br>
 
-% /*if(!a->description.empty()) {
-<span class="spellDescription"><%=a->description%></span><br>
-% }*/
+% if(a->description) {
+<span class="itemDescription"><%=a->description%></span><br>
+% }
 </p>
+<p>Rank: <%=a->rank%></p>
+<p>Tooltip: <%=a->toolTip%></p>
 
 % returnCode = tabsChtml::run(stream);
 

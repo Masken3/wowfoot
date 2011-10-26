@@ -15,6 +15,13 @@ CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
 WORKS = []
 
+include FileUtils::Verbose
+HOME_DIR = pwd
+FileUtils.cd '../wowfoot-ex'
+require './libs.rb'
+LIBMPQ.setup
+FileUtils.cd HOME_DIR
+
 if(HOST == :win32)
 
 def rootSendSignal(works)
@@ -140,6 +147,14 @@ class ExTemplateWork < HandlerWork
 	end
 end
 
+class DbcWork < HandlerWork
+	def initialize(name, handlerDeps = [])
+		handlerDeps << 'dbc'
+		super
+		@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+	end
+end
+
 # HandlerWorks
 
 HandlerWork.new('tdb').instance_eval do
@@ -154,13 +169,26 @@ HandlerWork.new('tdb').instance_eval do
 	end
 end
 
+HandlerWork.new('dbc').instance_eval do
+	@SOURCES << '../wowfoot-ex/src/libs'
+	@EXTRA_INCLUDES << '../wowfoot-ex/src'
+	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
+	@SPECIFIC_CFLAGS = {
+		'loadlib.cpp' => ' -Wno-multichar',
+	}
+	set_defaults
+	@EXTRA_OBJECTS = [CopyFileTask.new(self, @BUILDDIR + File.basename(LIBMPQ.target.to_s),
+		FileTask.new(self, LIBMPQ.target.to_s))]
+end
+
+DbcWork.new('dbcSpell')
+
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
 TdbWork.new('db_creature_template')
 
 ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
 ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
-ExTemplateWork.new('exSpell', 'Spell', 'Spells', 'SPELL')
 ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
 ExTemplateWork.new('ItemExtendedCost', 'ItemExtendedCost', 'ItemExtendedCosts',
 	'ITEM_EXTENDED_COST', ['db_npc_vendor', 'db_creature_template', 'db_item'])
@@ -182,10 +210,10 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 end
 
 PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
-PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'exSpell', 'db_item'])
+PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'exSpell'])
-PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'exSpell',
+	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'dbcSpell'])
+PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 
 @wfc = ExeWork.new
@@ -240,5 +268,11 @@ end
 target :callgrind => :default do
 	sh "valgrind --tool=callgrind #{cmd}"
 end
+
+# compile wowfoot-ex libs
+include FileUtils::Verbose
+FileUtils.cd '../wowfoot-ex'
+LIBMPQ.invoke
+FileUtils.cd HOME_DIR
 
 Targets.invoke

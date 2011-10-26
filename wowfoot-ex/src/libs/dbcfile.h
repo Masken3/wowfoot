@@ -3,14 +3,20 @@
 #include <cassert>
 #include <string>
 
+#if defined(__GNUC__) && !defined(VISIBLE)
+#define VISIBLE __attribute__((visibility("default")))
+#else
+#define VISIBLE
+#endif
+
 class DBCFile
 {
 public:
-    DBCFile(const std::string &filename);
-    ~DBCFile();
+    DBCFile(const std::string &filename) VISIBLE;
+    ~DBCFile() VISIBLE;
 
     // Open database. It must be openened before it can be used.
-    bool open();
+    bool open() VISIBLE;
 
     // Database exceptions
     class Exception
@@ -98,9 +104,9 @@ public:
     // Get record by id
     Record getRecord(size_t id);
     /// Get begin iterator over records
-    Iterator begin();
+    Iterator begin() VISIBLE;
     /// Get begin iterator over records
-    Iterator end();
+    Iterator end() VISIBLE;
     /// Trivial
     size_t getRecordCount() const { return recordCount;}
     size_t getFieldCount() const { return fieldCount; }

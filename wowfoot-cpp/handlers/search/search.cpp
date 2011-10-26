@@ -1,7 +1,7 @@
 #include "search.chtml.h"
 #include "dllInterface.h"
 #include "tabTable.h"
-#include "exSpell.h"
+#include "dbcSpell.h"
 #include "db_item.h"
 
 #include <string.h>

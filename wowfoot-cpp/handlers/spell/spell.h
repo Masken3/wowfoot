@@ -2,7 +2,7 @@
 #include "chtmlUtil.h"
 #include "tabTable.h"
 #include "db_item.h"
-#include "exSpell.struct.h"
+#include "dbcSpell.h"
 
 class spellChtml : public tabsChtml {
 public:

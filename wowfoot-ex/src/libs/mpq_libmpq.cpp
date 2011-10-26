@@ -1,4 +1,6 @@
+#define __STDC_FORMAT_MACROS
 #include "mpq_libmpq04.h"
+#include <inttypes.h>
 #include <deque>
 #include <cstdio>
 
@@ -31,6 +33,10 @@ MPQArchive::MPQArchive(const char* filename)
         }
         return;
     }
+		if(!mpq_a) {
+			printf("Error opening archive '%s': NULL\n", filename);
+			return;
+		}
     gOpenArchives.push_front(this);
 }
 
