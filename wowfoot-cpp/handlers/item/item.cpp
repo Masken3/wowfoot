@@ -4,7 +4,7 @@
 //#include "extendedCost.h"
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"
-#include "ItemExtendedCost.h"
+#include "dbcItemExtendedCost.h"
 #include "ItemExtendedCost.index.h"
 #include "money.h"
 

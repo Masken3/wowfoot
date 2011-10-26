@@ -1,7 +1,7 @@
 #ifndef ITEM_EXTENDED_COST_INDEX_H
 #define ITEM_EXTENDED_COST_INDEX_H
 
-#include "ItemExtendedCost.h"
+#include "dbcItemExtendedCost.h"
 #include "dllHelpers.h"
 #include "db_npc_vendor.struct.h"
 #include "db_creature_template.struct.h"

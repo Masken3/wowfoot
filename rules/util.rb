@@ -80,6 +80,10 @@ class String
 		return false if(self.length < with.length)
 		return self[-with.length, with.length] == with
 	end
+
+	def capitalize
+		return self[0,1].upcase + self[1..-1]
+	end
 end
 
 def sh(cmd)

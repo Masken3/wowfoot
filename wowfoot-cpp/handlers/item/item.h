@@ -2,7 +2,7 @@
 #include "chtmlUtil.h"
 #include "tabTable.h"
 #include "db_item.h"
-#include "TotemCategory.h"
+#include "dbcTotemCategory.h"
 #include "dbcSpell.h"
 
 class itemChtml : public tabsChtml {

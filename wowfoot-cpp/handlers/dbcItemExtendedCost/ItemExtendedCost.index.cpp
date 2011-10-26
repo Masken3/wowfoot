@@ -1,6 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include "ItemExtendedCost.index.h"
-#include "ItemExtendedCost.h"
+#include "dbcItemExtendedCost.h"
 #include "db_item.h"
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"

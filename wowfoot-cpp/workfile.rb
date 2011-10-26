@@ -8,6 +8,7 @@ require './chtmlCompiler.rb'
 require './ex_template.rb'
 require 'erb'
 require './handlers/tdb/tdb.rb'
+require './handlers/dbc/dbc.rb'
 require './config.rb'
 require 'net/http'
 
@@ -152,6 +153,8 @@ class DbcWork < HandlerWork
 		handlerDeps << 'dbc'
 		super
 		@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+		@EXTRA_INCLUDES << "build/#{name}"
+		@EXTRA_SOURCETASKS << DbcCppTask.new(self, name)
 	end
 end
 
@@ -181,17 +184,15 @@ HandlerWork.new('dbc').instance_eval do
 		FileTask.new(self, LIBMPQ.target.to_s))]
 end
 
-DbcWork.new('dbcSpell')
-
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
 TdbWork.new('db_creature_template')
 
-ExTemplateWork.new('AreaTable', 'Area', 'AreaTable', 'AREA_TABLE')
-ExTemplateWork.new('WorldMapArea', 'WorldMapArea', 'WorldMapAreas', 'WORLD_MAP_AREA')
-ExTemplateWork.new('TotemCategory', 'TotemCategory', 'TotemCategories', 'TOTEM_CATEGORY')
-ExTemplateWork.new('ItemExtendedCost', 'ItemExtendedCost', 'ItemExtendedCosts',
-	'ITEM_EXTENDED_COST', ['db_npc_vendor', 'db_creature_template', 'db_item'])
+DbcWork.new('dbcArea')
+DbcWork.new('dbcSpell')
+DbcWork.new('dbcWorldMapArea')
+DbcWork.new('dbcTotemCategory')
+DbcWork.new('dbcItemExtendedCost', ['db_npc_vendor', 'db_creature_template', 'db_item'])
 
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
@@ -209,10 +210,10 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 	@EXTRA_SOURCETASKS << patch
 end
 
-PageWork.new('zone', ['AreaTable', 'WorldMapArea', 'mapSize'])
-PageWork.new('search', ['AreaTable', 'WorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item'])
-PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'TotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'ItemExtendedCost', 'dbcSpell'])
+PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
+PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item'])
+PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
+	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 

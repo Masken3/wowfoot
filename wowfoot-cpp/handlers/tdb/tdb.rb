@@ -21,10 +21,6 @@ class TdbGenTask < MemoryGeneratedFileTask
 		:string => 'CDT_STRING',
 		:float => 'CDT_FLOAT',
 	}
-	def capitalize(foo)
-		s = foo.to_s
-		return s[0,1].upcase + s[1..-1]
-	end
 	def load(work, name, dstName)
 		return if(@loaded)
 		src = "handlers/#{name}/#{name}.rb"
@@ -51,7 +47,7 @@ end
 
 IF_INDEX = %q{
 <% if(@index) then @index.each do |args|
-capArgs = args.collect {|arg| capitalize(arg); }.join
+capArgs = args.collect {|arg| arg.to_s.capitalize; }.join
 iitr = capArgs + 'Itr'
 imap = capArgs + 'Map'
 istruct = capArgs + 'Struct'

@@ -1,7 +1,7 @@
 #include "chtmlBase.h"
 #include "chtmlUtil.h"
-#include "WorldMapArea.h"
-#include "AreaTable.h"
+#include "dbcWorldMapArea.h"
+#include "dbcArea.h"
 #include "mapSize.h"
 
 class zoneChtml : public ChtmlContext {
