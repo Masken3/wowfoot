@@ -1,0 +1,5 @@
+LIBRARY "npc.dll"
+
+EXPORTS
+cleanup
+getResponse

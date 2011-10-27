@@ -187,6 +187,7 @@ end
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
 TdbWork.new('db_creature_template')
+TdbWork.new('db_creature')
 
 DbcWork.new('dbcArea')
 DbcWork.new('dbcSpell')
@@ -210,6 +211,8 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 	@EXTRA_SOURCETASKS << patch
 end
 
+PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
+	'db_creature', 'tabs'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',

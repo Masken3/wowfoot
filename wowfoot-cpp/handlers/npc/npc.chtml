@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= mTitle %> - NPC - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<p>NPC: <%= mTitle %></p>
+
+% if(a) {
+<p>
+<!--<img id="map" width="40%" src="output/<%= mMapName %>.jpeg" alt="<%= mMapName %>">-->
+</p>
+% } else {
+<%= mTitle %> not found.
+% }
+
+% //returnCode = mSpawnPointsChtml.run(stream);
+% returnCode = tabsChtml::run(stream);
+
+</body>
+</html>

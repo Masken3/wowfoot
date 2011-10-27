@@ -50,8 +50,8 @@ int main(int argc, const char** argv) {
 	mountTextIdPage("search");
 	mountIdPage("item");
 	mountIdPage("spell");
-#if 0
 	mountIdPage("npc");
+#if 0
 	mountIdPage("quest");
 	mountIdPage("object");
 	mountIdPage("faction");
