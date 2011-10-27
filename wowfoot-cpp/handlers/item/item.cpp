@@ -93,22 +93,35 @@ enum TableRowId {
 	TYPE,
 };
 
+static class streamUnlessEmptyClass {
+private:
+	const char* const mSep;
+public:
+	streamUnlessEmptyClass(const char* sep) : mSep(sep) {}
+	friend ostream& operator<<(ostream& o, streamUnlessEmptyClass& s) {
+		if(o.tellp() == 0)
+			return o;
+		o << s.mSep;
+		return o;
+	}
+} costSep(", ");
+
 static string costHtml(const Item& a, int extendedCostId) {
 	ostringstream html;
 	if(a.buyPrice == 0 && extendedCostId == 0)
 		return "No cost";
-	if(a.buyPrice != 0 && (extendedCostId == 0 || a.flagsExtra != 3))
+	if(a.buyPrice != 0 && (extendedCostId == 0 || a.flagsExtra == 3))
 		moneyHtml(html, a.buyPrice);
 	if(extendedCostId == 0)
 		return html.str();
 
 	const ItemExtendedCost& ec(gItemExtendedCosts[extendedCostId]);
 	if(ec.honorPoints != 0)
-		html << ec.honorPoints<<" honor points";
+		html << costSep << ec.honorPoints<<" honor points";
 	if(ec.arenaPoints != 0)
-		html << ec.arenaPoints<<" arena points";
+		html << costSep << ec.arenaPoints<<" arena points";
 	if(ec.arenaRating != 0) {
-		html << ec.arenaRating<<" ";
+		html << costSep << ec.arenaRating<<" ";
 		switch(ec.arenaSlot) {
 		case 0: html << "2v2"; break;
 		case 1: html << "3v3/5v5"; break;
@@ -120,7 +133,7 @@ static string costHtml(const Item& a, int extendedCostId) {
 	for(int i=0; i<5; i++) {
 		ItemExtendedCost::ReqItem item(ec.item[i]);
 		if(item.id != 0 || item.count != 0) {
-			html <<item.count<<"x <a href=\"item="<<item.id<<"\">"<<gItems[item.id].name<<"</a>";
+			html << costSep << item.count<<"x <a href=\"item="<<item.id<<"\">"<<gItems[item.id].name<<"</a>";
 		}
 	}
 	return html.str();
