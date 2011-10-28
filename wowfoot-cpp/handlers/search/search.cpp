@@ -3,6 +3,7 @@
 #include "tabTable.h"
 #include "dbcSpell.h"
 #include "db_item.h"
+#include "db_creature_template.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -17,15 +18,14 @@ enum TableRowId {
 };
 #define MAX_COUNT 100
 
-extern "C"
-void getResponse(const char* urlPart, DllResponseData* drd) {
+void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	gWorldMapAreas.load();
 	gAreaTable.load();
 	gSpells.load();
 	gItems.load();
+	gNpcs.load();
 
-	searchChtml context;
-	context.urlPart = urlPart;
+	urlPart = u;
 
 	string searchString = toupper(urlPart);
 
@@ -48,7 +48,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 		}
 	}
 	t.count = t.array.size();
-	context.mTabs.push_back(tp);
+	mTabs.push_back(tp);
 	}
 	{
 		tabTableChtml* tp = new tabTableChtml;
@@ -70,7 +70,7 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 			}
 		}
 		t.count = t.array.size();
-		context.mTabs.push_back(tp);
+		mTabs.push_back(tp);
 	}
 	{
 		tabTableChtml* tp = new tabTableChtml;
@@ -92,8 +92,30 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 			}
 		}
 		t.count = t.array.size();
-		context.mTabs.push_back(tp);
+		mTabs.push_back(tp);
+	}
+	{
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "npc";
+		t.title = "NPCs";
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
+		for(Npcs::citr itr = gNpcs.begin();
+			itr != gNpcs.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
+			const Npc& s(itr->second);
+			if(strcasestr(s.name.c_str(), urlPart))
+			{
+				Row r;
+				r[ENTRY] = toString(itr->first);
+				r[NAME] = s.name;
+				t.array.push_back(r);
+			}
+		}
+		t.count = t.array.size();
+		mTabs.push_back(tp);
 	}
 
-	getResponse(drd, context);
+	drd->code = run(os);
 }

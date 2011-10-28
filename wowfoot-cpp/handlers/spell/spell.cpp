@@ -17,23 +17,20 @@
 
 using namespace std;
 
-extern "C"
-void getResponse(const char* urlPart, DllResponseData* drd) {
+void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
 	gItems.load();
 	gSpells.load();
 
-	spellChtml context;
-
 	int id = toInt(urlPart);
-	const Spell* a = context.a = gSpells.find(id);
+	a = gSpells.find(id);
 	if(a) {
-		context.mTitle = context.a->name;
-		context.mTabs.push_back(getComments("spell", id));
+		mTitle = a->name;
+		mTabs.push_back(getComments("spell", id));
 	} else {
-		context.mTitle = urlPart;
+		mTitle = urlPart;
 		drd->code = 404;
 	}
 
-	getResponse(drd, context);
+	drd->code = run(os);
 }

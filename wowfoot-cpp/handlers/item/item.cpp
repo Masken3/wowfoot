@@ -22,8 +22,7 @@ static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
 
-extern "C"
-void getResponse(const char* urlPart, DllResponseData* drd) {
+void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
@@ -32,27 +31,25 @@ void getResponse(const char* urlPart, DllResponseData* drd) {
 	ItemExtendedCostIndex::load();
 	gSpells.load();
 
-	itemChtml context;
-
 	int id = toInt(urlPart);
-	const Item* a = context.a = gItems.find(id);
+	a = gItems.find(id);
 	if(a) {
-		context.mTitle = context.a->name.c_str();
-		context.dps = 0.0;
+		mTitle = a->name.c_str();
+		mDps = 0.0;
 		for(int i=0; i<1; i++) {
 			float averageDmg = (a->dmg_min[i] + a->dmg_max[i]) / 2.0;
 			if(fnz(averageDmg))
-				context.dps += averageDmg / (a->delay / 1000.0);
+				mDps += averageDmg / (a->delay / 1000.0);
 		}
-		createTabs(context.mTabs, *a);
+		createTabs(mTabs, *a);
 		//printf("sizeof(string): %" PRIuPTR "\n", sizeof(string));
-		context.mTabs.push_back(getComments("item", id));
+		mTabs.push_back(getComments("item", id));
 	} else {
-		context.mTitle = urlPart;
+		mTitle = urlPart;
 		drd->code = 404;
 	}
 
-	getResponse(drd, context);
+	drd->code = run(os);
 }
 
 static void createTabs(vector<Tab*>& tabs, const Item& a) {

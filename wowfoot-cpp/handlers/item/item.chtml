@@ -64,11 +64,11 @@ Bag family:
 <br>
 % }
 
-% if(fnz(dps)) {
+% if(fnz(mDps)) {
 % for(int i=0; i<1; i++) { if(fnz(a->dmg_min[i]) || fnz(a->dmg_max[i])) {
 <%= a->dmg_min[i] %> - <%= a->dmg_max[i] %> <%= ITEM_DAMAGE_TYPE(a->dmg_type[i]) %> damage<br>
 % }
-(<%= dps %> dps)<br>
+(<%= mDps %> dps)<br>
 Speed: <%= a->delay / 1000.0 %><br>
 % }}
 

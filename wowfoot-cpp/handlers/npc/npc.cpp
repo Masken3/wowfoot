@@ -1,6 +1,7 @@
 #include "npc.chtml.h"
 #include "db_creature_template.h"
 #include "db_creature.h"
+#include "comments.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -9,21 +10,20 @@
 
 using namespace std;
 
-extern "C"
-void getResponse(const char* urlPart, DllResponseData* drd) {
+void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gWorldMapAreas.load();
 	gAreaTable.load();
 	gNpcs.load();
 	gNpcSpawns.load();
 
-	npcChtml context;
 	int id = toInt(urlPart);
-	const Npc* a = context.a = gNpcs.find(id);
+	a = gNpcs.find(id);
 	if(a) {
-		context.mTitle = a->name.c_str();
+		mTitle = a->name.c_str();
+		mTabs.push_back(getComments("npc", id));
 	} else {
-		context.mTitle = urlPart;
+		mTitle = urlPart;
 		drd->code = 404;
 	}
-	getResponse(drd, context);
+	drd->code = run(os);
 }

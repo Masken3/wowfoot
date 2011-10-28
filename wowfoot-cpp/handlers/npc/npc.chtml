@@ -12,12 +12,12 @@
 <p>
 <!--<img id="map" width="40%" src="output/<%= mMapName %>.jpeg" alt="<%= mMapName %>">-->
 </p>
-% } else {
-<%= mTitle %> not found.
-% }
 
 % //returnCode = mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);
+% } else {
+<%= mTitle %> not found.
+% }
 
 </body>
 </html>

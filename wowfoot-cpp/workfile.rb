@@ -16,6 +16,7 @@ CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
 WORKS = []
 
+# setup LIBMPQ. invoke later.
 include FileUtils::Verbose
 HOME_DIR = pwd
 FileUtils.cd '../wowfoot-ex'
@@ -24,7 +25,6 @@ LIBMPQ.setup
 FileUtils.cd HOME_DIR
 
 if(HOST == :win32)
-
 def rootSendSignal(works)
 	puts "Signalling (#{works})..."
 	res = Net::HTTP.get_response('localhost', '/unload=' + works, 3002)
@@ -64,7 +64,6 @@ class DllTask
 		old_execute
 	end
 end
-
 end	# WIN32
 
 common = DllWork.new
@@ -86,13 +85,13 @@ win32.instance_eval do
 end
 
 class HandlerWork < DllWork
-	def initialize(name, handlerDeps = [])
+	def initialize(name, handlerDeps = [], isPage = false)
 		super()
 		hasChtml = false
 		@EXTRA_SOURCETASKS = Dir["handlers/#{name}/*.chtml"].collect do |chtml|
 			hasChtml = true
 			bn = File.basename(chtml, '.chtml')
-			ChtmlCompileTask.new(self, CHTML_BUILDDIR, bn, chtml)
+			ChtmlCompileTask.new(self, CHTML_BUILDDIR, bn, chtml, isPage)
 		end
 		@SOURCES = ["handlers/#{name}"]
 		@EXTRA_SOURCEFILES = []
@@ -134,7 +133,7 @@ end
 
 class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [])
-		super
+		super(name, handlerDeps, true)
 		@EXTRA_OBJECTS = [FileTask.new(self, "handlers/#{name}/#{name}.def")] if(HOST == :win32)
 	end
 end
@@ -212,9 +211,10 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 end
 
 PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
-	'db_creature', 'tabs'])
+	'db_creature', 'tabs', 'comments'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
-PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item'])
+PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
+	'db_creature_template'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',

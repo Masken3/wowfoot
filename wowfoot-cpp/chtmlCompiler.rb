@@ -1,11 +1,12 @@
 require File.expand_path '../rules/task.rb'
 
 class ChtmlCompileTask < MultiFileTask
-	def initialize(work, builddir, name, src)
+	def initialize(work, builddir, name, src, isPage = false)
 		@name = name
 		@cpp = "#{builddir}/#{name}.chtml.cpp"
 		@header = "#{builddir}/#{name}.chtml.h"
 		@src = src
+		@isPage = isPage
 		super(work, @cpp, @header)
 		@prerequisites << DirTask.new(work, builddir)
 		@prerequisites << FileTask.new(work, @src)
@@ -21,6 +22,14 @@ class ChtmlCompileTask < MultiFileTask
 		@state = :norm
 		cpp << "#include \"#{@name}.chtml.h\"\n"
 		cpp << "\n"
+		if(@isPage)
+			cpp << "extern \"C\"\n"
+			cpp << "void getResponse(const char* urlPart, DllResponseData* drd) {\n"
+			cpp << "	#{@name}Chtml context;\n"
+			cpp << "	getResponse(urlPart, drd, context);\n"
+			cpp << "}\n"
+			cpp << "\n"
+		end
 		cpp << "int #{@name}Chtml::run(ostream& stream) {\n"
 		cpp << "int returnCode = 200;\n"
 		cpp << "# 1 \"#{File.expand_path(@src)}\"\n"

@@ -7,12 +7,10 @@
 
 using namespace std;
 
-extern "C"
-void getResponse(const char* urlPart, DllResponseData* drd) {
+void zoneChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	gWorldMapAreas.load();
 	gAreaTable.load();
 
-	zoneChtml context;
-	context.urlPart = urlPart;
-	getResponse(drd, context);
+	urlPart = u;
+	drd->code = run(os);
 }

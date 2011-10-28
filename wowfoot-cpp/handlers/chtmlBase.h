@@ -6,9 +6,14 @@
 
 class ChtmlContext {
 public:
-	virtual int run(std::ostream& stream) = 0;
+	virtual int run(std::ostream&) = 0;
 };
 
-void getResponse(DllResponseData* drd, ChtmlContext& context) VISIBLE;
+class PageContext {
+public:
+	virtual void getResponse2(const char* urlPart, DllResponseData* drd, std::ostream&) = 0;
+};
+
+void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context) VISIBLE;
 
 #endif	//CHTML_BASE_H

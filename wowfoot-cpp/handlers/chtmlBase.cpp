@@ -10,10 +10,10 @@
 
 using namespace std;
 
-void getResponse(DllResponseData* drd, ChtmlContext& context) {
+void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context) {
 	ostringstream oss;
 	try {
-		drd->code = context.run(oss);
+		context.getResponse2(urlPart, drd, oss);
 	} catch(exception& e) {
 		oss.str("");	//clear
 		oss << "Internal Server Error:<br>\n";
