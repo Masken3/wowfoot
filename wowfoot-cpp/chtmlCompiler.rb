@@ -6,7 +6,7 @@ class ChtmlCompileTask < MultiFileTask
 		@cpp = "#{builddir}/#{name}.chtml.cpp"
 		@header = "#{builddir}/#{name}.chtml.h"
 		@src = src
-		@isPage = isPage
+		@isPage = isPage	# todo: a change to this variable is cause for rebuild.
 		super(work, @cpp, @header)
 		@prerequisites << DirTask.new(work, builddir)
 		@prerequisites << FileTask.new(work, @src)

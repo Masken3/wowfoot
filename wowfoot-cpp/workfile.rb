@@ -188,6 +188,7 @@ TdbWork.new('db_npc_vendor')
 TdbWork.new('db_creature_template')
 TdbWork.new('db_creature')
 
+DbcWork.new('dbcAchievement')
 DbcWork.new('dbcArea')
 DbcWork.new('dbcSpell')
 DbcWork.new('dbcWorldMapArea')
@@ -210,11 +211,12 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 	@EXTRA_SOURCETASKS << patch
 end
 
+PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
 PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
 	'db_creature', 'tabs', 'comments'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
-	'db_creature_template'])
+	'db_creature_template', 'dbcAchievement'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',

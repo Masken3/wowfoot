@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= mTitle %> - Achievement - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+% if(a) {
+<p>
+<span class="itemName">Achievement: <%= mTitle %></span><br>
+% if(a->description) {
+<span class="itemDescription"><%=a->description%></span><br>
+% }
+</p>
+% if(a->reward) {
+<p>Reward: <%=a->reward%></p>
+% }
+<p>
+Faction: <%=FACTION(a->faction)%><br>
+% if(a->previous) {
+Previous: <a href="achievement=<%=a->previous%>"><%=gAchievements[a->previous].name%></a><br>
+% }
+</p>
+
+% returnCode = tabsChtml::run(stream);
+% } else {
+<%= mTitle %> not found.
+% }
+
+</body>
+</html>

@@ -51,11 +51,11 @@ int main(int argc, const char** argv) {
 	mountIdPage("item");
 	mountIdPage("spell");
 	mountIdPage("npc");
+	mountIdPage("achievement");
 #if 0
 	mountIdPage("quest");
 	mountIdPage("object");
 	mountIdPage("faction");
-	mountIdPage("achievement");
 #endif
 	mountUnload();
 	mountStaticDirectory("output", "../wowfoot-ex/output/");

@@ -2,6 +2,7 @@
 #include "dllInterface.h"
 #include "tabTable.h"
 #include "dbcSpell.h"
+#include "dbcAchievement.h"
 #include "db_item.h"
 #include "db_creature_template.h"
 
@@ -24,6 +25,7 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gSpells.load();
 	gItems.load();
 	gNpcs.load();
+	gAchievements.load();
 
 	urlPart = u;
 
@@ -110,6 +112,28 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 				Row r;
 				r[ENTRY] = toString(itr->first);
 				r[NAME] = s.name;
+				t.array.push_back(r);
+			}
+		}
+		t.count = t.array.size();
+		mTabs.push_back(tp);
+	}
+	{
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "achievement";
+		t.title = "Achievements";
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "achievement"));
+		for(Achievements::citr itr = gAchievements.begin();
+			itr != gAchievements.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
+			const Achievement& a(itr->second);
+			if(strcasestr(a.name, urlPart))
+			{
+				Row r;
+				r[ENTRY] = toString(itr->first);
+				r[NAME] = a.name;
 				t.array.push_back(r);
 			}
 		}
