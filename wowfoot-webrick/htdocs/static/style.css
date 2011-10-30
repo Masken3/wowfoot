@@ -9,6 +9,13 @@ div.tab { display: none; }
 div.rootComment { border-width: 1px; border:solid; margin-left: 0 }
 div.indentedComment { border-width: 1px; border:solid; margin-left: 1em }
 
+/* new comments */
+div.comments-wrapper { background: gray; padding:6px 2px 6px 2px; }
+div.comment-wrapper { background-color:#202020; padding:6px 6px 0 6px; }
+div.comment {color:#ddd;padding:6px 6px 6px 6px;border-radius:6px;  background-color:#404040;}
+span.comment-user { color:#ffC040 }
+span.comment-rating { font-weight:bold; float:right; }
+
 /* map */
 div { position:relative; }	/* Enables absolute positioning relative to div tags. */
 #map { width:40% }	/* Enables use of percentages inside. */
