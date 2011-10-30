@@ -80,6 +80,9 @@ static string formatComment(const char* src) {
 			}
 			formatTag(o, ptr, endPtr - ptr);
 			ptr = endPtr + 1;
+		} else if(c == '\\' && *ptr == 'n') {
+			ptr++;
+			o << "<br>";
 		} else {
 			o << c;
 		}
@@ -92,10 +95,6 @@ static string formatComment(const char* src) {
 if(strncmp("/" t, tag, len) == 0) { o << "</" t ">"; return; }
 
 static void formatTag(ostream& o, const char* tag, size_t len) {
-	if(strncmp("b", tag, len) == 0) {
-		o << "<b>";
-		return;
-	}
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
 	SIMPLE_TAG("u");
@@ -108,7 +107,6 @@ static void formatTag(ostream& o, const char* tag, size_t len) {
 	if(strncmp("url=", tag, 4) == 0) {
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
-		printf("%.*s\n", (int)urlLen, url);
 		o << "<a href=\"";
 		formatUrl(o, url, urlLen);
 		o << "\">";
