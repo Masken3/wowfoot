@@ -20,9 +20,9 @@ const char* commentTabChtml::patch(const char* date) {
 	if(!res)
 		throw logic_error("commentTabChtml::patch: strptime failed");
 	time_t t = timegm(&tm);
-	for(int i=0; i<gnPatchVersions; i++) {
+	for(int i=1; i<gnPatchVersions; i++) {
 		if(t < gPatchVersions[i].time)
-			return gPatchVersions[i].name;
+			return gPatchVersions[i-1].name;
 	}
 	throw logic_error("commentTabChtml::patch: invalid date");
 }
