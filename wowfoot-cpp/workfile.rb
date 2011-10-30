@@ -24,7 +24,7 @@ require './libs.rb'
 LIBMPQ.setup
 FileUtils.cd HOME_DIR
 
-if(HOST == :win32)
+if(true)#HOST == :win32)
 def rootSendSignal(works)
 	puts "Signalling (#{works})..."
 	res = Net::HTTP.get_response('localhost', '/unload=' + works, 3002)
@@ -55,12 +55,32 @@ class DllTask
 		idHandlerWorks << main
 		rootSendSignal(idHandlerWorks)
 	end
-	def execute
+	def isLoaded; if(HOST == :win32)
 		# try to remove target file.
-		# if that fails, send a signal.
+		# if that fails and the file still exists, it's loaded.
 		FileUtils.rm_f(@NAME)
-		sendSignal if(File.exist?(@NAME))
-
+		return File.exist?(@NAME)
+	else	# unix-type systems
+		# read /proc to find our server process.
+		# read /proc/*/maps to list the loaded objects.
+		#p WFC.target.to_s
+		Dir['/proc/*'].each do |proc|
+			#p proc
+			# Can be optimized by caching the exe search result.
+			# Seems fast enough for now.
+			if(File.exists?(proc+'/exe')); if(File.readlink(proc+'/exe') == WFC.target.to_s)
+				open(proc+'/maps', 'r').each do |line|
+					if(line.index(@NAME))
+						puts "Found #{@NAME} in #{proc}"
+						return true
+					end
+				end
+			end;end
+		end
+		return false
+	end;end
+	def execute
+		sendSignal if(isLoaded)
 		old_execute
 	end
 end
@@ -222,7 +242,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 
-@wfc = ExeWork.new
+WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
 	@SOURCES = ['.']
 	@LIBRARIES = ['microhttpd']
