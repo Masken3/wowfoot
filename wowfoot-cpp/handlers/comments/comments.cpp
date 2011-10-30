@@ -26,8 +26,9 @@ static void closeDb() {
 }
 
 static string formatComment(const char* src);
-static void formatTag(ostream& o, const char* tag, size_t len);
+static int formatTag(ostream& o, const char* tag, size_t len, int tagState);
 static void formatUrl(ostream& o, const char* url, size_t len);
+static const char* formatUnescapedUrl(ostream& o, const char* ptr);
 
 Tab* getComments(const char* type, int id) {
 	sqlite3_stmt* stmt = NULL;
@@ -66,10 +67,28 @@ Tab* getComments(const char* type, int id) {
 	return ct;
 }
 
+#define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
+#define WH ".wowhead.com/"
+
+static bool isUrlChar(char c) {
+	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+	//sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+	return isalnum(c) || c == '_' || c == '#' || c == '?' || c == '/' || c == '-' ||
+		c == '=' || c == '.';
+}
+static bool isWowheadNonUrlChar(char c) {
+	return c == '/' || c == '?' || c == '.';
+}
+
 static string formatComment(const char* src) {
 	ostringstream o;
+	int tagState = 0;
 	const char* ptr = src;
 	while(*ptr) {
+		if(STREQ(ptr, "http://")) {	// unescaped link
+			ptr = formatUnescapedUrl(o, ptr);
+			continue;
+		}
 		char c = *ptr;
 		ptr++;
 		if(c == '[') {	// start tag
@@ -78,7 +97,7 @@ static string formatComment(const char* src) {
 				o << (ptr-1);
 				break;
 			}
-			formatTag(o, ptr, endPtr - ptr);
+			tagState = formatTag(o, ptr, endPtr - ptr, tagState);
 			ptr = endPtr + 1;
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
@@ -90,19 +109,28 @@ static string formatComment(const char* src) {
 	return o.str();
 }
 
-#define COMPLEX_TAG(src, dst) if(strncmp(src, tag, len) == 0) { o << dst; return; }
-#define SIMPLE_TAG(t) if(strncmp(t, tag, len) == 0) { o << "<" t ">"; return; }\
-if(strncmp("/" t, tag, len) == 0) { o << "</" t ">"; return; }
+#define COMPLEX_TAG(src, dst, flag) if(strncmp(src, tag, len) == 0) { o << dst; flag; return tagState; }
+#define SIMPLE_TAG(t) if(strncmp(t, tag, len) == 0) { o << "<" t ">"; return tagState; }\
+	if(strncmp("/" t, tag, len) == 0) { o << "</" t ">"; return tagState; }
 
-static void formatTag(ostream& o, const char* tag, size_t len) {
+#define TAG_LIST 1
+
+static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
+	//printf("tag: %i %.*s\n", tagState, len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
 	SIMPLE_TAG("u");
-	SIMPLE_TAG("li");
-	COMPLEX_TAG("ul", "</p><ul>");
-	COMPLEX_TAG("/ul", "</ul><p>");
-	COMPLEX_TAG("ol", "</p><ol>");
-	COMPLEX_TAG("/ol", "</ol><p>");
+	if(tagState & TAG_LIST) {
+		SIMPLE_TAG("li");
+	} else {
+		// discard invalid tags
+		COMPLEX_TAG("li", "",);
+		COMPLEX_TAG("/li", "",);
+	}
+	COMPLEX_TAG("ul", "</p><ul>", tagState |= TAG_LIST);
+	COMPLEX_TAG("/ul", "</ul><p>", tagState &= ~TAG_LIST);
+	COMPLEX_TAG("ol", "</p><ol>", tagState |= TAG_LIST);
+	COMPLEX_TAG("/ol", "</ol><p>", tagState &= ~TAG_LIST);
 
 	if(strncmp("url=", tag, 4) == 0) {
 		const char* url = tag + 4;
@@ -110,20 +138,22 @@ static void formatTag(ostream& o, const char* tag, size_t len) {
 		o << "<a href=\"";
 		formatUrl(o, url, urlLen);
 		o << "\">";
-		return;
+		return tagState;
 	}
-	COMPLEX_TAG("/url", "</a>");
+	COMPLEX_TAG("/url", "</a>",);
 
 	// unknown tag
-	o << "["<<o.write(tag, len)<<"]";
+	o << "[";
+	o.write(tag, len);
+	o << "]";
+	return tagState;
 }
 
 static void formatUrl(ostream& o, const char* url, size_t len) {
 	// s/http://*.wowhead.com/
-	const char* wh = ".wowhead.com/";
-	const char* whf = strstr(url, wh);
+	const char* whf = strstr(url, WH);
 	if(whf) {
-		const char* path = whf + strlen(wh);
+		const char* path = whf + strlen(WH);
 		if(*path == '?')
 			path += 1;
 		size_t pathLen = len - (path - url);
@@ -132,4 +162,45 @@ static void formatUrl(ostream& o, const char* url, size_t len) {
 	}
 
 	o.write(url, len);
+}
+
+// returns new ptr.
+static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
+	const char* domain = ptr + 7;
+	const char* slash = strchr(domain, '/');
+	if(!slash)
+		return domain;
+	const char* path = slash + 1;
+
+	// we can assume wowhead urls never have slashes '/',
+	// or '?', except as the first character in the path.
+	const char* subdomain = slash - (strlen(WH) - 1);
+	//printf("sd: %s\n", subdomain);
+	bool isWowhead = STREQ(subdomain, WH);
+	if(isWowhead && *path == '?')
+		path++;
+	const char* end = path;
+	while(isUrlChar(*end)) {
+		if(isWowhead && isWowheadNonUrlChar(*end))
+			break;
+		end++;
+	}
+	size_t pathLen = end - path;
+	size_t urlLen = end - ptr;
+	//printf("uu: %i %.*s\n", isWowhead, urlLen, ptr);
+	if(isWowhead) {
+		o << "<a href=\"";
+		o.write(path, pathLen);
+		o << "\">";
+		// todo: write name of linked entity (item, object, spell, quest, et. al)
+		o.write(path, pathLen);
+		o << "</a>";
+	} else {
+		o << "<a href=\"";
+		o.write(ptr, urlLen);
+		o << "\">";
+		o.write(ptr, urlLen);
+		o << "</a>";
+	}
+	return end;
 }
