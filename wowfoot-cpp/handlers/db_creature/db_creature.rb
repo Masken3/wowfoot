@@ -3,10 +3,10 @@
 @containerType = :set
 
 @struct = [
-	[:int, :guid, :key],
-	[:int, :id],
-	[:int, :map],
-	[:float, :position_x],
-	[:float, :position_y],
-	[:float, :position_z],
+c(:int, :guid, :key),
+c(:int, :id),
+c(:int, :map),
+c(:float, :position_x),
+c(:float, :position_y),
+c(:float, :position_z),
 ]

@@ -1,6 +1,13 @@
-
-def sql_pair(type, array, count, postfix = '')
-	return [[type, array, count, postfix]]
+# if name, then it's a single.
+# otherwise it's an array.
+# array may be nil or :key if single.
+# :key means it's an SQL primary key column.
+SqlColumn = Struct.new(:type, :name, :array, :count, :postfix)
+def c(type, name, array = nil, count = nil, postfix = '')
+	SqlColumn.new(type, name, array, count, postfix)
+end
+def mc(type, array, count, postfix = '')
+	return c(type, nil, array, count, postfix)
 end
 
 class ERB
@@ -34,9 +41,15 @@ class TdbGenTask < MemoryGeneratedFileTask
 		super(work, dst)
 		upName = name.upcase
 
-		@types = {}
+		@names = {}	# members by name. includes sub-members of arrays.
 		@struct.each do |col|
-			@types[col[1]] = col[0]
+			if(col.name)
+				@names[col.name] = col
+			else
+				col.array.each do |n|
+					@names[n] = col
+				end
+			end
 		end
 
 		#p self.class.to_s
@@ -62,18 +75,18 @@ class TdbStructHeaderTask < TdbGenTask
 #define <%=upName%>_STRUCT_H
 
 struct <%=@structName%> {<% @struct.each do |col|
-	if(col.size == 2 || col[2] == :key) %>
-	<%=col[0]%> <%=cEscape(col[1])%>;<%else
-	col[1].each do |name| %>
-	<%=col[0]%> <%=cEscape(name)%>[<%=col[2]%>];<%end; end; end; if(@containerType == :set)%>
+	if(col.name) %>
+	<%=col.type%> <%=cEscape(col.name)%>;<%else
+	col.array.each do |name| %>
+	<%=col.type%> <%=cEscape(name)%>[<%=col.count%>];<%end; end; end; if(@containerType == :set)%>
 	bool operator==(const <%=@structName%>& o) const {
-		return<% @struct.each_with_index do |col, i| if(col[2] == :key) %>
-			<%if(i!=0)%>&& <%end%>this-><%=cEscape(col[1])%> == o.<%=cEscape(col[1])%><%end; end%>;
+		return<% @struct.each_with_index do |col, i| if(col.array == :key) %>
+			<%if(i!=0)%>&& <%end%>this-><%=cEscape(col.name)%> == o.<%=cEscape(col.name)%><%end; end%>;
 	}
 	size_t operator()(const <%=@structName%>& o) const {
-		return<% @struct.each do |col| if(col[2] == :key) %>
-			hash<int>()(o.<%=cEscape(col[1])%> + <%end; end%>0
-			<% @struct.each do |col| if(col[2] == :key) %>)<%end; end%>;
+		return<% @struct.each do |col| if(col.array == :key) %>
+			hash<int>()(o.<%=cEscape(col.name)%> + <%end; end%>0
+			<% @struct.each do |col| if(col.array == :key) %>)<%end; end%>;
 	}
 <%end%>
 };
@@ -93,10 +106,10 @@ class TdbFormatHeaderTask < TdbGenTask
 #include <stddef.h>
 
 static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
-	if(col.size == 2 || col[2] == :key) %>
-{<%=FORMATS[col[0]]%>, "<%=col[1]%>", offsetof(<%=@structName%>, <%=cEscape(col[1])%>)},<% else
-	(1..col[2]).each do |i| col[1].each do |name| %>
-{<%=FORMATS[col[0]]%>, "<%=name%><%=col[3]%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
+	if(!col.array || col.array == :key) %>
+{<%=FORMATS[col.type]%>, "<%=col.name%>", offsetof(<%=@structName%>, <%=cEscape(col.name)%>)},<% else
+	(1..col.count).each do |i| col.array.each do |name| %>
+{<%=FORMATS[col.type]%>, "<%=name%><%=col.postfix%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
 };
 
 #endif	//<%= upName %>_FORMAT_H
@@ -131,7 +144,7 @@ public:
 	void load() VISIBLE;
 ) + IF_INDEX + %q(
 	struct <%=istruct%> {<%args.each do |arg|%>
-		<%=@types[arg]%> <%=arg%>;<%end%>
+		<%=@names[arg].type%> <%=arg%>;<%end%>
 		bool operator==(const <%=istruct%>& o) const {
 			return<% args.each_with_index do |arg, i| %>
 				<%if(i!=0)%>&& <%end%>this-><%=arg%> == o.<%=arg%><%end%>;
@@ -149,7 +162,7 @@ private:
 	<%=imap%> m<%=imap%>;
 public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
-		<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
+		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
 		) VISIBLE;
 <%end; end%>
 };
@@ -185,11 +198,15 @@ void <%=@structName%>s::load() {
 		itr != g<%=@structName%>s.end();
 		++itr)
 	{
-		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);
+		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
+		col = @names[args[0]]; isArray = (args.size == 1 && !col.name); if(isArray) %>
+		for(int i=0; i<<%=col.count%>; i++) { if(_ref.<%=col.array[0]%>[i] != 0) {<%end%>
 		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-			<%if(i!=0)%>,<%end%>_ref.<%=arg%><%end%>
+			<%if(i!=0)%>,<%end%>_ref.<%=arg%><%if(isArray)%>[i]<%end;end%>
 		};
-		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
+		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));<%
+		if(isArray) %>
+		}}<%end%>
 	}
 	printf("Loaded %"PRIuPTR" rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
 <%end; end%>
@@ -199,7 +216,7 @@ void <%=@structName%>s::load() {
 
 ) + IF_INDEX + %q(
 <%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
-	<%if(i!=0)%>,<%end%><%=@types[arg]%> <%=arg%><%end%>
+	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
 	)
 {
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>

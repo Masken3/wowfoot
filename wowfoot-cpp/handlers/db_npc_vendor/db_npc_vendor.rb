@@ -3,11 +3,11 @@
 @containerType = :set
 
 @struct = [
-	[:int, :entry, :key],
-	[:int, :slot],
-	[:int, :item, :key],
-	[:int, :maxcount],
-	[:int, :extendedCost, :key],
+c(:int, :entry, :key),
+c(:int, :slot),
+c(:int, :item, :key),
+c(:int, :maxcount),
+c(:int, :extendedCost, :key),
 ]
 
 @index = [
