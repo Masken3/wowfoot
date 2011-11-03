@@ -24,6 +24,9 @@ void mountIdPage(const char* name);
 void mountTextIdPage(const char* name);
 void mountStaticDirectory(const char* mountName, const char* localPath);
 
+// calls load() on all handlers.
+void loadAllHandlers();
+
 const std::string& dllDir();
 
 // abstract
@@ -37,6 +40,8 @@ public:
 	// Unload any DLLs the Handler may have loaded.
 	// Used only on systems that lock its executable files (Windows).
 	virtual void unload() = 0;
+
+	virtual void load() = 0;
 };
 
 typedef std::unordered_map<std::string, RequestHandler*> PatternMap;

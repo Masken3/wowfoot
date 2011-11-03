@@ -216,8 +216,17 @@ public:
 		abort();
 	}
 	void unload() {}
+	void load() {}
 };
 
 static void mountUnload() {
 	insertPattern(PatternPair("/unload=", new UnloadHandler()));
+}
+
+void loadAllHandlers() {
+	for(PatternMap::const_iterator itr = sRootPatterns.begin();
+		itr != sRootPatterns.end(); ++itr)
+	{
+		itr->second->load();
+	}
 }

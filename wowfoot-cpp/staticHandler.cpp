@@ -15,6 +15,7 @@ public:
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*) __attribute__((noreturn));
 	virtual void unload() {}
+	virtual void load() {}
 private:
 	const string mLocalDir;
 };

@@ -11,6 +11,7 @@ public:
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*);
 	virtual void unload();
+	virtual void load();
 private:
 	DllGetResponse mDllGetResponse;
 	DllCleanup mDllCleanup;
@@ -57,11 +58,16 @@ void IdHandler::reload() {
 	assert(mDllCleanup);
 }
 
-ResponseData* IdHandler::handleRequest(const char* urlPart, MHD_Connection* conn) {
+void IdHandler::load() {
 	// check if DLL has been updated. If so, reload.
-	if(getTime(mDllName.c_str()) != mDllTime)
+	if(getTime(mDllName.c_str()) != mDllTime) {
 		reload();
+		loadAllHandlers();
+	}
+}
 
+ResponseData* IdHandler::handleRequest(const char* urlPart, MHD_Connection* conn) {
+	load();
 	DllResponseData* rd = new DllResponseData;
 	mDllGetResponse(urlPart, rd);
 	int res;

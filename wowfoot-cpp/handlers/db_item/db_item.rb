@@ -6,7 +6,7 @@ c(:int, :entry),
 c(:int, :class),
 c(:int, :subclass),
 c(:string, :name),
-c(:int, :displayid),
+c(:int, :displayId),
 c(:int, :quality),
 c(:int, :flags),
 c(:int, :flagsExtra),
@@ -62,4 +62,5 @@ mc(:float, [:spellPpmRate], 5, '_'),
 
 @index = [
 [:spellId],
+[:displayId],
 ]

@@ -21,6 +21,7 @@ using namespace std;
 static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
+static Tab* sharesModel(const Item& a);
 
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
@@ -57,6 +58,7 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	tabs.push_back(soldBy(a));
 	// Currency for (item)
 	tabs.push_back(currencyFor(a));
+	tabs.push_back(sharesModel(a));
 	// Disenchants to (item)
 	// Disenchanted from (item)
 	// Dropped by (npc)
@@ -164,10 +166,7 @@ static Tab* soldBy(const Item& a) {
 	return &t;
 }
 
-static Tab* currencyFor(const Item& a) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = "currencyFor";
-	t.title = "Currency for";
+static void itemColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
 	// name of and link to single vendor, or number of vendors.
 	//t.columns.push_back(Column(VENDOR, "Vendor", Column::NoEscape));
@@ -178,35 +177,68 @@ static Tab* currencyFor(const Item& a) {
 	t.columns.push_back(Column(TYPE, "Type"));
 	t.columns.push_back(Column(SOURCE, "Source"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
+}
+
+static void addItem(tabTableChtml& t, const Item& i) {
+	Row r;
+	r[ENTRY] = toString(i.entry);
+	r[NAME] = i.name;
+	r[ILEVEL] = toString(i.itemLevel);
+	r[CLEVEL] = toString(i.requiredLevel);
+	r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
+	r[TYPE] = itemChtml::ITEM_CLASS(i.class_) + string("/") +
+		itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
+
+	// check every vendor selling this item, to make sure costs are identical.
+	NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
+	int ec = -1;
+	bool identicalCost = true;
+	for(; nip.first != nip.second; ++nip.first) {
+		const NpcVendor& nv(*nip.first->second);
+		if(ec == -1)
+			ec = nv.extendedCost;
+		else if(ec != nv.extendedCost)
+			identicalCost = false;
+	}
+	if(identicalCost) {
+		r[COST] = costHtml(i, ec);
+	} else {
+		r[COST] = "Differs between vendors";
+	}
+
+	t.array.push_back(r);
+}
+
+static Tab* currencyFor(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "currencyFor";
+	t.title = "Currency for";
+	itemColumns(t);
 	ItemExtendedCostIndex::ItemItemPair res = ItemExtendedCostIndex::findItemItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
-		Row r;
 		const Item& i(*res.first->second);
+		addItem(t, i);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* sharesModel(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "sharesModel";
+	//t.title = "Same model as";
+	itemColumns(t);
+	// insufficient; displayId controls more than model.
+	t.title = "Same look as";
+	Items::DisplayIdPair res = gItems.findDisplayId(a.displayId);
+	for(; res.first != res.second; ++res.first) {
+		const Item& i(*res.first->second);
+		if(i.entry == a.entry)
+			continue;
+		//addItem(t, i);	// causes ConstMap[] exception
+		Row r;
 		r[ENTRY] = toString(i.entry);
 		r[NAME] = i.name;
-		r[ILEVEL] = toString(i.itemLevel);
-		r[CLEVEL] = toString(i.requiredLevel);
-		r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
-		r[TYPE] = itemChtml::ITEM_CLASS(i.class_) + string("/") +
-			itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
-
-		// check every vendor selling this item, to make sure costs are identical.
-		NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
-		int ec = -1;
-		bool identicalCost = true;
-		for(; nip.first != nip.second; ++nip.first) {
-			const NpcVendor& nv(*nip.first->second);
-			if(ec == -1)
-				ec = nv.extendedCost;
-			else if(ec != nv.extendedCost)
-				identicalCost = false;
-		}
-		if(identicalCost) {
-			r[COST] = costHtml(i, ec);
-		} else {
-			r[COST] = "Differs between vendors";
-		}
-
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();
