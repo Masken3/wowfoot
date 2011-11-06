@@ -1,6 +1,7 @@
 #ifndef CONST_SET_H
 #define CONST_SET_H
 
+#include "util/exception.h"
 #include <unordered_set>
 #include <stdexcept>
 #include <assert.h>
@@ -45,7 +46,7 @@ ConstSet<Key>::operator[](const Key& key) const {
 	if(itr != super::end())
 		return itr->second;
 	else
-		throw logic_error("ConstSet[]");
+		throw Exception("ConstSet[]");
 }
 
 #endif	//CONST_SET_H

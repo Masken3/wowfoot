@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdio.h>
 #include "chtmlBase.h"
+#include "util/exception.h"
 
 using namespace std;
 
@@ -14,6 +15,11 @@ void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context
 	ostringstream oss;
 	try {
 		context.getResponse2(urlPart, drd, oss);
+	} catch(Exception& e) {
+		oss.str("");	//clear
+		oss << "<pre>Internal Server Error:\n";
+		e.stream(oss);
+		drd->code = 500;
 	} catch(exception& e) {
 		oss.str("");	//clear
 		oss << "Internal Server Error:<br>\n";

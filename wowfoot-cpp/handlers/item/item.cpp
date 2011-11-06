@@ -7,6 +7,7 @@
 #include "dbcItemExtendedCost.h"
 #include "ItemExtendedCost.index.h"
 #include "money.h"
+#include "util/exception.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -235,11 +236,14 @@ static Tab* sharesModel(const Item& a) {
 		const Item& i(*res.first->second);
 		if(i.entry == a.entry)
 			continue;
-		//addItem(t, i);	// causes ConstMap[] exception
+#if 1
+		addItem(t, i);	// causes ConstMap[] exception
+#else
 		Row r;
 		r[ENTRY] = toString(i.entry);
 		r[NAME] = i.name;
 		t.array.push_back(r);
+#endif
 	}
 	t.count = t.array.size();
 	return &t;
@@ -641,6 +645,6 @@ const itemChtml::Quality& itemChtml::ITEM_QUALITY(int id) {
 	case 5: { static const Quality q = { "ff8000", "Legendary" }; return q; }
 	case 6: { static const Quality q = { "ff0000", "Artifact" }; return q; }
 	case 7: { static const Quality q = { "e6cc80", "Bind to Account" }; return q; }
-	default: throw logic_error("bad ITEM_QUALITY");
+	default: throw Exception("bad ITEM_QUALITY");
 	}
 }

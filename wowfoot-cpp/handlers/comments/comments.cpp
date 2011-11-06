@@ -1,5 +1,6 @@
 #include "comments.h"
 #include "commentTab.h"
+#include "util/exception.h"
 #include <sqlite3.h>
 #include <stdexcept>
 #include <stdlib.h>
@@ -16,7 +17,7 @@ static sqlite3* sDB;
 #define SQLT(func) do { int _res = (func); if(_res != SQLITE_OK) {\
 	sqlite3_finalize(stmt); stmt = NULL;\
 	printf("%s:%i: %s\n", __FILE__, __LINE__, sqlite3_errmsg(sDB));\
-	throw logic_error("sqlite"); } } while(0)
+	throw Exception("sqlite"); } } while(0)
 
 static void closeDb() {
 	if(sDB) {

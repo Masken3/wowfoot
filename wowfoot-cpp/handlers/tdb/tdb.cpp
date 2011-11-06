@@ -14,6 +14,7 @@ typedef int socklen_t;
 
 #include "config.h"
 #include "tdb_raw.h"
+#include "util/exception.h"
 #include <sstream>
 #include <stdio.h>
 #include <stdexcept>
@@ -26,7 +27,7 @@ static const char* sColName;
 static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
 	printf("%s: %s\n", funcName, mysql_error(sMysql));
-	throw logic_error(funcName);
+	throw Exception(funcName);
 }
 
 static void init() {

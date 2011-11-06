@@ -1,6 +1,7 @@
 #ifndef CONST_MAP_H
 #define CONST_MAP_H
 
+#include "util/exception.h"
 #include <unordered_map>
 #include <stdexcept>
 #include <assert.h>
@@ -45,7 +46,7 @@ ConstMap<Key, Value>::operator[](const Key& key) const {
 	if(itr != super::end())
 		return itr->second;
 	else
-		throw logic_error("ConstMap[]");
+		throw Exception("ConstMap[]");
 }
 
 #endif	//CONST_MAP_H

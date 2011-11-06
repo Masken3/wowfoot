@@ -88,8 +88,12 @@ end	# WIN32
 
 common = DllWork.new
 common.instance_eval do
-	@SOURCES = ['handlers']
+	@SOURCES = ['handlers', 'util/unix']
+	@SPECIFIC_CFLAGS = {
+		'process.cpp' => ' -Wno-missing-format-attribute',
+	}
 	@EXTRA_INCLUDES = ['.']
+	@LIBRARIES = ['dl']
 	@NAME = 'common'
 	WORKS << self
 end
@@ -131,7 +135,7 @@ class HandlerWork < DllWork
 			DirTask.new(self, TDB_BUILDDIR),
 		]
 		@LOCAL_DLLS = handlerDeps
-		@LOCAL_DLLS << 'common' if(hasChtml)
+		@LOCAL_DLLS << 'common' #if(hasChtml)
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
 		@NAME = name
 		WORKS << self
@@ -189,6 +193,7 @@ HandlerWork.new('tdb').instance_eval do
 	else
 		@EXTRA_INCLUDES << '/usr/include/mysql'
 	end
+	@LOCAL_DLLS << 'common'
 end
 
 HandlerWork.new('dbc').instance_eval do

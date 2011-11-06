@@ -1,5 +1,6 @@
 #include "commentTab.h"
 #include "patch.h"
+#include "util/exception.h"
 #include <time.h>
 #include "win32.h"
 #include <stdexcept>
@@ -18,11 +19,11 @@ const char* commentTabChtml::patch(const char* date) {
 	struct tm tm;
 	const char* res = strptime(date, "%Y/%m/%d %T", &tm);
 	if(!res)
-		throw logic_error("commentTabChtml::patch: strptime failed");
+		throw Exception("commentTabChtml::patch: strptime failed");
 	time_t t = timegm(&tm);
 	for(int i=1; i<gnPatchVersions; i++) {
 		if(t < gPatchVersions[i].time)
 			return gPatchVersions[i-1].name;
 	}
-	throw logic_error("commentTabChtml::patch: invalid date");
+	throw Exception("commentTabChtml::patch: invalid date");
 }
