@@ -108,14 +108,19 @@ public:
 
 static string costHtml(const Item& a, int extendedCostId) {
 	ostringstream html;
-	if(a.buyPrice == 0 && extendedCostId == 0)
+	if(a.buyPrice == 0 && extendedCostId <= 0)
 		return "No cost";
-	if(a.buyPrice != 0 && (extendedCostId == 0 || a.flagsExtra == 3))
+	if(a.buyPrice != 0 && (extendedCostId <= 0 || a.flagsExtra == 3))
 		moneyHtml(html, a.buyPrice);
-	if(extendedCostId == 0)
+	if(extendedCostId <= 0)
 		return html.str();
 
-	const ItemExtendedCost& ec(gItemExtendedCosts[extendedCostId]);
+	const ItemExtendedCost* ecp = gItemExtendedCosts.find(extendedCostId);
+	if(!ecp) {
+		html << "Extended cost not found (id "<<extendedCostId<<")";
+		return html.str();
+	}
+	const ItemExtendedCost& ec(*ecp);
 	if(ec.honorPoints != 0)
 		html << costSep << ec.honorPoints<<" honor points";
 	if(ec.arenaPoints != 0)
@@ -194,17 +199,21 @@ static void addItem(tabTableChtml& t, const Item& i) {
 	NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
 	int ec = -1;
 	bool identicalCost = true;
+	bool hasVendor = false;
 	for(; nip.first != nip.second; ++nip.first) {
+		hasVendor = true;
 		const NpcVendor& nv(*nip.first->second);
 		if(ec == -1)
 			ec = nv.extendedCost;
 		else if(ec != nv.extendedCost)
 			identicalCost = false;
 	}
-	if(identicalCost) {
-		r[COST] = costHtml(i, ec);
-	} else {
-		r[COST] = "Differs between vendors";
+	if(hasVendor) {
+		if(identicalCost) {
+			r[COST] = costHtml(i, ec);
+		} else {
+			r[COST] = "Differs between vendors";
+		}
 	}
 
 	t.array.push_back(r);

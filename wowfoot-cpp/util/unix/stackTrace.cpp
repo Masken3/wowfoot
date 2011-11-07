@@ -54,7 +54,7 @@ void StackTrace::stream(ostream& o) const {
 			Process* lp = new Process(true);
 			lps[fname] = lp;
 			const char* argv[] = { "", "-fCe", fname, NULL };
-			printf("addr2line -fCe %s\n", fname);
+			//printf("addr2line -fCe %s\n", fname);
 			lp->start("addr2line", argv, true);
 		}
 	}

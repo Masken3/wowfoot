@@ -23,6 +23,12 @@
 #include "util/exception.h"
 #include "process.h"
 
+#if 0
+#define LOG ::printf
+#else
+#define LOG(...)
+#endif
+
 Process::Process(bool killOnDestruct) : mFout(NULL), mFin(NULL), mPid(-1), mKoD(killOnDestruct) {
 }
 
@@ -37,10 +43,10 @@ Process::~Process() {
 	}
 	if(mPid > 0) {
 		if(mKoD) {
-			::printf("Sending killcode to pid %i\n", mPid);
+			LOG("Sending killcode to pid %i\n", mPid);
 			kill();
 		}
-		::printf("Waiting on pid %i\n", mPid);
+		LOG("Waiting on pid %i\n", mPid);
 #ifdef WIN32
 		//TODO
 #else
@@ -48,7 +54,7 @@ Process::~Process() {
 		ERRNO(waitpid(mPid, &status, 0));
 		errno = status;
 		ERRNO(errno);
-		::printf("status: %i\n", status);
+		LOG("status: %i\n", status);
 #endif
 	}
 }
@@ -105,7 +111,7 @@ void Process::start(const char* filename, const char* argv[], bool haveGetline) 
 		}
 	}
 #endif
-	::printf("Started '%s' with pid %i\n", filename, mPid);
+	LOG("Started '%s' with pid %i\n", filename, mPid);
 
 	mFout = fdopen(pin[1], "w");
 	if(!mFout) throwERRNO();
@@ -128,7 +134,7 @@ void Process::vprintf(const char* fmt, va_list args) {
 	va_list args2;
 	va_copy(args2, args);
 	ERRNO(::vfprintf(mFout, fmt, args));
-	::vprintf(fmt, args2);
+	//::vprintf(fmt, args2);
 	fflush(mFout);
 }
 
@@ -159,7 +165,7 @@ static int getline(char** _buf, size_t* _bufSize, FILE* f) {
 	if(i == bufSize) {
 		FAIL("getline buffer overrun");
 	}
-	::printf("getline returns %i\n", i);
+	LOG("getline returns %i\n", i);
 	return (int)i;
 }
 #endif
