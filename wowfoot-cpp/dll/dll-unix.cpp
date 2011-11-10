@@ -1,5 +1,7 @@
 #include "dll.h"
 #include <dlfcn.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef NULL
 #define NULL 0
@@ -24,7 +26,11 @@ void* Dll::get(const char* functionName) {
 
 void Dll::close() {
 	if(mHandle != NULL) {
-		dlclose(mHandle);
+		int res = dlclose(mHandle);
+		if(res != 0) {
+			printf("dlclose error: %i\n", res);
+			exit(res);
+		}
 		mHandle = NULL;
 	}
 }
