@@ -75,7 +75,7 @@ static bool isUrlChar(char c) {
 	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
 	//sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
 	return isalnum(c) || c == '_' || c == '#' || c == '?' || c == '/' || c == '-' ||
-		c == '=' || c == '.';
+		c == '=' || c == '.' || c == ':';
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.';
