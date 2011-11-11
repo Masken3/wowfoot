@@ -1,23 +1,21 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#include <string>
+#include <ostream>
+#include "dllHelpers.h"
+
 #ifdef WIN32
-#include "util/windows/sym_engine/exception2.h"
+#include "util/win32/sym_engine/exception2.h"
 
 class Exception : public exception2 {
 public:
 	Exception(const std::string& msg) : exception2(msg) {}
-	void dump() const {
-		printf("Exception: %s\n", what());
-		printf("Stack trace:\n%s\n", stack_trace());
-	}
+	void stream(std::ostream&) const VISIBLE;
 };
 
 #else
-
-#include <string>
 #include "util/unix/stackTrace.h"
-#include "dllHelpers.h"
 
 class Exception {
 public:

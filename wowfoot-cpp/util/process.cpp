@@ -150,7 +150,7 @@ void Process::kill() {
 static int getline(char** _buf, size_t* _bufSize, FILE* f) {
 	char* buf(*_buf);
 	size_t bufSize(*_bufSize);
-	_ASSERT(bufSize > 0);
+	assert(bufSize > 0);
 	size_t i=0;
 	while(i < bufSize-1) {
 		int c = fgetc(f);

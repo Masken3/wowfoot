@@ -88,12 +88,19 @@ end	# WIN32
 
 common = DllWork.new
 common.instance_eval do
-	@SOURCES = ['handlers', 'util/unix']
+	@SOURCES = ['handlers', 'util']
+	if(HOST == :win32)
+		@SOURCES << 'util/win32'
+		@SOURCES << 'util/win32/sym_engine'
+		@LIBRARIES = ['imagehlp']
+	else
+		@SOURCES << 'util/unix'
+		@LIBRARIES = ['dl']
+	end
 	@SPECIFIC_CFLAGS = {
 		'process.cpp' => ' -Wno-missing-format-attribute',
 	}
 	@EXTRA_INCLUDES = ['.']
-	@LIBRARIES = ['dl']
 	@NAME = 'common'
 	WORKS << self
 end
