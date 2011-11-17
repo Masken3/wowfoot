@@ -4,6 +4,7 @@
 //#include "extendedCost.h"
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"
+#include "db_loot_template.h"
 #include "dbcItemExtendedCost.h"
 #include "ItemExtendedCost.index.h"
 #include "money.h"
@@ -23,8 +24,20 @@ static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
 static Tab* sharesModel(const Item& a);
+static Tab* droppedBy(const Item& a);
+
+void init() __attribute((constructor));
+void init() {
+	printf("init item\n");
+}
+
+void fini() __attribute((destructor));
+void fini() {
+	printf("fini item\n");
+}
 
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gCreatureLoots.load();
 	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
@@ -59,10 +72,12 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	tabs.push_back(soldBy(a));
 	// Currency for (item)
 	tabs.push_back(currencyFor(a));
+	// Same model as (item)
 	tabs.push_back(sharesModel(a));
 	// Disenchants to (item)
 	// Disenchanted from (item)
 	// Dropped by (npc)
+	tabs.push_back(droppedBy(a));
 	// Contained in (gameobject)
 	// Contained in (item)
 	// Milled from (item)
@@ -91,6 +106,10 @@ enum TableRowId {
 	SIDE,
 	SLOT,
 	TYPE,
+	CHANCE,
+	MIN_COUNT,
+	MAX_COUNT,
+	SPAWN_COUNT,
 };
 
 static class streamUnlessEmptyClass {
@@ -144,22 +163,30 @@ static string costHtml(const Item& a, int extendedCostId) {
 	return html.str();
 }
 
+static void npcColumns(tabTableChtml& t) {
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
+	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
+}
+
+static void npcRows(Row& r, const Npc& npc) {
+	r[ENTRY] = toString(npc.entry);
+	r[NAME] = npc.name;
+	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
+	r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+}
+
 static Tab* soldBy(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = "soldBy";
 	t.title = "Sold by";
-	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
-	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
+	npcColumns(t);
 	t.columns.push_back(Column(STOCK, "Stock"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
 	NpcVendors::ItemPair res = gNpcVendors.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const NpcVendor& nv(*res.first->second);
 		Row r;
-		r[ENTRY] = toString(nv.entry);
-		r[NAME] = gNpcs[nv.entry].name;
-		r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
-		r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+		npcRows(r, gNpcs[nv.entry]);
 		//todo: add nv.incrtime, a.buyCount;
 		if(nv.maxcount == 0)
 			r[STOCK] = "∞";
@@ -167,6 +194,34 @@ static Tab* soldBy(const Item& a) {
 			r[STOCK] = toString(nv.maxcount);
 		r[COST] = costHtml(a, nv.extendedCost);
 		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* droppedBy(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "droppedBy";
+	t.title = "Dropped by";
+	npcColumns(t);
+	t.columns.push_back(Column(CHANCE, "Chance"));
+	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
+	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	Loots::ItemPair res = gCreatureLoots.findItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Npcs::LootIdPair nres = gNpcs.findLootId(loot.entry);
+		for(; nres.first != nres.second; ++nres.first) {
+			const Npc& npc(*nres.first->second);
+			Row r;
+			npcRows(r, npc);
+			r[CHANCE] = toString(loot.chance);
+			r[MIN_COUNT] = toString(loot.minCountOrRef);
+			r[MAX_COUNT] = toString(loot.maxCount);
+			r[SPAWN_COUNT] = toString(npc.spawnCount);
+			t.array.push_back(r);
+		}
 	}
 	t.count = t.array.size();
 	return &t;

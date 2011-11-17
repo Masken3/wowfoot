@@ -88,19 +88,12 @@ end	# WIN32
 
 common = DllWork.new
 common.instance_eval do
-	@SOURCES = ['handlers', 'util']
-	if(HOST == :win32)
-		@SOURCES << 'util/win32'
-		@SOURCES << 'util/win32/sym_engine'
-		@LIBRARIES = ['imagehlp']
-	else
-		@SOURCES << 'util/unix'
-		@LIBRARIES = ['dl']
-	end
+	@SOURCES = ['handlers', 'util', 'util/unix']
 	@SPECIFIC_CFLAGS = {
 		'process.cpp' => ' -Wno-missing-format-attribute',
 	}
 	@EXTRA_INCLUDES = ['.']
+	@LIBRARIES = ['dl']
 	@NAME = 'common'
 	WORKS << self
 end
@@ -150,8 +143,8 @@ class HandlerWork < DllWork
 end
 
 class TdbWork < HandlerWork
-	def initialize(name)
-		super(name, ['tdb'])
+	def initialize(name, handlerDeps = [])
+		super(name, ['tdb'] + handlerDeps)
 		@EXTRA_SOURCETASKS << TdbCppTask.new(self, name)
 		@EXTRA_CPPFLAGS = ' -Wno-invalid-offsetof'
 		@PREREQUISITES = [
@@ -215,10 +208,11 @@ HandlerWork.new('dbc').instance_eval do
 		FileTask.new(self, LIBMPQ.target.to_s))]
 end
 
+TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
-TdbWork.new('db_creature_template')
 TdbWork.new('db_creature')
+TdbWork.new('db_creature_template', ['db_creature'])
 
 DbcWork.new('dbcAchievement')
 DbcWork.new('dbcArea')
@@ -250,7 +244,8 @@ PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell'])
+	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
+	'db_loot_template'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 

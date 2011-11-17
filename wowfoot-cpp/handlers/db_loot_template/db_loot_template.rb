@@ -1,0 +1,32 @@
+@mysql_db_name = 'loot_template'
+@structName = 'Loot'
+@containerType = :set
+
+@prefixes = [
+	'creature',
+	'disenchant',
+	'fishing',
+	'gameobject',
+	'item',
+	'pickpocketing',
+	'prospecting',
+	'skinning',
+	'quest_mail',
+	'reference',
+	'milling',
+]
+
+@struct = [
+c(:int, :entry, :key),
+c(:int, :item, :key),
+renamed(:float, :chanceOrQuestChance, :chance),
+c(:int, :lootMode),
+c(:int, :groupId),
+c(:int, :minCountOrRef),
+c(:int, :maxCount),
+]
+
+@index = [
+	[:item],
+	[:groupId],
+]

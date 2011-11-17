@@ -10,3 +10,7 @@ c(:float, :position_x),
 c(:float, :position_y),
 c(:float, :position_z),
 ]
+
+@index = [
+	[:id],
+]

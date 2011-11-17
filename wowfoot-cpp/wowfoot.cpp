@@ -69,7 +69,6 @@ static void prepareHttpd(int port) {
 	sMhd = MHD_start_daemon(MHD_USE_DEBUG | MHD_USE_THREAD_PER_CONNECTION,
 		port, NULL, NULL, requestHandler, NULL,
 		MHD_OPTION_NOTIFY_COMPLETED, requestCompletedCallback, NULL, MHD_OPTION_END);
-	printf("%p\n", requestCompletedCallback);
 	assert(sMhd);
 }
 
