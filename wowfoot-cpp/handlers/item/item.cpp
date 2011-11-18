@@ -25,6 +25,7 @@ static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
 static Tab* sharesModel(const Item& a);
 static Tab* droppedBy(const Item& a);
+static Tab* referenceLoot(const Item& a);
 
 void init() __attribute((constructor));
 void init() {
@@ -37,6 +38,7 @@ void fini() {
 }
 
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gReferenceLoots.load();
 	gCreatureLoots.load();
 	gNpcs.load();
 	gNpcVendors.load();
@@ -92,6 +94,8 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Required for quest
 	// Quest reward choice
 	// Quest reward
+	// Reference loot (debug)
+	tabs.push_back(referenceLoot(a));
 }
 
 enum TableRowId {
@@ -222,6 +226,34 @@ static Tab* droppedBy(const Item& a) {
 			r[SPAWN_COUNT] = toString(npc.spawnCount);
 			t.array.push_back(r);
 		}
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* referenceLoot(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "referenceLoot";
+	t.title = "Reference loot";
+	t.columns.push_back(Column(CHANCE, "Chance"));
+	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
+	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	t.columns.push_back(Column(SPAWN_COUNT, "Other items count"));
+	Loots::ItemPair res = gReferenceLoots.findItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(loot.entry);
+		r[CHANCE] = toString(loot.chance);
+		r[MIN_COUNT] = toString(loot.minCountOrRef);
+		r[MAX_COUNT] = toString(loot.maxCount);
+		size_t count = 0;
+		Loots::EntryPair ep = gReferenceLoots.findEntry(loot.entry);
+		for(; ep.first != ep.second; ++ep.first) {
+			count++;
+		}
+		r[SPAWN_COUNT] = toString(count);
+		t.array.push_back(r);
 	}
 	t.count = t.array.size();
 	return &t;

@@ -27,6 +27,7 @@ c(:int, :maxCount),
 ]
 
 @index = [
+	[:entry],
 	[:item],
 	[:groupId],
 ]

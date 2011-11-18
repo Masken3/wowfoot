@@ -32,12 +32,6 @@ def rootSendSignal(works)
 	p res.body
 end
 
-class DllWork
-	def newDllName
-		return ''
-	end
-end
-
 # force server to unload DLLs,
 # to remove the write protection.
 class DllTask
@@ -58,8 +52,11 @@ class DllTask
 				idHandlerWorks << File.basename(name, DLL_FILE_ENDING)+',' if(pn == main)
 			end
 		end; end
-		@NAME = @work.newDllName
-		idHandlerWorks << main << ':' << @NAME
+		if(@work.respond_to?(:newDllName))
+			@originalName = @NAME
+			@NAME = @work.newDllName
+			idHandlerWorks << main << ':' << @NAME
+		end
 		rootSendSignal(idHandlerWorks)
 	end
 	def isLoaded; if(HOST == :win32)
@@ -91,6 +88,7 @@ class DllTask
 		FileUtils.rm_f(@NAME)
 		raise hell if(File.exist?(@NAME))
 		old_execute
+		cp(@NAME, @originalName) if(@originalName)
 	end
 end
 end	# WIN32
@@ -309,6 +307,7 @@ target :default do
 end
 
 target :run => :default do
+	rm_f 'build/count'
 	sh cmd
 end
 
