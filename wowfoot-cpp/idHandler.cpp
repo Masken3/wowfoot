@@ -10,13 +10,13 @@ public:
 	IdHandler(const char* name);
 	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*);
-	virtual void unload();
+	virtual void unload(const char* newName, size_t newNameLen);
 	virtual void load();
 private:
 	DllGetResponse mDllGetResponse;
 	DllCleanup mDllCleanup;
 	Dll mDll;
-	const string mDllName;
+	string mDllName;
 	time_t mDllTime;
 
 	void reload();
@@ -85,9 +85,12 @@ void IdHandler::cleanup(ResponseData* rd) {
 	delete rd;
 }
 
-void IdHandler::unload() {
+void IdHandler::unload(const char* newName, size_t newNameLen) {
 	mDll.close();
 	mDllTime = 0;	// in case the build fails
+	if(newName) {
+		mDllName.assign(newName, newNameLen);
+	}
 }
 
 void mountIdPage(const char* name) {

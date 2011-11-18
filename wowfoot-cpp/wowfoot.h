@@ -39,7 +39,7 @@ public:
 
 	// Unload any DLLs the Handler may have loaded.
 	// Used only on systems that lock its executable files (Windows).
-	virtual void unload() = 0;
+	virtual void unload(const char* newName, size_t newNameLen) = 0;
 
 	virtual void load() = 0;
 };

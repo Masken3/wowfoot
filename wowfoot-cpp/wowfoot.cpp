@@ -180,6 +180,13 @@ public:
 			// find next unload request
 			const char* end = strchr(ptr, ',');
 			size_t len = end ? end - ptr : strlen(ptr);
+			const char* colon = (char*)memchr(ptr, ':', len);
+			const char* newName = NULL;
+			size_t totalLen = len;
+			if(colon) {	// new name for dll
+				newName = colon + 1;
+				len = colon - ptr;
+			}
 			// search root patterns
 			for(PatternMap::const_iterator itr = sRootPatterns.begin();
 				itr != sRootPatterns.end(); ++itr)
@@ -193,10 +200,10 @@ public:
 					responseText.append(ptr, len);
 					// perform the unload
 					printf("Unloading %.*s...\n", (int)len, ptr);
-					itr->second->unload();
+					itr->second->unload(newName, totalLen - (len+1));
 				}
 			}
-			ptr += len;
+			ptr += totalLen;
 			if(*ptr == ',')
 				ptr++;
 		}
@@ -214,7 +221,7 @@ public:
 		// this function should never be called.
 		abort();
 	}
-	void unload() {}
+	void unload(const char*, size_t) {}
 	void load() {}
 };
 

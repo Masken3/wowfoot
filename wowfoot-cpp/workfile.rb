@@ -32,6 +32,12 @@ def rootSendSignal(works)
 	p res.body
 end
 
+class DllWork
+	def newDllName
+		return ''
+	end
+end
+
 # force server to unload DLLs,
 # to remove the write protection.
 class DllTask
@@ -41,18 +47,19 @@ class DllTask
 		# idHandlers that depends on this DLL (including itself).
 		# wait for a "finished" signal from the server.
 		idHandlerWorks = ''
-		main = File.basename(self.to_s, '.dll')
+		main = File.basename(self.to_s, DLL_FILE_ENDING)
 		# wrong: this is this DLL's dependencies, not the other way around.
 		WORKS.each do |w| w.prerequisites.each do |pre|
 			name = pre.to_s;
-			next unless(name.endsWith('.dll'))
+			next unless(name.endsWith(DLL_FILE_ENDING))
 			# this is the work's primary output. now we must look at its dependencies.
 			pre.prerequisites.each do |pp|
-				pn = File.basename(pp.to_s, '.dll')
-				idHandlerWorks << File.basename(name, '.dll')+',' if(pn == main)
+				pn = File.basename(pp.to_s, DLL_FILE_ENDING)
+				idHandlerWorks << File.basename(name, DLL_FILE_ENDING)+',' if(pn == main)
 			end
 		end; end
-		idHandlerWorks << main
+		@NAME = @work.newDllName
+		idHandlerWorks << main << ':' << @NAME
 		rootSendSignal(idHandlerWorks)
 	end
 	def isLoaded; if(HOST == :win32)
@@ -81,6 +88,8 @@ class DllTask
 	end;end
 	def execute
 		sendSignal if(isLoaded)
+		FileUtils.rm_f(@NAME)
+		raise hell if(File.exist?(@NAME))
 		old_execute
 	end
 end
@@ -159,6 +168,19 @@ class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [])
 		super(name, handlerDeps, true)
 		@EXTRA_OBJECTS = [FileTask.new(self, "handlers/#{name}/#{name}.def")] if(HOST == :win32)
+	end
+	def count
+		c = 0
+		c = open('build/count').read.strip.to_i if(File.exist?('build/count'))
+		c += 1
+		open('build/count', 'w') do |file|
+			file.write(c.to_s)
+			file.close
+		end
+		return c
+	end
+	def newDllName
+		return "#{@BUILDDIR}#{count}#{@NAME}#{DLL_FILE_ENDING}"
 	end
 end
 
