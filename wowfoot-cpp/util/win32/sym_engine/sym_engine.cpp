@@ -595,7 +595,7 @@ bool sym_engine::stack_trace(std::ostream& os, unsigned skip, const char * fmt)
 }
 
 bool sym_engine::stack_trace(std::ostream& os, sym_engine& sym,
-														 CONTEXT * pctx, unsigned skip, const char * fmt)
+	CONTEXT * pctx, unsigned skip, const char * fmt)
 {
 	if (!sym.stack_first(pctx))
 		return false;
