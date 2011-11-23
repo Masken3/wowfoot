@@ -178,7 +178,7 @@ private:
 public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
-		) VISIBLE;
+		) const VISIBLE;
 <%end; end%>
 };
 
@@ -239,7 +239,7 @@ void <%=@structName%>s::load() {
 ) + IF_INDEX + %q(
 <%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
-	)
+	) const
 {
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=arg%><%end%>

@@ -27,6 +27,8 @@ static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
 static Tab* sharesModel(const Item& a);
 static Tab* droppedBy(const Item& a);
+static Tab* pickpocketedFrom(const Item& a);
+static Tab* skinnedFrom(const Item& a);
 static Tab* referenceLoot(const Item& a);
 
 void init() __attribute((constructor));
@@ -42,6 +44,8 @@ void fini() {
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gReferenceLoots.load();
 	gCreatureLoots.load();
+	gPickpocketingLoots.load();
+	gSkinningLoots.load();
 	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
@@ -87,9 +91,11 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Milled from (item)
 	// Mills to (item)
 	// Pickpocketed from (npc)
+	tabs.push_back(pickpocketedFrom(a));
 	// Prospected from (item)
 	// Prospects (item)
 	// Skinned from (npc)
+	tabs.push_back(skinnedFrom(a));
 	// Created by (spell)
 	// Reagent for (spell)
 	// Provided for quest
@@ -117,6 +123,7 @@ enum TableRowId {
 	MIN_COUNT,
 	MAX_COUNT,
 	SPAWN_COUNT,
+	UTILITY,
 };
 
 static class streamUnlessEmptyClass {
@@ -206,16 +213,17 @@ static Tab* soldBy(const Item& a) {
 	return &t;
 }
 
-static Tab* droppedBy(const Item& a) {
+static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const char* title) {
 	tabTableChtml& t = *new tabTableChtml();
-	t.id = "droppedBy";
-	t.title = "Dropped by";
+	t.id = id;
+	t.title = title;
 	npcColumns(t);
-	t.columns.push_back(Column(CHANCE, "Chance"));
+	t.columns.push_back(Column(CHANCE, "Chance %"));
 	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
 	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
-	Loots::ItemPair res = gCreatureLoots.findItem(a.entry);
+	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
+	Loots::ItemPair res = loots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
 		Npcs::LootIdPair nres = gNpcs.findLootId(loot.entry);
@@ -227,12 +235,54 @@ static Tab* droppedBy(const Item& a) {
 			r[MIN_COUNT] = toString(loot.minCountOrRef);
 			r[MAX_COUNT] = toString(loot.maxCount);
 			r[SPAWN_COUNT] = toString(npc.spawnCount);
+			r[UTILITY] = toString(loot.chance * npc.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
 		}
 	}
 	t.count = t.array.size();
 	return &t;
 }
+
+static Tab* droppedBy(const Item& a) {
+	return npcLoot(a, gCreatureLoots, "droppedBy", "Dropped by");
+}
+static Tab* pickpocketedFrom(const Item& a) {
+	return npcLoot(a, gPickpocketingLoots, "pickpocketedFrom", "Pickpocketed from");
+}
+static Tab* skinnedFrom(const Item& a) {
+	return npcLoot(a, gSkinningLoots, "skinnedFrom", "Skinned from");
+}
+
+#if 0
+static Tab* foundInObject(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "foundInObject";
+	t.title = "Found in object";
+	objectColumns(t);
+	t.columns.push_back(Column(CHANCE, "Chance"));
+	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
+	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	Loots::ItemPair res = gGameobjectLoots.findItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Objects::LootIdPair nres = gObjects.findLootId(loot.entry);
+		for(; nres.first != nres.second; ++nres.first) {
+			const Object& o(*nres.first->second);
+			Row r;
+			objectRows(r, o);
+			r[CHANCE] = toString(loot.chance);
+			r[MIN_COUNT] = toString(loot.minCountOrRef);
+			r[MAX_COUNT] = toString(loot.maxCount);
+			r[SPAWN_COUNT] = toString(o.spawnCount);
+			t.array.push_back(r);
+		}
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+#endif
 
 static Tab* referenceLoot(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
