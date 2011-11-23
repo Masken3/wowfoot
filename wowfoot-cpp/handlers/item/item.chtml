@@ -35,7 +35,16 @@ Equip: <%= ITEM_EQUIP(a->inventoryType) %><!--(<%= a->inventoryType %>)--><br>
 Material: <%= ITEM_MATERIAL(a->material) %><!--(<%= a->material %>)--><br>
 Item level <%= a->itemLevel %><br>
 
-%// todo: class & race, skill, spell, honorrank, cityrank
+%// todo: skill, honorrank, cityrank
+% string classes = chrClasses(a->allowableClass);
+% if(!classes.empty()) {
+Classes: <%=classes%><br>
+% }
+
+% string races = chrRaces(a->allowableRace);
+% if(!races.empty()) {
+Races: <%=races%><br>
+% }
 
 %// unique
 % if(a->maxCount != 0) {

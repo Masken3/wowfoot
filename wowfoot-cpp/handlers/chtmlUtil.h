@@ -21,6 +21,12 @@ template<class T> string toString(const T& t) {
 	return oss.str();
 }
 
+template<class T> string toStringHex(const T& t) {
+	ostringstream oss;
+	oss << "0x" << hex << t;
+	return oss.str();
+}
+
 // float not zero (epsilon)
 bool fnz(float f) VISIBLE;
 

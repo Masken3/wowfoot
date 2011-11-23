@@ -4,6 +4,8 @@
 #include "db_item.h"
 #include "dbcTotemCategory.h"
 #include "dbcSpell.h"
+#include "chrClasses.h"
+#include "chrRaces.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:

@@ -6,6 +6,8 @@
 #include "db_creature_template.h"
 #include "db_loot_template.h"
 #include "dbcItemExtendedCost.h"
+#include "chrClasses.h"
+#include "chrRaces.h"
 #include "ItemExtendedCost.index.h"
 #include "money.h"
 #include "util/exception.h"
@@ -100,6 +102,7 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 
 enum TableRowId {
 	NAME = ENTRY+1,
+	RESTRICTIONS,
 	SOURCE,
 	COST,
 	LOCATION,
@@ -261,11 +264,12 @@ static Tab* referenceLoot(const Item& a) {
 
 static void itemColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	t.columns.push_back(Column(RESTRICTIONS, "Class/Race"));
 	// name of and link to single vendor, or number of vendors.
 	//t.columns.push_back(Column(VENDOR, "Vendor", Column::NoEscape));
 	t.columns.push_back(Column(ILEVEL, "iLevel"));
 	t.columns.push_back(Column(CLEVEL, "Req."));	//Required character level
-	t.columns.push_back(Column(SIDE, "Side"));	// Horde, Alliance, or none
+	//t.columns.push_back(Column(SIDE, "Side"));	// Horde, Alliance, or none
 	t.columns.push_back(Column(SLOT, "Slot"));
 	t.columns.push_back(Column(TYPE, "Type"));
 	t.columns.push_back(Column(SOURCE, "Source"));
@@ -275,6 +279,14 @@ static void itemColumns(tabTableChtml& t) {
 static void addItem(tabTableChtml& t, const Item& i) {
 	Row r;
 	r[ENTRY] = toString(i.entry);
+
+	string classes = chrClasses(i.allowableClass);
+	string races = chrRaces(i.allowableRace);
+	r[RESTRICTIONS] = classes;
+	if(!classes.empty() && !races.empty())
+		r[RESTRICTIONS] += " / ";
+	r[RESTRICTIONS] += races;
+
 	r[NAME] = i.name;
 	r[ILEVEL] = toString(i.itemLevel);
 	r[CLEVEL] = toString(i.requiredLevel);
