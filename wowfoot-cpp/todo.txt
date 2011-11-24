@@ -1,0 +1,6 @@
+* Comments
+** Check encoding; I think it's Latin-1, but it's presented as UTF-8 to the browser.
+Example: http://localhost:3002/npc=19516
+
+** Redirect wowwiki links to wowpedia.
+Example: http://localhost:3002/item=30450

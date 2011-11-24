@@ -1,4 +1,4 @@
-@mysql_db_name = 'loot_template'
+@mysql_db_name = '_loot_template'
 @structName = 'Loot'
 @containerType = :set
 

@@ -180,6 +180,7 @@ public:
 		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
 		) const VISIBLE;
 <%end; end%>
+<%=@extraClassDefinitionCode%>
 };
 
 <% if(@prefixes)
@@ -232,7 +233,7 @@ void <%=@structName%>s::load() {
 
 <% if(@prefixes)
 @prefixes.each do |pre| %>
-<%=@structName%>s g<%=pre.capitalize%><%=@structName%>s("<%=pre%>_<%=@mysql_db_name%>");<% end; else %>
+<%=@structName%>s g<%=pre.capitalize%><%=@structName%>s("<%=pre%><%=@mysql_db_name%>");<% end; else %>
 <%=@structName%>s g<%=@structName%>s("<%=@mysql_db_name%>");
 <% end %>
 

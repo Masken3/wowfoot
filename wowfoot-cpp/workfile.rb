@@ -52,7 +52,7 @@ class DllTask
 				idHandlerWorks << File.basename(name, DLL_FILE_ENDING)+',' if(pn == main)
 			end
 		end; end
-		if(@work.respond_to?(:newDllName))
+		if(@work.respond_to?(:newDllName) && HOST == :linux)
 			@originalName = @NAME
 			@NAME = @work.newDllName
 			idHandlerWorks << main << ':' << @NAME
@@ -238,8 +238,9 @@ end
 TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
-TdbWork.new('db_creature')
-TdbWork.new('db_creature_template', ['db_creature'])
+TdbWork.new('db_spawn')
+TdbWork.new('db_creature_template', ['db_spawn'])
+TdbWork.new('db_gameobject_template', ['db_spawn'])
 
 DbcWork.new('dbcAchievement')
 DbcWork.new('dbcArea')
@@ -268,13 +269,13 @@ end
 
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
 PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
-	'db_creature', 'tabs', 'comments'])
+	'db_spawn', 'tabs', 'comments'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
-	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces'])
+	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 

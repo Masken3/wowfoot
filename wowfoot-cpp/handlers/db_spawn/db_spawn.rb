@@ -1,6 +1,11 @@
-@mysql_db_name = 'creature'
-@structName = 'NpcSpawn'
+@mysql_db_name = ''
+@structName = 'Spawn'
 @containerType = :set
+
+@prefixes = [
+	'creature',
+	'gameobject',
+]
 
 @struct = [
 c(:int, :guid, :key),

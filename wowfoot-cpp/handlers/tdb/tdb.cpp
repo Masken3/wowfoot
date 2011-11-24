@@ -97,7 +97,7 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	MYSQL_ROW row;
 	while((row = mysql_fetch_row(res)) != NULL) {
 		count++;
-		if(count % 1000 == 0) {
+		if(count % 10000 == 0) {
 			printf("%i\n", count);
 		}
 

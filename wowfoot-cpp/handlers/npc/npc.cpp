@@ -1,6 +1,6 @@
 #include "npc.chtml.h"
 #include "db_creature_template.h"
-#include "db_creature.h"
+#include "db_spawn.h"
 #include "comments.h"
 
 #include <string.h>
@@ -14,7 +14,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gWorldMapAreas.load();
 	gAreaTable.load();
 	gNpcs.load();
-	gNpcSpawns.load();
+	gCreatureSpawns.load();
 
 	int id = toInt(urlPart);
 	a = gNpcs.find(id);

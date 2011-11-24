@@ -4,6 +4,7 @@
 //#include "extendedCost.h"
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"
+#include "db_gameobject_template.h"
 #include "db_loot_template.h"
 #include "dbcItemExtendedCost.h"
 #include "chrClasses.h"
@@ -29,6 +30,7 @@ static Tab* sharesModel(const Item& a);
 static Tab* droppedBy(const Item& a);
 static Tab* pickpocketedFrom(const Item& a);
 static Tab* skinnedFrom(const Item& a);
+static Tab* containedInObject(const Item& a);
 static Tab* referenceLoot(const Item& a);
 
 void init() __attribute((constructor));
@@ -53,6 +55,8 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gItemExtendedCosts.load();
 	ItemExtendedCostIndex::load();
 	gSpells.load();
+	gObjects.load();
+	gGameobjectLoots.load();
 
 	int id = toInt(urlPart);
 	a = gItems.find(id);
@@ -87,6 +91,7 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Dropped by (npc)
 	tabs.push_back(droppedBy(a));
 	// Contained in (gameobject)
+	tabs.push_back(containedInObject(a));
 	// Contained in (item)
 	// Milled from (item)
 	// Mills to (item)
@@ -253,36 +258,36 @@ static Tab* skinnedFrom(const Item& a) {
 	return npcLoot(a, gSkinningLoots, "skinnedFrom", "Skinned from");
 }
 
-#if 0
-static Tab* foundInObject(const Item& a) {
+static Tab* containedInObject(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
-	t.id = "foundInObject";
-	t.title = "Found in object";
-	objectColumns(t);
+	t.id = "containedInObject";
+	t.title = "Contained in object";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
 	t.columns.push_back(Column(CHANCE, "Chance"));
 	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
 	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
 	Loots::ItemPair res = gGameobjectLoots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
-		Objects::LootIdPair nres = gObjects.findLootId(loot.entry);
+		Objects::LootPair nres = gObjects.findLoot(loot.entry);
 		for(; nres.first != nres.second; ++nres.first) {
 			const Object& o(*nres.first->second);
 			Row r;
-			objectRows(r, o);
+			r[ENTRY] = toString(o.entry);
+			r[NAME] = o.name;
 			r[CHANCE] = toString(loot.chance);
 			r[MIN_COUNT] = toString(loot.minCountOrRef);
 			r[MAX_COUNT] = toString(loot.maxCount);
 			r[SPAWN_COUNT] = toString(o.spawnCount);
+			r[UTILITY] = toString(loot.chance * o.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
 		}
-		t.array.push_back(r);
 	}
 	t.count = t.array.size();
 	return &t;
 }
-#endif
 
 static Tab* referenceLoot(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
