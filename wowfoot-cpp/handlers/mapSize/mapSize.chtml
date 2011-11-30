@@ -1,14 +1,20 @@
 
 <SCRIPT type="text/javascript">
 function map_onclick(e) {
-	document.getElementById("map").style.width = "80%";//document.getElementById("mapImage").width + "px";
-}
-function my_onload() {
-	document.getElementById("map").onclick = map_onclick;
-	list = document.getElementsByClassName("mapLink");
-	for(i=0; i<list.length; i++) {
-		list.item(i).onclick = mapLink_onclick;
+	//bigWidth = "80%";
+	bigWidth = "1002px";	// todo: get image width directly
+	style = document.getElementById("map").style;
+	if(style.width != bigWidth) {
+		smallWidth = style.width;
+		style.width = bigWidth;
+	} else {
+		style.width = smallWidth;
 	}
 }
-window.onload = my_onload;
+
+document.getElementById("map").onclick = map_onclick;
+list = document.getElementsByClassName("mapLink");
+for(i=0; i<list.length; i++) {
+	list.item(i).onclick = mapLink_onclick;
+}
 </SCRIPT>
