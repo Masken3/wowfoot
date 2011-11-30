@@ -2,7 +2,7 @@
 @plural = 'WorldMapAreas'
 @upperCase = 'WORLD_MAP_AREA'
 
-@id = 0
+@id = 2
 @struct = [
 m(:int, 'map', 1),
 m(:int, 'area', 2),

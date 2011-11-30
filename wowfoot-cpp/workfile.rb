@@ -209,6 +209,7 @@ class DbcWork < HandlerWork
 end
 
 # HandlerWorks
+HandlerWork.new('areaMap')
 
 HandlerWork.new('tdb').instance_eval do
 	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
@@ -266,10 +267,11 @@ HandlerWork.new('comments', ['tabs']).instance_eval do
 	end
 	@EXTRA_SOURCETASKS << patch
 end
+HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
 PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
-	'db_spawn', 'tabs', 'comments'])
+	'db_spawn', 'tabs', 'comments', 'spawnPoints'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement'])

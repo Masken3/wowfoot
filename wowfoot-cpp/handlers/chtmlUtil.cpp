@@ -38,6 +38,18 @@ string htmlEscape(const string& src) {
 	return dst;
 }
 
+string jsEscape(const string& src) {
+	string dst;
+	dst.reserve(src.size()*2);	// ensure no reallocs
+	for(size_t i=0; i<src.size(); i++) {
+		switch(src[i]) {
+		case '\'': dst += "\\\'"; break;
+		default: dst += src[i];
+		}
+	}
+	return dst;
+}
+
 bool fnz(float f) {
 	return fabs(f) > 0.0001;
 }

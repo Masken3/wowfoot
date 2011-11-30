@@ -30,9 +30,10 @@ private:
 
 
 #define FAIL(msg) throw Exception(msg)
+#define EASSERT(test) if(!(test)) throw Exception(#test)
 
 #define ERRNO(a) { if((a) < 0) { printf("On line %i in file %s:\n", __LINE__, __FILE__); throwERRNO(); } }
 
-void throwERRNO() __attribute__((noreturn));
+void throwERRNO() __attribute__((noreturn)) VISIBLE;
 
 #endif	//EXCEPTION_H

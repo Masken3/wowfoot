@@ -14,6 +14,7 @@ int toInt(const char*) VISIBLE;
 string toupper(string s) VISIBLE;
 
 string htmlEscape(const string& src) VISIBLE;
+string jsEscape(const string& src) VISIBLE;
 
 template<class T> string toString(const T& t) {
 	ostringstream oss;

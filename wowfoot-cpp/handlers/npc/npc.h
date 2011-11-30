@@ -4,6 +4,7 @@
 #include "dbcArea.h"
 #include "tabs.h"
 #include "db_creature_template.h"
+#include "spawnPoints.h"
 
 class npcChtml : public tabsChtml, public PageContext {
 public:
@@ -13,4 +14,5 @@ public:
 	const char* mTitle;
 	string mMapName;
 	const Npc* a;
+	spawnPointsChtml mSpawnPointsChtml;
 };

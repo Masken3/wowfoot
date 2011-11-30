@@ -21,6 +21,8 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	if(a) {
 		mTitle = a->name.c_str();
 		mTabs.push_back(getComments("npc", id));
+
+		mSpawnPointsChtml.mSpawns = gCreatureSpawns.findId(id);
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;

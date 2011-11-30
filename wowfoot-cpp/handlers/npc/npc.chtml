@@ -9,11 +9,7 @@
 <p>NPC: <%= mTitle %></p>
 
 % if(a) {
-<p>
-<!--<img id="map" width="40%" src="output/<%= mMapName %>.jpeg" alt="<%= mMapName %>">-->
-</p>
-
-% //returnCode = mSpawnPointsChtml.run(stream);
+% mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);
 % } else {
 <%= mTitle %> not found.

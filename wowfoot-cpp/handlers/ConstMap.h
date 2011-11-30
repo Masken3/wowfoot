@@ -12,6 +12,7 @@ template<class Key, class Value>
 class ConstMap : protected unordered_map<Key, Value> {
 protected:
 	typedef unordered_map<Key, Value> super;
+	typedef pair<typename unordered_map<Key, Value>::iterator, bool> ires;
 public:
 	typedef const Value* ptr;
 	typedef const Value& ref;
