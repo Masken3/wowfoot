@@ -1,9 +1,15 @@
 
 <SCRIPT type="text/javascript">
 function map_onclick(e) {
-	//bigWidth = "80%";
-	bigWidth = "1002px";	// todo: get image width directly
-	style = document.getElementById("map").style;
+	//bigWidth = "80%";	// still scaled.
+	//bigWidth = "auto";	// equal to 100%, still scaled.
+	bigWidth = "1002px";	// magic number.
+	// todo: get natural image width. impossible?
+	img = document.getElementById("map");
+	/*bigWidth = img.width + "px";
+	window.alert(img.width);
+	window.alert(bigWidth);*/
+	style = img.style;
 	if(style.width != bigWidth) {
 		smallWidth = style.width;
 		style.width = bigWidth;
