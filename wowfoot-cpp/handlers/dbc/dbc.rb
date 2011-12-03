@@ -51,6 +51,7 @@ void <%=@plural%>::load() {
 	assert(res);
 	printf("Extracting %"PRIuPTR" <%=@plural.downcase%>...\n", sDbc.getRecordCount());
 	for(DBCFile::Iterator itr = sDbc.begin(); itr != sDbc.end(); ++itr) {
+		<%=@preRow%>
 		const DBCFile::Record& r(*itr);
 		int id = r.getInt(<%=@id%>);
 		<%=@singular%> s;<% @struct.each do |col| if(col.type == :f2) %>
@@ -60,7 +61,9 @@ void <%=@plural%>::load() {
 			s.<%=col.name%>[i].<%=m.name%> = r.get<%=m.type.to_s.capitalize%>(<%=m.offset%> + i);<%end%>
 		}<%else%>
 		s.<%=col.name%> = r.get<%=col.type.to_s.capitalize%>(<%=col.offset%>);<%end;end%>
+		<%=@midRow%>
 		insert(pair<int, <%=@singular%>>(id, s));
+		<%=@postRow%>
 	}
 }
 )

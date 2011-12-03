@@ -20,7 +20,7 @@ class ChtmlCompileTask < MultiFileTask
 		header << "#include \"#{@name}.h\"\n"
 
 		@state = :norm
-		cpp << "#include \"#{@name}.chtml.h\"\n"
+		cpp << "#include <#{@name}.chtml.h>\n"
 		cpp << "\n"
 		if(@isPage)
 			cpp << "extern \"C\"\n"

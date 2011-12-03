@@ -30,7 +30,7 @@ public:
 template<class Key>
 typename ConstSet<Key>::ptr
 ConstSet<Key>::find(const Key& key) const {
-	assert(!super::empty());
+	ASSERTE(!super::empty());
 	citr itr = this->super::find(key);
 	if(itr != this->super::end())
 		return &itr->second;
@@ -41,7 +41,7 @@ ConstSet<Key>::find(const Key& key) const {
 template<class Key>
 typename ConstSet<Key>::ref
 ConstSet<Key>::operator[](const Key& key) const {
-	assert(!super::empty());
+	ASSERTE(!super::empty());
 	citr itr = super::find(key);
 	if(itr != super::end())
 		return itr->second;

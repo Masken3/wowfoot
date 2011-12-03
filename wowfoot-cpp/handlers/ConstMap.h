@@ -31,7 +31,7 @@ public:
 template<class Key, class Value>
 typename ConstMap<Key, Value>::ptr
 ConstMap<Key, Value>::find(const Key& key) const {
-	assert(!super::empty());
+	EASSERT(!super::empty());
 	citr itr = this->super::find(key);
 	if(itr != this->super::end())
 		return &itr->second;
@@ -42,7 +42,7 @@ ConstMap<Key, Value>::find(const Key& key) const {
 template<class Key, class Value>
 typename ConstMap<Key, Value>::ref
 ConstMap<Key, Value>::operator[](const Key& key) const {
-	assert(!super::empty());
+	EASSERT(!super::empty());
 	citr itr = super::find(key);
 	if(itr != super::end())
 		return itr->second;

@@ -6,10 +6,15 @@
 #include <execinfo.h>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
-Exception::Exception(const std::string& m) : mMessage(m) {}
+Exception::Exception(const std::string& m) : mMessage(m) {
+	fflush(stdout);
+	mStackTrace.stream(cout);
+	cout.flush();
+}
 void Exception::stream(std::ostream& o) const {
 	mStackTrace.stream(o);
 }

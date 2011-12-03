@@ -11,8 +11,6 @@
 using namespace std;
 
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
-	gWorldMapAreas.load();
-	gAreaTable.load();
 	gNpcs.load();
 	gCreatureSpawns.load();
 

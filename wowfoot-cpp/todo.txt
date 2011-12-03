@@ -4,3 +4,5 @@ Example: http://localhost:3002/npc=19516
 
 ** Redirect wowwiki links to wowpedia.
 Example: http://localhost:3002/item=30450
+
+** Make sure document encoding is specified. We use UTF-8.

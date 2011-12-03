@@ -21,10 +21,13 @@ void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context
 		e.stream(oss);
 		drd->code = 500;
 	} catch(exception& e) {
+		printf("getResponse() caught std::exception: %s\n", e.what());
 		oss.str("");	//clear
-		oss << "Internal Server Error:<br>\n";
+		oss << "<pre>Internal Server Error:<br>\n";
 		oss << "Exception: "<<e.what();
 		drd->code = 500;
+		oss.flush();
+		printf("oss.str().size(): %lu\n", oss.str().size());
 	}
 	string* s = new string(oss.str());
 	drd->size = s->size();

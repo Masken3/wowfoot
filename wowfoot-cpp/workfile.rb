@@ -134,10 +134,10 @@ class HandlerWork < DllWork
 		@SOURCES = ["handlers/#{name}"]
 		@EXTRA_SOURCEFILES = []
 		@EXTRA_INCLUDES = [
+			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
 			'.', CHTML_BUILDDIR,
 			TDB_BUILDDIR,
 			'win32',
-			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
 		]
 		handlerDeps.each do |dll|
 			@EXTRA_INCLUDES << "handlers/#{dll}"
@@ -270,11 +270,13 @@ end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
-PageWork.new('npc', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'db_creature_template',
-	'db_spawn', 'tabs', 'comments', 'spawnPoints'])
+PageWork.new('object', ['db_gameobject_template',
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
+PageWork.new('npc', ['db_creature_template',
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
-	'db_creature_template', 'dbcAchievement'])
+	'db_creature_template', 'dbcAchievement', 'db_gameobject_template'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])

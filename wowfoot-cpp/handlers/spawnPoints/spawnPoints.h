@@ -5,8 +5,6 @@
 #include "db_spawn.h"
 #include "mapSize.h"
 #include "coord2d.h"
-#include "dbcArea.h"
-#include "dbcWorldMapArea.h"
 #include <vector>
 #include <unordered_map>
 

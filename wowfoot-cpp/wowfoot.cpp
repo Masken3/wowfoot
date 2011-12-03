@@ -52,9 +52,9 @@ int main(int argc, const char** argv) {
 	mountIdPage("spell");
 	mountIdPage("npc");
 	mountIdPage("achievement");
+	mountIdPage("object");
 #if 0
 	mountIdPage("quest");
-	mountIdPage("object");
 	mountIdPage("faction");
 	mountIdPage("title");
 #endif

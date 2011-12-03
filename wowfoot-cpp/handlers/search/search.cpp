@@ -5,6 +5,7 @@
 #include "dbcAchievement.h"
 #include "db_item.h"
 #include "db_creature_template.h"
+#include "db_gameobject_template.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -26,6 +27,7 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gItems.load();
 	gNpcs.load();
 	gAchievements.load();
+	gObjects.load();
 
 	urlPart = u;
 
@@ -107,6 +109,28 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 			++itr)
 		{
 			const Npc& s(itr->second);
+			if(strcasestr(s.name.c_str(), urlPart))
+			{
+				Row r;
+				r[ENTRY] = toString(itr->first);
+				r[NAME] = s.name;
+				t.array.push_back(r);
+			}
+		}
+		t.count = t.array.size();
+		mTabs.push_back(tp);
+	}
+	{
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "object";
+		t.title = "Objects";
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
+		for(Objects::citr itr = gObjects.begin();
+			itr != gObjects.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
+			const Object& s(itr->second);
 			if(strcasestr(s.name.c_str(), urlPart))
 			{
 				Row r;

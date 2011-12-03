@@ -8,7 +8,7 @@
 % for(unordered_map<int, Zone>::const_iterator itr = mZones.begin(); itr != mZones.end(); ++itr) {
 % int id = itr->first;
 % const Zone& z(itr->second);
-<a href="" id="zone<%= id %>" class="mapLink"><%= gAreaTable[id].name %></a>: <%= z.coords.size() %>
+<a href="javascript:;" id="zone<%= id %>" class="mapLink"><%= z.name %></a>: <%= z.coords.size() %>
 % }
 </p>
 
@@ -24,7 +24,7 @@ zones = {};
 % const WorldMapArea* a = gWorldMapAreas.find(id);
 % if(a) {
 zones[<%= id %>] = {name:'<%= jsEscape(a->name) %>',
-displayName:'<%= jsEscape(gAreaTable[id].name) %>',
+displayName:'<%= jsEscape(z.name) %>',
 coords:[<% VECTOR_EACH(z.coords, j) {
 const Coord2D& c(z.coords[j]); %>
 {y:<%=c.x%>,x:<%=c.y%>},<% } %>

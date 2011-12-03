@@ -1,6 +1,8 @@
 #include "spawnPoints.h"
 #include "util/exception.h"
 #include "areaMap.h"
+#include "dbcArea.h"
+#include "dbcWorldMapArea.h"
 
 static int zoneFromCoords(int map, float x, float y);
 static Coord2D percentagesInZone(int zone, float x, float y);
@@ -8,14 +10,18 @@ static Coord2D percentagesInZone(int zone, float x, float y);
 void spawnPointsChtml::prepare() {
 	gAreaMap.load();
 	gWorldMapAreas.load();
+	gAreaTable.load();
 
 	mSpawnCount = 0;
 	for(; mSpawns.first != mSpawns.second; ++mSpawns.first) {
 		const Spawn& s(*mSpawns.first->second);
 		mSpawnCount++;
 		int zoneId = zoneFromCoords(s.map, s.position_x, s.position_y);
-		//printf("zone %i, map %i, %f x %f\n", zoneId, s.map, s.position_x, s.position_y);
+		//printf("zone %i, map %i, %f, %f\n", zoneId, s.map, s.position_x, s.position_y);
 		Coord2D c = percentagesInZone(zoneId, s.position_x, s.position_y);
+		if(mZones[zoneId].coords.empty()) {	// first one
+			mZones[zoneId].name = gAreaTable[zoneId].name;
+		}
 		mZones[zoneId].coords.push_back(c);
 		mMainArea = zoneId;
 	}
@@ -43,9 +49,17 @@ static int zoneFromCoords(int map, float x, float y) {
 
 	// find zoneId
 	int zoneId = areaId;
-	while(gAreaTable[zoneId].parent != 0) {
-		zoneId = gAreaTable[zoneId].parent;
-	}
+	do {
+		const Area* a = gAreaTable.find(zoneId);
+		if(!a) {
+			printf("Invalid areaId(%i) for coords %i, %f x %f\n", zoneId, map, x, y);
+			return zoneId;
+		}
+		if(a->parent != 0)
+			zoneId = a->parent;
+		else
+			break;
+	} while(true);
 	return zoneId;
 }
 

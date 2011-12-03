@@ -3,6 +3,7 @@
 <head>
 	<title><%= mTitle %> - Spell - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 
