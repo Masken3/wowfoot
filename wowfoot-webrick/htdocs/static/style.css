@@ -33,7 +33,7 @@ BODY {
 }
 A { color:#00c0ff; text-decoration:none; }
 A:visited { color:#0080ff; }
-A:hover { text-decoration:underline; }
+A:hover { text-decoration:underline; cursor:pointer; }
 
 span.green { color:#1eff00; }
 span.itemName { font-size:medium; font-weight:bold; }

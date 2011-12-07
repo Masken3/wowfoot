@@ -8,7 +8,7 @@
 % for(unordered_map<int, Zone>::const_iterator itr = mZones.begin(); itr != mZones.end(); ++itr) {
 % int id = itr->first;
 % const Zone& z(itr->second);
-<a href="javascript:;" id="zone<%= id %>" class="mapLink"><%= z.name %></a>: <%= z.coords.size() %>
+<a id="zone<%= id %>" class="mapLink"><%= z.name %></a>: <%= z.coords.size() %>
 % }
 </p>
 

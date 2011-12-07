@@ -13,7 +13,7 @@ VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
 % if(!mTabs.empty()) {
 <table id="tabs" class="tabs"><tr>
 % VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
-<td><a href="javascript:;" id="<%= t.id %>"><%= t.title %> (<%= t.count %>)</a></td>
+<td><a id="<%= t.id %>"><%= t.title %> (<%= t.count %>)</a></td>
 % }
 </tr></table>
 % }
