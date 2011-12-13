@@ -218,14 +218,24 @@ static Tab* soldBy(const Item& a) {
 	return &t;
 }
 
+static void lootColumns(tabTableChtml& t) {
+	t.columns.push_back(Column(CHANCE, "Chance %"));
+	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
+	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+}
+
+static void lootRows(Row& r, const Loot& loot) {
+	r[CHANCE] = toString(loot.chance);
+	r[MIN_COUNT] = toString(loot.minCountOrRef);
+	r[MAX_COUNT] = toString(loot.maxCount);
+}
+
 static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const char* title) {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = id;
 	t.title = title;
 	npcColumns(t);
-	t.columns.push_back(Column(CHANCE, "Chance %"));
-	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
-	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
 	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
 	Loots::ItemPair res = loots.findItem(a.entry);
@@ -236,9 +246,7 @@ static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const cha
 			const Npc& npc(*nres.first->second);
 			Row r;
 			npcRows(r, npc);
-			r[CHANCE] = toString(loot.chance);
-			r[MIN_COUNT] = toString(loot.minCountOrRef);
-			r[MAX_COUNT] = toString(loot.maxCount);
+			lootRows(r, loot);
 			r[SPAWN_COUNT] = toString(npc.spawnCount);
 			r[UTILITY] = toString(loot.chance * npc.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
@@ -263,9 +271,7 @@ static Tab* containedInObject(const Item& a) {
 	t.id = "containedInObject";
 	t.title = "Contained in object";
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
-	t.columns.push_back(Column(CHANCE, "Chance"));
-	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
-	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
 	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
 	Loots::ItemPair res = gGameobjectLoots.findItem(a.entry);
@@ -277,9 +283,7 @@ static Tab* containedInObject(const Item& a) {
 			Row r;
 			r[ENTRY] = toString(o.entry);
 			r[NAME] = o.name;
-			r[CHANCE] = toString(loot.chance);
-			r[MIN_COUNT] = toString(loot.minCountOrRef);
-			r[MAX_COUNT] = toString(loot.maxCount);
+			lootRows(r, loot);
 			r[SPAWN_COUNT] = toString(o.spawnCount);
 			r[UTILITY] = toString(loot.chance * o.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
@@ -293,18 +297,14 @@ static Tab* referenceLoot(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = "referenceLoot";
 	t.title = "Reference loot";
-	t.columns.push_back(Column(CHANCE, "Chance"));
-	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
-	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
+	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Other items count"));
 	Loots::ItemPair res = gReferenceLoots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
 		Row r;
 		r[ENTRY] = toString(loot.entry);
-		r[CHANCE] = toString(loot.chance);
-		r[MIN_COUNT] = toString(loot.minCountOrRef);
-		r[MAX_COUNT] = toString(loot.maxCount);
+		lootRows(r, loot);
 		size_t count = 0;
 		Loots::EntryPair ep = gReferenceLoots.findEntry(loot.entry);
 		for(; ep.first != ep.second; ++ep.first) {

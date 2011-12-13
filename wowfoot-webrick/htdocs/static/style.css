@@ -38,3 +38,4 @@ A:hover { text-decoration:underline; cursor:pointer; }
 span.green { color:#1eff00; }
 span.itemName { font-size:medium; font-weight:bold; }
 span.itemDescription { color:#ffC040 }
+span.underlined { text-decoration:underline; }

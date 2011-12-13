@@ -10,6 +10,7 @@ using namespace std;
 struct Comment {
 	string user;
 	string body;
+	string originalBody;
 	int rating;
 	string date;
 	int indent;

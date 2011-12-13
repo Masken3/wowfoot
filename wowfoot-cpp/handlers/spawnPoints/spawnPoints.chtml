@@ -4,13 +4,15 @@
 <%= mSpawnCount %> spawn-points.
 </p>
 
+% { unordered_map<int, Zone>::const_iterator itr = mZones.begin(); if(itr != mZones.end()) {
 <p>
-% for(unordered_map<int, Zone>::const_iterator itr = mZones.begin(); itr != mZones.end(); ++itr) {
+% for(; itr != mZones.end(); ++itr) {
 % int id = itr->first;
 % const Zone& z(itr->second);
 <a id="zone<%= id %>" class="mapLink"><%= z.name %></a>: <%= z.coords.size() %>
 % }
 </p>
+% } }
 
 <div id="map">
 <img width="100%" id="mapImage" src="#" alt="Map image">

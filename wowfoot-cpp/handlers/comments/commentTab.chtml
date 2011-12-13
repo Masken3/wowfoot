@@ -1,6 +1,6 @@
 <div class="comments-wrapper">
 % VECTOR_EACH(mComments, i) { Comment& c(mComments[i]);
-%//<!-- <%= c[:originalBody] %> -->
+<!-- <%= c.originalBody %> -->
 % indentHtml(stream, c.indent);
 <div class="comment-wrapper">
 <div class="comment">
