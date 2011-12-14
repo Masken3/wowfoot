@@ -90,19 +90,28 @@ static bool isWowheadNonUrlChar(char c) {
 
 #define TAG_LIST 1
 #define TAG_LIST_ITEM 2
+#define BETWEEN_LIST (((tagState & TAG_LIST) != 0) && ((tagState & TAG_LIST_ITEM) == 0))
 
 static string formatComment(const char* src) {
 	ostringstream o;
 	int tagState = 0;
 	const char* ptr = src;
 	while(*ptr) {
+		char c = *ptr;
+		if(BETWEEN_LIST && c != '[' && !isspace(c) && c != '\\') {
+			o << "<li>";
+			tagState |= TAG_LIST_ITEM;
+		}
 		if(STREQ(ptr, "http://")) {	// unescaped link
 			ptr = formatUnescapedUrl(o, ptr);
 			continue;
 		}
-		char c = *ptr;
 		ptr++;
 		if(c == '[') {	// start tag
+			while(*ptr == '[') {
+				o << '[';
+				ptr++;
+			}
 			const char* endPtr = strchr(ptr, ']');
 			if(!endPtr) {
 				o << (ptr-1);
@@ -113,10 +122,15 @@ static string formatComment(const char* src) {
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
 			// between [ul] and [li], no text may appear.
-			if(((tagState & TAG_LIST) != 0) == ((tagState & TAG_LIST_ITEM) != 0))
-				o << "<br>\n";
+			if(!BETWEEN_LIST)
+				o << "<br>";
+			o << '\n';
 		} else if(c == '&') {
 			o << "&amp;";
+		} else if(c == '<') {
+			o << "&lt;";
+		} else if(c == '>') {
+			o << "&gt;";
 		} else {
 			o << c;
 		}
@@ -124,30 +138,52 @@ static string formatComment(const char* src) {
 	return o.str();
 }
 
+static bool tagFlag(int& tagState, int flag) {
+	if(!flag)
+		return true;
+	if(!(tagState & flag)) {
+		tagState |= flag;
+		return true;
+	}
+	return false;
+}
+
+static bool untagFlag(int& tagState, int flag) {
+	if(!flag)
+		return true;
+	if(tagState & flag) {
+		tagState &= ~flag;
+		return true;
+	}
+	return false;
+}
+
 #define COMPLEX_TAG(src, dst, flag) if(strncmp(src, tag, len) == 0) { o << dst; flag; return tagState; }
-#define FLAG_TAG(t, flag) if(strncmp(t, tag, len) == 0) { o << "<" t ">"; tagState |= flag; return tagState; }\
-	if(strncmp("/" t, tag, len) == 0) { o << "</" t ">"; tagState &= ~flag; return tagState; }
-#define SIMPLE_TAG(t) FLAG_TAG(t,0)
+#define FLAG_TAG(t, flag, end) \
+	if(strncmp(t, tag, len) == 0) if(tagFlag(tagState, flag)) { o << "<" t ">"; return tagState; }\
+	if(strncmp("/" t, tag, len) == 0) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
+#define SIMPLE_TAG(t) FLAG_TAG(t,0,)
 
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
-	//printf("tag: %i %.*s\n", tagState, len, tag);
+	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
 	COMPLEX_TAG("u", "<span class=\"underlined\">",);
 	COMPLEX_TAG("/u", "</span>",);
 	if(tagState & TAG_LIST) {
-		FLAG_TAG("li", TAG_LIST_ITEM);
+		FLAG_TAG("li", TAG_LIST_ITEM, <<"\n");
 	} else {
 		// discard invalid tags
-		COMPLEX_TAG("li", "",);
-		COMPLEX_TAG("/li", "",);
+		COMPLEX_TAG("li", "\n",);
+		COMPLEX_TAG("/li", "\n",);
 	}
-	COMPLEX_TAG("ul", "</p><ul>", tagState |= TAG_LIST);
-	COMPLEX_TAG("/ul", "</ul><p>", tagState &= ~TAG_LIST);
-	COMPLEX_TAG("ol", "</p><ol>", tagState |= TAG_LIST);
-	COMPLEX_TAG("/ol", "</ol><p>", tagState &= ~TAG_LIST);
+	COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
+	COMPLEX_TAG("/ul", "</ul>\n<p>", tagState &= ~TAG_LIST);
+	COMPLEX_TAG("ol", "</p>\n<ol>", tagState |= TAG_LIST);
+	COMPLEX_TAG("/ol", "</ol>\n<p>", tagState &= ~TAG_LIST);
 
 	if(strncmp("url=", tag, 4) == 0) {
+		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
 		o << "<a href=\"";
@@ -158,6 +194,7 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	COMPLEX_TAG("/url", "</a>",);
 
 	// unknown tag
+	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
 	o << "[";
 	o.write(tag, len);
 	o << "]";
@@ -178,7 +215,7 @@ static void streamHtmlEncode(ostream& o, const char* url, size_t len) {
 
 static void formatUrl(ostream& o, const char* url, size_t len) {
 	// s/http://*.wowhead.com/
-	const char* whf = strstr(url, WH);
+	const char* whf = (char*)memmem(url, len, WH, strlen(WH));
 	if(whf) {
 		const char* path = whf + strlen(WH);
 		if(*path == '?')
