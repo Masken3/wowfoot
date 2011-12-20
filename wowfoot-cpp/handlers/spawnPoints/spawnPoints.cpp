@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "spawnPoints.h"
 #include "util/exception.h"
 #include "areaMap.h"

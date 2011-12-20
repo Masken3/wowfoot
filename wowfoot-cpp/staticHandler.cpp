@@ -157,7 +157,7 @@ ResponseData* StaticDirHandler::handleRequest(const char* urlPart, MHD_Connectio
 	}
 	assert(resp);
 	if(code == 200) {
-#if 1	// MHD_add_response_header fails for no apparent reason.
+#if 0	// MHD_add_response_header fails for no apparent reason.
 		// Date gets overwritten.
 		char buf[64];
 		ctime_r(&fileDate, buf);

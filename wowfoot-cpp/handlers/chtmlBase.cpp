@@ -27,7 +27,7 @@ void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context
 		oss << "Exception: "<<e.what();
 		drd->code = 500;
 		oss.flush();
-		printf("oss.str().size(): %lu\n", oss.str().size());
+		printf("oss.str().size(): %"PRIuPTR"\n", oss.str().size());
 	}
 	string* s = new string(oss.str());
 	drd->size = s->size();

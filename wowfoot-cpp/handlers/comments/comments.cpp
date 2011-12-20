@@ -90,7 +90,10 @@ static bool isWowheadNonUrlChar(char c) {
 
 #define TAG_LIST 1
 #define TAG_LIST_ITEM 2
+#define TAG_ANCHOR 4
 #define BETWEEN_LIST (((tagState & TAG_LIST) != 0) && ((tagState & TAG_LIST_ITEM) == 0))
+#define IN_ANCHOR ((tagState & TAG_ANCHOR) != 0)
+#define IN_LIST_ITEM ((tagState & (TAG_LIST|TAG_LIST_ITEM)) == (TAG_LIST|TAG_LIST_ITEM))
 
 static string formatComment(const char* src) {
 	ostringstream o;
@@ -102,7 +105,7 @@ static string formatComment(const char* src) {
 			o << "<li>";
 			tagState |= TAG_LIST_ITEM;
 		}
-		if(STREQ(ptr, "http://")) {	// unescaped link
+		if(STREQ(ptr, "http://") && !IN_ANCHOR) {	// unescaped link
 			ptr = formatUnescapedUrl(o, ptr);
 			continue;
 		}
@@ -121,7 +124,7 @@ static string formatComment(const char* src) {
 			ptr = endPtr + 1;
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
-			// between [ul] and [li], no text may appear.
+			// between [ul] and [li], only whitespace may appear.
 			if(!BETWEEN_LIST)
 				o << "<br>";
 			o << '\n';
@@ -158,24 +161,94 @@ static bool untagFlag(int& tagState, int flag) {
 	return false;
 }
 
+static bool tagsFollow(const char* ptr, const char** tags) {
+	//printf("tagsFollow %s\n", ptr);
+	// skip whitespace
+	while(*ptr) {
+		if(*ptr == '\\') {
+			ptr++;
+			if(*ptr == 'n') {
+				ptr++;
+				continue;
+			} else {
+				printf("backslash\n");
+				return false;
+			}
+		}
+		if(!isspace(*ptr))
+			break;
+		ptr++;
+	}
+	if(*ptr != '[') {
+		printf("not a tag\n");
+		return false;
+	}
+	ptr++;
+	while(*tags) {
+		if(STREQ(ptr, *tags))
+			return true;
+		tags++;
+	}
+	printf("not a matching tag\n");
+	return false;
+}
+
+static bool nextEndTagIs(const char* ptr, const char* tag) {
+	const char* k = strchr(ptr, '[');
+	if(!k)
+		return false;
+	const char* e = strchr(k, ']');
+	if(!e)
+		return false;
+	if(k[1] != '/')
+		return true;
+	return strncmp(k+1, tag, (e-k)-1) == 0;
+}
+
 #define COMPLEX_TAG(src, dst, flag) if(strncmp(src, tag, len) == 0) { o << dst; flag; return tagState; }
 #define FLAG_TAG(t, flag, end) \
 	if(strncmp(t, tag, len) == 0) if(tagFlag(tagState, flag)) { o << "<" t ">"; return tagState; }\
 	if(strncmp("/" t, tag, len) == 0) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
-#define SIMPLE_TAG(t) FLAG_TAG(t,0,)
+#define SIMPLE_TAG(t) CHECK_TAG(t,"<"t">",); COMPLEX_TAG("/" t, "</"t">",)
+#define CHECK_TAG(t, dst, flag) \
+	if(strncmp(t, tag, len) == 0 && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
 
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
-	COMPLEX_TAG("u", "<span class=\"underlined\">",);
+	CHECK_TAG("u", "<span class=\"underlined\">",);
 	COMPLEX_TAG("/u", "</span>",);
 	if(tagState & TAG_LIST) {
-		FLAG_TAG("li", TAG_LIST_ITEM, <<"\n");
+		if(strncmp("li", tag, len) == 0) {
+			if(IN_LIST_ITEM) {
+				o << "</li>";
+				tagState &= ~TAG_LIST_ITEM;
+			}
+			if(tagFlag(tagState, TAG_LIST_ITEM)) {
+				o << "<li>";
+				return tagState;
+			}
+		}
+		if(strncmp("/li", tag, len) == 0) {
+			// if any of these tags follow /li, print /li.
+			// otherwise, discard it to maintain valid HTML.
+			static const char* sEndLiTags[] = { "/ul]", "/ol]", "li]", NULL };
+			if(untagFlag(tagState, TAG_LIST_ITEM)) {
+				if(tagsFollow(tag + len+1, sEndLiTags)) {
+					o << "</li>";
+				} else {
+					o << "</li><li>";
+					tagState |= TAG_LIST_ITEM;
+				}
+				return tagState;
+			}
+		}
 	} else {
 		// discard invalid tags
 		COMPLEX_TAG("li", "\n",);
 		COMPLEX_TAG("/li", "\n",);
+		tagState &= ~TAG_LIST_ITEM;
 	}
 	COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
 	COMPLEX_TAG("/ul", "</ul>\n<p>", tagState &= ~TAG_LIST);
@@ -189,9 +262,9 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 		o << "<a href=\"";
 		formatUrl(o, url, urlLen);
 		o << "\">";
-		return tagState;
+		return tagState | TAG_ANCHOR;
 	}
-	COMPLEX_TAG("/url", "</a>",);
+	COMPLEX_TAG("/url", "</a>", tagState &= ~TAG_ANCHOR);
 
 	// unknown tag
 	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
@@ -212,6 +285,16 @@ static void streamHtmlEncode(ostream& o, const char* url, size_t len) {
 		}
 	}
 }
+
+#ifdef WIN32
+#include <algorithm>
+static const char* memmem(const char* a, size_t alen, const char* b, size_t blen) {
+	const char* res = std::search(a, a+alen, b, b+blen);
+	if(res >= a+alen)
+		return NULL;
+	return res;
+}
+#endif
 
 static void formatUrl(ostream& o, const char* url, size_t len) {
 	// s/http://*.wowhead.com/
