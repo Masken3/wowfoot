@@ -1,4 +1,5 @@
 #include "comments.h"
+#include "dbcSpell.h"
 #include "commentTab.h"
 #include "util/exception.h"
 #include <sqlite3.h>
@@ -30,8 +31,11 @@ static string formatComment(const char* src);
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState);
 static void formatUrl(ostream& o, const char* url, size_t len);
 static const char* formatUnescapedUrl(ostream& o, const char* ptr);
+static void formatSpell(ostream& o, const char* idString, size_t len);
 
 Tab* getComments(const char* type, int id) {
+	gSpells.load();
+
 	sqlite3_stmt* stmt = NULL;
 	if(!sDB) {
 		SQLT(sqlite3_open("../wowfoot-import/imports.db", &sDB));
@@ -266,6 +270,13 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	}
 	COMPLEX_TAG("/url", "</a>", tagState &= ~TAG_ANCHOR);
 
+	if(strncmp("spell=", tag, 6) == 0) {
+		//printf("spell tag: %i %.*s\n", tagState, (int)len, tag);
+		const char* spell = tag + 6;
+		size_t spellLen = len - 6;
+		formatSpell(o, spell, spellLen);
+		return tagState;
+	}
 	// unknown tag
 	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
 	o << "[";
@@ -350,4 +361,23 @@ static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
 		o << "</a>";
 	}
 	return end;
+}
+
+static void formatSpell(ostream& o, const char* idString, size_t len) {
+	o << "<a href=\"spell=";
+	o.write(idString, len);
+	o << "\">";
+	char* end;
+	errno = 0;
+	int id = strtol(idString, &end, 10);
+	const Spell* s = gSpells.find(id);
+	if(id < 0 || errno != 0 || end != idString + len || !s) {
+		// error parsing or invalid spell id.
+		o << "[spell=";
+		o.write(idString, len);
+		o << "]";
+	} else {
+		o << s->name;
+	}
+	o << "</a>";
 }

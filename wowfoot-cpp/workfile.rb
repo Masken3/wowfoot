@@ -255,7 +255,7 @@ DbcWork.new('dbcChrRaces')
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
-HandlerWork.new('comments', ['tabs']).instance_eval do
+HandlerWork.new('comments', ['tabs', 'dbcSpell']).instance_eval do
 	@LIBRARIES = ['sqlite3']
 	patch = FileTask.new(self, 'build/patch.cpp')
 	patch.instance_eval do
