@@ -52,7 +52,8 @@ class DllTask
 				idHandlerWorks << File.basename(name, DLL_FILE_ENDING)+',' if(pn == main)
 			end
 		end; end
-		if(@work.respond_to?(:newDllName) && HOST == :linux)
+		#if(@work.respond_to?(:newDllName) && HOST == :linux)
+		if(false)
 			@originalName = @NAME
 			@NAME = @work.newDllName
 			idHandlerWorks << main << ':' << @NAME
@@ -282,6 +283,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
+PageWork.new('items', ['db_item'])
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do

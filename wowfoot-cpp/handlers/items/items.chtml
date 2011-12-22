@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>Items - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<p>List items:</p>
+
+<div class="comment-wrapper">
+<div class="comment">
+<form action="items">
+<p>Item level: <input name="iLvlMin" type="text" size="3" maxlength="3"> - <input name="iLvlMax" type="text" size="3" maxlength="3"></p>
+<p>Required character level: <input name="cLvlMin" type="text" size="2" maxlength="2"> - <input name="cLvlMax" type="text" size="2" maxlength="2"></p>
+</form>
+</div>
+</div>
+
+</body>
+</html>

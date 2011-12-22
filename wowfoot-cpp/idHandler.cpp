@@ -61,6 +61,7 @@ void IdHandler::reload() {
 void IdHandler::load() {
 	// check if DLL has been updated. If so, reload.
 	if(getTime(mDllName.c_str()) != mDllTime) {
+		printf("Time mismatch. reloading...\n");
 		reload();
 		loadAllHandlers();
 	}
