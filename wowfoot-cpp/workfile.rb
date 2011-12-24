@@ -237,6 +237,13 @@ HandlerWork.new('dbc').instance_eval do
 		FileTask.new(self, LIBMPQ.target.to_s))]
 end
 
+#HandlerWork.new('dbcItemSubClass', ['dbc']).instance_eval do
+#	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+#end
+HandlerWork.new('dbcItemClass', ['dbc']).instance_eval do
+	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+end
+
 TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
@@ -283,7 +290,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
-PageWork.new('items', ['db_item'])
+PageWork.new('items', ['db_item', 'dbcItemClass'])
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
