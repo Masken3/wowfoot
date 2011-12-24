@@ -1,21 +1,23 @@
 #define __STDC_FORMAT_MACROS
 #include "items.h"
-//#include "dbcItemSubClass.h"
+#include "dbcItemSubClass.h"
 #include "dbcItemClass.h"
 #include <stdio.h>
 #include <inttypes.h>
 
 void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gItemClasses.load();
+	gItemSubClasses.load();
+#if 0
 	for(size_t i=0; i<gItemClasses.size(); i++) {
 		printf("class %"PRIuPTR": %s\n", i, gItemClasses[i].name);
 	}
-#if 0
-	gItemSubClasses.load();
-	for(ItemSubClasses::citr itr = gItemSubClasses.begin(); itr != gItemSubClasses.end(); itr++) {
-		const ItemSubClass& isc(itr->second);
-		printf("subClass %i/%i: %i %s %s\n",
-			isc.itemClass, isc.subClass, isc.hands, isc.name, isc.plural);
+	for(size_t i=0; i<gItemSubClasses.size(); i++) {
+		for(size_t j=0; j<gItemSubClasses[i].size(); j++) {
+			const ItemSubClass& isc(gItemSubClasses[i][j]);
+			printf("subClass %"PRIuPTR"/%"PRIuPTR": %i %s %s\n",
+				i, j, isc.hands, isc.name, isc.plural);
+		}
 	}
 #endif
 

@@ -10,14 +10,14 @@ struct ItemClass {
 	const char* name;
 };
 
-class ItemClasses : protected vector<ItemClass> {
+class ItemClasses {
 private:
-	typedef vector<ItemClass> super;
+	vector<ItemClass> m;
 public:
 	void load() VISIBLE;
 
-	const ItemClass& operator[](int i) const { return super::operator[](i); }
-	size_t size() const { return super::size(); }
+	const ItemClass& operator[](int i) const { return m[i]; }
+	size_t size() const { return m.size(); }
 };
 
 extern ItemClasses gItemClasses VISIBLE;

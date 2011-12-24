@@ -22,7 +22,7 @@ void ItemClasses::load() {
 	bool res = sDbc.open();
 	assert(res);
 	printf("Extracting %"PRIuPTR" itemclasses...\n", sDbc.getRecordCount());
-	resize(sDbc.getRecordCount());
+	m.resize(sDbc.getRecordCount());
 	int i=0;
 	for(DBCFile::Iterator itr = sDbc.begin(); itr != sDbc.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
@@ -31,7 +31,7 @@ void ItemClasses::load() {
 		s.name = r.getString(3);
 
 		assert(i == id);
-		super::operator[](i) = s;
+		m[i] = s;
 		i++;
 	}
 }
