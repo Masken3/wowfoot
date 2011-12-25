@@ -1,7 +1,5 @@
 #define __STDC_FORMAT_MACROS
 #include "items.h"
-#include "dbcItemSubClass.h"
-#include "dbcItemClass.h"
 #include <stdio.h>
 #include <inttypes.h>
 

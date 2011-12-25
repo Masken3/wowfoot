@@ -49,7 +49,7 @@ int main(int argc, const char** argv) {
 	mountIdPage("zone");
 	mountTextIdPage("search");
 	mountIdPage("item");
-	mountIdPage("items");
+	mountFormPage("items");
 	mountIdPage("spell");
 	mountIdPage("npc");
 	mountIdPage("achievement");
@@ -117,10 +117,13 @@ static void runHttpd() {
 	}
 }
 
-static PatternMap sRootPatterns;
+static PatternMap sRootPatterns, sExactPatterns;
 
 void insertPattern(PatternPair p) {
 	sRootPatterns.insert(p);
+}
+void insertExactPattern(PatternPair p) {
+	sExactPatterns.insert(p);
 }
 
 static int requestHandler(void* cls, MHD_Connection* conn, const char* url,
@@ -138,8 +141,16 @@ static int requestHandler(void* cls, MHD_Connection* conn, const char* url,
 		if(strncmp(url, pattern.c_str(), pattern.size()) == 0) {
 			handler = itr->second;
 			urlPart = url + pattern.size();
+			break;
 		}
 		++itr;
+	}
+	if(handler == NULL) {
+		itr = sExactPatterns.find(url);
+		if(itr != sExactPatterns.end()) {
+			handler = itr->second;
+			urlPart = url + itr->first.size();
+		}
 	}
 	if(handler == NULL) {
 		// 404

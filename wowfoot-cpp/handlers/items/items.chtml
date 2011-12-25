@@ -11,9 +11,62 @@
 
 <div class="comment-wrapper">
 <div class="comment">
-<form action="items">
+<form action="items" method="get">
+
 <p>Item level: <input name="iLvlMin" type="text" size="3" maxlength="3"> - <input name="iLvlMax" type="text" size="3" maxlength="3"></p>
+
 <p>Required character level: <input name="cLvlMin" type="text" size="2" maxlength="2"> - <input name="cLvlMax" type="text" size="2" maxlength="2"></p>
+
+<p>Item class: <select name="itemClass" id="itemClass">
+<option value="" selected>Any</option>
+% for(size_t i=0; i<gItemClasses.size(); i++) {
+<option value="<%=i%>"><%=gItemClasses[i].name%></option>
+% }
+</select>
+
+Subclass: <select name="subClass" id="subClass">
+<option value="" selected>Any</option>
+</select>
+<script type="text/javascript">
+function createOption(value, name, selected) {
+	opt = document.createElement("option");
+	opt.value = value;
+	opt.defaultSelected = selected;
+	opt.appendChild(document.createTextNode(name));
+	return opt;
+}
+
+sSubClasses = [
+% for(size_t i=0; i<gItemSubClasses.size(); i++) { const vector<ItemSubClass>& c(gItemSubClasses[i]);
+	[
+		createOption("", "Any", true),
+% for(size_t j=0; j<c.size(); j++) { const ItemSubClass& sc(c[j]); if(sc.name) {
+		createOption(<%=j%>, "<%=((*sc.plural) ? sc.plural : sc.name)%>", false),
+% } }
+	],
+% }
+];
+
+function itemClass_onchange(e) {
+	// remove all children
+	t = document.getElementById("subClass");
+	while(t.lastChild) {
+		t.removeChild(t.lastChild);
+	}
+
+	// add new children
+	a = sSubClasses[e.target.value];
+	for(i=0; i<a.length; i++) {
+		t.appendChild(a[i]);
+	}
+}
+
+document.getElementById("itemClass").onchange = itemClass_onchange;
+</script>
+</p>
+
+<p><button type="submit">Search</button></p>
+
 </form>
 </div>
 </div>

@@ -22,6 +22,7 @@ typedef int socklen_t;
 
 void mountIdPage(const char* name);
 void mountTextIdPage(const char* name);
+void mountFormPage(const char* name);
 void mountStaticDirectory(const char* mountName, const char* localPath);
 
 // calls load() on all handlers.
@@ -48,5 +49,6 @@ typedef std::unordered_map<std::string, RequestHandler*> PatternMap;
 typedef std::pair<std::string, RequestHandler*> PatternPair;
 
 void insertPattern(PatternPair);
+void insertExactPattern(PatternPair);
 
 #endif	//WOWFOOT_H
