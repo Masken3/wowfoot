@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+void itemsChtml::httpArgument(const char* key, const char* value) {
+	printf("p %s: %s\n", key, value);
+}
+
+
 void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gItemClasses.load();
 	gItemSubClasses.load();
@@ -18,6 +23,7 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		}
 	}
 #endif
+	getArguments(drd);
 
 	drd->code = run(os);
 }

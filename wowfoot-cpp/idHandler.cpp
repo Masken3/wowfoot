@@ -67,9 +67,38 @@ void IdHandler::load() {
 	}
 }
 
+#if 0
+static int gcv(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+	printf("%s: %s\n", key, value);
+	return MHD_YES;
+}
+#else
+struct GCV {
+	ArgumentCallback ac;
+	void* user;
+};
+
+static int gcv(void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
+	GCV* g = (GCV*)cls;
+	int res = g->ac(g->user, key, value);
+	return res ? MHD_YES : MHD_NO;
+}
+static void getArgs(void* src, ArgumentCallback ac, void* user) {
+	GCV g = { ac, user };
+	MHD_Connection* conn = (MHD_Connection*)src;
+	MHD_get_connection_values(conn, MHD_GET_ARGUMENT_KIND, gcv, &g);
+}
+#endif
+
 ResponseData* IdHandler::handleRequest(const char* urlPart, MHD_Connection* conn) {
 	load();
 	DllResponseData* rd = new DllResponseData;
+#if 0
+	MHD_get_connection_values(conn, MHD_GET_ARGUMENT_KIND, gcv, NULL);
+#else
+	rd->getArgs = getArgs;
+	rd->getArgsSrc = conn;
+#endif
 	mDllGetResponse(urlPart, rd);
 	int res;
 	MHD_Response* resp;

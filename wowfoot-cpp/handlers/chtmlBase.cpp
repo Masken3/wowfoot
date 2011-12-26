@@ -35,6 +35,21 @@ void getResponse(const char* urlPart, DllResponseData* drd, PageContext& context
 	drd->user = s;
 }
 
+void PageContext::httpArgument(const char* key, const char* value) {
+	throw Exception("httpArgument");
+}
+
+static int argc(void* user, const char* key, const char* value) {
+	PageContext* pc = (PageContext*)user;
+	pc->httpArgument(key, value);
+	return 1;
+}
+
+// calls httpArgument.
+void PageContext::getArguments(ResponseData* rd) {
+	rd->getArgs(rd->getArgsSrc, argc, this);
+}
+
 // must not attempt to delete[] or free() the drd itself.
 extern "C"
 void cleanup(DllResponseData* drd) {

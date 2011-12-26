@@ -159,14 +159,14 @@ public:
 	void load() VISIBLE;
 ) + IF_INDEX + %q(
 	struct <%=istruct%> {<%args.each do |arg|%>
-		<%=@names[arg].type%> <%=arg%>;<%end%>
+		<%=@names[arg].type%> <%=cEscape(arg)%>;<%end%>
 		bool operator==(const <%=istruct%>& o) const {
 			return<% args.each_with_index do |arg, i| %>
-				<%if(i!=0)%>&& <%end%>this-><%=arg%> == o.<%=arg%><%end%>;
+				<%if(i!=0)%>&& <%end%>this-><%=cEscape(arg)%> == o.<%=cEscape(arg)%><%end%>;
 		}
 		size_t operator()(const <%=istruct%>& o) const {
 			return<% args.each do |arg| %>
-				hash<int>()(o.<%=arg%> + <%end%>0
+				hash<int>()(o.<%=cEscape(arg)%> + <%end%>0
 				<% args.each do |arg| %>)<%end%>;
 		}
 	};
@@ -177,7 +177,7 @@ private:
 	<%=imap%> m<%=imap%>;
 public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
-		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
+		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 		) const VISIBLE;
 <%end; end%>
 <%=@extraClassDefinitionCode%>
@@ -220,7 +220,7 @@ void <%=@structName%>s::load() {
 		col = @names[args[0]]; isArray = (args.size == 1 && !col.cName); if(isArray) %>
 		for(int i=0; i<<%=col.count%>; i++) { if(_ref.<%=col.array[0]%>[i] != 0) {<%end%>
 		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-			<%if(i!=0)%>,<%end%>_ref.<%=arg%><%if(isArray)%>[i]<%end;end%>
+			<%if(i!=0)%>,<%end%>_ref.<%=cEscape(arg)%><%if(isArray)%>[i]<%end;end%>
 		};
 		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));<%
 		if(isArray) %>
@@ -239,11 +239,11 @@ void <%=@structName%>s::load() {
 
 ) + IF_INDEX + %q(
 <%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
-	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=arg%><%end%>
+	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 	) const
 {
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-		<%if(i!=0)%>,<%end%><%=arg%><%end%>
+		<%if(i!=0)%>,<%end%><%=cEscape(arg)%><%end%>
 	};
 	return m<%=imap%>.equal_range(key);
 }

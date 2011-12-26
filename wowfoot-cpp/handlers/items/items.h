@@ -8,4 +8,5 @@ class itemsChtml : public PageContext {
 public:
 	int run(ostream& stream);
 	void getResponse2(const char* urlPart, DllResponseData* drd, ostream& os);
+	void httpArgument(const char* key, const char* value);
 };

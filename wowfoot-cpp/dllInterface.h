@@ -6,9 +6,15 @@
 
 class RequestHandler;
 
+// return non-zero to continue receiving arguments, or zero to stop enumerating.
+typedef int (*ArgumentCallback)(void* user, const char* key, const char* value);
+typedef void (*GetArguments)(void* src, ArgumentCallback, void* user);
+
 struct ResponseData {
 	// Core fills, DLL ignores.
 	RequestHandler* handler;
+	GetArguments getArgs;
+	void* getArgsSrc;
 };
 
 struct DllResponseData : ResponseData {

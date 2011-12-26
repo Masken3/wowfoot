@@ -63,4 +63,6 @@ mc(:float, [:spellPpmRate], 5, '_'),
 @index = [
 [:spellId],
 [:displayId],
+[:class],
+[:class, :subclass],
 ]
