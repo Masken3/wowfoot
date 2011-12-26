@@ -2,11 +2,17 @@
 #include "items.h"
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
 
 void itemsChtml::httpArgument(const char* key, const char* value) {
 	printf("p %s: %s\n", key, value);
+	if(strcmp(key, "itemClass") == 0) {
+		mItemClass = toInt(value);
+	}
+	if(strcmp(key, "subClass") == 0) {
+		mSubClass = toInt(value);
+	}
 }
-
 
 void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gItemClasses.load();
@@ -23,7 +29,44 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		}
 	}
 #endif
+	mItemClass = -1;
+	mSubClass = -1;
 	getArguments(drd);
 
+	if(mItemClass >= 0) {
+		gItems.load();
+		if(mSubClass < 0) {
+			mPair = new ItrPairImpl<Item, Items::ClassItr>(gItems.findClass(mItemClass));
+		} else {
+			mPair = new ItrPairImpl<Item, Items::ClassSubclassItr>(gItems.findClassSubclass(mItemClass, mSubClass));
+		}
+	} else if(mSubClass >= 0) {
+		throw Exception("subClass without itemClass");
+	}
+
+	if(mPair) {
+		int count = 0;
+		while(mPair->hasNext()) {
+			const Item& i(mPair->next());
+			printf("Item %i (%s)\n", i.entry, i.name.c_str());
+			count++;
+		}
+		printf("count: %i\n", count);
+		Items::citr itr = gItems.begin();
+		while(count < 10) {
+			const Item& i(itr->second);
+			printf("Item %i class %i (%s)\n", i.entry, i.class_, i.name.c_str());
+			count++;
+			++itr;
+		}
+	}
+
 	drd->code = run(os);
+}
+
+itemsChtml::itemsChtml() : mPair(NULL) {}
+
+itemsChtml::~itemsChtml() {
+	if(mPair)
+		delete mPair;
 }
