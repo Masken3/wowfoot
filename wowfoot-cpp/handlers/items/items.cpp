@@ -5,6 +5,8 @@
 #include <string.h>
 
 void itemsChtml::httpArgument(const char* key, const char* value) {
+	if(*value == 0)
+		return;
 	printf("p %s: %s\n", key, value);
 	if(strcmp(key, "itemClass") == 0) {
 		mItemClass = toInt(value);
@@ -44,6 +46,7 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		throw Exception("subClass without itemClass");
 	}
 
+#if 0
 	if(mPair) {
 		int count = 0;
 		while(mPair->hasNext()) {
@@ -60,6 +63,7 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 			++itr;
 		}
 	}
+#endif
 
 	drd->code = run(os);
 }

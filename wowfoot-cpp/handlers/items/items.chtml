@@ -71,5 +71,22 @@ document.getElementById("itemClass").onchange = itemClass_onchange;
 </div>
 </div>
 
+% if(mPair) {
+<table class="tab">
+<!-- Title row -->
+<tr><td>ID</td><td>Class / subclass</td><td>Name</td></tr>
+%  int count = 0;
+%  while(mPair->hasNext()) {
+%   const Item& i(mPair->next());
+%   const ItemSubClass& sc(gItemSubClasses[i.class_][i.subclass]);
+%   const char* scName = ((*sc.plural) ? sc.plural : sc.name);
+<tr><td><%=i.entry%></td><td><%=gItemClasses[i.class_].name%> / <%=scName%></td>
+<td><a href="item=<%=i.entry%>"><%=i.name%></a></td></tr>
+%   count++;
+%  }
+</table>
+<p><%=count%> items.</p>
+% }
+
 </body>
 </html>
