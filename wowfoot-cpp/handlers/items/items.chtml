@@ -74,14 +74,21 @@ document.getElementById("itemClass").onchange = itemClass_onchange;
 % if(mPair) {
 <table class="tab">
 <!-- Title row -->
-<tr><td>ID</td><td>Class / subclass</td><td>Name</td></tr>
+<tr><td>ID</td><td>Name</td><td>Class / subclass</td><td>iLevel</td><td>cLevel</td><td>Source</td><td>Cost</td></tr>
 %  int count = 0;
 %  while(mPair->hasNext()) {
 %   const Item& i(mPair->next());
 %   const ItemSubClass& sc(gItemSubClasses[i.class_][i.subclass]);
 %   const char* scName = ((*sc.plural) ? sc.plural : sc.name);
-<tr><td><%=i.entry%></td><td><%=gItemClasses[i.class_].name%> / <%=scName%></td>
-<td><a href="item=<%=i.entry%>"><%=i.name%></a></td></tr>
+<tr>
+<td><%=i.entry%></td>
+<td><a href="item=<%=i.entry%>"><%=i.name%></a></td>
+<td><%=gItemClasses[i.class_].name%> / <%=scName%></td>
+<td><%=i.itemLevel%></td>
+<td><%=i.requiredLevel%></td>
+<td><!--not implemented--></td>
+<td><%streamAllCostHtml(stream, i);%></td>
+</tr>
 %   count++;
 %  }
 </table>

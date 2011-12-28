@@ -4,6 +4,7 @@
 #include "dbcItemSubClass.h"
 #include "dbcItemClass.h"
 #include "itrPair.h"
+#include "item_shared.h"
 
 class itemsChtml : public PageContext {
 public:

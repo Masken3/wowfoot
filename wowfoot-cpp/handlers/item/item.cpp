@@ -1,7 +1,7 @@
 #define __STDC_FORMAT_MACROS
 #include "item.chtml.h"
+#include "item_shared.h"
 #include "comments.h"
-//#include "extendedCost.h"
 #include "db_npc_vendor.h"
 #include "db_creature_template.h"
 #include "db_gameobject_template.h"
@@ -131,32 +131,38 @@ enum TableRowId {
 	UTILITY,
 };
 
-static class streamUnlessEmptyClass {
+static class streamIfNonFirstClass {
 private:
 	const char* const mSep;
+	bool mHit;
 public:
-	streamUnlessEmptyClass(const char* sep) : mSep(sep) {}
-	friend ostream& operator<<(ostream& o, streamUnlessEmptyClass& s) {
-		if(o.tellp() == 0)
-			return o;
-		o << s.mSep;
+	streamIfNonFirstClass(const char* sep) : mSep(sep) {}
+	friend ostream& operator<<(ostream& o, streamIfNonFirstClass& s) {
+		if(s.mHit)
+			o << s.mSep;
+		else
+			s.mHit = true;
 		return o;
 	}
+	void reset() { mHit = false; }
 } costSep(", ");
 
-static string costHtml(const Item& a, int extendedCostId) {
-	ostringstream html;
-	if(a.buyPrice == 0 && extendedCostId <= 0)
-		return "No cost";
+static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
+	gItemExtendedCosts.load();
+	costSep.reset();
+	if(a.buyPrice == 0 && extendedCostId <= 0) {
+		html << "No cost";
+		return;
+	}
 	if(a.buyPrice != 0 && (extendedCostId <= 0 || a.flagsExtra == 3))
 		moneyHtml(html, a.buyPrice);
 	if(extendedCostId <= 0)
-		return html.str();
+		return;
 
 	const ItemExtendedCost* ecp = gItemExtendedCosts.find(extendedCostId);
 	if(!ecp) {
 		html << "Extended cost not found (id "<<extendedCostId<<")";
-		return html.str();
+		return;
 	}
 	const ItemExtendedCost& ec(*ecp);
 	if(ec.honorPoints != 0)
@@ -179,7 +185,6 @@ static string costHtml(const Item& a, int extendedCostId) {
 			html << costSep << item.count<<"x <a href=\"item="<<item.id<<"\">"<<gItems[item.id].name<<"</a>";
 		}
 	}
-	return html.str();
 }
 
 static void npcColumns(tabTableChtml& t) {
@@ -211,7 +216,9 @@ static Tab* soldBy(const Item& a) {
 			r[STOCK] = "∞";
 		else
 			r[STOCK] = toString(nv.maxcount);
-		r[COST] = costHtml(a, nv.extendedCost);
+		ostringstream oss;
+		streamCostHtml(oss, a, nv.extendedCost);
+		r[COST] = oss.str();
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();
@@ -331,6 +338,30 @@ static void itemColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
 }
 
+void streamAllCostHtml(std::ostream& o, const Item& i) {
+	gNpcVendors.load();
+	// check every vendor selling this item, to make sure costs are identical.
+	NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
+	int ec = -1;
+	bool identicalCost = true;
+	bool hasVendor = false;
+	for(; nip.first != nip.second; ++nip.first) {
+		hasVendor = true;
+		const NpcVendor& nv(*nip.first->second);
+		if(ec == -1)
+			ec = nv.extendedCost;
+		else if(ec != nv.extendedCost)
+			identicalCost = false;
+	}
+	if(hasVendor) {
+		if(identicalCost) {
+			streamCostHtml(o, i, ec);
+		} else {
+			o << "Differs between vendors";
+		}
+	}
+}
+
 static void addItem(tabTableChtml& t, const Item& i) {
 	Row r;
 	r[ENTRY] = toString(i.entry);
@@ -350,25 +381,9 @@ static void addItem(tabTableChtml& t, const Item& i) {
 		itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
 
 	// check every vendor selling this item, to make sure costs are identical.
-	NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
-	int ec = -1;
-	bool identicalCost = true;
-	bool hasVendor = false;
-	for(; nip.first != nip.second; ++nip.first) {
-		hasVendor = true;
-		const NpcVendor& nv(*nip.first->second);
-		if(ec == -1)
-			ec = nv.extendedCost;
-		else if(ec != nv.extendedCost)
-			identicalCost = false;
-	}
-	if(hasVendor) {
-		if(identicalCost) {
-			r[COST] = costHtml(i, ec);
-		} else {
-			r[COST] = "Differs between vendors";
-		}
-	}
+	ostringstream oss;
+	streamAllCostHtml(oss, i);
+	r[COST] = oss.str();
 
 	t.array.push_back(r);
 }

@@ -290,7 +290,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
-PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass'])
+PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item'])
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
