@@ -287,7 +287,8 @@ PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSp
 	'db_creature_template', 'dbcAchievement', 'db_gameobject_template'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
-	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template'])
+	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
+	'dbcItemClass', 'dbcItemSubClass'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item'])

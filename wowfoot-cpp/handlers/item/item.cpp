@@ -7,6 +7,8 @@
 #include "db_gameobject_template.h"
 #include "db_loot_template.h"
 #include "dbcItemExtendedCost.h"
+#include "dbcItemSubClass.h"
+#include "dbcItemClass.h"
 #include "chrClasses.h"
 #include "chrRaces.h"
 #include "ItemExtendedCost.index.h"
@@ -359,6 +361,20 @@ void streamAllCostHtml(std::ostream& o, const Item& i) {
 		} else {
 			o << "Differs between vendors";
 		}
+	}
+}
+
+void streamItemClassHtml(std::ostream& o, const Item& i) {
+	gItemClasses.load();
+	gItemSubClasses.load();
+	o << gItemClasses[i.class_].name;
+	if(gItemSubClasses[i.class_].size() > 1) {
+		const ItemSubClass& sc(gItemSubClasses[i.class_][i.subclass]);
+		o << " / ";
+		if(*sc.plural)
+			o << sc.plural;
+		else
+			o << sc.name;
 	}
 }
 
