@@ -29,7 +29,7 @@ Bind to Account<br>
 <%= tc->name %><br>
 % }
 
-Class: <%= ITEM_CLASS(a->class_) %><!--(<%= a->class_ %>)--> / <%= ITEM_SUBCLASS(a->class_, a->subclass) %><!--(<%= a->subclass %>)--><br>
+Class: <%streamItemClassHtml(stream, *a);%><!--(<%= a->class_ %> / <%= a->subclass %>)--><br>
 % if(a->inventoryType != 0) {
 Equip: <%= ITEM_EQUIP(a->inventoryType) %><!--(<%= a->inventoryType %>)--><br>
 % }

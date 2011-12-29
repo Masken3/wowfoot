@@ -367,10 +367,24 @@ void streamAllCostHtml(std::ostream& o, const Item& i) {
 void streamItemClassHtml(std::ostream& o, const Item& i) {
 	gItemClasses.load();
 	gItemSubClasses.load();
-	o << gItemClasses[i.class_].name;
-	if(gItemSubClasses[i.class_].size() > 1) {
-		const ItemSubClass& sc(gItemSubClasses[i.class_][i.subclass]);
+	if((size_t)i.class_ >= gItemClasses.size()) {
+		o << "Bad item.class (" << i.class_ << ")";
+		return;
+	}
+	const ItemClass& c(gItemClasses[i.class_]);
+	o << c.name;
+	if((size_t)i.class_ >= gItemSubClasses.size()) {
+		o << " / Bad item.class (" << i.class_ << ")";
+		return;
+	}
+	auto isc = gItemSubClasses[i.class_];
+	if(isc.size() > 1) {
 		o << " / ";
+		if((size_t)i.subclass >= isc.size()) {
+			o << "Bad item.subclass (" << i.subclass << ")";
+			return;
+		}
+		const ItemSubClass& sc(isc[i.subclass]);
 		if(*sc.plural)
 			o << sc.plural;
 		else
@@ -379,6 +393,7 @@ void streamItemClassHtml(std::ostream& o, const Item& i) {
 }
 
 static void addItem(tabTableChtml& t, const Item& i) {
+	ostringstream oss;
 	Row r;
 	r[ENTRY] = toString(i.entry);
 
@@ -393,11 +408,12 @@ static void addItem(tabTableChtml& t, const Item& i) {
 	r[ILEVEL] = toString(i.itemLevel);
 	r[CLEVEL] = toString(i.requiredLevel);
 	r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
-	r[TYPE] = itemChtml::ITEM_CLASS(i.class_) + string("/") +
-		itemChtml::ITEM_SUBCLASS(i.class_, i.subclass);
+	oss.str("");
+	streamItemClassHtml(oss, i);
+	r[TYPE] = oss.str();
 
 	// check every vendor selling this item, to make sure costs are identical.
-	ostringstream oss;
+	oss.str("");
 	streamAllCostHtml(oss, i);
 	r[COST] = oss.str();
 
@@ -459,203 +475,6 @@ const itemChtml::Resistance itemChtml::mResistances[] = {
 };
 const int itemChtml::mnResistances = sizeof(itemChtml::mResistances) / sizeof(itemChtml::Resistance);
 
-// todo: read from ItemClass.dbc & ItemSubClass.dbc.
-const char* itemChtml::ITEM_CLASS(int id) {
-	switch(id) {
-	case 0: return "Consumable";
-	case 1: return "Container";
-	case 2: return "Weapon";
-	case 3: return "Gem";
-	case 4: return "Armor";
-	case 5: return "Reagent";
-	case 6: return "Projectile";
-	case 7: return "Trade Goods";
-	case 8: return "Generic(OBSOLETE)";
-	case 9: return "Recipe";
-	case 10: return "Money";
-	case 11: return "Quiver";
-	case 12: return "Quest";
-	case 13: return "Key";
-	case 14: return "Permanent(OBSOLETE)";
-	case 15: return "Miscellaneous";
-	case 16: return "Glyph";
-	default: return "bad ITEM_CLASS";
-	}
-}
-const char* itemChtml::ITEM_SUBCLASS(int c, int sc) {
-	switch(c) {
-	case 0: switch(sc) {
-		case 0: return "Consumable (Usability in combat is decided by the spell assigned.)";
-		case 1: return "Potion";
-		case 2: return "Elixir";
-		case 3: return "Flask";
-		case 4: return "Scroll";
-		case 5: return "Food & Drink";
-		case 6: return "Item Enhancement";
-		case 7: return "Bandage";
-		case 8: return "Other";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 1: switch(sc) {
-		case 0: return "Bag";
-		case 1: return "Soul Bag";
-		case 2: return "Herb Bag";
-		case 3: return "Enchanting Bag";
-		case 4: return "Engineering Bag";
-		case 5: return "Gem Bag";
-		case 6: return "Mining Bag";
-		case 7: return "Leatherworking Bag";
-		case 8: return "Inscription Bag";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 2: switch(sc) {
-		case 0: return "Axe 1H";
-		case 1: return "Axe 2H";
-		case 2: return "Bow";
-		case 3: return "Gun";
-		case 4: return "Mace 1H";
-		case 5: return "Mace 2H";
-		case 6: return "Polearm";
-		case 7: return "Sword 1H";
-		case 8: return "Sword 2H";
-		case 9: return "Obsolete";
-		case 10: return "Staff";
-		case 11: return "Exotic";
-		case 12: return "Exotic";
-		case 13: return "Fist Weapon";
-		case 14: return "Miscellaneous (Blacksmith Hammer, Mining Pick, etc.)";
-		case 15: return "Dagger";
-		case 16: return "Thrown";
-		case 17: return "Spear";
-		case 18: return "Crossbow";
-		case 19: return "Wand";
-		case 20: return "Fishing Pole";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 3: switch(sc) {
-		case 0: return "Red";
-		case 1: return "Blue";
-		case 2: return "Yellow";
-		case 3: return "Purple";
-		case 4: return "Green";
-		case 5: return "Orange";
-		case 6: return "Meta";
-		case 7: return "Simple";
-		case 8: return "Prismatic";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 4: switch(sc) {
-		case 0: return "Miscellaneous";
-		case 1: return "Cloth";
-		case 2: return "Leather";
-		case 3: return "Mail";
-		case 4: return "Plate";
-		case 5: return "Buckler(OBSOLETE)";
-		case 6: return "Shield";
-		case 7: return "Libram";
-		case 8: return "Idol";
-		case 9: return "Totem";
-		case 10: return "Sigil";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 5: switch(sc) {
-		case 0: return "Reagent";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 6: switch(sc) {
-		case 0: return "Wand(OBSOLETE)";
-		case 1: return "Bolt(OBSOLETE)";
-		case 2: return "Arrow";
-		case 3: return "Bullet";
-		case 4: return "Thrown(OBSOLETE)";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 7: switch(sc) {
-		case 0: return "Trade Goods";
-		case 1: return "Parts";
-		case 2: return "Explosives";
-		case 3: return "Devices";
-		case 4: return "Jewelcrafting";
-		case 5: return "Cloth";
-		case 6: return "Leather";
-		case 7: return "Metal & Stone";
-		case 8: return "Meat";
-		case 9: return "Herb";
-		case 10: return "Elemental";
-		case 11: return "Other";
-		case 12: return "Enchanting";
-		case 13: return "Materials";
-		case 14: return "Armor Enchantment";
-		case 15: return "Weapon Enchantment";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 8: switch(sc) {
-		case 0: return "Generic(OBSOLETE)";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 9: switch(sc) {
-		case 0: return "Book";
-		case 1: return "Leatherworking";
-		case 2: return "Tailoring";
-		case 3: return "Engineering";
-		case 4: return "Blacksmithing";
-		case 5: return "Cooking";
-		case 6: return "Alchemy";
-		case 7: return "First Aid";
-		case 8: return "Enchanting";
-		case 9: return "Fishing";
-		case 10: return "Jewelcrafting";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 10: switch(sc) {
-		case 0: return "Money";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 11: switch(sc) {
-		case 0: return "Quiver(OBSOLETE 0)";
-		case 1: return "Quiver(OBSOLETE 1)";
-		case 2: return "Quiver (Can hold arrows)";
-		case 3: return "Ammo Pouch (Can hold bullets)";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 12: switch(sc) {
-		case 0: return "Quest";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 13: switch(sc) {
-		case 0: return "Key";
-		case 1: return "Lockpick";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 14: switch(sc) {
-		case 0: return "Permanent";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 15: switch(sc) {
-		case 0: return "Junk";
-		case 1: return "Reagent";
-		case 2: return "Pet";
-		case 3: return "Holiday";
-		case 4: return "Other";
-		case 5: return "Mount";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	case 16: switch(sc) {
-		case 1: return "Warrior";
-		case 2: return "Paladin";
-		case 3: return "Hunter";
-		case 4: return "Rogue";
-		case 5: return "Priest";
-		case 6: return "Death Knight";
-		case 7: return "Shaman";
-		case 8: return "Mage";
-		case 9: return "Warlock";
-		case 11: return "Druid";
-		default: return "bad ITEM_SUBCLASS";
-		}
-	default: return "bad ITEM_CLASS";
-	}
-}
 const char* itemChtml::ITEM_EQUIP(int id) {
 	switch(id) {
 	case 0: return "";

@@ -6,6 +6,7 @@
 #include "dbcSpell.h"
 #include "chrClasses.h"
 #include "chrRaces.h"
+#include "item_shared.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:
@@ -29,8 +30,6 @@ public:
 	};
 
 	static const Quality& ITEM_QUALITY(int id);
-	static const char* ITEM_CLASS(int id);
-	static const char* ITEM_SUBCLASS(int c, int sc);
 	static const char* ITEM_EQUIP(int id);
 	static const char* ITEM_BONDING(int id);
 	static const char* ITEM_MATERIAL(int id);
