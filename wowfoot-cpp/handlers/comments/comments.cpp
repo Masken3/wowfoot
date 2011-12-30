@@ -2,6 +2,7 @@
 #include "dbcSpell.h"
 #include "commentTab.h"
 #include "util/exception.h"
+#include "util/minmax.h"
 #include <sqlite3.h>
 #include <stdexcept>
 #include <stdlib.h>
@@ -95,7 +96,9 @@ static bool isWowheadNonUrlChar(char c) {
 #define TAG_LIST 1
 #define TAG_LIST_ITEM 2
 #define TAG_ANCHOR 4
+#define TAG_TABLE 8
 #define BETWEEN_LIST (((tagState & TAG_LIST) != 0) && ((tagState & TAG_LIST_ITEM) == 0))
+#define ALLOW_BR (!BETWEEN_LIST && !(tagState & TAG_TABLE))
 #define IN_ANCHOR ((tagState & TAG_ANCHOR) != 0)
 #define IN_LIST_ITEM ((tagState & (TAG_LIST|TAG_LIST_ITEM)) == (TAG_LIST|TAG_LIST_ITEM))
 
@@ -129,7 +132,7 @@ static string formatComment(const char* src) {
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
 			// between [ul] and [li], only whitespace may appear.
-			if(!BETWEEN_LIST)
+			if(ALLOW_BR)
 				o << "<br>";
 			o << '\n';
 		} else if(c == '&') {
@@ -209,18 +212,29 @@ static bool nextEndTagIs(const char* ptr, const char* tag) {
 	return strncmp(k+1, tag, (e-k)-1) == 0;
 }
 
-#define COMPLEX_TAG(src, dst, flag) if(strncmp(src, tag, len) == 0) { o << dst; flag; return tagState; }
+#define COMPARE_TAG(t) (strncmp(t, tag, strlen(t)) == 0 && (strlen(t) == len || isspace(tag[strlen(t)])))
+
+#define COMPLEX_TAG(src, dst, flag) if COMPARE_TAG(src) { o << dst; flag; return tagState; }
 #define FLAG_TAG(t, flag, end) \
-	if(strncmp(t, tag, len) == 0) if(tagFlag(tagState, flag)) { o << "<" t ">"; return tagState; }\
-	if(strncmp("/" t, tag, len) == 0) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
+	if COMPARE_TAG(t) if(tagFlag(tagState, flag)) { o << "<" t ">"; return tagState; }\
+	if COMPARE_TAG("/" t) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
 #define SIMPLE_TAG(t) CHECK_TAG(t,"<"t">",); COMPLEX_TAG("/" t, "</"t">",)
 #define CHECK_TAG(t, dst, flag) \
-	if(strncmp(t, tag, len) == 0 && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
+	if(COMPARE_TAG(t) && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
 
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
+	CHECK_TAG("small", "<div class=\"small\">",);
+	COMPLEX_TAG("/small", "</div>",);
+	FLAG_TAG("table", TAG_TABLE,);
+	SIMPLE_TAG("tr");
+	SIMPLE_TAG("td");
+	if(strncmp("table", tag, strlen("table")) == 0) {
+		printf("tag: %i %.*s\n", tagState, (int)len, tag);
+		printf("tag[%i]: '%c' (%i)\n", 5, tag[5], tag[5]);
+	}
 	CHECK_TAG("u", "<span class=\"underlined\">",);
 	COMPLEX_TAG("/u", "</span>",);
 	if(tagState & TAG_LIST) {
@@ -254,10 +268,15 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 		COMPLEX_TAG("/li", "\n",);
 		tagState &= ~TAG_LIST_ITEM;
 	}
-	COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
-	COMPLEX_TAG("/ul", "</ul>\n<p>", tagState &= ~TAG_LIST);
-	COMPLEX_TAG("ol", "</p>\n<ol>", tagState |= TAG_LIST);
-	COMPLEX_TAG("/ol", "</ol>\n<p>", tagState &= ~TAG_LIST);
+	if(tagState & TAG_TABLE) {
+		FLAG_TAG("ul", TAG_LIST,);
+		FLAG_TAG("ol", TAG_LIST,);
+	} else {
+		COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
+		COMPLEX_TAG("/ul", "</ul>\n<p>", tagState &= ~TAG_LIST);
+		COMPLEX_TAG("ol", "</p>\n<ol>", tagState |= TAG_LIST);
+		COMPLEX_TAG("/ol", "</ol>\n<p>", tagState &= ~TAG_LIST);
+	}
 
 	if(strncmp("url=", tag, 4) == 0) {
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);

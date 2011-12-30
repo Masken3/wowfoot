@@ -9,15 +9,12 @@
 #include "config.h"
 #include <string>
 #include "wowfoot.h"
+#include "util/minmax.h"
 
 #ifdef WIN32
 #define PRIxLL "I64x"
 #else
 #define PRIxLL "llx"
-#endif
-
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
 using namespace std;

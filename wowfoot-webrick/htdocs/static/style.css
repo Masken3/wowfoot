@@ -39,3 +39,5 @@ span.green { color:#1eff00; }
 span.itemName { font-size:medium; font-weight:bold; }
 span.itemDescription { color:#ffC040 }
 span.underlined { text-decoration:underline; }
+
+div.small { font-size:x-small; }
