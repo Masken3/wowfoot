@@ -8,7 +8,6 @@ By <span class="comment-user"><%=c.user%></span> <%=c.date%> (Patch <%=patch(c.d
 <span class="comment-rating">Rating: <%if(c.rating > 0){%>+<%}%><%=c.rating%></span> Indent: <%=c.indent%><br>
 <p class="comment-body">
 %= c.body
-</p>
 </div>
 </div>
 % }

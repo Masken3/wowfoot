@@ -308,6 +308,16 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	}
 	COMPLEX_TAG("/url", "</a>", tagState &= ~TAG_ANCHOR);
 
+	if(strncmp("color=", tag, 6) == 0) {
+		const char* idString = tag + 6;
+		size_t idLen = len - 6;
+		o << "<span class=\"";
+		o.write(idString, idLen);
+		o << "\">";
+		return tagState;
+	}
+	COMPLEX_TAG("/color", "</span>",);
+
 	if(strncmp("spell=", tag, 6) == 0) {
 		//printf("spell tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* idString = tag + 6;
