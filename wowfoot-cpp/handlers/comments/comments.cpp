@@ -1,5 +1,6 @@
 #include "comments.h"
 #include "dbcSpell.h"
+#include "db_item.h"
 #include "commentTab.h"
 #include "util/exception.h"
 #include "util/minmax.h"
@@ -32,11 +33,8 @@ static string formatComment(const char* src);
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState);
 static void formatUrl(ostream& o, const char* url, size_t len);
 static const char* formatUnescapedUrl(ostream& o, const char* ptr);
-static void formatSpell(ostream& o, const char* idString, size_t len);
 
 Tab* getComments(const char* type, int id) {
-	gSpells.load();
-
 	sqlite3_stmt* stmt = NULL;
 	if(!sDB) {
 		SQLT(sqlite3_open("../wowfoot-import/imports.db", &sDB));
@@ -91,6 +89,27 @@ static bool isUrlChar(char c) {
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.';
+}
+
+template<class T, class Map>
+static void formatNamedLink(Map& map, const char* type, ostream& o, const char* idString, size_t len) {
+	map.load();
+	o << "<a href=\""<<type<<"=";
+	o.write(idString, len);
+	o << "\">";
+	char* end;
+	errno = 0;
+	int id = strtol(idString, &end, 10);
+	const T* s = map.find(id);
+	if(id < 0 || errno != 0 || end != idString + len || !s) {
+		// error parsing or invalid id.
+		o << "["<<type<<"=";
+		o.write(idString, len);
+		o << "]";
+	} else {
+		o << s->name;
+	}
+	o << "</a>";
 }
 
 #define TAG_LIST 1
@@ -291,11 +310,20 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 
 	if(strncmp("spell=", tag, 6) == 0) {
 		//printf("spell tag: %i %.*s\n", tagState, (int)len, tag);
-		const char* spell = tag + 6;
-		size_t spellLen = len - 6;
-		formatSpell(o, spell, spellLen);
+		const char* idString = tag + 6;
+		size_t idLen = len - 6;
+		formatNamedLink<Spell>(gSpells, "spell", o, idString, idLen);
 		return tagState;
 	}
+
+	if(strncmp("item=", tag, 5) == 0) {
+		//printf("item tag: %i %.*s\n", tagState, (int)len, tag);
+		const char* idString = tag + 5;
+		size_t idLen = len - 5;
+		formatNamedLink<Item>(gItems, "item", o, idString, idLen);
+		return tagState;
+	}
+
 	// unknown tag
 	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
 	o << "[";
@@ -380,23 +408,4 @@ static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
 		o << "</a>";
 	}
 	return end;
-}
-
-static void formatSpell(ostream& o, const char* idString, size_t len) {
-	o << "<a href=\"spell=";
-	o.write(idString, len);
-	o << "\">";
-	char* end;
-	errno = 0;
-	int id = strtol(idString, &end, 10);
-	const Spell* s = gSpells.find(id);
-	if(id < 0 || errno != 0 || end != idString + len || !s) {
-		// error parsing or invalid spell id.
-		o << "[spell=";
-		o.write(idString, len);
-		o << "]";
-	} else {
-		o << s->name;
-	}
-	o << "</a>";
 }

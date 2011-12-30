@@ -103,8 +103,10 @@ Random suffix <%= a->randomSuffix %><br>
 % }
 
 %// spell effects
-% for(int i=0; i<5; i++) { int id = a->spellId[i]; if(id) {
-<span class="green"><%= SPELLTRIGGER(a->spellTrigger[i]) %>: <a href="spell=<%=id%>"><%= gSpells[id].name %></a></span>
+% for(int i=0; i<5; i++) { int id = a->spellId[i]; if(id) { const Spell* s = gSpells.find(id);
+<span class="green"><%= SPELLTRIGGER(a->spellTrigger[i]) %>: <a href="spell=<%=id%>"><%
+if(s){%><%=s->name%><%}else{%><%=id%><%}
+%></a></span>
 % if(a->spellTrigger[i] == 2) {	// Chance on Hit
 (<%= a->spellPpmRate[i] %> Procs per minute)
 % }
