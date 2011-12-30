@@ -231,17 +231,45 @@ static bool nextEndTagIs(const char* ptr, const char* tag) {
 	return strncmp(k+1, tag, (e-k)-1) == 0;
 }
 
-#define COMPARE_TAG(t) (strncmp(t, tag, strlen(t)) == 0 && (strlen(t) == len || isspace(tag[strlen(t)])))
+// attrs ends with ']'
+static void streamTagAttrs(ostream& o, const char* attrs) {
+	const char* p = attrs;
+	while(*p != ']') {
+		// skip whitespace
+		while(isspace(*p))
+			p++;
+
+		// stream name
+		o << ' ';
+		while(*p != '=') {
+			o << *p;
+			p++;
+		}
+		p++;
+		o << "=\"";
+		while(*p != ']' && !isspace(*p)) {
+			o << *p;
+			p++;
+		}
+		o << "\"";
+	}
+}
+
+#define COMPARE_TAG(t) (strncmp(t, tag, strlen(t)) == 0 && \
+	(strlen(t) == len || (hasAttributes = isspace(tag[strlen(t)]))))
+
+#define STREAM_TAG_ATTRS(t) ; if(hasAttributes) streamTagAttrs(o, tag + strlen(t)); o <<
 
 #define COMPLEX_TAG(src, dst, flag) if COMPARE_TAG(src) { o << dst; flag; return tagState; }
 #define FLAG_TAG(t, flag, end) \
-	if COMPARE_TAG(t) if(tagFlag(tagState, flag)) { o << "<" t ">"; return tagState; }\
+	if COMPARE_TAG(t) if(tagFlag(tagState, flag)) { o << "<" t STREAM_TAG_ATTRS(t) ">"; return tagState; }\
 	if COMPARE_TAG("/" t) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
-#define SIMPLE_TAG(t) CHECK_TAG(t,"<"t">",); COMPLEX_TAG("/" t, "</"t">",)
+#define SIMPLE_TAG(t) CHECK_TAG(t,"<"t STREAM_TAG_ATTRS(t) ">",); COMPLEX_TAG("/" t, "</"t">",)
 #define CHECK_TAG(t, dst, flag) \
 	if(COMPARE_TAG(t) && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
 
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
+	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
@@ -250,10 +278,6 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	FLAG_TAG("table", TAG_TABLE,);
 	SIMPLE_TAG("tr");
 	SIMPLE_TAG("td");
-	if(strncmp("table", tag, strlen("table")) == 0) {
-		printf("tag: %i %.*s\n", tagState, (int)len, tag);
-		printf("tag[%i]: '%c' (%i)\n", 5, tag[5], tag[5]);
-	}
 	CHECK_TAG("u", "<span class=\"underlined\">",);
 	COMPLEX_TAG("/u", "</span>",);
 	if(tagState & TAG_LIST) {
