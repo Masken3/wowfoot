@@ -6,6 +6,7 @@
 #include "db_item.h"
 #include "db_creature_template.h"
 #include "db_gameobject_template.h"
+#include "db_quest.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -28,6 +29,7 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gNpcs.load();
 	gAchievements.load();
 	gObjects.load();
+	gQuests.load();
 
 	urlPart = u;
 
@@ -158,6 +160,28 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 				Row r;
 				r[ENTRY] = toString(itr->first);
 				r[NAME] = a.name;
+				t.array.push_back(r);
+			}
+		}
+		t.count = t.array.size();
+		mTabs.push_back(tp);
+	}
+	{
+		tabTableChtml* tp = new tabTableChtml;
+		tabTableChtml& t(*tp);
+		t.id = "quest";
+		t.title = "Quests";
+		t.columns.push_back(Column(NAME, "Name", ENTRY, "quest"));
+		for(Quests::citr itr = gQuests.begin();
+			itr != gQuests.end() && t.array.size() < MAX_COUNT;
+			++itr)
+		{
+			const Quest& a(itr->second);
+			if(strcasestr(a.title.c_str(), urlPart))
+			{
+				Row r;
+				r[ENTRY] = toString(itr->first);
+				r[NAME] = a.title;
 				t.array.push_back(r);
 			}
 		}

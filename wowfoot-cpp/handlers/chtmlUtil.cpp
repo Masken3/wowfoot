@@ -38,6 +38,22 @@ string htmlEscape(const string& src) {
 	return dst;
 }
 
+void streamHtmlEscape(ostream& os, const string& src) {
+	for(size_t i=0; i<src.size(); i++) {
+		streamHtmlEscape(os, src[i]);
+	}
+}
+
+void streamHtmlEscape(ostream& os, char c) {
+	switch(c) {
+	case '&': os << "&amp;"; break;
+	case '\"': os << "&quot;"; break;
+	case '>': os << "&gt;"; break;
+	case '<': os << "&lt;"; break;
+	default: os << c;
+	}
+}
+
 string jsEscape(const string& src) {
 	string dst;
 	dst.reserve(src.size()*2);	// ensure no reallocs

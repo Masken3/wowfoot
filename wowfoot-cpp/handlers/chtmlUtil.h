@@ -16,6 +16,9 @@ string toupper(string s) VISIBLE;
 string htmlEscape(const string& src) VISIBLE;
 string jsEscape(const string& src) VISIBLE;
 
+void streamHtmlEscape(ostream&, const string& src) VISIBLE;
+void streamHtmlEscape(ostream&, char) VISIBLE;
+
 template<class T> string toString(const T& t) {
 	ostringstream oss;
 	oss << t;

@@ -51,8 +51,8 @@ int main(int argc, const char** argv) {
 	mountIdPage("npc");
 	mountIdPage("achievement");
 	mountIdPage("object");
-#if 0
 	mountIdPage("quest");
+#if 0
 	mountIdPage("faction");
 	mountIdPage("title");
 #endif
