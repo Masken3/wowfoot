@@ -14,6 +14,7 @@
 <span class="itemDescription"><%=a->description%></span><br>
 % }
 </p>
+<p><%=a->points%> points.</p>
 % if(a->reward) {
 <p>Reward: <%=a->reward%></p>
 % }

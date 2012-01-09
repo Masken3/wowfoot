@@ -10,6 +10,14 @@ using namespace std;
 
 void achievementChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gAchievements.load();
+#if 0
+	int points = 0;
+	for(Achievements::citr itr = gAchievements.begin(); itr != gAchievements.end(); ++itr) {
+		points += itr->second.points;
+		printf("%i: %i points. (%s)\n", itr->first, itr->second.points, itr->second.name);
+	}
+	printf("%i points total.\n", points);
+#endif
 
 	int id = toInt(urlPart);
 	a = gAchievements.find(id);
