@@ -16,8 +16,10 @@ private:
 	DllGetResponse mDllGetResponse;
 	DllCleanup mDllCleanup;
 	Dll mDll;
-	string mDllName;
-	time_t mDllTime;
+	string mBaseDllName;
+	string mLoadedDllName;
+	int mReloadCount;
+	struct stat mDllStat;
 
 	void reload();
 };
@@ -29,38 +31,56 @@ static const string DLLEXT =
 	".so";
 #endif
 
-static time_t getTime(const char* filename) {
-	struct stat s;
-	int res = stat(filename, &s);
-	assert(res == 0);
-	return s.st_mtime;
-}
-
 IdHandler::IdHandler(const char* name)
-: mDllName(dllDir() + name + DLLEXT)
+: mBaseDllName(dllDir() + name + DLLEXT)
 {
+	mReloadCount = 0;
+	memset(&mDllStat, 0, sizeof(mDllStat));
 	reload();
 }
 
 void IdHandler::reload() {
 	// load DLL. exit on failure.
 	mDll.close();
-	mDllTime = getTime(mDllName.c_str());
-	bool res = mDll.open(mDllName.c_str());
+
+	struct stat s;
+	int res = stat(mBaseDllName.c_str(), &s);
+	assert(res == 0);
+
+	// see if the file needs to be renamed
+	const char* dllName = mBaseDllName.c_str();
+	char buf[1024];
+	if(s.st_ino != mDllStat.st_ino && mReloadCount > 0) {
+		sprintf(buf, "%s.%i", mBaseDllName.c_str(), mReloadCount);
+		remove(buf);
+		res = link(mBaseDllName.c_str(), buf);
+		assert(res == 0);
+		dllName = buf;
+	}
+
+	res = mDll.open(dllName);
 	if(!res) {
-		printf("Failed to open %s.\n", mDllName.c_str());
+		printf("Failed to open %s.\n", dllName);
 		abort();
 	}
-	printf("Loaded %s\n", mDllName.c_str());
+	printf("Loaded %s\n", dllName);
 	mDllGetResponse = (DllGetResponse)mDll.get("getResponse");
 	assert(mDllGetResponse);
 	mDllCleanup = (DllCleanup)mDll.get("cleanup");
 	assert(mDllCleanup);
+	mDllStat = s;
+	mLoadedDllName = dllName;
+	mReloadCount++;
 }
 
 void IdHandler::load() {
+	struct stat s;
+	int res = stat(mBaseDllName.c_str(), &s);
+	if(res != 0 && mReloadCount != 0)
+		return;
+	assert(res == 0);
 	// check if DLL has been updated. If so, reload.
-	if(getTime(mDllName.c_str()) != mDllTime) {
+	if(s.st_mtime != mDllStat.st_mtime) {
 		printf("Time mismatch. reloading...\n");
 		reload();
 		loadAllHandlers();
@@ -117,9 +137,10 @@ void IdHandler::cleanup(ResponseData* rd) {
 
 void IdHandler::unload(const char* newName, size_t newNameLen) {
 	mDll.close();
-	mDllTime = 0;	// in case the build fails
+	mDllStat.st_mtime = 0;	// in case the build fails
 	if(newName) {
-		mDllName.assign(newName, newNameLen);
+		assert(false);
+		//mDllName.assign(newName, newNameLen);
 	}
 }
 

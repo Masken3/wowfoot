@@ -58,7 +58,7 @@ class DllTask
 			@NAME = @work.newDllName
 			idHandlerWorks << main << ':' << @NAME
 		end
-		rootSendSignal(idHandlerWorks)
+		rootSendSignal(idHandlerWorks) if(!idHandlerWorks.empty?)
 	end
 	def isLoaded; if(HOST == :win32)
 		# try to remove target file.
