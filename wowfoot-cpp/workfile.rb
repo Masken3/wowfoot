@@ -280,6 +280,7 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item']).instance_eval do
 end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
+PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
 	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
