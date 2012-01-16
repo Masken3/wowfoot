@@ -273,8 +273,8 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
 	SIMPLE_TAG("i");
-	CHECK_TAG("small", "<div class=\"small\">",);
-	COMPLEX_TAG("/small", "</div>",);
+	CHECK_TAG("small", "<span class=\"small\">",);
+	COMPLEX_TAG("/small", "</span>",);
 	FLAG_TAG("table", TAG_TABLE,);
 	SIMPLE_TAG("tr");
 	SIMPLE_TAG("td");
