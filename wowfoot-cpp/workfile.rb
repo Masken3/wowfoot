@@ -252,6 +252,8 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcQuestFactionReward')
+DbcWork.new('dbcFaction')
 DbcWork.new('dbcAchievement')
 DbcWork.new('dbcArea')
 DbcWork.new('dbcSpell')
@@ -278,7 +280,8 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item']).instance_eval do
 end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
-PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template', 'db_item'])
+PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
+	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
 PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])

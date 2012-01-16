@@ -4,6 +4,8 @@
 #include "db_item.h"
 #include "db_quest.h"
 #include "dbcSpell.h"
+#include "dbcFaction.h"
+#include "money.h"
 
 class questChtml : public tabsChtml, public PageContext {
 public:
@@ -12,6 +14,8 @@ public:
 private:
 	string mTitle;
 	const Quest* a;
+	int mRewXp;
 
 	void streamQuestText(ostream&, const string&);
+	int rewRepValue(int index);
 };

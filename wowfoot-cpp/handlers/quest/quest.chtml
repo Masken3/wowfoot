@@ -12,6 +12,52 @@ Quest <%=mTitle%> does not exist.
 % } else {
 <p>Quest: <span class="itemName"><%=a->title%></span></p>
 
+<p>
+MinLevel: <%=a->minLevel%><br>
+QuestLevel: <%=a->questLevel%><br>
+MaxLevel: <%=a->maxLevel%><br>
+</p>
+
+<p>
+Rewards:<br>
+Money: <% moneyHtml(stream, a->rewOrReqMoney); %><br>
+
+Experience:
+% if(mRewXp == 0) {
+0
+% } else {
+<%= mRewXp %> xp, or <% moneyHtml(stream, a->rewMoneyMaxLevel); %> at max level.
+% }
+<br>
+
+% for(size_t i=0; i<5; i++) { int id = a->rewRepFaction[i]; if(id != 0) {
+Reputation: <a href="faction=<%= id %>"><% streamName(stream, gFactions, id); %></a> <%= rewRepValue(i) %><br>
+% } }
+
+% if(a->rewMailTemplateId != 0) {
+Mail: <%= a->rewMailTemplateId %> after <%= a->rewMailDelaySecs %> seconds.<br>
+% }
+
+% for(size_t i=0; i<4; i++) { int id = a->rewItemId[i]; if(id != 0) {
+Item: <a href="item=<%= id %>"><% streamName(stream, gItems, id); %></a>
+<% int count = a->rewItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
+<br>
+% } }
+
+% for(size_t i=0; i<6; i++) { int id = a->rewChoiceItemId[i]; if(id != 0) {
+Item choice: <a href="item=<%= id %>"><% streamName(stream, gItems, id); %></a>
+<% int count = a->rewChoiceItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
+<br>
+% } }
+
+% int castId = a->rewSpell;
+% if(a->rewSpellCast) castId = a->rewSpellCast;
+% if(castId) {
+Spell: <a href="spell=<%= castId %>"><% streamName(stream, gSpells, castId); %></a><br>
+% }
+</p>
+
+
 <p>Details:<br>
 % streamQuestText(stream, a->details);
 </p>
@@ -19,7 +65,7 @@ Quest <%=mTitle%> does not exist.
 <p>Objectives:<br>
 % streamQuestText(stream, a->objectives);
 </p>
-<p>requestItemsText:<br>
+<p>In progress:<br>
 % streamQuestText(stream, a->requestItemsText);
 </p>
 <p>offerRewardText:<br>

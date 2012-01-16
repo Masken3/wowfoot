@@ -112,7 +112,10 @@ struct <%=@singular%> {<% @struct.each do |col| if(col.type == :as) then s = col
 
 class <%=@plural%> : public ConstMap<int, <%=@singular%>> {
 public:
+	<%=@plural%>() : name("<%=@singular.downcase%>") {}
 	void load() VISIBLE;
+
+	const char* const name;
 };
 
 extern <%=@plural%> g<%=@plural%> VISIBLE;

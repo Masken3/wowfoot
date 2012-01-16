@@ -20,6 +20,15 @@ c(:string, :offerRewardText),
 c(:string, :requestItemsText),
 c(:string, :endText),
 c(:string, :completedText),
+c(:int, :rewOrReqMoney),
+c(:int, :rewMoneyMaxLevel),
+c(:int, :rewMailTemplateId),
+c(:int, :rewMailDelaySecs),
+mc(:int, [:rewItemId, :rewItemCount], 4),
+mc(:int, [:rewChoiceItemId, :rewChoiceItemCount], 6),
+mc(:int, [:rewRepFaction, :rewRepValueId, :rewRepValue], 5),
+c(:int, :rewSpell),
+c(:int, :rewSpellCast),
 ]
 
 @index = [

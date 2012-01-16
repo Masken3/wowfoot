@@ -19,6 +19,15 @@ string jsEscape(const string& src) VISIBLE;
 void streamHtmlEscape(ostream&, const string& src) VISIBLE;
 void streamHtmlEscape(ostream&, char) VISIBLE;
 
+template<class T> void streamName(ostream& os, const T& map, int id) {
+	auto* t = map.find(id);
+	if(t) {
+		os << t->name;
+	} else {
+		os << map.name << " " << id;
+	}
+}
+
 template<class T> string toString(const T& t) {
 	ostringstream oss;
 	oss << t;

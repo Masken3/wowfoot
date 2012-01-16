@@ -155,6 +155,8 @@ private:
 	bool mLoaded;
 	const char* const mTableName;
 public:
+	const char* const name;
+
 	<%=@structName%>s(const char* tableName);
 	void load() VISIBLE;
 ) + IF_INDEX + %q(
@@ -206,7 +208,9 @@ class TdbCppTask < TdbGenTask
 #include "<%=name%>.format.h"
 <%=@extraHeaderCode%>
 
-<%=@structName%>s::<%=@structName%>s(const char* tableName) : mLoaded(false), mTableName(tableName) {}
+<%=@structName%>s::<%=@structName%>s(const char* tableName) : mLoaded(false), mTableName(tableName),
+name("<%=@structName.downcase%>")
+{}
 
 void <%=@structName%>s::load() {
 	if(mLoaded)
