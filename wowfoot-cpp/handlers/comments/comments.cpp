@@ -10,10 +10,17 @@
 #include <stdio.h>
 #include <sstream>
 #include <string.h>
+#include <stack>
 
 using namespace std;
 
 typedef unsigned char byte;
+
+struct Tag {
+	const char* t;
+	size_t len;
+};
+typedef stack<Tag> TagStack;
 
 static sqlite3* sDB;
 
@@ -30,9 +37,37 @@ static void closeDb() {
 }
 
 static string formatComment(const char* src);
-static int formatTag(ostream& o, const char* tag, size_t len, int tagState);
+static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagStack&);
 static void formatUrl(ostream& o, const char* url, size_t len);
 static const char* formatUnescapedUrl(ostream& o, const char* ptr);
+
+static bool compareTag(const char* src, size_t srcLen, const char* tag, size_t tagLen,
+	bool& hasAttributes, TagStack& tagStack)
+{
+	bool match = strncmp(src, tag, srcLen) == 0 &&
+		(tagLen == srcLen || (hasAttributes = isspace(tag[tagLen])));
+	if(!match)
+		return false;
+	if(src[0] == '/') {	// end tag
+		bool stackMatch = false;
+		if(!tagStack.empty()) {
+			const Tag& t(tagStack.top());
+			stackMatch = t.len == srcLen-1 && strncmp(src+1, t.t, t.len) == 0;
+		}
+		if(stackMatch) {
+			tagStack.pop();
+		} else {
+			printf("Superflous end tag detected: %.*s\n", (int)tagLen, tag);
+		}
+		return stackMatch;
+	} else {	// start tag
+		Tag t = { src, srcLen };
+		tagStack.push(t);
+		return true;
+	}
+}
+
+#define PUSH(literal) { Tag t = { literal, sizeof(literal)-1 }; tagStack.push(t); }
 
 Tab* getComments(const char* type, int id) {
 	sqlite3_stmt* stmt = NULL;
@@ -124,6 +159,7 @@ static void formatNamedLink(Map& map, const char* type, ostream& o, const char* 
 static string formatComment(const char* src) {
 	ostringstream o;
 	int tagState = 0;
+	TagStack ts;
 	const char* ptr = src;
 	while(*ptr) {
 		char c = *ptr;
@@ -146,7 +182,7 @@ static string formatComment(const char* src) {
 				o << (ptr-1);
 				break;
 			}
-			tagState = formatTag(o, ptr, endPtr - ptr, tagState);
+			tagState = formatTag(o, ptr, endPtr - ptr, tagState, ts);
 			ptr = endPtr + 1;
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
@@ -255,8 +291,7 @@ static void streamTagAttrs(ostream& o, const char* attrs) {
 	}
 }
 
-#define COMPARE_TAG(t) (strncmp(t, tag, strlen(t)) == 0 && \
-	(strlen(t) == len || (hasAttributes = isspace(tag[strlen(t)]))))
+#define COMPARE_TAG(t) (compareTag(t, strlen(t), tag, len, hasAttributes, tagStack))
 
 #define STREAM_TAG_ATTRS(t) ; if(hasAttributes) streamTagAttrs(o, tag + strlen(t)); o <<
 
@@ -268,7 +303,7 @@ static void streamTagAttrs(ostream& o, const char* attrs) {
 #define CHECK_TAG(t, dst, flag) \
 	if(COMPARE_TAG(t) && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
 
-static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
+static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagStack& tagStack) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b");
@@ -328,6 +363,7 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 		o << "<a href=\"";
 		formatUrl(o, url, urlLen);
 		o << "\">";
+		PUSH("url");
 		return tagState | TAG_ANCHOR;
 	}
 	COMPLEX_TAG("/url", "</a>", tagState &= ~TAG_ANCHOR);
@@ -338,6 +374,7 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState) {
 		o << "<span class=\"";
 		o.write(idString, idLen);
 		o << "\">";
+		PUSH("color");
 		return tagState;
 	}
 	COMPLEX_TAG("/color", "</span>",);
