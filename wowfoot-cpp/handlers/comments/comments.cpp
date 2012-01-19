@@ -1,6 +1,12 @@
 #include "comments.h"
 #include "dbcSpell.h"
+#include "dbcAchievement.h"
+#include "dbcFaction.h"
+#include "dbcWorldMapArea.h"
 #include "db_item.h"
+#include "db_gameobject_template.h"
+#include "db_quest.h"
+#include "db_creature_template.h"
 #include "commentTab.h"
 #include "util/exception.h"
 #include "util/minmax.h"
@@ -124,27 +130,6 @@ static bool isUrlChar(char c) {
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.';
-}
-
-template<class T, class Map>
-static void formatNamedLink(Map& map, const char* type, ostream& o, const char* idString, size_t len) {
-	map.load();
-	o << "<a href=\""<<type<<"=";
-	o.write(idString, len);
-	o << "\">";
-	char* end;
-	errno = 0;
-	int id = strtol(idString, &end, 10);
-	const T* s = map.find(id);
-	if(id < 0 || errno != 0 || end != idString + len || !s) {
-		// error parsing or invalid id.
-		o << "["<<type<<"=";
-		o.write(idString, len);
-		o << "]";
-	} else {
-		o << s->name;
-	}
-	o << "</a>";
 }
 
 #define TAG_LIST 1
@@ -291,6 +276,47 @@ static void streamTagAttrs(ostream& o, const char* attrs) {
 	}
 }
 
+template<class T> void streamName(ostream& o, const T& t) {
+	o << t.name;
+}
+template<> void streamName<Quest>(ostream& o, const Quest& t) {
+	o << t.title;
+}
+
+template<class Map>
+static bool pageTag(const char* type, size_t typeLen, const char* tag, size_t tagLen,
+	Map& map, ostream& o)
+{
+	if(strncmp(type, tag, typeLen) != 0)
+		return false;
+	//printf("%*s tag: %.*s\n", (int)(typeLen-1), type, (int)tagLen, tag);
+	const char* idString = tag + typeLen;
+	size_t idLen = tagLen - typeLen;
+
+	const char* space = (char*)memchr(idString, ' ', idLen);
+	if(space)
+		idLen = space - idString;
+
+	map.load();
+	o << "<a href=\""<<type;
+	o.write(idString, idLen);
+	o << "\">";
+	char* end;
+	errno = 0;
+	int id = strtol(idString, &end, 10);
+	const auto* s = map.find(id);
+	if(id < 0 || errno != 0 || end != idString + idLen || !s) {
+		// error parsing or invalid id.
+		o << "["<<type;
+		o.write(idString, idLen);
+		o << "]";
+	} else {
+		streamName(o, *s);
+	}
+	o << "</a>";
+	return true;
+}
+
 #define COMPARE_TAG(t) (compareTag(t, strlen(t), tag, len, hasAttributes, tagStack))
 
 #define STREAM_TAG_ATTRS(t) ; if(hasAttributes) streamTagAttrs(o, tag + strlen(t)); o <<
@@ -379,21 +405,16 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 	}
 	COMPLEX_TAG("/color", "</span>",);
 
-	if(strncmp("spell=", tag, 6) == 0) {
-		//printf("spell tag: %i %.*s\n", tagState, (int)len, tag);
-		const char* idString = tag + 6;
-		size_t idLen = len - 6;
-		formatNamedLink<Spell>(gSpells, "spell", o, idString, idLen);
-		return tagState;
-	}
+#define PAGE_TAG(name, map, type) if(pageTag(name "=", sizeof(name), tag, len, map, o)) return tagState;
 
-	if(strncmp("item=", tag, 5) == 0) {
-		//printf("item tag: %i %.*s\n", tagState, (int)len, tag);
-		const char* idString = tag + 5;
-		size_t idLen = len - 5;
-		formatNamedLink<Item>(gItems, "item", o, idString, idLen);
-		return tagState;
-	}
+	PAGE_TAG("spell", gSpells, Spell);
+	PAGE_TAG("item", gItems, Item);
+	PAGE_TAG("faction", gFactions, Faction);
+	PAGE_TAG("npc", gNpcs, Npc);
+	PAGE_TAG("achievement", gAchievements, Achievement);
+	PAGE_TAG("zone", gWorldMapAreas, WorldMapArea);
+	PAGE_TAG("object", gObjects, Object);
+	PAGE_TAG("quest", gQuests, Quest);
 
 	// unknown tag
 	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
