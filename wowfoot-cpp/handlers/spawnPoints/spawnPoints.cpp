@@ -20,11 +20,24 @@ void spawnPointsChtml::prepare() {
 		int zoneId = zoneFromCoords(s.map, s.position_x, s.position_y);
 		//printf("zone %i, map %i, %f, %f\n", zoneId, s.map, s.position_x, s.position_y);
 		Coord2D c = percentagesInZone(zoneId, s.position_x, s.position_y);
-		if(mZones[zoneId].coords.empty()) {	// first one
-			mZones[zoneId].name = gAreaTable[zoneId].name;
+		unordered_map<int, Zone>::iterator itr = mZones.find(zoneId);
+		Zone* zone = NULL;
+		if(itr == mZones.end()) {	// first point in this zone
+			const Area* a = gAreaTable.find(zoneId);
+			if(a) {
+				zone = &mZones[zoneId];
+				zone->name = a->name;
+			} else {
+				printf("spawnPoint in unknown zone %i (map %i, %f, %f)\n",
+					zoneId, s.map, s.position_x, s.position_y);
+			}
+		} else {
+			zone = &itr->second;
 		}
-		mZones[zoneId].coords.push_back(c);
-		mMainArea = zoneId;
+		if(zone != NULL) {
+			zone->coords.push_back(c);
+			mMainArea = zoneId;
+		}
 	}
 }
 
