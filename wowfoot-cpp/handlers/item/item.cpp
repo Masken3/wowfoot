@@ -113,26 +113,6 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	tabs.push_back(referenceLoot(a));
 }
 
-enum TableRowId {
-	NAME = ENTRY+1,
-	RESTRICTIONS,
-	SOURCE,
-	COST,
-	LOCATION,
-	ZONE,
-	STOCK,
-	ILEVEL,
-	CLEVEL,
-	SIDE,
-	SLOT,
-	TYPE,
-	CHANCE,
-	MIN_COUNT,
-	MAX_COUNT,
-	SPAWN_COUNT,
-	UTILITY,
-};
-
 static class streamIfNonFirstClass {
 private:
 	const char* const mSep;
@@ -194,7 +174,7 @@ static void npcColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
 }
 
-static void npcRows(Row& r, const Npc& npc) {
+static void npcRow(Row& r, const Npc& npc) {
 	r[ENTRY] = toString(npc.entry);
 	r[NAME] = npc.name;
 	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
@@ -212,7 +192,7 @@ static Tab* soldBy(const Item& a) {
 	for(; res.first != res.second; ++res.first) {
 		const NpcVendor& nv(*res.first->second);
 		Row r;
-		npcRows(r, gNpcs[nv.entry]);
+		npcRow(r, gNpcs[nv.entry]);
 		//todo: add nv.incrtime, a.buyCount;
 		if(nv.maxcount == 0)
 			r[STOCK] = "∞";
@@ -227,13 +207,13 @@ static Tab* soldBy(const Item& a) {
 	return &t;
 }
 
-static void lootColumns(tabTableChtml& t) {
+void lootColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(CHANCE, "Chance %"));
 	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
 	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
 }
 
-static void lootRows(Row& r, const Loot& loot) {
+void lootRow(Row& r, const Loot& loot) {
 	r[CHANCE] = toString(loot.chance);
 	r[MIN_COUNT] = toString(loot.minCountOrRef);
 	r[MAX_COUNT] = toString(loot.maxCount);
@@ -254,8 +234,8 @@ static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const cha
 		for(; nres.first != nres.second; ++nres.first) {
 			const Npc& npc(*nres.first->second);
 			Row r;
-			npcRows(r, npc);
-			lootRows(r, loot);
+			npcRow(r, npc);
+			lootRow(r, loot);
 			r[SPAWN_COUNT] = toString(npc.spawnCount);
 			r[UTILITY] = toString(loot.chance * npc.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
@@ -292,7 +272,7 @@ static Tab* containedInObject(const Item& a) {
 			Row r;
 			r[ENTRY] = toString(o.entry);
 			r[NAME] = o.name;
-			lootRows(r, loot);
+			lootRow(r, loot);
 			r[SPAWN_COUNT] = toString(o.spawnCount);
 			r[UTILITY] = toString(loot.chance * o.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
 			t.array.push_back(r);
@@ -313,7 +293,7 @@ static Tab* referenceLoot(const Item& a) {
 		const Loot& loot(*res.first->second);
 		Row r;
 		r[ENTRY] = toString(loot.entry);
-		lootRows(r, loot);
+		lootRow(r, loot);
 		size_t count = 0;
 		Loots::EntryPair ep = gReferenceLoots.findEntry(loot.entry);
 		for(; ep.first != ep.second; ++ep.first) {
@@ -326,7 +306,7 @@ static Tab* referenceLoot(const Item& a) {
 	return &t;
 }
 
-static void itemColumns(tabTableChtml& t) {
+void itemColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
 	t.columns.push_back(Column(RESTRICTIONS, "Class/Race"));
 	// name of and link to single vendor, or number of vendors.
@@ -392,9 +372,14 @@ void streamItemClassHtml(std::ostream& o, const Item& i) {
 	}
 }
 
-static void addItem(tabTableChtml& t, const Item& i) {
-	ostringstream oss;
+void addItem(tabTableChtml& t, const Item& i) {
 	Row r;
+	itemRow(r, i);
+	t.array.push_back(r);
+}
+
+void itemRow(Row& r, const Item& i) {
+	ostringstream oss;
 	r[ENTRY] = toString(i.entry);
 
 	string classes = chrClasses(i.allowableClass);
@@ -416,8 +401,6 @@ static void addItem(tabTableChtml& t, const Item& i) {
 	oss.str("");
 	streamAllCostHtml(oss, i);
 	r[COST] = oss.str();
-
-	t.array.push_back(r);
 }
 
 static Tab* currencyFor(const Item& a) {

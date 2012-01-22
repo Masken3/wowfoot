@@ -287,8 +287,6 @@ PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
 	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
-PageWork.new('object', ['db_gameobject_template',
-	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
 PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
@@ -298,9 +296,12 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass'])
+PageWork.new('object', ['db_gameobject_template',
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
+	'db_loot_template', 'db_item'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template'])
-PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item'])
+PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'])
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do

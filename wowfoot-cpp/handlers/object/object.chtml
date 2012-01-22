@@ -9,6 +9,8 @@
 
 <p>Object: <%= mTitle %></p>
 
+<p>Type: <% type(stream); %></p>
+
 % if(a) {
 % mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);
