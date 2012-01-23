@@ -4,7 +4,7 @@
 #include <string>
 
 #if defined(__GNUC__) && !defined(VISIBLE)
-#define VISIBLE __attribute__((visibility("default")))
+#define VISIBLE __attribute__((visibility("default"))) __declspec(dllexport)
 #else
 #define VISIBLE
 #endif

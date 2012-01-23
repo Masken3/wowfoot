@@ -24,13 +24,13 @@ class ChtmlCompileTask < MultiFileTask
 		cpp << "\n"
 		if(@isPage)
 			cpp << "extern \"C\"\n"
-			cpp << "void getResponse(const char* urlPart, DllResponseData* drd) {\n"
+			cpp << "void __declspec(dllexport) getResponse(const char* urlPart, DllResponseData* drd) {\n"
 			cpp << "	#{@name}Chtml context;\n"
 			cpp << "	getResponse(urlPart, drd, context);\n"
 			cpp << "}\n"
 			cpp << "\n"
 		end
-		cpp << "int #{@name}Chtml::run(ostream& stream) {\n"
+		cpp << "int __declspec(dllexport) #{@name}Chtml::run(ostream& stream) {\n"
 		cpp << "int returnCode = 200;\n"
 		cpp << "# 1 \"#{File.expand_path(@src)}\"\n"
 

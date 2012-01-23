@@ -43,20 +43,22 @@ void IdHandler::reload() {
 	// load DLL. exit on failure.
 	mDll.close();
 
+	const char* dllName = mBaseDllName.c_str();
 	struct stat s;
-	int res = stat(mBaseDllName.c_str(), &s);
+	int res = stat(dllName, &s);
 	assert(res == 0);
 
+#ifndef WIN32
 	// see if the file needs to be renamed
-	const char* dllName = mBaseDllName.c_str();
 	char buf[1024];
 	if(s.st_ino != mDllStat.st_ino && mReloadCount > 0) {
-		sprintf(buf, "%s.%i", mBaseDllName.c_str(), mReloadCount);
+		sprintf(buf, "%s.%i", dllName, mReloadCount);
 		remove(buf);
-		res = link(mBaseDllName.c_str(), buf);
+		res = link(dllName, buf);
 		assert(res == 0);
 		dllName = buf;
 	}
+#endif
 
 	res = mDll.open(dllName);
 	if(!res) {

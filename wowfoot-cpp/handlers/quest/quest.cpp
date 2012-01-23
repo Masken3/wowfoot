@@ -6,6 +6,8 @@
 #include "dbcSpell.h"
 #include "db_item.h"
 #include "dbcQuestFactionReward.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 

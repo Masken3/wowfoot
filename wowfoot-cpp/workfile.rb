@@ -94,7 +94,7 @@ class DllTask
 end
 end	# WIN32
 
-common = DllWork.new
+common = NativeLibWork.new
 common.instance_eval do
 	@SOURCES = ['handlers', 'util']
 	if(HOST == :win32)
@@ -150,7 +150,8 @@ class HandlerWork < DllWork
 			DirTask.new(self, TDB_BUILDDIR),
 		]
 		@LOCAL_DLLS = handlerDeps
-		@LOCAL_DLLS << 'common' #if(hasChtml)
+		@LOCAL_LIBS = ['common']
+		@LIBRARIES = ['imagehlp'] if(HOST == :win32)
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
 		@NAME = name
 		WORKS << self
@@ -173,7 +174,6 @@ end
 class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [])
 		super(name, handlerDeps, true)
-		@EXTRA_OBJECTS = [FileTask.new(self, "handlers/#{name}/#{name}.def")] if(HOST == :win32)
 	end
 	def count
 		c = 0
@@ -214,7 +214,7 @@ HandlerWork.new('areaMap')
 
 HandlerWork.new('tdb').instance_eval do
 	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
-	@LIBRARIES = ['mysqlclient']
+	@LIBRARIES << 'mysqlclient'
 	if(HOST == :win32)
 		@EXTRA_INCLUDES += CONFIG_MYSQL_INCLUDES
 		@EXTRA_LINKFLAGS = CONFIG_MYSQL_LIBDIRS
@@ -222,7 +222,6 @@ HandlerWork.new('tdb').instance_eval do
 	else
 		@EXTRA_INCLUDES << '/usr/include/mysql'
 	end
-	@LOCAL_DLLS << 'common'
 end
 
 HandlerWork.new('dbc').instance_eval do
@@ -270,7 +269,7 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	'dbcAchievement', 'db_quest', 'db_creature_template',
 	'db_gameobject_template', 'dbcFaction',
 ]).instance_eval do
-	@LIBRARIES = ['sqlite3']
+	@LIBRARIES << 'sqlite3'
 	patch = FileTask.new(self, 'build/patch.cpp')
 	patch.instance_eval do
 		@src = 'handlers/comments/patch.rb'
