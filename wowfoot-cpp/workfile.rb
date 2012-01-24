@@ -100,10 +100,10 @@ common.instance_eval do
 	if(HOST == :win32)
 		@SOURCES << 'util/win32'
 		@SOURCES << 'util/win32/sym_engine'
-		@LIBRARIES = ['imagehlp']
+		#@LIBRARIES = ['imagehlp']
 	else
 		@SOURCES << 'util/unix'
-		@LIBRARIES = ['dl']
+		#@LIBRARIES = ['dl']
 	end
 	@SPECIFIC_CFLAGS = {
 		'process.cpp' => ' -Wno-missing-format-attribute',
@@ -151,7 +151,9 @@ class HandlerWork < DllWork
 		]
 		@LOCAL_DLLS = handlerDeps
 		@LOCAL_LIBS = ['common']
-		@LIBRARIES = ['imagehlp'] if(HOST == :win32)
+		@LIBRARIES = []
+		@LIBRARIES << 'imagehlp' if(HOST == :win32)
+		@LIBRARIES << 'dl' if(HOST != :win32)
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
 		@NAME = name
 		WORKS << self
@@ -243,6 +245,7 @@ HandlerWork.new('dbcItemClass', ['dbc']).instance_eval do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
 end
 
+TdbWork.new('db_achievement_reward')
 TdbWork.new('db_quest')
 TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
@@ -251,6 +254,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcCharTitles')
 DbcWork.new('dbcQuestFactionReward')
 DbcWork.new('dbcFaction')
 DbcWork.new('dbcAchievement')
@@ -285,7 +289,8 @@ HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMa
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
 	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
-PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments'])
+PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
+	'db_item', 'db_creature_template', 'db_achievement_reward'])
 PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])

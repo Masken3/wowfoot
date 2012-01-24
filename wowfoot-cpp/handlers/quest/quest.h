@@ -16,6 +16,5 @@ private:
 	const Quest* a;
 	int mRewXp;
 
-	void streamQuestText(ostream&, const string&);
 	int rewRepValue(int index);
 };

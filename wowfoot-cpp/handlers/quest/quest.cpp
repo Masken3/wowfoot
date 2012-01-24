@@ -47,17 +47,6 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	drd->code = run(os);
 }
 
-void questChtml::streamQuestText(ostream& os, const string& src) {
-	for(size_t i=0; i<src.size(); i++) {
-		if(src[i] == '$' && toupper(src[i+1]) == 'B') {
-			os << "<br>\n";
-			i++;
-			continue;
-		}
-		streamHtmlEscape(os, src[i]);
-	}
-}
-
 int questChtml::rewRepValue(int index) {
 	if(a->rewRepValue[index] == 0) {
 		int id = a->rewRepValueId[index];

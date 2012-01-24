@@ -457,6 +457,10 @@ static void formatUrl(ostream& o, const char* url, size_t len) {
 		streamHtmlEncode(o, path, pathLen);
 		return;
 	}
+	if(strncmp(url, "/?", 2) == 0) {
+		url += 2;
+		len -= 2;
+	}
 
 	streamHtmlEncode(o, url, len);
 }
@@ -490,6 +494,7 @@ static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
 		streamHtmlEncode(o, path, pathLen);
 		o << "\">";
 		// todo: write name of linked entity (item, object, spell, quest, et. al)
+		// use PAGE_TAG code
 		streamHtmlEncode(o, path, pathLen);
 		o << "</a>";
 	} else {

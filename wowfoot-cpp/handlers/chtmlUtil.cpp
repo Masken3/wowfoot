@@ -54,6 +54,17 @@ void streamHtmlEscape(ostream& os, char c) {
 	}
 }
 
+void streamWowFormattedText(ostream& os, const string& src) {
+	for(size_t i=0; i<src.size(); i++) {
+		if(src[i] == '$' && toupper(src[i+1]) == 'B') {
+			os << "<br>\n";
+			i++;
+			continue;
+		}
+		streamHtmlEscape(os, src[i]);
+	}
+}
+
 string jsEscape(const string& src) {
 	string dst;
 	dst.reserve(src.size()*2);	// ensure no reallocs

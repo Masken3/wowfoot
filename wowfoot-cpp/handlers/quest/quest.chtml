@@ -59,23 +59,23 @@ Spell: <a href="spell=<%= castId %>"><% streamName(stream, gSpells, castId); %><
 
 
 <p>Details:<br>
-% streamQuestText(stream, a->details);
+% streamWowFormattedText(stream, a->details);
 </p>
 
 <p>Objectives:<br>
-% streamQuestText(stream, a->objectives);
+% streamWowFormattedText(stream, a->objectives);
 </p>
 <p>In progress:<br>
-% streamQuestText(stream, a->requestItemsText);
+% streamWowFormattedText(stream, a->requestItemsText);
 </p>
 <p>offerRewardText:<br>
-% streamQuestText(stream, a->offerRewardText);
+% streamWowFormattedText(stream, a->offerRewardText);
 </p>
 <p>endText:<br>
-% streamQuestText(stream, a->endText);
+% streamWowFormattedText(stream, a->endText);
 </p>
 <p>completedText:<br>
-% streamQuestText(stream, a->completedText);
+% streamWowFormattedText(stream, a->completedText);
 </p>
 
 % returnCode = tabsChtml::run(stream);

@@ -14,10 +14,42 @@
 <span class="itemDescription"><%=a->description%></span><br>
 % }
 </p>
+
 <p><%=a->points%> points.</p>
+
 % if(a->reward) {
-<p>Reward: <%=a->reward%></p>
+<p>Reward description: <%=a->reward%></p>
 % }
+% } else {
+<p><%= mTitle %> not found.</p>
+% }
+
+% if(ar) {
+<p>Reward:</p>
+
+% if(ar->title_A) {
+<p>Title
+% if(ar->title_A == ar->title_H) {
+(both factions):
+% } else {
+(Alliance):
+% }
+<a href="title=<%= ar->title_A %>"><%streamName(stream, gTitles, ar->title_A);%></a></p>
+% }
+% if(ar->title_H && ar->title_H != ar->title_A) {
+<p>Title (Horde): <a href="title=<%= ar->title_H %>"><%streamName(stream, gTitles, ar->title_H);%></a></p>
+% }
+
+% if(ar->item) { gItems.load(); gNpcs.load();
+<p>Item (via mail): <a href="item=<%= ar->item %>"><%streamName(stream, gItems, ar->item);%></a><br>
+Sender: <a href="npc=<%= ar->sender %>"><%streamName(stream, gNpcs, ar->sender);%></a><br>
+Subject: <%= ar->subject %><br>
+Message: <% streamWowFormattedText(stream, ar->text); %><br>
+</p>
+% }
+% }	//ar
+
+% if(a) {
 <p>
 Faction: <%=FACTION(a->faction)%><br>
 % if(a->previous) {
@@ -26,8 +58,6 @@ Previous: <a href="achievement=<%=a->previous%>"><%=gAchievements[a->previous].n
 </p>
 
 % returnCode = tabsChtml::run(stream);
-% } else {
-<%= mTitle %> not found.
 % }
 
 </body>

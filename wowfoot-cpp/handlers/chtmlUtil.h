@@ -19,6 +19,8 @@ string jsEscape(const string& src) VISIBLE;
 void streamHtmlEscape(ostream&, const string& src) VISIBLE;
 void streamHtmlEscape(ostream&, char) VISIBLE;
 
+void streamWowFormattedText(ostream&, const string& src) VISIBLE;
+
 template<class T> void streamName(ostream& os, const T& map, int id) {
 	auto* t = map.find(id);
 	if(t) {

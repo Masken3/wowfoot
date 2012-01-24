@@ -10,6 +10,8 @@ using namespace std;
 
 void achievementChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gAchievements.load();
+	gAchievementRewards.load();
+	gTitles.load();
 #if 0
 	int points = 0;
 	for(Achievements::citr itr = gAchievements.begin(); itr != gAchievements.end(); ++itr) {
@@ -21,6 +23,7 @@ void achievementChtml::getResponse2(const char* urlPart, DllResponseData* drd, o
 
 	int id = toInt(urlPart);
 	a = gAchievements.find(id);
+	ar = gAchievementRewards.find(id);
 	if(a) {
 		mTitle = a->name;
 		mTabs.push_back(getComments("achievement", id));
