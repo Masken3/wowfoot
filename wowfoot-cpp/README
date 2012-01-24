@@ -1,16 +1,16 @@
 This is an experiment. A wowfoot server, identical in interface to wowfoot-webrick, but written in C++.
 
-Startup time is expected to increase by 20-30 seconds, as the entire database is copied to C++ containers.
-Memory usage is expected to increase by 50-100 MB.
+Startup time is expected to increase to 20-30 seconds, as the entire database is copied to C++ containers.
+Memory usage is expected to increase to 300-600 MB.
 Page serving speed is expected to increase a great deal, since NoSQL is used instead of MySQL.
-Windows compatibility is expected to increase, as this server won't rely on buggy Ruby implementations.
+Windows compatibility has increased, as this server doesn't rely on buggy Ruby implementations.
 Graphics can be improved, as icons from MPQs can be accessed directly.
 
-The server will not be monolithic; it will have a core, but all the page renderers will be DLLs
+The server is not monolithic; it will have a core, but all the page renderers are DLLs
 that can be reloaded as they change, without the need to restart the entire server.
 
 Databases are copied from a MySQL server into hash tables. These tables should be self-contained
 and reloadable, much like the page renderer DLLs.
 
-Pages will be written in CHTML, an embedding format much like RHTML/erb, except this one's compiled into C++.
-The CHTML compiler itself will probably be very simple, and written in Ruby.
+Pages are written in CHTML, an embedding format much like RHTML/erb, except this one's compiled into C++.
+The CHTML compiler itself is fairly simple, and written in Ruby.
