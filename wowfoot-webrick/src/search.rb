@@ -2,6 +2,8 @@ run 'money.rb'
 
 #puts "Hello search!"
 
+run 'money.rb'
+
 searchTerm = @id[1]
 
 @zones = []
