@@ -350,6 +350,23 @@ int main() {
 
 	mkdir("output");
 
+	printf("Opening CharTitles.dbc...\n");
+	DBCFile ct("DBFilesClient\\CharTitles.dbc");
+	res = ct.open();
+	if(!res)
+		return 1;
+	printf("Extracting %"PRIuPTR" titles...\n", ct.getRecordCount());
+	out = fopen("output/Title.rb", "w");
+	fprintf(out, "TITLE = {\n");
+	for(DBCFile::Iterator itr = ct.begin(); itr != ct.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(2);
+		fprintf(out, "\t%i => { :name => \"%s\" },\n",
+			id, name);
+	}
+	fprintf(out, "}\n");
+
 	printf("Opening ItemExtendedCost.dbc...\n");
 	DBCFile iec("DBFilesClient\\ItemExtendedCost.dbc");
 	res = iec.open();
