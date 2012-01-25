@@ -53,9 +53,8 @@ int main(int argc, const char** argv) {
 	mountIdPage("object");
 	mountIdPage("quest");
 	mountIdPage("faction");
-#if 0
 	mountIdPage("title");
-#endif
+
 	mountUnload();
 	mountStaticDirectory("output", "../wowfoot-ex/output/");
 	mountStaticDirectory("static", "../wowfoot-webrick/htdocs/static/");
