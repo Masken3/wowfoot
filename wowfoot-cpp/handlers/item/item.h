@@ -6,6 +6,7 @@
 #include "dbcSpell.h"
 #include "chrClasses.h"
 #include "chrRaces.h"
+#include "dbcItemSet.h"
 #include "item_shared.h"
 
 class itemChtml : public tabsChtml, public PageContext {

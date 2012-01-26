@@ -119,6 +119,11 @@ if(s){%><%=s->name%><%}else{%><%=id%><%}
 % if(!a->description.empty()) {
 <span class="itemDescription">"<%= a->description %>"</span><br>
 % }
+
+% if(a->itemset) {
+<br>
+Part of set: <a href="itemset=<%=a->itemset%>"><%streamName(stream, gItemSets, a->itemset);%></a><br>
+% }
 </p>
 
 % returnCode = tabsChtml::run(stream);

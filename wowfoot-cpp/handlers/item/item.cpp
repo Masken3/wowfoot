@@ -59,6 +59,7 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gSpells.load();
 	gObjects.load();
 	gGameobjectLoots.load();
+	gItemSets.load();
 
 	int id = toInt(urlPart);
 	a = gItems.find(id);

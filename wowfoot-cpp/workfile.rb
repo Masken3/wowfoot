@@ -254,6 +254,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcItemSet')
 DbcWork.new('dbcCharTitles')
 DbcWork.new('dbcQuestFactionReward')
 DbcWork.new('dbcFaction')
@@ -301,7 +302,7 @@ PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSp
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
-	'dbcItemClass', 'dbcItemSubClass'])
+	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet'])
 PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
 	'db_loot_template', 'db_item'])

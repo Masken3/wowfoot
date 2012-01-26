@@ -1,6 +1,7 @@
 DbcColumn = Struct.new(:type, :name, :offset)
 Point2D = Struct.new(:x, :y)
 AS = Struct.new(:name, :members, :count)
+ARRAY = Struct.new(:type, :offset, :count)
 
 # member.
 def m(a,b,c)
@@ -13,6 +14,9 @@ end
 # array of structs
 def as(structName, arrayName, members, count)
 	DbcColumn.new(:as, arrayName, AS.new(structName, members, count))
+end
+def ar(type, name, offset, count)
+	DbcColumn.new(:ar, name, ARRAY.new(type, offset, count))
 end
 
 class DbcCppTask < MemoryGeneratedFileTask
@@ -59,6 +63,9 @@ void <%=@plural%>::load() {
 		s.<%=col.name%>.y = r.getFloat(<%=col.offset.y%>);<%elsif(col.type == :as) then s = col.offset%>
 		for(int i=0; i<<%=s.count%>; i++) {<% s.members.each do |m| %>
 			s.<%=col.name%>[i].<%=m.name%> = r.get<%=m.type.to_s.capitalize%>(<%=m.offset%> + i);<%end%>
+		}<% elsif(col.type == :ar) then a = col.offset %>
+		for(int i=0; i<<%=a.count%>; i++) {
+			s.<%=col.name%>[i] = r.get<%=a.type.to_s.capitalize%>(<%=a.offset%> + i);
 		}<%else%>
 		s.<%=col.name%> = r.get<%=col.type.to_s.capitalize%>(<%=col.offset%>);<%end;end%>
 		<%=@midRow%>
@@ -106,7 +113,8 @@ struct <%=@singular%> {<% @struct.each do |col| if(col.type == :as) then s = col
 	struct <%=s.name%> {<% s.members.each do |m| %>
 		<%=CType[m.type]%> <%=m.name%>;<%end%>
 	};
-	<%=s.name%> <%=col.name%>[<%=s.count%>];<%else%>
+	<%=s.name%> <%=col.name%>[<%=s.count%>];<%elsif(col.type == :ar) then a = col.offset %>
+	<%=CType[a.type]%> <%=col.name%>[<%=a.count%>];<%else%>
 	<%=CType[col.type]%> <%=col.name%>;<%end;end%>
 };
 
