@@ -10,6 +10,12 @@
 % if(a) {
 <p><span class="itemName">Item Set: <%= mTitle %></span></p>
 
+<p>Items:
+% for(size_t i=0; i<NUMOF(a->item); i++) { int id = a->item[i]; if(id != 0) {
+<%NAMELINK(gItems, id);%><br>
+% } }
+</p>
+
 % returnCode = tabsChtml::run(stream);
 % } else {
 <p><%= mTitle %> not found.</p>

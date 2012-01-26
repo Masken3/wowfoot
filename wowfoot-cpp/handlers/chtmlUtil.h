@@ -30,6 +30,14 @@ template<class T> void streamName(ostream& os, const T& map, int id) {
 	}
 }
 
+template<class T>
+void streamNameLink(ostream& o, const T& map, int id) {
+	o << "<a href=\""<<map.name<<"="<<id<<"\">";
+	streamName(o, map, id);
+	o << "</a>";
+}
+#define NAMELINK(map, id) streamNameLink(stream, map, id)
+
 template<class T> string toString(const T& t) {
 	ostringstream oss;
 	oss << t;
