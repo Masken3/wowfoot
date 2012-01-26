@@ -1,5 +1,0 @@
-LIBRARY "object.dll"
-
-EXPORTS
-cleanup
-getResponse

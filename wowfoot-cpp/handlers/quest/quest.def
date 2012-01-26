@@ -1,5 +1,0 @@
-LIBRARY "quest.dll"
-
-EXPORTS
-cleanup
-getResponse

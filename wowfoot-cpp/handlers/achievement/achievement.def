@@ -1,5 +1,0 @@
-LIBRARY "achievement.dll"
-
-EXPORTS
-cleanup
-getResponse
