@@ -73,11 +73,11 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 		}
 		createTabs(mTabs, *a);
 		//printf("sizeof(string): %" PRIuPTR "\n", sizeof(string));
-		mTabs.push_back(getComments("item", id));
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;
 	}
+	mTabs.push_back(getComments("item", id));
 
 	drd->code = run(os);
 }

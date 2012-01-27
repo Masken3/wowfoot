@@ -14,44 +14,44 @@ Quest <%=mTitle%> does not exist.
 
 <p>
 MinLevel: <%=a->minLevel%><br>
-QuestLevel: <%=a->questLevel%><br>
+QuestLevel: <%=a->level%><br>
 MaxLevel: <%=a->maxLevel%><br>
 </p>
 
 <p>
 Rewards:<br>
-Money: <% moneyHtml(stream, a->rewOrReqMoney); %><br>
+Money: <% moneyHtml(stream, a->rewardOrRequiredMoney); %><br>
 
 Experience:
 % if(mRewXp == 0) {
 0
 % } else {
-<%= mRewXp %> xp, or <% moneyHtml(stream, a->rewMoneyMaxLevel); %> at max level.
+<%= mRewXp %> xp, or <% moneyHtml(stream, a->rewardMoneyMaxLevel); %> at max level.
 % }
 <br>
 
-% for(size_t i=0; i<5; i++) { int id = a->rewRepFaction[i]; if(id != 0) {
+% for(size_t i=0; i<5; i++) { int id = a->rewardFactionId[i]; if(id != 0) {
 Reputation: <a href="faction=<%= id %>"><% streamName(stream, gFactions, id); %></a> <%= rewRepValue(i) %><br>
 % } }
 
-% if(a->rewMailTemplateId != 0) {
-Mail: <%= a->rewMailTemplateId %> after <%= a->rewMailDelaySecs %> seconds.<br>
+% if(a->rewardMailTemplateId != 0) {
+Mail: <%= a->rewardMailTemplateId %> after <%= a->rewardMailDelay %> seconds.<br>
 % }
 
-% for(size_t i=0; i<4; i++) { int id = a->rewItemId[i]; if(id != 0) {
+% for(size_t i=0; i<4; i++) { int id = a->rewardItemId[i]; if(id != 0) {
 Item: <a href="item=<%= id %>"><% streamName(stream, gItems, id); %></a>
-<% int count = a->rewItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
+<% int count = a->rewardItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
 <br>
 % } }
 
-% for(size_t i=0; i<6; i++) { int id = a->rewChoiceItemId[i]; if(id != 0) {
+% for(size_t i=0; i<6; i++) { int id = a->rewardChoiceItemId[i]; if(id != 0) {
 Item choice: <a href="item=<%= id %>"><% streamName(stream, gItems, id); %></a>
-<% int count = a->rewChoiceItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
+<% int count = a->rewardChoiceItemCount[i]; if(count != 1) { %> x<%= count %> <% } %>
 <br>
 % } }
 
-% int castId = a->rewSpell;
-% if(a->rewSpellCast) castId = a->rewSpellCast;
+% int castId = a->rewardSpell;
+% if(a->rewardSpellCast) castId = a->rewardSpellCast;
 % if(castId) {
 Spell: <a href="spell=<%= castId %>"><% streamName(stream, gSpells, castId); %></a><br>
 % }

@@ -133,7 +133,7 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 
 static char* dstGetMap(const ColumnFormat& cf, MYSQL_ROW row, unsigned long* lengths, TableFetchMap tfm) {
 	// get destination struct
-	assert(strcmp(cf.name, "entry") == 0);
+	//assert(strcmp(cf.name, "entry") == 0);
 	int entry = safe_atoi(row[0], lengths[0]);
 	char* dst = (char*)tfm(entry);
 

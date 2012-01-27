@@ -126,13 +126,13 @@ Part of set: <a href="itemset=<%=a->itemset%>"><%streamName(stream, gItemSets, a
 % }
 </p>
 
-% returnCode = tabsChtml::run(stream);
-
 % if(mTabs.size() == 0) {
 <p>Item source &amp; use not found.</p>
 % }
 
 % }	//if(a)
+
+% returnCode = tabsChtml::run(stream);
 
 </body>
 </html>
