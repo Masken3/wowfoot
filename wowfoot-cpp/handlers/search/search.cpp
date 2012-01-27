@@ -7,6 +7,8 @@
 #include "db_creature_template.h"
 #include "db_gameobject_template.h"
 #include "db_quest.h"
+#include "dbcCharTitles.h"
+#include "dbcItemSet.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -21,6 +23,33 @@ enum TableRowId {
 };
 #define MAX_COUNT 100
 
+static const char* cstr(const char* s) { return s; }
+static const char* cstr(const string& s) { return s.c_str(); }
+
+template<class T>
+tabTableChtml* standardSearch(const T& map, const char* urlPart, const char* title) {
+	tabTableChtml* tp = new tabTableChtml;
+	tabTableChtml& t(*tp);
+	t.id = map.name;
+	t.title = title;
+	t.columns.push_back(Column(NAME, "Name", ENTRY, map.name));
+	for(typename T::citr itr = map.begin();
+		itr != map.end() && t.array.size() < MAX_COUNT;
+		++itr)
+	{
+		const auto& s(itr->second);
+		if(strcasestr(cstr(s.name), urlPart))
+		{
+			Row r;
+			r[ENTRY] = toString(itr->first);
+			r[NAME] = s.name;
+			t.array.push_back(r);
+		}
+	}
+	t.count = t.array.size();
+	return tp;
+}
+
 void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	gWorldMapAreas.load();
 	gAreaTable.load();
@@ -30,6 +59,8 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gAchievements.load();
 	gObjects.load();
 	gQuests.load();
+	gTitles.load();
+	gItemSets.load();
 
 	urlPart = u;
 
@@ -56,116 +87,13 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	t.count = t.array.size();
 	mTabs.push_back(tp);
 	}
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "spell";
-		t.title = "Spells";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "spell"));
-		for(Spells::citr itr = gSpells.begin();
-			itr != gSpells.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Spell& s(itr->second);
-			if(strcasestr(s.name, urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = s.name;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "item";
-		t.title = "Items";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
-		for(Items::citr itr = gItems.begin();
-			itr != gItems.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Item& s(itr->second);
-			if(strcasestr(s.name.c_str(), urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = s.name;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "npc";
-		t.title = "NPCs";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
-		for(Npcs::citr itr = gNpcs.begin();
-			itr != gNpcs.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Npc& s(itr->second);
-			if(strcasestr(s.name.c_str(), urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = s.name;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "object";
-		t.title = "Objects";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
-		for(Objects::citr itr = gObjects.begin();
-			itr != gObjects.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Object& s(itr->second);
-			if(strcasestr(s.name.c_str(), urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = s.name;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "achievement";
-		t.title = "Achievements";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "achievement"));
-		for(Achievements::citr itr = gAchievements.begin();
-			itr != gAchievements.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Achievement& a(itr->second);
-			if(strcasestr(a.name, urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = a.name;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
+	mTabs.push_back(standardSearch(gSpells, urlPart, "Spells"));
+	mTabs.push_back(standardSearch(gItems, urlPart, "Items"));
+	mTabs.push_back(standardSearch(gItemSets, urlPart, "Item Sets"));
+	mTabs.push_back(standardSearch(gNpcs, urlPart, "NPCs"));
+	mTabs.push_back(standardSearch(gObjects, urlPart, "Objects"));
+	mTabs.push_back(standardSearch(gAchievements, urlPart, "Achievements"));
+	mTabs.push_back(standardSearch(gTitles, urlPart, "Titles"));
 	{
 		tabTableChtml* tp = new tabTableChtml;
 		tabTableChtml& t(*tp);

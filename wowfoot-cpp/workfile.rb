@@ -298,7 +298,8 @@ PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
-	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest'])
+	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest',
+	'dbcCharTitles', 'dbcItemSet'])
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
