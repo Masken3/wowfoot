@@ -4,6 +4,7 @@
 #include "attribute.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -95,8 +96,12 @@ static JsonValue* parseString(char delim) {
 			switch(*sText) {
 			case '\'':
 			case '\\':
+			case '/':
+			case '"':
+			case 'u':	// 4-hex-digit unicode character
 				break;
 			case 'n':
+			case 't':
 				s += '\\';
 				break;
 			default:
@@ -153,9 +158,18 @@ static JsonObject* parseObject() {
 			break;
 		skipWhitespace();
 		string name;
-		while(isalpha(*sText)) {
-			name += *sText;
+		if(*sText == '"') {
 			sText++;
+			const char* end = strchr(sText, '"');
+			if(!end)
+				error();
+			name.append(sText, end - sText);
+			sText = end + 1;
+		} else {
+			while(isalpha(*sText) || (!name.empty() && isalnum(*sText))) {
+				name += *sText;
+				sText++;
+			}
 		}
 		token(':');
 		obj->mMap[name] = parseValue();

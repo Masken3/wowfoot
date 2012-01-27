@@ -18,7 +18,7 @@ void titleChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	if(a) {
 		mTitle = a->name;
 
-		//mTabs.push_back(getComments("title", id));
+		mTabs.push_back(getComments("title", id));
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;

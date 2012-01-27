@@ -28,3 +28,6 @@ CREATE TABLE `itemset_comments` (`entry` int NOT NULL, `commentId` int NOT NULL,
 
 DROP TABLE IF EXISTS `item_comments`;
 CREATE TABLE `item_comments` (`entry` int NOT NULL, `commentId` int NOT NULL, PRIMARY KEY (`entry`, `commentId`));
+
+DROP TABLE IF EXISTS `title_comments`;
+CREATE TABLE `title_comments` (`entry` int NOT NULL, `commentId` int NOT NULL, PRIMARY KEY (`entry`, `commentId`));
