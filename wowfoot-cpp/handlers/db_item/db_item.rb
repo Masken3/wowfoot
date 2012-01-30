@@ -65,4 +65,5 @@ mc(:float, [:spellPpmRate], 5, '_'),
 [:displayId],
 [:class],
 [:class, :subclass],
+[:itemset],
 ]
