@@ -63,10 +63,17 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gGameobjectLoots.load();
 	gItemSets.load();
 
+	string buffer;
+
 	int id = toInt(urlPart);
 	a = gItems.find(id);
 	if(a) {
-		mTitle = a->name.c_str();
+		if(a->flags & ITEM_FLAG_HEROIC) {
+			buffer = "Heroic " + a->name;
+			mTitle = buffer.c_str();
+		} else {
+			mTitle = a->name.c_str();
+		}
 		mDps = 0.0;
 		for(int i=0; i<1; i++) {
 			float averageDmg = (a->dmg_min[i] + a->dmg_max[i]) / 2.0;
@@ -173,7 +180,8 @@ static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
 	for(int i=0; i<5; i++) {
 		ItemExtendedCost::ReqItem item(ec.item[i]);
 		if(item.id != 0 || item.count != 0) {
-			html << costSep << item.count<<"x <a href=\"item="<<item.id<<"\">"<<gItems[item.id].name<<"</a>";
+			html << costSep << item.count<<"x ";
+			streamNameLinkById(html, gItems, item.id);
 		}
 	}
 }
@@ -398,7 +406,10 @@ void itemRow(Row& r, const Item& i) {
 		r[RESTRICTIONS] += " / ";
 	r[RESTRICTIONS] += races;
 
-	r[NAME] = i.name;
+	if(i.flags & ITEM_FLAG_HEROIC)
+		r[NAME] = string("Heroic ") + i.name;
+	else
+		r[NAME] = i.name;
 	r[ILEVEL] = toString(i.itemLevel);
 	r[CLEVEL] = toString(i.requiredLevel);
 	r[SLOT] = itemChtml::ITEM_EQUIP(i.inventoryType);
