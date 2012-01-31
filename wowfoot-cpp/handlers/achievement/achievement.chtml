@@ -34,15 +34,16 @@
 % } else {
 (Alliance):
 % }
-<a href="title=<%= ar->title_A %>"><%streamName(stream, gTitles, ar->title_A);%></a></p>
+% NAMELINK(gTitles, ar->title_A);
+</p>
 % }
 % if(ar->title_H && ar->title_H != ar->title_A) {
-<p>Title (Horde): <a href="title=<%= ar->title_H %>"><%streamName(stream, gTitles, ar->title_H);%></a></p>
+<p>Title (Horde): <% NAMELINK(gTitles, ar->title_H);%></p>
 % }
 
 % if(ar->item) { gItems.load(); gNpcs.load();
-<p>Item (via mail): <a href="item=<%= ar->item %>"><%streamName(stream, gItems, ar->item);%></a><br>
-Sender: <a href="npc=<%= ar->sender %>"><%streamName(stream, gNpcs, ar->sender);%></a><br>
+<p>Item (via mail): <%NAMELINK(gItems, ar->item);%><br>
+Sender: <%NAMELINK(gNpcs, ar->sender);%><br>
 Subject: <%= ar->subject %><br>
 Message: <% streamWowFormattedText(stream, ar->text); %><br>
 </p>

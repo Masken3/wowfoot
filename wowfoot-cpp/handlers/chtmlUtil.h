@@ -21,22 +21,27 @@ void streamHtmlEscape(ostream&, char) VISIBLE;
 
 void streamWowFormattedText(ostream&, const string& src) VISIBLE;
 
-template<class T> void streamName(ostream& os, const T& map, int id) {
+template<class T> void streamName(ostream& os, const T& t) {
+	os << t.name;
+}
+#define NAME(i) streamName(stream, i)
+
+template<class T> void streamNameById(ostream& os, const T& map, int id) {
 	auto* t = map.find(id);
 	if(t) {
-		os << t->name;
+		streamName(os, *t);
 	} else {
 		os << map.name << " " << id;
 	}
 }
 
 template<class T>
-void streamNameLink(ostream& o, const T& map, int id) {
+void streamNameLinkById(ostream& o, const T& map, int id) {
 	o << "<a href=\""<<map.name<<"="<<id<<"\">";
-	streamName(o, map, id);
+	streamNameById(o, map, id);
 	o << "</a>";
 }
-#define NAMELINK(map, id) streamNameLink(stream, map, id)
+#define NAMELINK(map, id) streamNameLinkById(stream, map, id)
 
 template<class T> string toString(const T& t) {
 	ostringstream oss;

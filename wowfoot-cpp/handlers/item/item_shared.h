@@ -4,10 +4,15 @@
 #include "db_item.h"
 #include "tabTable.h"
 #include "db_loot_template.h"
+#include "chtmlUtil.h"
 #include <ostream>
 
 void streamAllCostHtml(std::ostream&, const Item&) VISIBLE;
 void streamItemClassHtml(std::ostream&, const Item&) VISIBLE;
+
+// has "Heroic" prefix.
+template<> void streamName(ostream& os, const Item& t) VISIBLE;
+
 void addItem(tabTableChtml& t, const Item& i) VISIBLE;
 void itemColumns(tabTableChtml& t) VISIBLE;
 void lootColumns(tabTableChtml& t) VISIBLE;

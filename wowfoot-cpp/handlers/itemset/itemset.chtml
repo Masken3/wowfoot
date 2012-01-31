@@ -10,7 +10,7 @@
 % if(a) {
 <p><span class="itemName">Item Set: <%= mTitle %></span></p>
 
-<p>Static items (bugged):<br>
+<p>DBC items (bugged):<br>
 % for(size_t i=0; i<NUMOF(a->item); i++) { int id = a->item[i]; if(id != 0) {
 <%NAMELINK(gItems, id);%><br>
 % } }
@@ -19,7 +19,7 @@
 <p>TDB items:<br>
 % for(Items::ItemsetPair p = gItems.findItemset(a->id); p.first != p.second; ++p.first) {
 % const Item& i(*p.first->second);
-<a href="item=<%=i.entry%>"><%=i.name%></a><br>
+<a href="item=<%=i.entry%>"><%NAME(i);%></a><br>
 % }
 </p>
 

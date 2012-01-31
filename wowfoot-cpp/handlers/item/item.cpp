@@ -25,6 +25,8 @@
 
 using namespace std;
 
+static const int ITEM_FLAG_HEROIC = 8;
+
 static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
@@ -112,6 +114,12 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Quest reward
 	// Reference loot (debug)
 	tabs.push_back(referenceLoot(a));
+}
+
+template<> void streamName(ostream& os, const Item& t) {
+	if(t.flags & ITEM_FLAG_HEROIC)
+		os << "Heroic ";
+	os << t.name;
 }
 
 static class streamIfNonFirstClass {

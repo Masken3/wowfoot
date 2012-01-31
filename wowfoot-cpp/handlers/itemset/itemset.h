@@ -4,6 +4,7 @@
 #include "tabs.h"
 #include "db_item.h"
 #include "util/numof.h"
+#include "item_shared.h"
 
 class itemsetChtml : public tabsChtml, public PageContext {
 public:

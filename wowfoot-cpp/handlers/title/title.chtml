@@ -15,7 +15,7 @@ Title <%=mTitle%> does not exist.
 <p>Rewarded by:
 % AchievementRewards::Title_APair p = gAchievementRewards.findTitle_A(a->id);
 % for(; p.first != p.second; ++p.first) { int id = p.first->second->entry;
-<a href="achievement=<%= id %>"><%streamName(stream, gAchievements, id);%></a><br>
+<%NAMELINK(gAchievements, id);%><br>
 % }
 </p>
 
