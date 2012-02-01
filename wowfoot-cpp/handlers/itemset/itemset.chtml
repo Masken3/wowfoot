@@ -23,6 +23,14 @@
 % }
 </p>
 
+% for(size_t i=0; i<NUMOF(a->spell) && a->spell[i].id != 0; ) { int nPieces = a->spell[i].req;
+<p><%=nPieces%> piece bonus:<br>
+% while(a->spell[i].req == nPieces && a->spell[i].id != 0) {
+<%NAMELINK(gSpells, a->spell[i].id);%><br>
+% i++; }
+</p>
+% }
+
 % returnCode = tabsChtml::run(stream);
 % } else {
 <p><%= mTitle %> not found.</p>

@@ -1,6 +1,7 @@
 #include "chtmlBase.h"
 #include "chtmlUtil.h"
 #include "dbcItemSet.h"
+#include "dbcSpell.h"
 #include "tabs.h"
 #include "db_item.h"
 #include "util/numof.h"
