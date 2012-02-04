@@ -53,6 +53,7 @@ int main(int argc, const char** argv) {
 	mountIdPage("achievement");
 	mountIdPage("object");
 	mountIdPage("quest");
+	mountFormPage("quests");
 	mountIdPage("faction");
 	mountIdPage("title");
 

@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>Quests - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<p>List quests:</p>
+
+% if(mPair) {
+<table class="tab">
+<!-- Title row -->
+<tr><td>ID</td><td>Title</td><td>Faction</td><td>Min rep</td><td>Max rep</td></tr>
+%  int count = 0;
+%  while(mPair->hasNext() && count < 100) {
+%   const Quest& q(mPair->next());
+<tr>
+<td><%=q.id%></td>
+<td><a href="quest=<%=q.id%>"><%=q.title%></a></td>
+<td><%NAMELINK(gFactions, q.requiredMaxRepFaction);%></td>
+<td><%=q.requiredMinRepValue%></td>
+<td><%=q.requiredMaxRepValue%></td>
+</tr>
+%   count++;
+%  }
+</table>
+<p><%=count%> quests.</p>
+% }
+
+</body>
+</html>

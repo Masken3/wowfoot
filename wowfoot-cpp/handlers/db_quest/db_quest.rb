@@ -14,7 +14,10 @@ c(:int, :requiredRaces),
 c(:int, :requiredClasses),
 c(:int, :requiredSkillId),
 c(:int, :requiredSkillPoints),
-# todo: reputation required to get quest
+c(:int, :requiredMinRepFaction),
+c(:int, :requiredMinRepValue),
+c(:int, :requiredMaxRepFaction),
+c(:int, :requiredMaxRepValue),
 # todo: prevId, nextId, group, chain
 c(:string, :title),
 c(:string, :details),
