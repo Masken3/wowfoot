@@ -23,6 +23,10 @@ HOME_DIR = pwd
 FileUtils.cd '../wowfoot-ex'
 require './libs.rb'
 LIBMPQ.setup
+BLP.setup
+SQUISH.setup
+PALBMP.setup
+CRBLIB.setup
 FileUtils.cd HOME_DIR
 
 if(true)#HOST == :win32)
@@ -77,8 +81,6 @@ class DllTask
 		#@work.dump(0) if(@NAME.include?('icon'))
 		return c
 	end
-
-		#return c if(!p_needed?)
 
 	def writeCount(c)
 		cn = "#{@work.baseName}.count"
@@ -300,8 +302,12 @@ HandlerWork.new('icon', ['dbc']).instance_eval do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
 	@prerequisites << DirTask.new(self, 'build/icon')
 	set_defaults
-	@EXTRA_OBJECTS = [CopyFileTask.new(self, @BUILDDIR + File.basename(LIBMPQ.target.to_s),
-		FileTask.new(self, LIBMPQ.target.to_s))]
+	def copy(work)
+		CopyFileTask.new(self, @BUILDDIR + File.basename(work.target.to_s),
+			FileTask.new(self, work.target.to_s))
+	end
+	@EXTRA_OBJECTS = [copy(LIBMPQ), copy(BLP), copy(SQUISH), copy(PALBMP), copy(CRBLIB)]
+	@LIBRARIES += ['png', 'jpeg']
 end
 
 TdbWork.new('db_achievement_reward')

@@ -1,5 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include "blp/MemImage.h"
 #include "mpq_libmpq04.h"
 #include "icon.h"
 #include "dbc.h"
@@ -44,11 +45,24 @@ string getIcon(const char* name) {
 	string mpqName = string("Interface\\ICONS\\") + name + ".blp";
 	MPQFile file(mpqName.c_str());
 
-	string httpName = string("icon/") + name + ".blp";
+	string httpName = string("icon/") + name + ".jpg";
 	if(file.getSize() > 0) {
 		string localName = "build/" + httpName;
+#if 0
 		FileDescriptor fd = open(localName.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
 		ERRNO(fd.writeFully(file.getBuffer(), file.getSize()));
+#endif
+		MemImage img;
+		bool res = img.LoadFromBLP((const BYTE*)file.getBuffer(),
+			(DWORD)file.getSize());
+		EASSERT(res);
+#if 0
+		printf("Size: %i x %i\n", img.GetWidth(), img.GetHeight());
+		res = img.RemoveAlpha();
+		EASSERT(res);
+#endif
+		res = img.SaveToJPEG(localName.c_str());
+		EASSERT(res);
 	} else {
 		printf("Warning: %s not found.\n", name);
 	}
