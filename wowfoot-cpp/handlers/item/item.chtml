@@ -10,9 +10,19 @@
 % if(!a) {
 Item <%=mTitle%> does not exist.
 % } else {
-<p>
-<span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span><br>
+<p><span class="itemName" style="color:#<%=ITEM_QUALITY(a->quality).color%>;"><%= a->name %></span></p>
 
+%// icon
+<p>
+% const ItemDisplayInfo* di = gItemDisplayInfos.find(a->displayId);
+% if(di) {
+<img src="<%=getIcon(di->icon)%>" alt="<%=di->icon%>">
+% } else {
+Warning: invalid display id (<%=a->displayId%>)
+% }
+</p>
+
+<p>
 % if(a->bonding != 0) {
 <%= ITEM_BONDING(a->bonding) %><br>
 % }

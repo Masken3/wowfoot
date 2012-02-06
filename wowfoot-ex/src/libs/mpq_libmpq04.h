@@ -8,6 +8,7 @@
 #ifndef MPQ_H
 #define MPQ_H
 
+#include "visible.h"
 #include "loadlib.h"
 #include "libmpq/mpq.h"
 #include <string.h>
@@ -72,7 +73,7 @@ public:
     // Searches open archives for the specified file.
     // Archive are searched in reverse order of opening,
     // so you'll want to open the oldest archive first.
-    MPQFile(const char* filename);    // filenames are not case sensitive
+    MPQFile(const char* filename) VISIBLE;    // filenames are not case sensitive
     ~MPQFile() { close(); }
     size_t read(void* dest, size_t bytes);
     size_t getSize() { return size; }
@@ -82,7 +83,7 @@ public:
     bool isEof() { return eof; }
     void seek(int offset);
     void seekRelative(int offset);
-    void close();
+    void close() VISIBLE;
 };
 
 inline void flipcc(char *fcc)

@@ -208,6 +208,13 @@ class Task < TaskBase
 	def needed?(log = true)
 		true
 	end
+
+	def p_needed?(log = true)
+		@prerequisites.each do |p|
+			return true if(p.p_needed?(log))
+		end
+		return needed?(log)
+	end
 end
 
 # A Task representing a file.
@@ -281,7 +288,7 @@ class FileTask < Task
 	end
 
 	def dump(level)
-		puts (" " * level) + @NAME
+		puts (' ' * level) + @NAME + (p_needed? ? ' needed' : '')
 		super
 	end
 end

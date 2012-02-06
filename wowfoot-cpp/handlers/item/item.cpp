@@ -48,6 +48,7 @@ void fini() {
 }
 
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gItemDisplayInfos.load();
 	gReferenceLoots.load();
 	gCreatureLoots.load();
 	gPickpocketingLoots.load();

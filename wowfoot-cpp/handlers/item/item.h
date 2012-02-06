@@ -7,7 +7,9 @@
 #include "chrClasses.h"
 #include "chrRaces.h"
 #include "dbcItemSet.h"
+#include "dbcItemDisplayInfo.h"
 #include "item_shared.h"
+#include "icon.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:

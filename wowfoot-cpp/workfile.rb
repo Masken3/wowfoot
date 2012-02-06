@@ -15,6 +15,7 @@ require 'net/http'
 CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
 WORKS = []
+WORK_MAP = {}
 
 # setup LIBMPQ. invoke later.
 include FileUtils::Verbose
@@ -37,6 +38,10 @@ end
 class DllTask
 	alias_method :old_execute, :execute
 	def sendSignal
+		if(HOST != :win32)
+			#setNewName	# causes crash
+			return
+		end
 		# send a signal containing all the
 		# idHandlers that depends on this DLL (including itself).
 		# wait for a "finished" signal from the server.
@@ -54,11 +59,52 @@ class DllTask
 		end; end
 		#if(@work.respond_to?(:newDllName) && HOST == :linux)
 		if(false)
-			@originalName = @NAME
-			@NAME = @work.newDllName
+			setNewName
 			idHandlerWorks << main << ':' << @NAME
 		end
 		rootSendSignal(idHandlerWorks) if(!idHandlerWorks.empty?)
+	end
+	def readCount
+		cn = "#{@work.baseName}.count"
+		c = 0
+		if(File.exist?(cn))
+			open(cn) do |file|
+				c = file.read.strip.to_i
+				file.close
+			end
+		end
+		#puts "#{@NAME}: loaded #{isLoaded}, needed #{p_needed?}, count #{c}" if(@NAME.include?('icon'))
+		#@work.dump(0) if(@NAME.include?('icon'))
+		return c
+	end
+
+		#return c if(!p_needed?)
+
+	def writeCount(c)
+		cn = "#{@work.baseName}.count"
+		c += 1
+		open(cn, 'w') do |file|
+			file.write(c.to_s)
+			file.close
+		end
+		return c
+	end
+	def newDllName(c)
+		return File.expand_path "#{@work.baseName}.#{c}#{DLL_FILE_ENDING}"
+	end
+	def setNewName
+		return if(!isLoaded)
+		c = readCount
+		if(c != 0)
+			@originalName = @NAME
+			@NAME = newDllName(c)
+		end
+		c = writeCount(c) if(p_needed?)
+		if(c != 0)
+			@originalName = @NAME if(!@originalName)
+			@NAME = newDllName(c)
+			puts "#{@originalName} is loaded. renaming to #{@NAME}"
+		end
 	end
 	def isLoaded; if(HOST == :win32)
 		# try to remove target file.
@@ -66,6 +112,10 @@ class DllTask
 		FileUtils.rm_f(@NAME)
 		return File.exist?(@NAME)
 	else	# unix-type systems
+		if(@work.is_a?(PageWork))
+			#puts "#{@NAME} is a PageWork."
+			return false
+		end
 		# read /proc to find our server process.
 		# read /proc/*/maps to list the loaded objects.
 		#p WFC.target.to_s
@@ -76,7 +126,7 @@ class DllTask
 			if(File.exists?(proc+'/exe')); if(File.readlink(proc+'/exe') == WFC.target.to_s)
 				open(proc+'/maps', 'r').each do |line|
 					if(line.index(@NAME))
-						puts "Found #{@NAME} in #{proc}"
+						#puts "Found #{@NAME} in #{proc}"
 						return true
 					end
 				end
@@ -89,7 +139,7 @@ class DllTask
 		FileUtils.rm_f(@NAME)
 		raise hell if(File.exist?(@NAME))
 		old_execute
-		cp(@NAME, @originalName) if(@originalName)
+		#cp(@NAME, @originalName) if(@originalName)
 	end
 end
 end	# WIN32
@@ -157,6 +207,20 @@ class HandlerWork < DllWork
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
 		@NAME = name
 		WORKS << self
+		WORK_MAP[name] = self
+	end
+	def name; File.basename(@TARGET.to_s, '.so'); end
+	def baseName; "#{@BUILDDIR}#{@NAME}"; end
+	def setup
+		@LOCAL_DLLS = @LOCAL_DLLS.collect do |dll|
+			w = WORK_MAP[dll]
+			if(w)
+				dll = w.name
+			end
+			dll
+		end
+		super
+		@TARGET.setNewName
 	end
 end
 
@@ -176,19 +240,6 @@ end
 class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [])
 		super(name, handlerDeps, true)
-	end
-	def count
-		c = 0
-		c = open('build/count').read.strip.to_i if(File.exist?('build/count'))
-		c += 1
-		open('build/count', 'w') do |file|
-			file.write(c.to_s)
-			file.close
-		end
-		return c
-	end
-	def newDllName
-		return "#{@BUILDDIR}#{count}#{@NAME}#{DLL_FILE_ENDING}"
 	end
 end
 
@@ -244,6 +295,14 @@ end
 HandlerWork.new('dbcItemClass', ['dbc']).instance_eval do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
 end
+HandlerWork.new('icon', ['dbc']).instance_eval do
+	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
+	@prerequisites << DirTask.new(self, 'build/icon')
+	set_defaults
+	@EXTRA_OBJECTS = [CopyFileTask.new(self, @BUILDDIR + File.basename(LIBMPQ.target.to_s),
+		FileTask.new(self, LIBMPQ.target.to_s))]
+end
 
 TdbWork.new('db_achievement_reward')
 TdbWork.new('db_quest')
@@ -254,6 +313,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcItemDisplayInfo')
 DbcWork.new('dbcItemSet')
 DbcWork.new('dbcCharTitles')
 DbcWork.new('dbcQuestFactionReward')
@@ -304,7 +364,7 @@ PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSp
 PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
-	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet'])
+	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo'])
 PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
@@ -355,6 +415,7 @@ end
 
 target :run => :default do
 	rm_f 'build/count'
+	rm_f Dir.glob('build/*/*.count')
 	sh cmd
 end
 
