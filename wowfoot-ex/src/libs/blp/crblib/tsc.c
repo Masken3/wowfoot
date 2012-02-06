@@ -16,7 +16,7 @@
 void readTSC(ulong *hi)
 {
 ulong *lo = hi + 1;
-	__asm 
+	__asm
 	{
 		rdtsc
 		mov EBX,hi
@@ -51,7 +51,7 @@ void readTSC(ulong *hi)
 }
 double diffTSChz(ulong *tsc1,ulong *tsc2)
 {
-	return tsc2[0] - tsc1[0]; 
+	return tsc2[0] - tsc1[0];
 }
 
 double readTSChz(void)
@@ -63,7 +63,7 @@ double readTSChz(void)
 
 
 typedef struct tscNode tscNode;
-struct tscNode 
+struct tscNode
 {
 	tscNode *next;
 	ulong tsc[2];
@@ -107,7 +107,7 @@ double diffTSC(ulong *tsc1,ulong *tsc2)
 return diffTSChz(tsc1,tsc2) * secondsPerTSC();
 }
 
-#ifndef WIN32	//HACK
+#ifndef _MSC_VER	//HACK
 double secondsPerTSC() {
 	return 1;
 }
@@ -123,11 +123,11 @@ double time;
 }
 
 void showTSC(const char *tag,FILE * fp,double time)
-{	
+{
 	fprintf(fp,"%s : %f secs\n",tag,time);
 }
 
-#ifdef WIN32
+#ifdef _MSC_VER
 void showPopTSCper(FILE * fp,const char *tag,int items,const char *itemTag)
 {
 double time;
@@ -142,10 +142,10 @@ double hz,per;
 
 	hz = time * tscMHZ() * 1000000;
 	per = time/(double)items;
-	
+
 	fprintf(fp,"%s : %f secs = %2.1f cycles / %s = ",tag,time,hz/items,itemTag);
 
-	if ( per < 0.0001 ) 
+	if ( per < 0.0001 )
 	{
 		fprintf(fp,"%d %ss /sec\n",(int)(1.0/per),itemTag);
 	}
@@ -184,7 +184,7 @@ bool RegistryGetValue(const char * path,const char * file,int * pValue)
 					(BYTE *)work,
 					&size
 				) == ERROR_SUCCESS;
- 
+
 	RegCloseKey (hKey);
 
 	if ( result )
@@ -282,25 +282,25 @@ double clocksPerSec; //MHZ;
 		fprintf(stderr,"Calibrating TSC \n");
 
 		i = j = 0;
-		
+
 		#define NUM_WARMUP_CLOCKS	(100)
-		
+
 		clock1 = clock();
 		clock2 = clock1+NUM_WARMUP_CLOCKS;
 		while( clock() < clock2 )
 		{
 			j += rand();
 		}
-		
+
 		#define NUM_TEST_CLOCKS	(100)
-		
+
 		readTSC(tsc1);
 		while( clock() < clock2 + NUM_TEST_CLOCKS )
 		{
 			j += rand();
 		}
 		readTSC(tsc2);
-		
+
 		secondsElapsed = ((double)NUM_TEST_CLOCKS)/CLOCKS_PER_SEC; // 1/1000.0;
 		clocksPerSec = diffTSChz(tsc1,tsc2) / secondsElapsed;
 
@@ -323,7 +323,7 @@ double clocksPerSec; //MHZ;
 
 			TSC_MHZ = (int) MHZ;
 		}
-	
+
 		fprintf(stderr,"Storing MHZ after rounding : %d\n",TSC_MHZ);
 
 		RegistrySetValue(TSC_REGISTRY_PATH,TSC_REGISTRY_VAL,TSC_MHZ);

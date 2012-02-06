@@ -24,11 +24,11 @@ See the Usage() function for info on using this application.
 
 This program requires quite a few things in order to compile correctly:
 
-- Windows 2000 and up.  I'm unsure about the various libraries but at the very 
+- Windows 2000 and up.  I'm unsure about the various libraries but at the very
   least this file calls win32 functions to handle input wildcards.
 - palbmp: A pallete library (C) Charles Bloom.  http://www.cbloom.co/m
-	I'm opting to comply with section 0 of the Bloom Public License: I'm 
-	distributing this program using the GPL.  I've also made some very small 
+	I'm opting to comply with section 0 of the Bloom Public License: I'm
+	distributing this program using the GPL.  I've also made some very small
 	changes to it: I commented out the stderr spam.
 - crblib: Another library (C) Charles Bloom, which is a dependency of palbmp.
 - libpng: The offical PNG reference library. http://www.libpng.org/
@@ -37,14 +37,14 @@ This program requires quite a few things in order to compile correctly:
 ///////////////////////////////////////////////////////////////////////////////
 
 Versions:
-* 8.1 * 
+* 8.1 *
 - Added support for BLP_PAL_A4 format.
 
 * 8 *
 - Incorporated David Holland's (david.w.holland@gmail.com) changes no allow for Linux-compatible builds.
 - Using squish instead of the ATIlib for DXT compression, as it is cross platform.
 
-* 7 * 
+* 7 *
 - Textures that have 256 or fewer unique colors now use exactly those colors when palettized.
 - Made -r option default.  -s turns it off.
 
@@ -58,7 +58,7 @@ Versions:
 - -g will now work when when converting a Palettized PNG that has no alpha.
 - Added -h, which forces cHaracter format BLPs. (palettized, no alpha).
 
-* 4 * 
+* 4 *
 - Added -e and -n options.
 - -g option now works when doing a rgb png -> p8 blp.
 - -g option will automatically create an alpha channel for RGB source PNGs.
@@ -69,12 +69,12 @@ Versions:
 - Removed dependency on DirectX.
 - Added -m, -i, and -c options.
 
-* 2 * 
+* 2 *
 - Fixed bug preventing files from being processed if there was a '.' in their path.
 - Now setting device format to current display format, in hopes of fixing an error
 that people are reporting when the program tries to call CreateDevice().
 
-* 1 * 
+* 1 *
 - Initial release
 
 
@@ -126,7 +126,7 @@ BLP_C_A0		| earthroot		| OK					Sword_1H_Short_A_02Rusty.blp (human male war sta
 BLP_C_A1		| peacebloom	| OK					Hair01_05 (Human golden blonde hair)
 BLP_DXT3		| 				| OK					NorthshireValley1.blp | sungrass
 BLP_C_A8_7		| see end ->	|						Ability_Druid_Cyclone.blp
-					
+
 PNG_RGB			|				| BLP_U_A0	| BLP_C_A0 (DXT1)
 PNG_RGBA		|				| BLP_U_A8	| BLP_C_A8 (DXT3)
 PNG_P8			|				| BLP_U_A0	| -
@@ -138,7 +138,7 @@ PNG_RGBA			| ok, igok (horde armory sign)
 PNG_RGBA	-> P A8	| ok, igok (fang top)
 PNG_P8			| ok, igok (character skin)
 PNG_P8_1trans	| ok, igok (fang top)
-	
+
  */
 
 #ifndef LINUX
@@ -152,7 +152,7 @@ PNG_P8_1trans	| ok, igok (fang top)
 ///////////////////////////////////////////////////////////////////////////////
 // Windows Stuff
 
-#ifndef LINUX
+#ifdef WIN32
 #include <windows.h>
 #include "png.h"
 #else
@@ -178,7 +178,7 @@ FORMATID g_targetFormatID = FORMAT_UNSPECIFIED;
 ///////////////////////////////////////////////////////////////////////////////
 // Testing code.
 
-const char* pngTestList[] = 
+const char* pngTestList[] =
 {
 	"PNG_RGB",
 	"PNG_RGBA",
@@ -186,7 +186,7 @@ const char* pngTestList[] =
 	"PNG_P8_1Trans",
 };
 
-const char* blpTestList[] = 
+const char* blpTestList[] =
 {
 	"BLP_U_A0",
 	"BLP_U_A1",
@@ -217,7 +217,7 @@ static bool RunTest()
 		::sprintf(inputFilename, "%s.png",  pngTestList[iFile]);
 		if (!aMemImage.LoadFromPNG(inputFilename))
 			return false;
-		
+
 		for (int iFormat = 1; iFormat < BLPTYPE_COUNT; ++iFormat)
 		{
 			char outputFilename[BLPCONV_MAX_PATH];
@@ -235,7 +235,7 @@ static bool RunTest()
 		::sprintf(inputFilename, "%s.png",  pngTestList[iFile]);
 		if (!aMemImage.LoadFromPNG(inputFilename))
 			return false;
-		
+
 		for (int iFormat = 1; iFormat < BLPTYPE_COUNT; ++iFormat)
 		{
 			char outputFilename[BLPCONV_MAX_PATH];
@@ -263,7 +263,7 @@ static int ProcessFile(const char* pszFilenameArgument, const char* pszDestinati
 	}
 	pszPeriod[0] = 0;
 	char* pszExtension = &pszPeriod[1];
-	
+
 	// Load the file.
 	FileType inputFileType;
 	FORMATID inputFormatID;
@@ -298,10 +298,10 @@ static int ProcessFile(const char* pszFilenameArgument, const char* pszDestinati
 	char pszTargetFilename[MAX_PATH];
 	if (NULL == pszDestinationFilename)
 	{
-		bool bSameFiletype =	(FILETYPE_BLP == inputFileType && ISBLP(targetFormatID)) || 
+		bool bSameFiletype =	(FILETYPE_BLP == inputFileType && ISBLP(targetFormatID)) ||
 								(FILETYPE_PNG == inputFileType && ISPNG(targetFormatID));
 
-		::sprintf(pszTargetFilename, "%s%s.%s", 
+		::sprintf(pszTargetFilename, "%s%s.%s",
 				(char*) pszFilenameBuffer,
 				bSameFiletype ? "_" : "",
 				ISBLP(targetFormatID) ? "blp" : "png");
@@ -310,10 +310,10 @@ static int ProcessFile(const char* pszFilenameArgument, const char* pszDestinati
 		::strcpy(pszTargetFilename, pszDestinationFilename);
 
 	// Save the file with the given format.
-	LOG("Converting: %s (%s) -> %s (%s)\n", 
-			pszFilenameArgument, 
+	LOG("Converting: %s (%s) -> %s (%s)\n",
+			pszFilenameArgument,
 			FORMATIDNames[inputFormatID],
-			pszTargetFilename, 
+			pszTargetFilename,
 			FORMATIDNames[targetFormatID]);
 	bool result = aMemImage.Save(pszTargetFilename, targetFormatID);
 
@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 		result = -1;
 		goto Finish;
 	}
-	
+
 	int iArg;
 	for (iArg = 1; iArg < argc; ++iArg)
 	{
@@ -540,7 +540,7 @@ int main(int argc, char* argv[])
 					result = -1;
 					goto Finish;
 				}
-				
+
 				MemImage::s_ruleTable[srcID] = destID;
 				break;
 			}
@@ -620,25 +620,25 @@ int main(int argc, char* argv[])
 			while (FindNextFile(hFindFile, &aFindData));
 
 			FindClose(hFindFile);
-#else 
-			DIR *dp; 
-			struct dirent *de; 
+#else
+			DIR *dp;
+			struct dirent *de;
 
-			dp = opendir( dirname( argv[iArg] )); 
-			if( dp == NULL ) { 
+			dp = opendir( dirname( argv[iArg] ));
+			if( dp == NULL ) {
 			    printf("ERROR: Couldn't find file '%s' (%d).\n", argv[iArg], errno);
-			    result = -1; 
-			} else { 
+			    result = -1;
+			} else {
 
 			while ( (de = readdir(dp)) != NULL ) {
-			    if( fnmatch( basename(argv[iArg]), de->d_name, FNM_PATHNAME ) == 0 ) { 
+			    if( fnmatch( basename(argv[iArg]), de->d_name, FNM_PATHNAME ) == 0 ) {
 				result = ProcessFile(de->d_name, NULL);
-				if( result != 0 ) { 
-				    break; 
+				if( result != 0 ) {
+				    break;
 				}
 			    }
 			}
-			closedir(dp); 
+			closedir(dp);
 
 			}
 #endif
@@ -665,7 +665,7 @@ Finish:
 #ifndef LINUX
 		_getch();
 #else
-		getchar(); 
+		getchar();
 #endif
 	}
 

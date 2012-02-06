@@ -12,10 +12,10 @@ make it easier to add support for other file types.
 
 //#define SQUISH_USE_SSE 1
 
-#ifndef LINUX
+#include "port.h"
+#ifdef WIN32
 #include <stdio.h>
 #else
-#include "port.h"
 #include <libgen.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -30,7 +30,7 @@ make it easier to add support for other file types.
 #include <list>
 
 #include <png.h>
-#ifndef LINUX
+#ifdef _MSC_VER
 #include <pnginfo.h>
 #endif
 #include "MemImage.h"
@@ -76,14 +76,14 @@ FORMATID MemImage::s_ruleTable[FORMAT_COUNT] =
 {
 	FORMAT_UNSPECIFIED,
 
-	PNGTYPE_PALETTIZED,				// < BLPTYPE_PAL_ALPHA0,		
-	PNGTYPE_PALETTIZED_ALPHAMASK,	// < BLPTYPE_PAL_ALPHA1,		
-		PNGTYPE_RGBA,					// < BLPTYPE_PAL_ALPHA4,		
-		PNGTYPE_RGBA,					// < BLPTYPE_PAL_ALPHA8,		
-	PNGTYPE_RGB,					// < BLPTYPE_DXT1_ALPHA0,	
-		PNGTYPE_RGBA,					// < BLPTYPE_DXT1_ALPHA1,	
-	PNGTYPE_RGBA,					// < BLPTYPE_DXT3,			
-		PNGTYPE_RGBA,					// < BLPTYPE_DXT5,			
+	PNGTYPE_PALETTIZED,				// < BLPTYPE_PAL_ALPHA0,
+	PNGTYPE_PALETTIZED_ALPHAMASK,	// < BLPTYPE_PAL_ALPHA1,
+		PNGTYPE_RGBA,					// < BLPTYPE_PAL_ALPHA4,
+		PNGTYPE_RGBA,					// < BLPTYPE_PAL_ALPHA8,
+	PNGTYPE_RGB,					// < BLPTYPE_DXT1_ALPHA0,
+		PNGTYPE_RGBA,					// < BLPTYPE_DXT1_ALPHA1,
+	PNGTYPE_RGBA,					// < BLPTYPE_DXT3,
+		PNGTYPE_RGBA,					// < BLPTYPE_DXT5,
 
 	BLPTYPE_PAL_ALPHA0,				// < PNGTYPE_PALETTIZED,
 	BLPTYPE_PAL_ALPHA1,				// < PNGTYPE_PALETTIZED_ALPHAMASK,
@@ -107,9 +107,9 @@ b = bytes per pixel, ie 1 = palettized, 3 = rgb, 4 = rgba
 */
 static int OFFSET_RGB(int x, int y, int w, int h, int c, int b)
 {
-	if (x >= w) 
+	if (x >= w)
 		x = w - 1;
-	if (y >= h) 
+	if (y >= h)
 		y = h - 1;
 	return ((y * w * b) + (x * b) + c);
 }
@@ -177,7 +177,7 @@ static HSB RGBToHSB(int r, int g, int b)
 			BMin = g;
 		else
 			BMin = b;
-	
+
 	diff = float(BMax - BMin);
 
 	if (BMin > 0)
@@ -186,7 +186,7 @@ static HSB RGBToHSB(int r, int g, int b)
 		grey = int(((float)BMin / bright) + 0.5f);
 		sat = int((100 - (((float)grey/255) * 100)) + 0.5f);
 		bright = (float(bright * 100) + 0.5f);
-		
+
 		if (r == BMax)
 		{
 			TempHue = (float)(g - b) / diff;
@@ -200,11 +200,11 @@ static HSB RGBToHSB(int r, int g, int b)
 			TempHue = 4 + (float)(r - g) / diff;
 		}
 		hue = int(TempHue * 60.0f);
-		
+
 		if (hue < 0)
 			hue = hue + 360;
 	}
-	
+
 	hsb.b = DWORD(bright);
 	hsb.h = hue;
 	hsb.s = sat;
@@ -217,7 +217,7 @@ typedef std::list<HSB> THSBList;
 static void SortPalette(BYTE* palette, int numEntries)
 {
 	THSBList hsbList;
-	
+
 	HSB hsb;
 	int ii;
 	for (ii = 0; ii < numEntries; ++ii)
@@ -232,7 +232,7 @@ static void SortPalette(BYTE* palette, int numEntries)
 
 	BYTE tempPalette[MEMIMAGE_PALETTEBYTES];
 	THSBList::iterator it;
-	for (it = hsbList.begin(), ii = 0; it != hsbList.end(); ++it, ++ii) 
+	for (it = hsbList.begin(), ii = 0; it != hsbList.end(); ++it, ++ii)
 	{
 		HSB* pHSB = &(*it);
 		int ix = pHSB->index;
@@ -422,7 +422,7 @@ public:
 
 		// Write the header.
 		::fwrite(&aHeader, sizeof(BLPHeader), 1, hOutputFile);
-		
+
 		// Write the palette.
 		::fwrite(&aPalette, sizeof(BYTE) * 4, 256, hOutputFile);
 
@@ -531,7 +531,7 @@ bool MemImage::AllocateBuffer(DWORD bytes)
 	m_buffer = new BYTE[bytes];
 	if (NULL == m_buffer)
 	{
-		LOG("ERROR: Failed to allocate buffer (%u bytes).\n", bytes);
+		LOG("ERROR: Failed to allocate buffer (%lu bytes).\n", bytes);
 		return false;
 	}
 	m_bufferBytes = bytes;
@@ -544,8 +544,7 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 	FILE* fileInput = ::fopen(filename, "rb");
 	if (NULL == fileInput)
 	{
-		errno_t err;
-		_get_errno( &err );
+		errno_t err = errno;
 		LOG("ERROR opening %s: %s.\n", filename, ::strerror(err));
 		return false;
 	}
@@ -686,7 +685,7 @@ bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* 
 		{
 		case 0: blpType = BLPTYPE_DXT1_ALPHA0; m_bHasAlpha = false; break;
 		case 1: blpType = BLPTYPE_DXT1_ALPHA1; break;
-		case 8: 
+		case 8:
 			{
 				switch (pHeader->alphaEncoding)
 				{
@@ -701,15 +700,15 @@ bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* 
 
 		////////////
 
-		const void* Source = &(fileBuffer[pHeader->mipOffsets[0]]); 
-		squish::u8* Dest = new squish::u8[ m_width * m_height * 4 ]; 
+		const void* Source = &(fileBuffer[pHeader->mipOffsets[0]]);
+		squish::u8* Dest = new squish::u8[ m_width * m_height * 4 ];
 
 		// Do the conversion.
-		squish::DecompressImage( Dest, 
-				 m_width, 
-				 m_height, 
-				 Source, 
-				 squishFlags); 
+		squish::DecompressImage( Dest,
+				 m_width,
+				 m_height,
+				 Source,
+				 squishFlags);
 
 		// Create a buffer for the data.
 		DWORD bpp = (0 == pHeader->alphaBitDepth) ? 3 : 4;
@@ -744,6 +743,7 @@ bool MemImage::LoadFromBLP(const BYTE* fileBuffer, DWORD dwFileBytes, FORMATID* 
 	return true;
 }
 
+#if 0
 bool MemImage::LoadFromPNG(const char* filename, FORMATID* pngTypeRet)
 {
 	bool retVal = true;
@@ -758,8 +758,7 @@ bool MemImage::LoadFromPNG(const char* filename, FORMATID* pngTypeRet)
 	FILE *fp;
 	if ((fp = ::fopen(filename, "rb")) == NULL)
 	{
-		errno_t err;
-		_get_errno( &err );
+		errno_t err = errno;
 		LOG("ERROR opening %s: %s.\n", filename, ::strerror(err));
 		return false;
 	}
@@ -834,8 +833,8 @@ bool MemImage::LoadFromPNG(const char* filename, FORMATID* pngTypeRet)
 		return false;
 
 	// Copy the data in row by row.
-	if (info_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA || 
-		info_ptr->color_type == PNG_COLOR_TYPE_RGB || 
+	if (info_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA ||
+		info_ptr->color_type == PNG_COLOR_TYPE_RGB ||
 		(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE && info_ptr->num_trans == 0))
 	{
 		for (DWORD row = 0; row < info_ptr->height; ++row)
@@ -859,7 +858,7 @@ bool MemImage::LoadFromPNG(const char* filename, FORMATID* pngTypeRet)
 			}
 		}
 	}
-	else 
+	else
 	{
 		printf("ERROR: PNG format unsupported.  Format = %d", info_ptr->color_type);
 		return false;
@@ -927,6 +926,7 @@ bool MemImage::LoadFromPNG(const char* filename, FORMATID* pngTypeRet)
 	/* that's it */
 	return retVal;
 }
+#endif	//0
 
 bool MemImage::Save(const char* filename, FORMATID type) const
 {
@@ -934,7 +934,7 @@ bool MemImage::Save(const char* filename, FORMATID type) const
 		return SaveToBLP(filename, type);
 	else if (PNGTYPE_FIRST <= type && type <= PNGTYPE_LAST)
 		return SaveToPNG(filename, type);
-	
+
 	LOG("ERROR: Save called with invalid type %d.\n", type);
 	return false;
 }
@@ -947,7 +947,7 @@ bool MemImage::SaveToJPEG(const char* filename, unsigned width, unsigned height)
 		temp.Depalettize();
 		return temp.SaveToJPEG(filename);
 	}
-	
+
 	if(width > GetWidth())
 		width = GetWidth();
 	if(height > GetHeight())
@@ -965,15 +965,15 @@ bool MemImage::SaveToJPEG(const char* filename, unsigned width, unsigned height)
 		return false;
 	}
 	jpeg_stdio_dest(&cinfo, outfile);
-	
+
 	cinfo.image_width = width; 	/* image width and height, in pixels */
 	cinfo.image_height = height;
 	cinfo.input_components = 3;	/* # of color components per pixel */
 	cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
 	jpeg_set_defaults(&cinfo);
-	
+
 	jpeg_start_compress(&cinfo, TRUE);
-	
+
 	JSAMPROW row_pointer[1];	/* pointer to a single row */
 	int row_stride;			/* physical row width in buffer */
 	row_stride = GetWidth() * 3;	/* JSAMPLEs per row in image_buffer */
@@ -983,7 +983,7 @@ bool MemImage::SaveToJPEG(const char* filename, unsigned width, unsigned height)
 	}
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
-	
+
 	fclose(outfile);
 	return true;
 }
@@ -1036,7 +1036,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 		{
 			// Create a image to convert.
 			// NOTE: The point of doing this is to make the code which actually saves the BLP
-			// data simpler.  Since we do this, it can assume that when it is asked to save 
+			// data simpler.  Since we do this, it can assume that when it is asked to save
 			// to a given format the MemImage will be in the nearest corresponding format.
 			// For example, if the code below is saving to pal 1-bit alpha, the MemImage will
 			// always be palettized w/ alpha.
@@ -1100,7 +1100,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 	{
 		LOG("ERROR: Couldn't open %s for writing.\n", filename);
 		return false;
-	}	
+	}
 	png_init_io(png_ptr, fp);
 
 	// Allocate row pointers.
@@ -1115,8 +1115,8 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 
 	switch (type)
 	{
-	case PNGTYPE_PALETTIZED: 
-	case PNGTYPE_PALETTIZED_ALPHAMASK: 
+	case PNGTYPE_PALETTIZED:
+	case PNGTYPE_PALETTIZED_ALPHAMASK:
 		{
 			// Create the PNG palette and set it.
 			png_color pngPalette[256];
@@ -1128,7 +1128,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 			}
 
 			// Set the image type.
-			png_set_IHDR(png_ptr, info_ptr, 
+			png_set_IHDR(png_ptr, info_ptr,
 					m_width,
 					m_height,
 					8,	// Bit depth.
@@ -1157,7 +1157,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 
 				// Not necessarily lossy if the source was 1-bit alpha, too.
 				printf("\t1-bit Alpha\n");
-				
+
 				// This needs to come first, its the way the file format is defined.
 				const BYTE ALPHAPALETTEINDEX = 0;
 
@@ -1176,12 +1176,12 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 							transparentAlphaIndex = tempBuffer[ii];
 
 							// Dont use 0--thats the one we want.
-							// I'm not really 100% sure about this, but I don't care a whole lot 
+							// I'm not really 100% sure about this, but I don't care a whole lot
 							// because this is a lossy conversion.  RGBA is a much better option.
 							if (transparentAlphaIndex != 0)
 							{
 								// We want palette entry 0 to be our transparent one, so swap out
-								// this color with 0 in the palette.^		
+								// this color with 0 in the palette.^
 								pngPalette[transparentAlphaIndex].red = pngPalette[ALPHAPALETTEINDEX].red;
 								pngPalette[transparentAlphaIndex].green = pngPalette[ALPHAPALETTEINDEX].green;
 								pngPalette[transparentAlphaIndex].blue = pngPalette[ALPHAPALETTEINDEX].blue;
@@ -1229,7 +1229,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 					// green zero entry created.  It looks correct, but instead of the alpha entry
 					// being 0 it is 255.
 				}
-			} 
+			}
 			else // no alpha
 			{
 				// Assign row pointers.
@@ -1245,11 +1245,11 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 			break;
 		}
 
-	case PNGTYPE_RGB: 
-	case PNGTYPE_RGBA: 
+	case PNGTYPE_RGB:
+	case PNGTYPE_RGBA:
 		{
 			// Set the image type.
-			png_set_IHDR(png_ptr, info_ptr, 
+			png_set_IHDR(png_ptr, info_ptr,
 					m_width,
 					m_height,
 					8,	// Bit depth.
@@ -1336,7 +1336,7 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 	FORMATID destFormat = type;
 	if (FORMAT_UNSPECIFIED == destFormat)
 	{
-		// By default, do 8-bit or 0-bit alpha only.  We could theoretically 
+		// By default, do 8-bit or 0-bit alpha only.  We could theoretically
 		// check the actual alpha levels in the image and try to guess whether 1-bit
 		// is appropriate, but it seems pretty rare that people will need 1-bit alpha
 		// and they can always manually specify it when/if they do.
@@ -1379,7 +1379,7 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 		{
 			// Create a image to convert.
 			// NOTE: The point of doing this is to make the code which actually saves the BLP
-			// data simpler.  Since we do this, it can assume that when it is asked to save 
+			// data simpler.  Since we do this, it can assume that when it is asked to save
 			// to a given format the MemImage will be in the nearest corresponding format.
 			// For example, if the code below is saving to pal 1-bit alpha, the MemImage will
 			// always be palettized w/ alpha.
@@ -1427,28 +1427,28 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 		{
 			aBLPFile.aHeader.alphaBitDepth = 0;		// No alpha
 			aBLPFile.aHeader.alphaEncoding = 8;		// 8 value taken from example
-			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;		
+			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;
 			break;
 		}
 	case BLPTYPE_PAL_ALPHA1:
 		{
 			aBLPFile.aHeader.alphaBitDepth = 1;		// 1-bit alpha
 			aBLPFile.aHeader.alphaEncoding = 1;		// 1 value taken from example
-			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;		
+			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;
 			break;
 		}
 	case BLPTYPE_PAL_ALPHA4:
 		{
 			aBLPFile.aHeader.alphaBitDepth = 4;		// 1-bit alpha
 			aBLPFile.aHeader.alphaEncoding = 8;		// 8 value taken from example
-			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;		
+			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;
 			break;
 		}
 	case BLPTYPE_PAL_ALPHA8:
 		{
 			aBLPFile.aHeader.alphaBitDepth = 8;		// Regular alpha
 			aBLPFile.aHeader.alphaEncoding = 8;		// 8 value taken from example
-			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;		
+			aBLPFile.aHeader.encoding = BLP_ENCODING_PALETTIZED;
 			break;
 		}
 	case BLPTYPE_DXT1_ALPHA0:
@@ -1461,20 +1461,20 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 	case BLPTYPE_DXT1_ALPHA1:
 		{
 			aBLPFile.aHeader.alphaBitDepth = 1;		// No alpha
-			aBLPFile.aHeader.alphaEncoding = 0;		// 0 = DXT1 
+			aBLPFile.aHeader.alphaEncoding = 0;		// 0 = DXT1
 			aBLPFile.aHeader.encoding = BLP_ENCODING_COMPRESSED;
 			break;
 		}
 	case BLPTYPE_DXT3:
 		{
-			aBLPFile.aHeader.alphaBitDepth = 8;		// 
+			aBLPFile.aHeader.alphaBitDepth = 8;		//
 			aBLPFile.aHeader.alphaEncoding = 1;		// 1 = DXT3
 			aBLPFile.aHeader.encoding = BLP_ENCODING_COMPRESSED;
 			break;
 		}
 	case BLPTYPE_DXT5:
 		{
-			aBLPFile.aHeader.alphaBitDepth = 8;		// 
+			aBLPFile.aHeader.alphaBitDepth = 8;		//
 			aBLPFile.aHeader.alphaEncoding = 7;		// 7 = DXT5
 			aBLPFile.aHeader.encoding = BLP_ENCODING_COMPRESSED;
 			break;
@@ -1585,7 +1585,7 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 				return false;
 			}
 		}
-				
+
 		// Allocate a buffer for the converted mip level.
 		aBLPFile.aHeader.mipSizes[iLevel] = convertedMipBytes;
 		aBLPFile.pMips[iLevel] = new BYTE[convertedMipBytes];
@@ -1670,8 +1670,8 @@ bool MemImage::SaveToBLP(const char* filename, FORMATID type) const
 			}
 
 			// Set up the destination texture.
-			squish::u8	*Dest; 
-			Dest = new squish::u8[convertedMipBytes]; 
+			squish::u8	*Dest;
+			Dest = new squish::u8[convertedMipBytes];
 
 			int dxtType = squish::kDxt1;
 			if (BLPTYPE_DXT3 == destFormat)
@@ -1778,7 +1778,7 @@ bool MemImage::Palettize()
 
 		RGBASet::iterator it;
 		DWORD ii;
-		for (it = setPalette.begin(), ii = 0; it != setPalette.end(); ++it, ++ii) 
+		for (it = setPalette.begin(), ii = 0; it != setPalette.end(); ++it, ++ii)
 		{
 			DWORD color = *it;
 			m_palette[ii*3 + 0] = BYTE(  color & 0x0000FF );
@@ -1986,7 +1986,7 @@ bool MemImage::SaveMipDebugImage(const char* pszBaseFilename, const MemImage* mi
 	if (!AllocateBuffer(m_height * pitch * (m_bPalettized && m_bHasAlpha ? 2 : 1)))
 		return false;
 	::memset(m_buffer, 0, m_bufferBytes);
-	
+
 	// Create the image.
 	DWORD destRow = 0;
 	// Note: alphaOffsets only valid/used if pal+alpha.
@@ -1998,13 +1998,13 @@ bool MemImage::SaveMipDebugImage(const char* pszBaseFilename, const MemImage* mi
 		DWORD mipAlphaOffset = mip->m_width * mip->m_height;
 		for (DWORD row = 0; row < mip->m_height; ++row, ++destRow)
 		{
-			::memcpy(&m_buffer[destRow * pitch], 
-						&mip->m_buffer[row * mip->m_width * bytesPerPixel], 
+			::memcpy(&m_buffer[destRow * pitch],
+						&mip->m_buffer[row * mip->m_width * bytesPerPixel],
 						mip->m_width * bytesPerPixel);
 			if (m_bPalettized && m_bHasAlpha)
 			{
-				::memcpy(&m_buffer[alphaOffset + destRow*pitch], 
-							&mip->m_buffer[mipAlphaOffset + row * mip->m_width * bytesPerPixel], 
+				::memcpy(&m_buffer[alphaOffset + destRow*pitch],
+							&mip->m_buffer[mipAlphaOffset + row * mip->m_width * bytesPerPixel],
 							mip->m_width * bytesPerPixel);
 			}
 		}
@@ -2016,14 +2016,14 @@ bool MemImage::SaveMipDebugImage(const char* pszBaseFilename, const MemImage* mi
 	return SaveToPNG(pszMipFilename);
 }
 
-bool MemImage::BuildMipmap(const MemImage& sourceMip) 
+bool MemImage::BuildMipmap(const MemImage& sourceMip)
 {
 	Clear();
 
 	m_bHasAlpha = sourceMip.m_bHasAlpha;
 	m_bPalettized = sourceMip.m_bPalettized;
-	m_width = __max(sourceMip.m_width / 2, 1U);
-	m_height = __max(sourceMip.m_height / 2, 1U);
+	m_width = __max(sourceMip.m_width / 2, (DWORD)1U);
+	m_height = __max(sourceMip.m_height / 2, (DWORD)1U);
 	if (!AllocateBuffer(0))
 		return false;
 
@@ -2037,7 +2037,7 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
     DWORD i, j;
     for (j = 0; j < destHeight; j++)
 	{
-        for (i = 0; i < destWidth; i++) 
+        for (i = 0; i < destWidth; i++)
 		{
 			if (!m_bPalettized)
 			{
@@ -2069,9 +2069,9 @@ bool MemImage::BuildMipmap(const MemImage& sourceMip)
 				int c;
 				for (c = 0; c < bpp; ++c)
 				{
-					destColor[c] = int(	srcBuff[OFFSET_RGB(i*2+0, j*2+0, w, h, c, bpp)] * gammaWeights[0] + 
+					destColor[c] = int(	srcBuff[OFFSET_RGB(i*2+0, j*2+0, w, h, c, bpp)] * gammaWeights[0] +
 										srcBuff[OFFSET_RGB(i*2+0, j*2+1, w, h, c, bpp)] * gammaWeights[1] +
-										srcBuff[OFFSET_RGB(i*2+1, j*2+0, w, h, c, bpp)] * gammaWeights[2] + 
+										srcBuff[OFFSET_RGB(i*2+1, j*2+0, w, h, c, bpp)] * gammaWeights[2] +
 										srcBuff[OFFSET_RGB(i*2+1, j*2+1, w, h, c, bpp)] * gammaWeights[3]);
 				}
 

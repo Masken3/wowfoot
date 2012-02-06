@@ -195,7 +195,7 @@ class GccWork < BuildWork
 
 	def getGccFlags(source)
 		ext = source.to_s.getExt
-		cflags = @CFLAGS_MAP[ext]
+		cflags = @CFLAGS_MAP[ext.downcase]
 		if(cflags == nil) then
 			error "Bad ext: '#{ext}' from source '#{source}'"
 		end

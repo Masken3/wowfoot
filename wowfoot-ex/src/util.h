@@ -19,7 +19,7 @@ int mkdir(const char* name);
 #ifdef _MSC_VER
 #define PFZT "Iu"
 #else
-#define PFZT "zu"
+#define PFZT PRIuPTR
 #endif
 
 #ifdef _MSC_VER

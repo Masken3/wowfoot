@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <fcntl.h>
 #include <set>
+#include <stdio.h>
 
 using namespace std;
 
@@ -89,7 +90,7 @@ static void LoadCommonMPQFiles()
 	int count = sizeof(CONF_mpq_list)/sizeof(char*);
 	for(int i = 0; i < count; ++i)
 	{
-		sprintf(filename, WOW_INSTALL_DIR"Data/%s", CONF_mpq_list[i]);
+		sprintf(filename, WOW_INSTALL_DIR "Data/%s", CONF_mpq_list[i]);
 		if(FileExists(filename))
 			new MPQArchive(filename);
 	}
@@ -143,7 +144,7 @@ static bool mkdir_p(const string& path) {
 		size_t sep = path.find('/', pos);
 		//printf("mkdir(%s)\n", path.substr(0, sep).c_str());
 		if(mkdir(path.substr(0, sep).c_str()) < 0 && errno != EEXIST) {
-			printf("mkdir(%s) failed: %m\n", path.substr(0, sep).c_str());
+			printf("mkdir(%s) failed: %s\n", path.substr(0, sep).c_str(), strerror(errno));
 			return false;
 		}
 		pos = sep + 2;
@@ -244,7 +245,7 @@ static void dumpAreaMap(bool dumpArea) {
 	res = mapDbc.open();
 	if(!res)
 		exit(1);
-	printf("Extracting %"PRIuPTR" maps...\n", mapDbc.getRecordCount());
+	printf("Extracting %" PRIuPTR " maps...\n", mapDbc.getRecordCount());
 	if(dumpArea) {
 		out = fopen("output/AreaMap.bin", "wb");
 		writeInt(out, mapDbc.getRecordCount());
@@ -327,10 +328,10 @@ int main() {
 	FILE* out2;
 
 	printf("Opening MPQ files:\n");
-	MPQArchive locale(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
-	MPQArchive patch(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
-	MPQArchive patch2(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
-	MPQArchive patch3(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
+	MPQArchive locale(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
+	MPQArchive patch(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
+	MPQArchive patch2(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
+	MPQArchive patch3(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
 	LoadCommonMPQFiles();
 
 	mkdir("output");
@@ -355,7 +356,7 @@ int main() {
 	res = ct.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" titles...\n", ct.getRecordCount());
+	printf("Extracting %" PRIuPTR " titles...\n", ct.getRecordCount());
 	out = fopen("output/Title.rb", "w");
 	fprintf(out, "TITLE = {\n");
 	for(DBCFile::Iterator itr = ct.begin(); itr != ct.end(); ++itr) {
@@ -372,7 +373,7 @@ int main() {
 	res = iec.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" costs...\n", iec.getRecordCount());
+	printf("Extracting %" PRIuPTR " costs...\n", iec.getRecordCount());
 	out = fopen("output/ItemExtendedCost.rb", "w");
 	fprintf(out, "IdCount = Struct.new(:id, :count)\n");
 	fprintf(out, "ITEM_EXTENDED_COST = {\n");
@@ -412,7 +413,7 @@ int main() {
 	res = totem.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" totems...\n", totem.getRecordCount());
+	printf("Extracting %" PRIuPTR " totems...\n", totem.getRecordCount());
 	out = fopen("output/TotemCategory.rb", "w");
 	fprintf(out, "TOTEM_CATEGORY = {\n");
 	out2 = fopen("output/TotemCategory.data.cpp", "w");
@@ -436,7 +437,7 @@ int main() {
 	res = spell.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" spells...\n", spell.getRecordCount());
+	printf("Extracting %" PRIuPTR " spells...\n", spell.getRecordCount());
 	out = fopen("output/Spell.rb", "w");
 	fprintf(out, "SPELL = {\n");
 	out2 = fopen("output/exSpell.data.cpp", "w");
@@ -462,7 +463,7 @@ int main() {
 		printf("DBC open fail.\n");
 		return 1;
 	}
-	printf("Extracting %"PRIuPTR" continents...\n", wmc.getRecordCount());
+	printf("Extracting %" PRIuPTR " continents...\n", wmc.getRecordCount());
 	out = fopen("output/WorldMapContinent.rb", "w");
 	fprintf(out, "WORLD_MAP_CONTINENT = {\n");
 	for(DBCFile::Iterator itr = wmc.begin(); itr != wmc.end(); ++itr) {
@@ -484,7 +485,7 @@ int main() {
 	res = ach.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" achievements...\n", ach.getRecordCount());
+	printf("Extracting %" PRIuPTR " achievements...\n", ach.getRecordCount());
 	out = fopen("output/Achievement.rb", "w");
 	fprintf(out, "ACHIEVEMENT = {\n");
 	for(DBCFile::Iterator itr = ach.begin(); itr != ach.end(); ++itr) {
@@ -507,7 +508,7 @@ int main() {
 	res = fac.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" factions...\n", fac.getRecordCount());
+	printf("Extracting %" PRIuPTR " factions...\n", fac.getRecordCount());
 	out = fopen("output/Faction.rb", "w");
 	fprintf(out, "FACTION = {\n");
 	for(DBCFile::Iterator itr = fac.begin(); itr != fac.end(); ++itr) {
@@ -525,7 +526,7 @@ int main() {
 	res = qfr.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" QuestFactionRewards...\n", qfr.getRecordCount());
+	printf("Extracting %" PRIuPTR " QuestFactionRewards...\n", qfr.getRecordCount());
 	out = fopen("output/QuestFactionReward.rb", "w");
 	fprintf(out, "QUEST_FACTION_REWARD = {\n");
 	for(DBCFile::Iterator itr = qfr.begin(); itr != qfr.end(); ++itr) {
@@ -544,7 +545,7 @@ int main() {
 	res = is.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" item sets...\n", is.getRecordCount());
+	printf("Extracting %" PRIuPTR " item sets...\n", is.getRecordCount());
 	out = fopen("output/ItemSet.rb", "w");
 	fprintf(out, "ITEM_SET = {\n");
 	for(DBCFile::Iterator itr = is.begin(); itr != is.end(); ++itr) {
@@ -561,7 +562,7 @@ int main() {
 	res = qs.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" quest sorts...\n", qs.getRecordCount());
+	printf("Extracting %" PRIuPTR " quest sorts...\n", qs.getRecordCount());
 	out = fopen("output/QuestSort.rb", "w");
 	fprintf(out, "QUEST_SORT = {\n");
 	for(DBCFile::Iterator itr = qs.begin(); itr != qs.end(); ++itr) {
@@ -579,7 +580,7 @@ int main() {
 	res = wma.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" map areas...\n", wma.getRecordCount());
+	printf("Extracting %" PRIuPTR " map areas...\n", wma.getRecordCount());
 	out = fopen("output/WorldMapArea.rb", "w");
 	fprintf(out, "WORLD_MAP_AREA = {\n");
 	out2 = fopen("output/WorldMapArea.data.cpp", "w");
@@ -613,7 +614,7 @@ int main() {
 	fprintf(out2, "const size_t gnWorldMapArea = sizeof(gWorldMapArea) / sizeof(WorldMapAreai);\n");
 #if 0
 	MPQFile testBlp("interface\\worldmap\\azeroth\\azeroth12.blp");
-	printf("size: %"PRIuPTR"\n", testBlp.getSize());
+	printf("size: %" PRIuPTR "\n", testBlp.getSize());
 	MemImage img;
 	img.LoadFromBLP((const BYTE*)testBlp.getBuffer(), (DWORD)testBlp.getSize());
 	img.SaveToPNG("output/azeroth12.png");
@@ -626,7 +627,7 @@ int main() {
 	res = at.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" AreaTable entries...\n", at.getRecordCount());
+	printf("Extracting %" PRIuPTR " AreaTable entries...\n", at.getRecordCount());
 	out = fopen("output/AreaTable.rb", "w");
 	fprintf(out, "# encoding: utf-8\n");
 	fprintf(out, "AREA_TABLE = {\n");
@@ -656,7 +657,7 @@ int main() {
 	res = wmo.open();
 	if(!res)
 		return 1;
-	printf("Extracting %"PRIuPTR" map overlays...\n", wmo.getRecordCount());
+	printf("Extracting %" PRIuPTR " map overlays...\n", wmo.getRecordCount());
 	out = fopen("output/WorldMapOverlay.txt", "w");
 	for(DBCFile::Iterator itr = wmo.begin(); itr != wmo.end(); ++itr) {
 		const DBCFile::Record& r(*itr);
@@ -732,7 +733,7 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 		assert(res);
 		//res = img.RemoveAlpha();
 		assert(res);
-		printf("%s: %ix%i\n", buf, img.GetWidth(), img.GetHeight());
+		printf("%s: %ix%i\n", buf, (int)img.GetWidth(), (int)img.GetHeight());
 #if 0
 		sprintf(buf, "output/%s_%s%i.jpeg", a.name, o.name, srcCount+1);
 		img.SaveToJPEG(buf);

@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <crblib/inc.h>
 #include <crblib/fileutil.h>
-#ifdef LINUX
+#ifndef _MSC_VER
 #include <dirent.h>
 #define _stat stat
 #define a_name d_name
@@ -20,7 +20,7 @@ struct WalkInfo
 	ulong Attr;
 	ulong Date;
 	char FullName[1024]; /* strcpy(FullName,Path) strcat(FullName,Name) */
-	
+
 	/* private stuff: */
 
 	struct WalkInfo * Next;
@@ -76,10 +76,10 @@ while ( KeepGoing && (DE = readdir(DFD)) )
 				newWI->Date = (ulong)EntryStat.st_mtime;
 				newWI->IsDir = S_ISDIR(EntryStat.st_mode);
 				if ( newWI->IsDir ) newWI->Size = 0;
-	
+
 				/** my internal stuff **/
 				newWI->Next = NULL;
-	
+
 				newWI->Path = BasePath;
 				strcpy(newWI->FullName,BasePath);
 				CatPaths(newWI->FullName,DE->a_name);
@@ -175,9 +175,9 @@ while( CurState )
 			{
 			if ( chdir(GotState->Path) == 0 )
 				{
-				if ( DirStartFunc && KeepGoing ) 
+				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				CatPaths(GotState->Path,"");
 
 				if ( KeepGoing )
@@ -190,7 +190,7 @@ while( CurState )
 				closedir(DFD); DFD = NULL;
 				}
 			else Ok = 0;
-	
+
 			if ( DFD) closedir(DFD);
 			}
 		else
@@ -199,7 +199,7 @@ while( CurState )
 				{
 				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				if ( KeepGoing && DirDoneFunc )
 					KeepGoing = (*DirDoneFunc)(GotState->Path,GotState->NestLevel);
 				}
@@ -267,7 +267,7 @@ if ( RecurseFlag)
 		{
 		GotState = ListHead;
 		while(GotState && GotState->WalkerFlag ) GotState = GotState->Next;
-	
+
 		if ( GotState )
 			{
 			if ( KeepGoing )
@@ -282,7 +282,7 @@ if ( RecurseFlag)
 						}
 					else
 						Ok = 0;
-			
+
 					closedir(DFD);
 					}
 				}
@@ -304,9 +304,9 @@ while( CurState )
 			{
 			if ( chdir(GotState->Path) == 0 )
 				{
-				if ( DirStartFunc && KeepGoing ) 
+				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				CatPaths(GotState->Path,"");
 
 				if ( KeepGoing )
@@ -319,7 +319,7 @@ while( CurState )
 				closedir(DFD); DFD = NULL;
 				}
 			else Ok = 0;
-	
+
 			if ( DFD) closedir(DFD);
 			}
 		else
@@ -328,7 +328,7 @@ while( CurState )
 				{
 				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				if ( KeepGoing && DirDoneFunc )
 					KeepGoing = (*DirDoneFunc)(GotState->Path,GotState->NestLevel);
 				}
@@ -392,9 +392,9 @@ while( CurState )
 			{
 			if ( chdir(GotState->Path) == 0 )
 				{
-				if ( DirStartFunc && KeepGoing ) 
+				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				if ( KeepGoing )
 					KeepGoing = WalkCurDir(DFD,GotState->Path,GotState->NestLevel,
 												0,DoDirs,FileFunc,&CurState);
@@ -405,7 +405,7 @@ while( CurState )
 				closedir(DFD); DFD = NULL;
 				}
 			else Ok = 0;
-	
+
 			if ( DFD) closedir(DFD);
 			}
 		else
@@ -414,7 +414,7 @@ while( CurState )
 				{
 				if ( DirStartFunc && KeepGoing )
 					KeepGoing = (*DirStartFunc)(GotState->Path,GotState->NestLevel);
-	
+
 				if ( KeepGoing && DirDoneFunc )
 					KeepGoing = (*DirDoneFunc)(GotState->Path,GotState->NestLevel);
 				}

@@ -37,10 +37,29 @@ def rootSendSignal(works)
 	p res.body
 end
 
+def findPrerequisites(main, level=0)
+	a = ''
+	WORKS.each do |w| w.prerequisites.each do |pre|
+		next unless(pre.to_s.endsWith(DLL_FILE_ENDING))
+		name = File.basename(pre.to_s, DLL_FILE_ENDING)
+		pre.prerequisites.each do |p|
+			next unless(p.to_s.endsWith(DLL_FILE_ENDING))
+			pn = File.basename(p.to_s, DLL_FILE_ENDING)
+			if(pn == main)
+				a << name+','
+				puts 'Found: ' + main + ' in ' + (' '*level) + name
+				a << findPrerequisites(name, level + 1)
+			end
+		end
+	end; end
+	return a
+end
+
 # force server to unload DLLs,
 # to remove the write protection.
 class DllTask
 	alias_method :old_execute, :execute
+
 	def sendSignal
 		if(HOST != :win32)
 			#setNewName	# causes crash
@@ -51,16 +70,8 @@ class DllTask
 		# wait for a "finished" signal from the server.
 		idHandlerWorks = ''
 		main = File.basename(self.to_s, DLL_FILE_ENDING)
-		# wrong: this is this DLL's dependencies, not the other way around.
-		WORKS.each do |w| w.prerequisites.each do |pre|
-			name = pre.to_s;
-			next unless(name.endsWith(DLL_FILE_ENDING))
-			# this is the work's primary output. now we must look at its dependencies.
-			pre.prerequisites.each do |pp|
-				pn = File.basename(pp.to_s, DLL_FILE_ENDING)
-				idHandlerWorks << File.basename(name, DLL_FILE_ENDING)+',' if(pn == main)
-			end
-		end; end
+
+		idHandlerWorks << findPrerequisites(main)
 		#if(@work.respond_to?(:newDllName) && HOST == :linux)
 		if(false)
 			setNewName
@@ -139,7 +150,7 @@ class DllTask
 	def execute
 		sendSignal if(isLoaded)
 		FileUtils.rm_f(@NAME)
-		raise hell if(File.exist?(@NAME))
+		raise "Loaded file was not deleted!" if(File.exist?(@NAME))
 		old_execute
 		#cp(@NAME, @originalName) if(@originalName)
 	end
@@ -213,7 +224,7 @@ class HandlerWork < DllWork
 	end
 	def name; File.basename(@TARGET.to_s, '.so'); end
 	def baseName; "#{@BUILDDIR}#{@NAME}"; end
-	def setup
+	if(HOST != :win32) then def setup
 		@LOCAL_DLLS = @LOCAL_DLLS.collect do |dll|
 			w = WORK_MAP[dll]
 			if(w)
@@ -223,7 +234,7 @@ class HandlerWork < DllWork
 		end
 		super
 		@TARGET.setNewName
-	end
+	end end
 end
 
 class TdbWork < HandlerWork
