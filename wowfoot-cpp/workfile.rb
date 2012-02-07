@@ -392,6 +392,8 @@ PageWork.new('object', ['db_gameobject_template',
 	'db_loot_template', 'db_item'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template', 'dbcSpellIcon', 'icon'])
+PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
+	'dbcSpellIcon', 'icon'])
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'])
 
 WFC = @wfc = ExeWork.new

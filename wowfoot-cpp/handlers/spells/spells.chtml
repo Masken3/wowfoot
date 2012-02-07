@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>Spells - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<p>List spells:</p>
+
+% if(mPair) {
+<table class="tab">
+<!-- Title row -->
+<tr><td>ID</td><td>Name</td></tr>
+%  int count = 0;
+%  while(mPair->hasNext() && count < 100) {
+%   const Spell& s(mPair->next());
+<tr>
+<td><%=s.id%></td>
+<td><a href="spell=<%=s.id%>"><%=s.name%></a></td>
+</tr>
+%   count++;
+%  }
+</table>
+<p><%=count%> spells.</p>
+% }
+
+</body>
+</html>

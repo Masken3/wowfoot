@@ -17,6 +17,8 @@ public:
 	typedef const Value* ptr;
 	typedef const Value& ref;
 	typedef typename super::const_iterator citr;
+	typedef Value value;
+	typedef Key key;
 
 	citr begin() const { return this->super::begin(); }
 	citr end() const { return this->super::end(); }

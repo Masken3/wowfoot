@@ -4,6 +4,7 @@
 
 @id = 0
 @struct = [
+m(:int, 'id', 0),
 m(:int, 'spellIconID', 133),
 m(:int, 'activeIconID', 134),
 m(:string, 'name', 136),

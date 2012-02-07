@@ -4,12 +4,12 @@ Startup time is expected to increase to 20-30 seconds, as the entire database is
 Memory usage is expected to increase to 300-600 MB.
 Page serving speed is expected to increase a great deal, since NoSQL is used instead of MySQL.
 Windows compatibility has increased, as this server doesn't rely on buggy Ruby implementations.
-Graphics can be improved, as icons from MPQs can be accessed directly.
+Graphics has been improved, as icons from MPQs can be accessed directly.
 
 The server is not monolithic; it will have a core, but all the page renderers are DLLs
 that can be reloaded as they change, without the need to restart the entire server.
 
-Databases are copied from a MySQL server into hash tables. These tables should be self-contained
+Databases are copied from a MySQL server into hash tables. These tables are self-contained
 and reloadable, much like the page renderer DLLs.
 
 Pages are written in CHTML, an embedding format much like RHTML/erb, except this one's compiled into C++.
