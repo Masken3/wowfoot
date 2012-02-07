@@ -112,11 +112,11 @@ class DllTask
 			@originalName = @NAME
 			@NAME = newDllName(c)
 		end
-		c = writeCount(c) if(p_needed?)
+		c = writeCount(c) if(p_needed?(false))
 		if(c != 0)
 			@originalName = @NAME if(!@originalName)
 			@NAME = newDllName(c)
-			puts "#{@originalName} is loaded. renaming to #{@NAME}"
+			#puts "#{@originalName} is loaded. renaming to #{@NAME}"
 		end
 	end
 	def isLoaded; if(HOST == :win32)
@@ -330,6 +330,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcSpellIcon')
 DbcWork.new('dbcItemDisplayInfo')
 DbcWork.new('dbcItemSet')
 DbcWork.new('dbcCharTitles')
@@ -390,7 +391,7 @@ PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
 	'db_loot_template', 'db_item'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
-	'db_creature_template'])
+	'db_creature_template', 'dbcSpellIcon', 'icon'])
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'])
 
 WFC = @wfc = ExeWork.new

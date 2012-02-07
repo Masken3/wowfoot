@@ -13,6 +13,23 @@ Spell <%=mTitle%> does not exist.
 <p>
 <span class="itemName"><%=a->name%></span><br>
 
+%// icon
+<p>
+% const SpellIcon* si = gSpellIcons.find(a->spellIconID);
+% if(si) {
+<img src="<%=getIconRaw(si->icon)%>" alt="<%=si->icon%>">
+% } else {
+Warning: invalid icon id (<%=a->spellIconID%>)
+% }
+% if(a->activeIconID) { si = gSpellIcons.find(a->activeIconID);
+% if(si) {
+<img src="<%=getIconRaw(si->icon)%>" alt="<%=si->icon%>">
+% } else {
+Warning: invalid icon id (<%=a->activeIconID%>)
+% }
+% }
+</p>
+
 % if(a->description) {
 <span class="itemDescription"><%=a->description%></span><br>
 % }

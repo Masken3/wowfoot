@@ -39,12 +39,28 @@ public:
 	}
 };
 
-string getIcon(const char* name) {
-	DBC::load();
+static string getIconBase(const char* name, const char* mpqName);
 
+string getIconRaw(const char* path) {
+	printf("Loading icon %s\n", path);
+	const char* fileName = strrchr(path, '\\');
+	if(fileName)
+		fileName++;
+	else
+		fileName = path;
+	string mpqName = path + string(".blp");
+	return getIconBase(fileName, mpqName.c_str());
+}
+
+string getIcon(const char* name) {
 	printf("Loading icon %s\n", name);
 	string mpqName = string("Interface\\ICONS\\") + name + ".blp";
-	MPQFile file(mpqName.c_str());
+	return getIconBase(name, mpqName.c_str());
+}
+
+static string getIconBase(const char* name, const char* mpqName) {
+	DBC::load();
+	MPQFile file(mpqName);
 
 	string httpName = string("icon/") + name + ".jpg";
 	if(file.getSize() > 0) {

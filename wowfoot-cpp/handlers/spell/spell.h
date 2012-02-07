@@ -3,6 +3,8 @@
 #include "tabTable.h"
 #include "db_item.h"
 #include "dbcSpell.h"
+#include "dbcSpellIcon.h"
+#include "icon.h"
 
 class spellChtml : public tabsChtml, public PageContext {
 public:

@@ -24,6 +24,7 @@ enum TableRowId {
 #define MAX_COUNT 100
 
 void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gSpellIcons.load();
 	gNpcs.load();
 	gItems.load();
 	gSpells.load();
