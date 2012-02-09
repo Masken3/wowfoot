@@ -1,8 +1,11 @@
 * Comments
 ** Check encoding; I think it's Latin-1, but it's presented as UTF-8 to the browser.
 Example: http://localhost:3002/npc=19516
+*** Seems to  be fixed.
 
 ** Redirect wowwiki links to wowpedia.
 Example: http://localhost:3002/item=30450
+** Done.
 
 ** Make sure document encoding is specified. We use UTF-8.
+** Done.

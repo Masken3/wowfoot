@@ -8,6 +8,7 @@
 #include "db_quest.h"
 #include "db_creature_template.h"
 #include "commentTab.h"
+#include "pageTags.h"
 #include "util/exception.h"
 #include "util/minmax.h"
 #include <sqlite3.h>
@@ -121,6 +122,7 @@ Tab* getComments(const char* type, int id) {
 
 #define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
 #define WH ".wowhead.com/"
+#define WW ".wowwiki.com/"
 
 static bool isUrlChar(char c) {
 	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
@@ -405,16 +407,9 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 	}
 	COMPLEX_TAG("/color", "</span>",);
 
-#define PAGE_TAG(name, map, type) if(pageTag(name "=", sizeof(name), tag, len, map, o)) return tagState;
+#define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map, o)) return tagState;
 
-	PAGE_TAG("spell", gSpells, Spell);
-	PAGE_TAG("item", gItems, Item);
-	PAGE_TAG("faction", gFactions, Faction);
-	PAGE_TAG("npc", gNpcs, Npc);
-	PAGE_TAG("achievement", gAchievements, Achievement);
-	PAGE_TAG("zone", gWorldMapAreas, WorldMapArea);
-	PAGE_TAG("object", gObjects, Object);
-	PAGE_TAG("quest", gQuests, Quest);
+	PAGE_TAGS(PAGE_TAG);
 
 	// unknown tag
 	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
@@ -457,6 +452,16 @@ static void formatUrl(ostream& o, const char* url, size_t len) {
 		streamHtmlEncode(o, path, pathLen);
 		return;
 	}
+	// s/http://*.wowwiki.com/
+	printf("URL test: %*s\n", (int)len, url);
+	const char* wwf = (char*)memmem(url, len, WW, strlen(WW));
+	if(wwf) {
+		const char* path = whf + strlen(WH);
+		size_t pathLen = len - (path - url);
+		o << "www.wowpedia.org/";
+		streamHtmlEncode(o, path, pathLen);
+		return;
+	}
 	if(strncmp(url, "/?", 2) == 0) {
 		url += 2;
 		len -= 2;
@@ -489,20 +494,33 @@ static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
 	size_t pathLen = end - path;
 	size_t urlLen = end - ptr;
 	//printf("uu: %i %.*s\n", isWowhead, urlLen, ptr);
+	size_t len;
 	if(isWowhead) {
-		o << "<a href=\"";
-		streamHtmlEncode(o, path, pathLen);
-		o << "\">";
-		// todo: write name of linked entity (item, object, spell, quest, et. al)
+		// write name of linked entity (item, object, spell, quest, et. al)
 		// use PAGE_TAG code
+#define UE_TAG(name, map) if(pageTag(name "=", sizeof(name), path, pathLen, map, o)) return end;
+		PAGE_TAGS(UE_TAG);
+
+		len = pathLen;
+	} else {
+		len = urlLen;
+	}
+
+	// wowwiki->wowpedia
+	const char* wwf = (char*)memmem(ptr, urlLen, WW, strlen(WW));
+	if(wwf) {
+		o << "<a href=\"http://www.wowpedia.org/";
+		streamHtmlEncode(o, path, pathLen);
+		o << "\">http://www.wowpedia.org/";
 		streamHtmlEncode(o, path, pathLen);
 		o << "</a>";
-	} else {
-		o << "<a href=\"";
-		streamHtmlEncode(o, ptr, urlLen);
-		o << "\">";
-		streamHtmlEncode(o, ptr, urlLen);
-		o << "</a>";
+		return end;
 	}
+
+	o << "<a href=\"";
+	streamHtmlEncode(o, path, len);
+	o << "\">";
+	streamHtmlEncode(o, path, len);
+	o << "</a>";
 	return end;
 }
