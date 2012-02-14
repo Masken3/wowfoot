@@ -3,9 +3,9 @@
 #include "item_shared.h"
 #include "comments.h"
 #include "db_npc_vendor.h"
-#include "db_creature_template.h"
 #include "db_gameobject_template.h"
 #include "db_loot_template.h"
+#include "db_creature_template.h"
 #include "dbcItemExtendedCost.h"
 #include "dbcItemSubClass.h"
 #include "dbcItemClass.h"
@@ -187,16 +187,16 @@ static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
 	}
 }
 
-static void npcColumns(tabTableChtml& t) {
+void npcColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
-	t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
+	//t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
 }
 
-static void npcRow(Row& r, const Npc& npc) {
+void npcRow(Row& r, const Npc& npc) {
 	r[ENTRY] = toString(npc.entry);
 	r[NAME] = npc.name;
 	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
-	r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
 }
 
 static Tab* soldBy(const Item& a) {

@@ -12,6 +12,8 @@ Faction <%=mTitle%> does not exist.
 % } else {
 <p>Faction: <span class="itemName"><%=a->name%></span></p>
 
+<p><%=a->description%></p>
+
 % returnCode = tabsChtml::run(stream);
 
 % }	//if(a)

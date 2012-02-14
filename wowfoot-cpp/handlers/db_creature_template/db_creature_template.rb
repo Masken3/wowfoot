@@ -9,6 +9,8 @@ c(:string, :iconName),
 c(:int, :minLevel),
 c(:int, :maxLevel),
 c(:int, :exp),	# expansion
+renamed(:int, :faction_a, :faction),
+#c(:int, :faction_h),
 c(:int, :npcflag),
 c(:int, :rank),
 c(:float, :minDmg),
@@ -54,6 +56,7 @@ c(:string, :scriptName),
 	[:lootId],
 	[:pickpocketLoot],
 	[:skinLoot],
+	[:faction],
 ]
 
 require './handlers/db_spawn/spawnCount.rb'

@@ -1,11 +1,14 @@
 #ifndef ITEM_SHARED_H
 #define ITEM_SHARED_H
 
-#include "db_item.h"
-#include "tabTable.h"
-#include "db_loot_template.h"
 #include "chtmlUtil.h"
+#include "tabTable.h"
 #include <ostream>
+
+class Item;
+class Row;
+class Loot;
+class Npc;
 
 void streamAllCostHtml(std::ostream&, const Item&) VISIBLE;
 void streamItemClassHtml(std::ostream&, const Item&) VISIBLE;
@@ -18,6 +21,8 @@ void itemColumns(tabTableChtml& t) VISIBLE;
 void lootColumns(tabTableChtml& t) VISIBLE;
 void lootRow(Row& r, const Loot& loot) VISIBLE;
 void itemRow(Row& r, const Item& i) VISIBLE;
+void npcColumns(tabTableChtml&) VISIBLE;
+void npcRow(Row&, const Npc&) VISIBLE;
 
 enum TableRowId {
 	NAME = ENTRY+1,

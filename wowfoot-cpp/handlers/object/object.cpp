@@ -4,6 +4,7 @@
 #include "comments.h"
 #include "item_shared.h"
 #include "db_loot_template.h"
+#include "db_item.h"
 
 #include <string.h>
 #include <stdlib.h>

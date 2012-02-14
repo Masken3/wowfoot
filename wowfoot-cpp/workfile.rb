@@ -330,6 +330,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 
+DbcWork.new('dbcFactionTemplate')
 DbcWork.new('dbcSpellIcon')
 DbcWork.new('dbcItemDisplayInfo')
 DbcWork.new('dbcItemSet')
@@ -368,7 +369,6 @@ HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMa
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'])
 PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCharTitles',
 	'db_achievement_reward'])
-PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
 	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
@@ -383,6 +383,8 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo'])
+PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
+	'db_quest', 'db_creature_template', 'dbcFactionTemplate'])
 PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
