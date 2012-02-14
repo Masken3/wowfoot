@@ -7,9 +7,19 @@
 </head>
 <body>
 
-<p>NPC: <%= mTitle %></p>
-
 % if(a) {
+<p>NPC: <%= mTitle %>
+% if(!a->subName.empty()) {
+&lt;<%=a->subName%>&gt;
+% }
+</p>
+
+% const FactionTemplate* ft = gFactionTemplates.find(a->faction);
+% if(ft) {
+<p>Faction: <%NAMELINK(gFactions, ft->nameId);%></p>
+% } else if(a->faction != 0) {
+<p>Invalid FactionTemplate id: <%=a->faction%></p>
+% }
 % mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);
 % } else {

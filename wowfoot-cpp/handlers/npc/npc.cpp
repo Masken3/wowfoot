@@ -13,11 +13,14 @@ using namespace std;
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
 	gCreatureSpawns.load();
+	gFactions.load();
+	gFactionTemplates.load();
 
 	int id = toInt(urlPart);
 	a = gNpcs.find(id);
 	if(a) {
 		mTitle = a->name.c_str();
+
 		mTabs.push_back(getComments("npc", id));
 
 		mSpawnPointsChtml.mSpawns = gCreatureSpawns.findId(id);

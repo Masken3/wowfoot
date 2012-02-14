@@ -374,7 +374,8 @@ PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', '
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
 	'db_item', 'db_creature_template', 'db_achievement_reward'])
 PageWork.new('npc', ['db_creature_template',
-	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize'])
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
+	'dbcFaction', 'dbcFactionTemplate'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest',
