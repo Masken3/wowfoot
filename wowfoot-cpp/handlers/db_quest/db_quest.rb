@@ -38,4 +38,5 @@ c(:int, :rewardSpellCast),
 ]
 
 @index = [
+	[:rewardFactionId],
 ]

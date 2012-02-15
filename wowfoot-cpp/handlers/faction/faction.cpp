@@ -9,6 +9,9 @@
 using namespace std;
 
 static Tab* members(int factionId);
+static Tab* quests(int factionId);
+static Tab* enemies(int factionId);
+static Tab* items(int factionId);
 
 void factionChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gFactions.load();
@@ -25,11 +28,13 @@ void factionChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostre
 		//members
 		mTabs.push_back(members(id));
 		//quests that modify reputation
-		//mTabs.push_back(getQuests(id));
+		mTabs.push_back(quests(id));
 		//npcs that can be killed for reputation
-		//mTabs.push_back(getEnemies(id));
+		//mTabs.push_back(enemies(id));
+		enemies(id);
 		//items that require reputation to buy
-		//mTabs.push_back(getItems(id));
+		//mTabs.push_back(items(id));
+		items(id);
 
 		mTabs.push_back(getComments("faction", id));
 	} else {
@@ -61,4 +66,28 @@ static Tab* members(int factionId) {
 	}
 	t.count = t.array.size();
 	return &t;
+}
+
+static Tab* quests(int factionId) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "quests";
+	t.title = "Quests";
+	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	Quests::RewardFactionIdPair p = gQuests.findRewardFactionId(factionId);
+	for(; p.first != p.second; ++p.first) {
+		const Quest& q(*p.first->second);
+		Row r;
+		r[ENTRY] = toString(q.id);
+		r[NAME] = q.title;
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* enemies(int factionId) {
+	return NULL;
+}
+static Tab* items(int factionId) {
+	return NULL;
 }
