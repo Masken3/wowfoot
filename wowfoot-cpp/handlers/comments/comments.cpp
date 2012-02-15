@@ -453,12 +453,12 @@ static void formatUrl(ostream& o, const char* url, size_t len) {
 		return;
 	}
 	// s/http://*.wowwiki.com/
-	printf("URL test: %*s\n", (int)len, url);
+	//printf("URL test: %*s\n", (int)len, url);
 	const char* wwf = (char*)memmem(url, len, WW, strlen(WW));
 	if(wwf) {
-		const char* path = whf + strlen(WH);
+		const char* path = wwf + strlen(WW);
 		size_t pathLen = len - (path - url);
-		o << "www.wowpedia.org/";
+		o << "http://www.wowpedia.org/";
 		streamHtmlEncode(o, path, pathLen);
 		return;
 	}
