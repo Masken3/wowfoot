@@ -6,5 +6,5 @@
 @struct = [
 m(:int, 'parent', 18),
 m(:string, 'name', 23),
-m(:string, 'description', 34),	# very uncertain number
+m(:string, 'description', 40),	# very uncertain number
 ]

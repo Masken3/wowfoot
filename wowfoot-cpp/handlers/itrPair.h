@@ -26,10 +26,10 @@ private:
 };
 
 template<class Map, class Test>
-class SimpleItrPair : public ItrPair<typename Map::value> {
+class SimpleItrPair : public ItrPair<typename Map::valueType> {
 public:
 	typedef typename Map::citr citr;
-	typedef typename Map::value value;
+	typedef typename Map::valueType value;
 private:
 	citr mItr;
 	const citr mEnd;

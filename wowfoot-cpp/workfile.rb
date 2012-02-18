@@ -329,6 +329,7 @@ TdbWork.new('db_npc_vendor')
 TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
+TdbWork.new('db_creature_onkill_reputation')
 
 DbcWork.new('dbcFactionTemplate')
 DbcWork.new('dbcSpellIcon')
@@ -385,7 +386,8 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
-	'db_quest', 'db_creature_template', 'dbcFactionTemplate'])
+	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
+	'db_creature_onkill_reputation'])
 PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
@@ -403,13 +405,15 @@ WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
 	@SOURCES = ['.']
 	@LIBRARIES = ['microhttpd']
-	@EXTRA_INCLUDES = ['win32']#'src', 'src/libs/libmpq']
+	@EXTRA_INCLUDES = ['win32', '.']#'src', 'src/libs/libmpq']
 	#@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
+	@LOCAL_LIBS = ['common']
+	@LOCAL_DLLS = []
 
 	if(HOST == :win32)
 		@EXTRA_SOURCEFILES = ["dll/dll-win32.cpp"]
 		@LIBRARIES << 'wsock32'
-		@LOCAL_DLLS = ['win32']
+		@LOCAL_DLLS << 'win32'
 	elsif(HOST == :linux || HOST == :darwin)
 		@EXTRA_SOURCEFILES = ["dll/dll-unix.cpp"]
 		@LIBRARIES << 'dl'
@@ -426,7 +430,6 @@ def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 
 target :default do
 	win32.invoke if(HOST == :win32)
-	@wfc.invoke
 	# required for unload to function properly
 	WORKS.each do |w|
 		w.setup
@@ -434,6 +437,7 @@ target :default do
 	WORKS.each do |w|
 		w.invoke
 	end
+	@wfc.invoke
 end
 
 target :run => :default do

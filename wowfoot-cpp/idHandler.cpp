@@ -2,6 +2,7 @@
 #include <assert.h>
 #include "dll/dll.h"
 #include <sys/stat.h>
+#include "util/exception.h"
 
 using namespace std;
 
@@ -44,9 +45,9 @@ void IdHandler::reload() {
 	mDll.close();
 
 	const char* dllName = mBaseDllName.c_str();
+	//printf("Loading %s\n", dllName);
 	struct stat s;
-	int res = stat(dllName, &s);
-	assert(res == 0);
+	ERRNO(stat(dllName, &s));
 
 #ifndef WIN32
 	// see if the file needs to be renamed
@@ -54,13 +55,12 @@ void IdHandler::reload() {
 	if(s.st_ino != mDllStat.st_ino && mReloadCount > 0) {
 		sprintf(buf, "%s.%i", dllName, mReloadCount);
 		remove(buf);
-		res = link(dllName, buf);
-		assert(res == 0);
+		ERRNO(link(dllName, buf));
 		dllName = buf;
 	}
 #endif
 
-	res = mDll.open(dllName);
+	int res = mDll.open(dllName);
 	if(!res) {
 		printf("Failed to open %s.\n", dllName);
 		abort();

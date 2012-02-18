@@ -2,9 +2,11 @@
 #include "faction.chtml.h"
 #include "comments.h"
 #include "db_creature_template.h"
+#include "db_creature_onkill_reputation.h"
 #include "db_quest.h"
 #include "item_shared.h"
 #include "FactionTemplate.index.h"
+#include "util/numof.h"
 
 using namespace std;
 
@@ -13,7 +15,12 @@ static Tab* quests(int factionId);
 static Tab* enemies(int factionId);
 static Tab* items(int factionId);
 
+enum FactionTableRowId {
+	REP = UTILITY+1,
+};
+
 void factionChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gNpcReps.load();
 	gFactions.load();
 	FactionTemplateIndex::load();
 	gNpcs.load();
@@ -30,8 +37,7 @@ void factionChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostre
 		//quests that modify reputation
 		mTabs.push_back(quests(id));
 		//npcs that can be killed for reputation
-		//mTabs.push_back(enemies(id));
-		enemies(id);
+		mTabs.push_back(enemies(id));
 		//items that require reputation to buy
 		//mTabs.push_back(items(id));
 		items(id);
@@ -86,8 +92,75 @@ static Tab* quests(int factionId) {
 }
 
 static Tab* enemies(int factionId) {
-	return NULL;
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "enemies";
+	t.title = "Enemies";
+	npcColumns(t);
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	t.columns.push_back(Column(REP, "Reputation", Column::NoEscape));
+	NpcReps::RewOnKillRepFactionPair p = gNpcReps.findRewOnKillRepFaction(factionId);
+	for(; p.first != p.second; ++p.first) {
+		const NpcRep& rep(*p.first->second);
+		const Npc* npc = gNpcs.find(rep.creature_id);
+		Row r;
+		if(npc) {
+			npcRow(r, *npc);
+			r[SPAWN_COUNT] = toString(npc->spawnCount);
+		} else {
+			r[ENTRY] = toString(rep.creature_id);
+		}
+
+		// calculate/format value
+		ostringstream o;
+		const char* sides[2] = { "Alliance", "Horde" };
+		const char* standings[] = {
+			"Hated",
+			"Hostile",
+			"Unfriendly",
+			"Neutral",
+			"Friendly",
+			"Honored",
+			"Revered",
+			"Exalted",
+		};
+		bool isEnemy = true;
+		for(int i=0; i<2; i++) {
+			int repVal = rep.rewOnKillRepValue[i];
+			int repFaction = rep.rewOnKillRepFaction[i];
+			if(repVal == 0 && repFaction == 0)
+				continue;
+			if(repVal < 0 && repFaction == factionId) {
+				isEnemy = false;
+				break;
+			}
+			o << (repVal > 0 ? "+" : "")<<repVal<<" with ";
+			streamNameLinkById(o, gFactions, repFaction);
+			uint s = rep.maxStanding[i];
+			if(repVal > 0) {
+				o << " until ";
+				if(s < NUMOF(standings)) {
+					o << standings[s];
+				} else {
+					o << "[invalid standing code "<<s<<"]";
+				}
+			}
+			if(rep.teamDependent) {
+				EASSERT(rep.teamDependent == 1);
+				o << " for "<< sides[i];
+			} else {
+			}
+			o << "<br>";
+		}
+		if(!isEnemy)
+			continue;
+		r[REP] = o.str();
+
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
 }
+
 static Tab* items(int factionId) {
 	return NULL;
 }

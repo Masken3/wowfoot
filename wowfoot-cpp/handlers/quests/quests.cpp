@@ -11,7 +11,7 @@ void questsChtml::httpArgument(const char* key, const char* value) {
 }
 
 struct QuestMaxRepTest {
-	bool have(const Quest& q) {
+	static bool have(const Quest& q) {
 		return q.requiredMaxRepFaction != 0;
 	}
 };
