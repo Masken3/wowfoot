@@ -61,8 +61,9 @@ string getIcon(const char* name) {
 static string getIconBase(const char* name, const char* mpqName) {
 	DBC::load();
 	MPQFile file(mpqName);
+	//MemImage::s_bVerbose = true;
 
-	string httpName = string("icon/") + name + ".jpg";
+	string httpName = string("icon/") + name + ".png";
 	if(file.getSize() > 0) {
 		string localName = "build/" + httpName;
 #if 0
@@ -74,11 +75,16 @@ static string getIconBase(const char* name, const char* mpqName) {
 			(DWORD)file.getSize());
 		EASSERT(res);
 #if 0
+		string dumpName = string(name) + ".raw";
+		FileDescriptor fd = open(dumpName.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
+		ERRNO(fd.writeFully(img.GetBuffer(), img.GetBufferBytes()));
+#endif
+#if 0
 		printf("Size: %i x %i\n", img.GetWidth(), img.GetHeight());
 		res = img.RemoveAlpha();
 		EASSERT(res);
 #endif
-		res = img.SaveToJPEG(localName.c_str());
+		res = img.SaveToPNG(localName.c_str());
 		EASSERT(res);
 	} else {
 		printf("Warning: %s not found.\n", name);

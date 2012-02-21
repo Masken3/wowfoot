@@ -531,7 +531,7 @@ bool MemImage::AllocateBuffer(DWORD bytes)
 	m_buffer = new BYTE[bytes];
 	if (NULL == m_buffer)
 	{
-		LOG("ERROR: Failed to allocate buffer (%lu bytes).\n", bytes);
+		LOG("ERROR: Failed to allocate buffer (%u bytes).\n", bytes);
 		return false;
 	}
 	m_bufferBytes = bytes;
@@ -1001,9 +1001,13 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 		{
 			type = m_bHasAlpha ? PNGTYPE_RGBA : PNGTYPE_RGB;
 		}
+		if (s_bVerbose)
+			LOG("\tUnFormat = %s (%s).\n", FORMATIDNames[type], FORMATIDDescriptions[type]);
 	}
 	else
 	{
+		if (s_bVerbose)
+			LOG("\tForceFormat = %s (%s).\n", FORMATIDNames[type], FORMATIDDescriptions[type]);
 		// See if we need to make any conversions.
 		bool bPalettize = false;
 		bool bDepalettize = false;
@@ -1078,6 +1082,7 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr)
 	{
+		LOG("ERROR: png_create_info_struct failed!\n");
 		png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
 		return false;
 	}
@@ -1088,8 +1093,9 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 	*/
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
+		LOG("ERROR: png_jmpbuf failed!\n");
 		/* Free all of the memory associated with the png_ptr and info_ptr */
-		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
 		/* If we get here, we had a problem reading the file */
 		return false;
 	}
@@ -1291,9 +1297,11 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 			else
 			{
 				DWORD bpp = (PNGTYPE_RGBA == type) ? 4 : 3;
+				//LOG("Assigning %i row pointers at %i Bpp...\n", m_height, bpp);
 				for (WORD row = 0; row < m_height; ++row)
 				{
 					pRowPointers[row] = &m_buffer[row * m_width * bpp];
+					//LOG("%i: %p\n", row, pRowPointers[row]);
 				}
 			}
 
@@ -1313,6 +1321,13 @@ bool MemImage::SaveToPNG(const char* filename, FORMATID type) const
 
 	// *** Do the write.
 	png_write_png(png_ptr, info_ptr, transform, NULL);
+
+	// Close up.
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+	int fres = fclose(fp);
+	if(fres != 0) {
+		LOG("ERROR: fclose failed (%s)\n", strerror(errno));
+	}
 
 	// Clean up.
 	if (bDeleteRows)
