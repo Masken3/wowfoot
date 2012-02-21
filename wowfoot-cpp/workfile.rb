@@ -129,6 +129,7 @@ class DllTask
 			#puts "#{@NAME} is a PageWork."
 			return false
 		end
+		#puts self
 		# read /proc to find our server process.
 		# read /proc/*/maps to list the loaded objects.
 		#p WFC.target.to_s
@@ -137,6 +138,7 @@ class DllTask
 			# Can be optimized by caching the exe search result.
 			# Seems fast enough for now.
 			if(File.exists?(proc+'/exe')); if(File.readlink(proc+'/exe') == WFC.target.to_s)
+				#puts "Found #{proc}"
 				open(proc+'/maps', 'r').each do |line|
 					if(line.index(@NAME))
 						#puts "Found #{@NAME} in #{proc}"
@@ -431,13 +433,13 @@ def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 target :default do
 	win32.invoke if(HOST == :win32)
 	# required for unload to function properly
+	@wfc.invoke
 	WORKS.each do |w|
 		w.setup
 	end
 	WORKS.each do |w|
 		w.invoke
 	end
-	@wfc.invoke
 end
 
 target :run => :default do
