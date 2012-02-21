@@ -15,3 +15,9 @@ template<class T> T __max(T a, T b) {
 inline int _stricmp(const char* a, const char* b) {
 	return strcasecmp(a, b);
 }
+
+#ifdef WIN32
+#define PRuDWORD "lu"
+#else
+#define PRuDWORD "u"
+#endif

@@ -1,5 +1,6 @@
 require File.expand_path '../rules/dll.rb'
 require File.expand_path '../rules/native_lib.rb'
+require './config.rb'
 
 LIBMPQ = DllWork.new
 LIBMPQ.instance_eval do
@@ -46,9 +47,9 @@ end
 BLP = NativeLibWork.new
 BLP.instance_eval do
 	@SOURCES = ['src/libs/blp']
-	@EXTRA_INCLUDES = ['src/libs/blp']
+	@EXTRA_INCLUDES = ['src/libs/blp'] + CONFIG_BLP_INCLUDES
 	@EXTRA_CFLAGS = ' -Wno-all -Wno-error -Wno-extra'
-	#@EXTRA_LINKFLAGS = ' -symbolic'
+	@EXTRA_CPPFLAGS = ' -DXMD_H -DHAVE_BOOLEAN'
 	#@LIBRARIES = ['png']	# ignored by *LibWork
 	@NAME = 'libblp'
 end

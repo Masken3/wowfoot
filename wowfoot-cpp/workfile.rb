@@ -321,6 +321,7 @@ HandlerWork.new('icon', ['dbc']).instance_eval do
 	end
 	@EXTRA_OBJECTS = [copy(LIBMPQ), copy(BLP), copy(SQUISH), copy(PALBMP), copy(CRBLIB)]
 	@LIBRARIES += ['png', 'jpeg']
+	@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIB
 end
 
 TdbWork.new('db_achievement_reward')
@@ -415,6 +416,7 @@ WFC = @wfc = ExeWork.new
 	if(HOST == :win32)
 		@EXTRA_SOURCEFILES = ["dll/dll-win32.cpp"]
 		@LIBRARIES << 'wsock32'
+		@LIBRARIES << 'imagehlp'
 		@LOCAL_DLLS << 'win32'
 	elsif(HOST == :linux || HOST == :darwin)
 		@EXTRA_SOURCEFILES = ["dll/dll-unix.cpp"]

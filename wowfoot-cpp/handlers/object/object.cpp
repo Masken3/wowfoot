@@ -57,7 +57,7 @@ static Tab* contains(int entry) {
 		lootRow(r, l);
 		const Item* pi = gItems.find(l.item);
 		if(!pi) {
-			r[NAME] = r[ENTRY] = toString(pi->entry);
+			r[NAME] = r[ENTRY] = toString(l.item);
 		} else {
 			itemRow(r, *pi);
 		}

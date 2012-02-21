@@ -135,7 +135,7 @@ static Tab* enemies(int factionId) {
 			}
 			o << (repVal > 0 ? "+" : "")<<repVal<<" with ";
 			streamNameLinkById(o, gFactions, repFaction);
-			uint s = rep.maxStanding[i];
+			unsigned s = rep.maxStanding[i];
 			if(repVal > 0) {
 				o << " until ";
 				if(s < NUMOF(standings)) {

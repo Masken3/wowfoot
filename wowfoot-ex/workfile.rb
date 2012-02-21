@@ -4,6 +4,7 @@ require File.expand_path '../rules/host.rb'
 require File.expand_path '../rules/exe.rb'
 require File.expand_path '../rules/targets.rb'
 require './libs.rb'
+require './config.rb'
 
 wfe = ExeWork.new
 wfe.instance_eval do
@@ -21,6 +22,7 @@ wfe.instance_eval do
 			'wdt.cpp' => ' -Wno-multichar',
 		}
 		@LIBRARIES = ['png', 'jpeg']
+		@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIB
 
 		@NAME = 'wowfoot-ex'
 
