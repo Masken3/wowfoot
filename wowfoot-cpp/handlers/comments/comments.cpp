@@ -187,6 +187,14 @@ static string formatComment(const char* src) {
 			o << c;
 		}
 	}
+	while(!ts.empty()) {
+		Tag t = ts.top();
+		ts.pop();
+		printf("Closing unclosed tag: %*s\n", (int)t.len, t.t);
+		o << "</";
+		o.write(t.t, t.len);
+		o << ">";
+	}
 	return o.str();
 }
 
