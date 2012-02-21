@@ -9,6 +9,7 @@
 #include "db_quest.h"
 #include "dbcCharTitles.h"
 #include "dbcItemSet.h"
+#include "dbcFaction.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -26,8 +27,10 @@ enum TableRowId {
 static const char* cstr(const char* s) { return s; }
 static const char* cstr(const string& s) { return s.c_str(); }
 
-template<class T>
-tabTableChtml* standardSearch(const T& map, const char* urlPart, const char* title) {
+template<class T, class StringType>
+tabTableChtml* standardSearch2(const T& map, const char* urlPart, const char* title,
+	StringType T::valueType::* namePtr)
+{
 	tabTableChtml* tp = new tabTableChtml;
 	tabTableChtml& t(*tp);
 	t.id = map.name;
@@ -38,16 +41,21 @@ tabTableChtml* standardSearch(const T& map, const char* urlPart, const char* tit
 		++itr)
 	{
 		const auto& s(itr->second);
-		if(strcasestr(cstr(s.name), urlPart))
+		if(strcasestr(cstr(s.*namePtr), urlPart))
 		{
 			Row r;
 			r[ENTRY] = toString(itr->first);
-			r[NAME] = s.name;
+			r[NAME] = s.*namePtr;
 			t.array.push_back(r);
 		}
 	}
 	t.count = t.array.size();
 	return tp;
+}
+
+template<class T>
+tabTableChtml* standardSearch(const T& map, const char* urlPart, const char* title) {
+	return standardSearch2(map, urlPart, title, &T::valueType::name);
 }
 
 void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
@@ -61,6 +69,7 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gQuests.load();
 	gTitles.load();
 	gItemSets.load();
+	gFactions.load();
 
 	urlPart = u;
 
@@ -94,28 +103,8 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	mTabs.push_back(standardSearch(gObjects, urlPart, "Objects"));
 	mTabs.push_back(standardSearch(gAchievements, urlPart, "Achievements"));
 	mTabs.push_back(standardSearch(gTitles, urlPart, "Titles"));
-	{
-		tabTableChtml* tp = new tabTableChtml;
-		tabTableChtml& t(*tp);
-		t.id = "quest";
-		t.title = "Quests";
-		t.columns.push_back(Column(NAME, "Name", ENTRY, "quest"));
-		for(Quests::citr itr = gQuests.begin();
-			itr != gQuests.end() && t.array.size() < MAX_COUNT;
-			++itr)
-		{
-			const Quest& a(itr->second);
-			if(strcasestr(a.title.c_str(), urlPart))
-			{
-				Row r;
-				r[ENTRY] = toString(itr->first);
-				r[NAME] = a.title;
-				t.array.push_back(r);
-			}
-		}
-		t.count = t.array.size();
-		mTabs.push_back(tp);
-	}
+	mTabs.push_back(standardSearch2(gQuests, urlPart, "Quests", &Quest::title));
+	mTabs.push_back(standardSearch(gFactions, urlPart, "Factions"));
 
 	drd->code = run(os);
 }
