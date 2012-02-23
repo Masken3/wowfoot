@@ -50,7 +50,6 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 int questChtml::rewRepValue(int index) {
 	if(a->rewardFactionValueIdOverride[index] == 0) {
 		int id = a->rewardFactionValueId[index];
-		printf("rewardFactionValueId %i\n", id);
 		EASSERT(abs(id) <= 9);
 		if(id >= 0)
 			return gQuestFactionRewards[1].rep[id].value;

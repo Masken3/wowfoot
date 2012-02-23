@@ -85,9 +85,9 @@ def generateUrlsToTest
 		entry = 'entry' if(!entry)
 		stm = TDB::C.prepare("select #{entry} from #{data[:table]}")
 		stm.execute
-		rows =stm.fetch_all
+		rows = stm.fetch_all
 		rows.each do |row|
-			URLS_TO_TEST << "#{BASE_URL}#{name}=#{row[:entry]}"
+			URLS_TO_TEST << "#{BASE_URL}#{name}=#{row[entry]}"
 		end
 	end
 end
@@ -138,7 +138,7 @@ URLS_TO_TEST.each do |url|
 	code = testUrl(url)
 	next if(!code)
 	break if(code.to_i != 200)
-	#successFile.puts(url)
+	successFile.puts(url)
 end
 
 # print results
