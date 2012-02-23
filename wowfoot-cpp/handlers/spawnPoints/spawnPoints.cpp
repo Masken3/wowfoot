@@ -55,7 +55,13 @@ static int zoneFromCoords(int map, float x, float y) {
 	//puts "Grid: [#{gridX}][#{gridY}]"
 	//puts "Cell: [#{cellX}][#{cellY}]"
 	//puts "Pixel: [#{gridX*MAX_NUMBER_OF_CELLS + cellX}][#{gridY*MAX_NUMBER_OF_CELLS + cellY}]"
-	int* grid = gAreaMap[map][gridY * MAX_NUMBER_OF_GRIDS + gridX];
+	int** const* ap = gAreaMap.find(map);
+	if(!ap) {
+		printf("Invalid mapId(%i) with coords %f x %f\n", map, x, y);
+		return -1;
+	}
+	int** const area(*ap);
+	int* grid = area[gridY * MAX_NUMBER_OF_GRIDS + gridX];
 	if(!grid)
 		return -1;
 	int areaId = grid[cellY + cellX * MAX_NUMBER_OF_CELLS];
