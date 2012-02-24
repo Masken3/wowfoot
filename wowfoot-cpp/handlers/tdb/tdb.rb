@@ -206,6 +206,9 @@ class TdbCppTask < TdbGenTask
 #include <stdio.h>
 #include <inttypes.h>
 #include "<%=name%>.format.h"
+#include "util/criticalSection.h"
+
+static CriticalSection sCS;
 <%=@extraHeaderCode%>
 
 <%=@structName%>s::<%=@structName%>s(const char* tableName) : mLoaded(false), mTableName(tableName),
@@ -213,6 +216,7 @@ name("<%=@structName.downcase%>")
 {}
 
 void <%=@structName%>s::load() {
+	LOCK(sCS);
 	if(mLoaded)
 		return;
 	mLoaded = true;

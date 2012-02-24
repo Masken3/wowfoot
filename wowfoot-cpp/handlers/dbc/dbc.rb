@@ -37,7 +37,9 @@ class DbcCppTask < MemoryGeneratedFileTask
 #include "dbcfile.h"
 #include "dbc.h"
 #include "<%=name%>.h"
+#include "util/criticalSection.h"
 
+static CriticalSection sCS;
 static bool sLoaded = false;
 <%=@plural%> g<%=@plural%>;
 
@@ -45,6 +47,7 @@ static bool sLoaded = false;
 static DBCFile sDbc("DBFilesClient\\\\<%=@dbcName%>.dbc");
 
 void <%=@plural%>::load() {
+	LOCK(sCS);
 	if(sLoaded)
 		return;
 	sLoaded = true;

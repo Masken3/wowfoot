@@ -5,7 +5,9 @@
 #include "dbcfile.h"
 #include "dbc.h"
 #include "dbcItemClass.h"
+#include "util/criticalSection.h"
 
+static CriticalSection sCS;
 static bool sLoaded = false;
 ItemClasses gItemClasses;
 
@@ -13,6 +15,7 @@ ItemClasses gItemClasses;
 static DBCFile sDbc("DBFilesClient\\ItemClass.dbc");
 
 void ItemClasses::load() {
+	LOCK(sCS);
 	if(sLoaded)
 		return;
 	sLoaded = true;

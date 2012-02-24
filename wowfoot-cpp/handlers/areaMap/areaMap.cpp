@@ -5,6 +5,9 @@
 #include "areaMap.h"
 #include "win32.h"
 #include "util/exception.h"
+#include "util/criticalSection.h"
+
+static CriticalSection sCS;
 
 // throws Exception on error.
 static int readInt(int fd);
@@ -52,6 +55,7 @@ AreaMap::~AreaMap() {
 }
 
 void AreaMap::load() {
+	LOCK(sCS);
 	static bool sLoaded = false;
 	if(sLoaded)
 		return;

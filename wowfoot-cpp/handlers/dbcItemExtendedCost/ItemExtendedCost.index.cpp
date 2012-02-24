@@ -7,10 +7,12 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <unordered_set>
+#include "util/criticalSection.h"
 
 using namespace std;
 using namespace ItemExtendedCostIndex;
 
+static CriticalSection sCS;
 static ItemCostMap sItemCostMap;
 static ItemVendorCostMap sItemVendorCostMap;
 static ItemVendorMap sItemVendorMap;
@@ -28,6 +30,7 @@ public:
 }
 
 void ItemExtendedCostIndex::load() {
+	LOCK(sCS);
 	if(sLoaded)
 		return;
 	sLoaded = true;

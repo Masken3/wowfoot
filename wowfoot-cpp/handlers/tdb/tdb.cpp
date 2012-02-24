@@ -15,6 +15,7 @@ typedef int socklen_t;
 #include "config.h"
 #include "tdb_raw.h"
 #include "util/exception.h"
+#include "util/criticalSection.h"
 #include <sstream>
 #include <stdio.h>
 #include <stdexcept>
@@ -23,6 +24,7 @@ using namespace std;
 
 static MYSQL* sMysql;
 static const char* sColName;
+static CriticalSection sCS;
 
 static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
@@ -33,6 +35,7 @@ static void error(const char* funcName) {
 }
 
 static void init() {
+	LOCK(sCS);
 	static bool sInit = false;
 	if(sInit)
 		return;
@@ -73,6 +76,7 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	char* (*dstGet)(const ColumnFormat&, MYSQL_ROW, unsigned long* lengths, T), T t,
 	size_t ColCountStart, void (*PostCallback)())
 {
+	LOCK(sCS);
 	init();
 
 	sMysql = mysql_init(NULL);
@@ -161,63 +165,3 @@ void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
 {
 	fetchTableBase<void*>(tableName, cf, nCol, dstGetSet, vdst, 0, tfs);
 }
-#if 0
-void fetchTable(const char* tableName, const ColumnFormat* cf, size_t nCol,
-	TableFetchSet tfs, void* vdst)
-{
-	init();
-
-	printf("fetching table %s...\n", tableName);
-	ostringstream oss;
-	oss << "SELECT ";
-	for(size_t i=0; i<nCol; i++) {
-		if(i != 0)
-			oss << ", ";
-		oss << cf[i].name;
-	}
-	oss << " FROM " << tableName;
-	string s = oss.str();
-	if(mysql_real_query(sMysql, s.c_str(), s.length()))
-		error("mysql_real_query");
-	MYSQL_RES* res = mysql_use_result(sMysql);
-	if(!res)
-		error("mysql_use_result");
-	int count = 0;
-	MYSQL_ROW row;
-	while((row = mysql_fetch_row(res)) != NULL) {
-		count++;
-		if(count % 1000 == 0) {
-			printf("%i\n", count);
-		}
-
-		assert(mysql_num_fields(res) == nCol);
-		unsigned long* lengths = mysql_fetch_lengths(res);
-		assert(lengths);
-
-		char* dst = (char*)vdst;
-
-		// store data in struct
-		for(size_t i=1; i<nCol; i++) {
-			char* ptr = dst + cf[i].offset;
-			switch(cf[i].type) {
-			case CDT_INT:
-				*(int*)ptr = safe_atoi(row[i], lengths[i]);
-				break;
-			case CDT_STRING:
-				*(string*)ptr = string(row[i], lengths[i]);
-				break;
-			case CDT_FLOAT:
-				*(float*)ptr = safe_atof(row[i], lengths[i]);
-				break;
-			}
-		}
-
-		// call back
-		tfs();
-	}
-	printf("%i\n", count);
-	if(mysql_errno(sMysql))
-		error("mysql_fetch_row");
-	mysql_free_result(res);
-}
-#endif

@@ -6,7 +6,9 @@
 #include "../wowfoot-ex/src/config.h"
 #include <stdio.h>
 #include <fcntl.h>
+#include "util/criticalSection.h"
 
+static CriticalSection sCS;
 static bool sLoaded = false;
 
 static const char * const CONF_mpq_list[] = {
@@ -42,6 +44,7 @@ static void LoadCommonMPQFiles() {
 }
 
 void DBC::load() {
+	LOCK(sCS);
 	if(sLoaded)
 		return;
 	sLoaded = true;

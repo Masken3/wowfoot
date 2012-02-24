@@ -3,14 +3,17 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <unordered_set>
+#include "util/criticalSection.h"
 
 using namespace std;
 using namespace FactionTemplateIndex;
 
+static CriticalSection sCS;
 static FactionMap sFactionMap;
 static bool sLoaded;
 
 void FactionTemplateIndex::load() {
+	LOCK(sCS);
 	if(sLoaded)
 		return;
 	sLoaded = true;
