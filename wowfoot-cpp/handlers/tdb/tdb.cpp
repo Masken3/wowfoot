@@ -27,6 +27,8 @@ static const char* sColName;
 static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
 	printf("%s: %s\n", funcName, mysql_error(sMysql));
+	mysql_close(sMysql);
+	sMysql = NULL;
 	throw Exception(funcName);
 }
 
@@ -40,11 +42,6 @@ static void init() {
 	// uses non-dot (.) radix characters.
 	// Example: Sweden uses comma (,).
 	setlocale(LC_NUMERIC, "C");
-
-	sMysql = mysql_init(NULL);
-	if(!mysql_real_connect(sMysql, TDB_SERVER, TDB_USER, TDB_PASS, TDB_WORLD, 0,NULL,0)) {
-		error("mysql_real_connect");
-	}
 }
 
 static int safe_atoi(const char* str, unsigned long len) {
@@ -77,6 +74,11 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	size_t ColCountStart, void (*PostCallback)())
 {
 	init();
+
+	sMysql = mysql_init(NULL);
+	if(!mysql_real_connect(sMysql, TDB_SERVER, TDB_USER, TDB_PASS, TDB_WORLD, 0,NULL,0)) {
+		error("mysql_real_connect");
+	}
 
 	printf("fetching table %s...\n", tableName);
 	ostringstream oss;
@@ -129,6 +131,7 @@ void fetchTableBase(const char* tableName, const ColumnFormat* cf, size_t nCol,
 	if(mysql_errno(sMysql))
 		error("mysql_fetch_row");
 	mysql_free_result(res);
+	mysql_close(sMysql);
 }
 
 static char* dstGetMap(const ColumnFormat& cf, MYSQL_ROW row, unsigned long* lengths, TableFetchMap tfm) {
