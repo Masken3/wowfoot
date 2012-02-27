@@ -24,7 +24,7 @@ using namespace std;
 
 static MYSQL* sMysql;
 static const char* sColName;
-static CriticalSection sCS;
+static CriticalSectionLoadGuard sCS;
 
 static void error(const char* funcName) __attribute__((noreturn));
 static void error(const char* funcName) {
@@ -35,11 +35,7 @@ static void error(const char* funcName) {
 }
 
 static void init() {
-	LOCK(sCS);
-	static bool sInit = false;
-	if(sInit)
-		return;
-	sInit = true;
+	LOCK_AND_LOAD;
 
 	// Required for strtod() to work properly on systems whose default locale
 	// uses non-dot (.) radix characters.

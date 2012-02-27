@@ -7,18 +7,14 @@
 #include "dbcItemSubClass.h"
 #include "util/criticalSection.h"
 
-static CriticalSection sCS;
-static bool sLoaded = false;
+static CriticalSectionLoadGuard sCS;
 ItemSubClasses gItemSubClasses;
 
 // we need to keep this object alive, so the string table remains valid.
 static DBCFile sDbc("DBFilesClient\\ItemSubClass.dbc");
 
 void ItemSubClasses::load() {
-	LOCK(sCS);
-	if(sLoaded)
-		return;
-	sLoaded = true;
+	LOCK_AND_LOAD;
 	DBC::load();
 
 	printf("Opening ItemSubClass.dbc...\n");

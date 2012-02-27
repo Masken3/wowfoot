@@ -8,8 +8,7 @@
 #include <fcntl.h>
 #include "util/criticalSection.h"
 
-static CriticalSection sCS;
-static bool sLoaded = false;
+static CriticalSectionLoadGuard sCS;
 
 static const char * const CONF_mpq_list[] = {
 	"common.MPQ",
@@ -44,10 +43,7 @@ static void LoadCommonMPQFiles() {
 }
 
 void DBC::load() {
-	LOCK(sCS);
-	if(sLoaded)
-		return;
-	sLoaded = true;
+	LOCK_AND_LOAD;
 
 	printf("Opening MPQ files:\n");
 	// the objects need to survive past this function.

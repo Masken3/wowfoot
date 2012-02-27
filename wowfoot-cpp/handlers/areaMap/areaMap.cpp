@@ -7,7 +7,7 @@
 #include "util/exception.h"
 #include "util/criticalSection.h"
 
-static CriticalSection sCS;
+static CriticalSectionLoadGuard sCS;
 
 // throws Exception on error.
 static int readInt(int fd);
@@ -55,11 +55,7 @@ AreaMap::~AreaMap() {
 }
 
 void AreaMap::load() {
-	LOCK(sCS);
-	static bool sLoaded = false;
-	if(sLoaded)
-		return;
-	sLoaded = true;
+	LOCK_AND_LOAD;
 
 	printf("loading AreaMap...\n");
 	int fd = open("../wowfoot-ex/output/AreaMap.bin", O_RDONLY | O_BINARY);

@@ -8,15 +8,11 @@
 using namespace std;
 using namespace FactionTemplateIndex;
 
-static CriticalSection sCS;
+static CriticalSectionLoadGuard sCS;
 static FactionMap sFactionMap;
-static bool sLoaded;
 
 void FactionTemplateIndex::load() {
-	LOCK(sCS);
-	if(sLoaded)
-		return;
-	sLoaded = true;
+	LOCK_AND_LOAD;
 
 	gFactionTemplates.load();
 

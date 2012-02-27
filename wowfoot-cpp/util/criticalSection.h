@@ -42,6 +42,30 @@ public:
 	}
 };
 
+class CriticalSectionLoadGuard : public CriticalSection {
+private:
+	bool mLoaded;
+public:
+	CriticalSectionLoadGuard() : mLoaded(false) {}
+	bool isLoaded() const { return mLoaded; }
+	friend class CriticalSectionLoader;
+};
+
+class CriticalSectionLoader : NonCopyable {
+private:
+	CriticalSectionLoadGuard& mCS;
+public:
+	CriticalSectionLoader(CriticalSectionLoadGuard& cs) : mCS(cs) {
+		mCS.enter();
+	}
+	~CriticalSectionLoader() {
+		mCS.mLoaded = true;
+		mCS.leave();
+	}
+};
+
 #define LOCK(cs) CriticalSectionLocker _lock(cs)
+
+#define LOCK_AND_LOAD if(sCS.isLoaded()) return; CriticalSectionLoader _load(sCS)
 
 #endif	//CRITICAL_SECTION_H

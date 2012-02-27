@@ -12,12 +12,11 @@
 using namespace std;
 using namespace ItemExtendedCostIndex;
 
-static CriticalSection sCS;
+static CriticalSectionLoadGuard sCS;
 static ItemCostMap sItemCostMap;
 static ItemVendorCostMap sItemVendorCostMap;
 static ItemVendorMap sItemVendorMap;
 static ItemItemMap sItemItemMap;
-static bool sLoaded;
 
 namespace std {
 template<class A, class B>
@@ -30,10 +29,7 @@ public:
 }
 
 void ItemExtendedCostIndex::load() {
-	LOCK(sCS);
-	if(sLoaded)
-		return;
-	sLoaded = true;
+	LOCK_AND_LOAD;
 
 	gItemExtendedCosts.load();
 	gNpcs.load();

@@ -152,7 +152,6 @@ using namespace std;
 
 class <%=@structName%>s : public <%=@cppContainer%> {
 private:
-	bool mLoaded;
 	const char* const mTableName;
 public:
 	const char* const name;
@@ -208,18 +207,15 @@ class TdbCppTask < TdbGenTask
 #include "<%=name%>.format.h"
 #include "util/criticalSection.h"
 
-static CriticalSection sCS;
+static CriticalSectionLoadGuard sCS;
 <%=@extraHeaderCode%>
 
-<%=@structName%>s::<%=@structName%>s(const char* tableName) : mLoaded(false), mTableName(tableName),
+<%=@structName%>s::<%=@structName%>s(const char* tableName) : mTableName(tableName),
 name("<%=@structName.downcase%>")
 {}
 
 void <%=@structName%>s::load() {
-	LOCK(sCS);
-	if(mLoaded)
-		return;
-	mLoaded = true;
+	LOCK_AND_LOAD;
 	TDB<<%=@structName%>>::fetchTable(mTableName, s<%=@structName%>Formats,
 		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);
 ) + IF_INDEX + %q(
