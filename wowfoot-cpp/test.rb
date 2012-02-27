@@ -8,7 +8,6 @@ VERSION_CPP = true
 require '../wowfoot-webrick/src/config.rb'
 require '../wowfoot-webrick/src/dbiExtras.rb'
 require '../wowfoot-webrick/src/util.rb'
-require '../wowfoot-ex/output/WorldMapArea.rb'
 require 'net/http'
 
 include Net
@@ -21,32 +20,6 @@ end
 # set up variables
 TESTED_URLS = {}
 RESULT_CODES = {}
-
-SEARCHES = [
-'foo',
-'bar',
-'hell',
-'the people',
-]
-
-DBC_PAGES = {
-'title' => 'CharTitles',
-'achievement' => 'dbcAchievement',
-'zone' => 'dbcWorldMapArea',
-'faction' => 'Faction',
-'itemset' => 'ItemSet',
-'spell' => 'Spell',
-}
-
-SQL_PAGES = {
-'npc' => { :table => 'creature_template' },
-'object' => { :table => 'gameobject_template' },
-'quest' => { :table => 'quest_template', :entry => 'id' },
-'item' => { :table => 'item_template' },
-}
-
-
-BASE_URL = "http://localhost:#{VERSION_CPP ? 3002 : WEBRICK_PORT}/"
 
 
 RESULT_CODES[200] = 0
@@ -64,30 +37,66 @@ successFile.sync = true
 URLS_TO_TEST = []
 
 def generateUrlsToTest
-	#URLS_TO_TEST << "#{BASE_URL}zones"
-	URLS_TO_TEST << "#{BASE_URL}quests"
-	URLS_TO_TEST << "#{BASE_URL}items"
-	URLS_TO_TEST << "#{BASE_URL}spells"
+
+require '../wowfoot-ex/output/WorldMapArea.rb'
+require '../wowfoot-ex/output/Achievement.rb'
+require '../wowfoot-ex/output/Title.rb'
+require '../wowfoot-ex/output/Faction.rb'
+require '../wowfoot-ex/output/ItemSet.rb'
+require '../wowfoot-ex/output/Spell.rb'
+
+searches = [
+'foo',
+'bar',
+'hell',
+'the people',
+]
+
+dbc_pages = {
+'title' => TITLE,
+'achievement' => ACHIEVEMENT,
+'faction' => FACTION,
+'itemset' => ITEM_SET,
+'spell' => SPELL,
+'zone' => WORLD_MAP_AREA,
+}
+
+sql_pages = {
+'npc' => { :table => 'creature_template' },
+'object' => { :table => 'gameobject_template' },
+'quest' => { :table => 'quest_template', :entry => 'id' },
+'item' => { :table => 'item_template' },
+}
+
+base_url = "http://localhost:#{VERSION_CPP ? 3002 : WEBRICK_PORT}/"
+
+	#URLS_TO_TEST << "#{base_url}zones"
+	URLS_TO_TEST << "#{base_url}quests"
+	URLS_TO_TEST << "#{base_url}items"
+	URLS_TO_TEST << "#{base_url}spells"
 
 
 	# populate test list
-	SEARCHES.each do |s|
-		url = "#{BASE_URL}search=#{s}"
+	searches.each do |s|
+		url = "#{base_url}search=#{s}"
 		URLS_TO_TEST << url
 	end
 
-	WORLD_MAP_AREA.each do |id, data|
-		URLS_TO_TEST << "#{BASE_URL}zone=#{id}"
+	dbc_pages.each do |name, dbc|
+		dbc.keys.sort.each do |id|
+			url = "#{base_url}#{name}=#{id}"
+			URLS_TO_TEST << url
+		end
 	end
 
-	SQL_PAGES.each do |name, data|
+	sql_pages.each do |name, data|
 		entry = data[:entry]
 		entry = 'entry' if(!entry)
 		stm = TDB::C.prepare("select #{entry} from #{data[:table]}")
 		stm.execute
 		rows = stm.fetch_all
 		rows.each do |row|
-			URLS_TO_TEST << "#{BASE_URL}#{name}=#{row[entry]}"
+			URLS_TO_TEST << "#{base_url}#{name}=#{row[entry]}"
 		end
 	end
 end
