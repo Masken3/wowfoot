@@ -15,3 +15,122 @@ Example: http://localhost:3002/item=30450
 *** Done.
 ** Test DLL reloading under heavy load (like the test program).
 *** I've seen one crash already.
+
+Feature list, per page, with YES/NO for "implemented?":
+* zone
+** Map	YES
+** Quests	NO
+** NPCs	NO
+** Objects	NO
+** Areas?	NO
+** Herbs	NO
+** Mining nodes	NO
+** comments	NO
+
+* search
+** phrase	YES
+** multi-word	NO
+** areas?	NO
+
+* item
+** icon	YES
+** spell use	YES
+*** spell description	NO
+** sold by	YES
+** currency for	YES
+** same look as	YES
+** dropped by	YES
+** contained in object	YES
+** contained in item	NO
+** pickpocketed from	YES
+** skinned from	NO
+** reference loot	PARTIAL
+** comments	YES
+
+* itemset
+** DBC items?	YES
+** TDB items	YES
+** spell use	YES
+*** spell description	NO
+** comments	YES
+
+* items
+** ilvl	BUGGED
+** clvl	BUGGED
+** class/subclass	YES
+
+* spell
+** icon	YES
+** description	RAW
+** tooltip	RAW
+** used by
+*** item	YES
+*** object	NO
+*** npc		NO
+*** player class	NO
+*** script?	NO
+** comments	YES
+
+* spells
+** two icons	HARD-CODED
+** input form	NO
+** professions	NO
+** player classes	NO
+** more?	NO
+
+* npc
+** faction	YES
+** stats	NO
+** spawnpoints	YES
+*** out-of-map points	NO
+** comments	YES
+** quests	NO
+** drops	NO
+** tameable	NO
+
+* achievement
+** description	YES
+** requirements	NO
+** comments	YES
+
+* object
+** spawnpoints	YES
+** comments	YES
+** contains	YES
+** spell use	NO
+** quests	NO
+
+* quest
+** levels	YES
+** rewards	YES
+** texts	YES
+** requirements	NO
+** comments	YES
+** givers	NO
+** points-of-interest	NO
+*** givers, targets
+** isDaily	NO
+
+* quests
+** max rep	HARD-CODED
+** level	NO
+** zone	NO
+** class	NO
+** profession	NO
+** faction?	NO
+
+* faction
+** members	YES
+*** reputation loss for killing	NO
+** enemies	YES
+** quests	YES
+*** reputation gain	NO
+** comments	YES
+
+* title
+** source	YES
+** comments	YES
+
+* main page	NO
+
+* link to source code and license on every page (required by AGPL)	NO
