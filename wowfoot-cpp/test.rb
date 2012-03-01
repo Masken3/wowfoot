@@ -9,6 +9,7 @@ require '../wowfoot-webrick/src/config.rb'
 require '../wowfoot-webrick/src/dbiExtras.rb'
 require '../wowfoot-webrick/src/util.rb'
 require 'net/http'
+require 'tidy'
 
 include Net
 
@@ -137,7 +138,14 @@ def testUrl(url)
 end
 
 def parse(body)
-	#todo
+	#Tidy.path = '/usr/lib/libtidy.so'
+	Tidy.open(:show_warnings=>true) do |tidy|
+		tidy.options.output_xml = true
+		tidy.clean(body)
+		puts tidy.errors
+		puts tidy.diagnostics
+		raise hell if(tidy.errors)
+	end
 end
 
 
