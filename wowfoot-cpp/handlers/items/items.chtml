@@ -72,7 +72,7 @@ document.getElementById("itemClass").onchange = itemClass_onchange;
 </div>
 
 % if(mPair) {
-<table class="tab">
+<table class="tab" summary="items">
 <!-- Title row -->
 <tr><td>ID</td><td>Name</td><td>Class</td><td>iLevel</td><td>cLevel</td><td>Source</td><td>Cost</td></tr>
 %  int count = 0;

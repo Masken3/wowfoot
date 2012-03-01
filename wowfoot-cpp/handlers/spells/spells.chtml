@@ -10,7 +10,7 @@
 <p>List spells:</p>
 
 % if(mPair) {
-<table class="tab">
+<table class="tab" summary="spells">
 <!-- Title row -->
 <tr><td>ID</td><td>Name</td></tr>
 %  int count = 0;

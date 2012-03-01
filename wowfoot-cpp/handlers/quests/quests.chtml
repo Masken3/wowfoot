@@ -10,7 +10,7 @@
 <p>List quests:</p>
 
 % if(mPair) {
-<table class="tab">
+<table class="tab" summary="quests">
 <!-- Title row -->
 <tr><td>ID</td><td>Title</td><td>Faction</td><td>Min rep</td><td>Max rep</td></tr>
 %  int count = 0;
