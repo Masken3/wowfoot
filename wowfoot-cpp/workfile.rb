@@ -430,6 +430,28 @@ WFC = @wfc = ExeWork.new
 	def buildDir; @BUILDDIR; end
 end
 
+TEST = ExeWork.new
+TEST.instance_eval do
+	@SOURCES = ['test']
+	@LIBRARIES = ['curl', 'tidy']
+	@LOCAL_DLLS = [
+		'db_quest',
+		'db_item',
+		'db_creature_template',
+		'db_gameobject_template',
+		'dbcItemSet',
+		'dbcCharTitles',
+		'dbcFaction',
+		'dbcAchievement',
+		'dbcWorldMapArea',
+		'dbcSpell',
+	]
+	@EXTRA_LINKFLAGS = ' -Wl,-rpath,.'
+
+	@NAME = 'wowfoot-test'
+	def run; sh @TARGET; end
+end
+
 def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 
 target :default do
@@ -448,6 +470,11 @@ target :run => :default do
 	rm_f 'build/count'
 	rm_f Dir.glob('build/*/*.count')
 	sh cmd
+end
+
+target :test => :default do
+	TEST.invoke
+	TEST.run
 end
 
 target :gdb => :default do
