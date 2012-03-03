@@ -1,12 +1,14 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <stdio.h>
-#include <curl/curl.h>
 #include <fstream>
 #include <vector>
 #include <string>
+
 #include <tidy/tidy.h>
 #include <tidy/buffio.h>
+
+#include <curl/curl.h>
 
 using namespace std;
 
@@ -44,32 +46,66 @@ int main() {
 	return 0;
 }
 
+#ifdef WIN32
+struct Memstream {
+	char** buf;
+	size_t* size;
+};
+
+static size_t memstream_write(void* src, size_t size, size_t nmemb, void* userdata) {
+	Memstream* m = (Memstream*)userdata;
+	size_t srcSize = size * nmemb;
+	size_t newSize = *m->size + srcSize;
+	*m->buf = (char*)realloc(*m->buf, newSize + 1);
+	memcpy(*m->buf + *m->size, src, srcSize);
+	*m->size = newSize;
+	(*m->buf)[newSize] = 0;
+	return srcSize;
+}
+#endif
+
 static void testUrl(const string& url) {
-	static char* mem;
-	static size_t memSize;
+	static char* mem = NULL;
+	static size_t memSize = 0;
 	printf("%s\n", url.c_str());
-	FILE* memStream = open_memstream(&mem, &memSize);
+
 	CURL* curl;
 	TCP(curl = curl_easy_init());
-	//TCE(curl_easy_setopt(curl, CURLOPT_SHARE, sCurlsh));
 	TCE(curl_easy_setopt(curl, CURLOPT_URL, url.c_str()));
+
+#ifdef WIN32
+	// WIN32 doesn't support open_memstream.
+	TCE(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memstream_write));
+	Memstream ms = { &mem, &memSize };
+	Memstream* memStream = &ms;
+#else
+	FILE* memStream = open_memstream(&mem, &memSize);
+#endif
 	TCE(curl_easy_setopt(curl, CURLOPT_WRITEDATA, memStream));
+
 	//TCE(curl_easy_setopt(curl, CURLOPT_FILETIME, 1));
 	//TCE(curl_easy_setopt(curl, CURLOPT_USERAGENT, DEFAULT_USERAGENT));
 	TCE(curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0));
 
 	TCE(curl_easy_perform(curl));
 
+#ifndef WIN32
 	fflush(memStream);
+#endif
 
 	parse(mem, memSize);
 
 	curl_easy_cleanup(curl);
+
+#ifdef WIN32
+	memSize = 0;
+#else
 	fclose(memStream);
+#endif
 }
 
 static void fatalError() {
-	abort();
+	exit(1);
 }
 
 static void parse(const char* html, size_t size) {
@@ -99,8 +135,14 @@ static void parse(const char* html, size_t size) {
 
 	if ( rc >= 0 )
 	{
-		if ( rc > 0 )
+		if ( rc > 0 ) {
 			printf( "\nDiagnostics:\n\%s", errbuf.bp );
+#if 0
+			FILE* f = fopen("dump.html", "wb");
+			fwrite(html, size, 1, f);
+			fclose(f);
+#endif
+		}
 		//printf( "\\nAnd here is the result:\\n\\n\%s", output.bp );
 	}
 	else
@@ -110,5 +152,5 @@ static void parse(const char* html, size_t size) {
 	tidyBufFree( &errbuf );
 	tidyRelease( tdoc );
 	if(rc != 0)
-		abort();
+		exit(1);
 }

@@ -433,7 +433,12 @@ end
 TEST = ExeWork.new
 TEST.instance_eval do
 	@SOURCES = ['test']
-	@LIBRARIES = ['curl', 'tidy']
+	@LIBRARIES = ['tidy']
+	if(HOST == :win32)
+		@LIBRARIES << 'curldll'
+	else
+		@LIBRARIES << 'curl'
+	end
 	@LOCAL_DLLS = [
 		'db_quest',
 		'db_item',

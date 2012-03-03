@@ -3,6 +3,18 @@
 
 #ifdef WIN32
 //	CRITICAL_SECTION mCS;
+CriticalSection::CriticalSection()
+{
+	InitializeCriticalSection(&mCS);
+}
+CriticalSection::~CriticalSection() {
+}
+void CriticalSection::enter() {
+	EnterCriticalSection(&mCS);
+}
+void CriticalSection::leave() {
+	LeaveCriticalSection(&mCS);
+}
 #else
 //	pthread_mutex_t mMutex;
 CriticalSection::CriticalSection()
