@@ -121,6 +121,8 @@ static void parse(const char* html, size_t size) {
 
 	//ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );  // Convert to XHTML
 	//if ( ok )
+		rc = tidySetCharEncoding(tdoc, "utf8");	// set encoding
+	if ( rc >= 0 )
 		rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
 	if ( rc >= 0 )
 		rc = tidyParseString( tdoc, input );           // Parse the input
@@ -137,7 +139,7 @@ static void parse(const char* html, size_t size) {
 	{
 		if ( rc > 0 ) {
 			printf( "\nDiagnostics:\n\%s", errbuf.bp );
-#if 0
+#if 1
 			FILE* f = fopen("dump.html", "wb");
 			fwrite(html, size, 1, f);
 			fclose(f);

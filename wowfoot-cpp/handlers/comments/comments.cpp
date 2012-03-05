@@ -27,7 +27,17 @@ struct Tag {
 	const char* t;
 	size_t len;
 };
-typedef stack<Tag> TagStack;
+class TagStack : public stack<Tag> {
+public:
+	bool contains(const Tag& t) const {
+		container_type::const_iterator itr = c.begin();
+		for(; itr != c.end(); ++itr) {
+			if(itr->len == t.len && strcmp(itr->t, t.t) == 0)
+				return true;
+		}
+		return false;
+	}
+};
 
 static sqlite3* sDB;
 
@@ -48,29 +58,48 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 static void formatUrl(ostream& o, const char* url, size_t len);
 static const char* formatUnescapedUrl(ostream& o, const char* ptr);
 
-static bool compareTag(const char* src, size_t srcLen, const char* tag, size_t tagLen,
+enum CompRes {
+	crMatch,
+	crMismatch,
+	crIgnore,
+};
+
+static CompRes compareTag(const char* src, size_t srcLen, const char* tag, size_t tagLen,
 	bool& hasAttributes, TagStack& tagStack)
 {
 	bool match = strncmp(src, tag, srcLen) == 0 &&
 		(tagLen == srcLen || (hasAttributes = isspace(tag[tagLen])));
 	if(!match)
-		return false;
+		return crMismatch;
 	if(src[0] == '/') {	// end tag
-		bool stackMatch = false;
+		CompRes cr = crIgnore;
 		if(!tagStack.empty()) {
 			const Tag& t(tagStack.top());
-			stackMatch = t.len == srcLen-1 && strncmp(src+1, t.t, t.len) == 0;
+			if(t.len == srcLen-1 && strncmp(src+1, t.t, t.len) == 0)
+				cr = crMatch;
 		}
-		if(stackMatch) {
+		if(cr == crMatch) {
 			tagStack.pop();
 		} else {
-			printf("Superflous end tag detected: %.*s\n", (int)tagLen, tag);
+			// this message is now potentially false
+			//printf("Superflous end tag detected: %.*s\n", (int)tagLen, tag);
 		}
-		return stackMatch;
+		return cr;
 	} else {	// start tag
 		Tag t = { src, srcLen };
+		// check that tag isn't already on the stack
+		if(tagStack.contains(t))
+			return crIgnore;
+
+		// also check that it isn't immediately followed by its end tag.
+		if(tag[tagLen] == ']' && tag[tagLen+1] == '[' &&
+			tag[tagLen+2] == '/' && tag[tagLen+3+tagLen] == ']' &&
+			strncmp(tag + tagLen + 3, tag, tagLen) == 0)
+			return crIgnore;
+
+		// push tag onto stack
 		tagStack.push(t);
-		return true;
+		return crMatch;
 	}
 }
 
@@ -138,6 +167,7 @@ static bool isWowheadNonUrlChar(char c) {
 #define TAG_LIST_ITEM 2
 #define TAG_ANCHOR 4
 #define TAG_TABLE 8
+#define TAG_PLAINTEXT 0x10
 #define BETWEEN_LIST (((tagState & TAG_LIST) != 0) && ((tagState & TAG_LIST_ITEM) == 0))
 #define ALLOW_BR (!BETWEEN_LIST && !(tagState & TAG_TABLE))
 #define IN_ANCHOR ((tagState & TAG_ANCHOR) != 0)
@@ -148,8 +178,15 @@ static string formatComment(const char* src) {
 	int tagState = 0;
 	TagStack ts;
 	const char* ptr = src;
+	bool pNeeded = true;
 	while(*ptr) {
 		char c = *ptr;
+		if(tagState == 0 && pNeeded) {
+			o << "<p>\n";
+			pNeeded = false;
+		}
+		if(tagState != 0)
+			pNeeded = true;
 		if(BETWEEN_LIST && c != '[' && !isspace(c) && c != '\\') {
 			o << "<li>";
 			tagState |= TAG_LIST_ITEM;
@@ -327,17 +364,23 @@ static bool pageTag(const char* type, size_t typeLen, const char* tag, size_t ta
 	return true;
 }
 
-#define COMPARE_TAG(t) (compareTag(t, strlen(t), tag, len, hasAttributes, tagStack))
+// intentional fallthrough
+#define COMPARE_TAG(t, matchAction) { CompRes cr = compareTag(t, strlen(t), tag, len, hasAttributes, tagStack);\
+	switch(cr) {\
+	case crIgnore: return tagState;\
+	case crMatch: matchAction\
+	case crMismatch: break;\
+	} }
 
 #define STREAM_TAG_ATTRS(t) ; if(hasAttributes) streamTagAttrs(o, tag + strlen(t)); o <<
 
-#define COMPLEX_TAG(src, dst, flag) if COMPARE_TAG(src) { o << dst; flag; return tagState; }
+#define COMPLEX_TAG(src, dst, flag) COMPARE_TAG(src, o << dst; flag; return tagState;)
 #define FLAG_TAG(t, flag, end) \
-	if COMPARE_TAG(t) if(tagFlag(tagState, flag)) { o << "<" t STREAM_TAG_ATTRS(t) ">"; return tagState; }\
-	if COMPARE_TAG("/" t) if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; }
+	COMPARE_TAG(t, if(tagFlag(tagState, flag)) { o << "<" t STREAM_TAG_ATTRS(t) ">"; return tagState; })\
+	COMPARE_TAG("/" t, if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; })
 #define SIMPLE_TAG(t) CHECK_TAG(t,"<"t STREAM_TAG_ATTRS(t) ">",); COMPLEX_TAG("/" t, "</"t">",)
 #define CHECK_TAG(t, dst, flag) \
-	if(COMPARE_TAG(t) && nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; }
+	COMPARE_TAG(t, if(nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; })
 
 static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagStack& tagStack) {
 	bool hasAttributes;
@@ -387,9 +430,9 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 		FLAG_TAG("ol", TAG_LIST,);
 	} else {
 		COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
-		COMPLEX_TAG("/ul", "</ul>\n<p>", tagState &= ~TAG_LIST);
+		COMPLEX_TAG("/ul", "</ul>\n", tagState &= ~TAG_LIST);
 		COMPLEX_TAG("ol", "</p>\n<ol>", tagState |= TAG_LIST);
-		COMPLEX_TAG("/ol", "</ol>\n<p>", tagState &= ~TAG_LIST);
+		COMPLEX_TAG("/ol", "</ol>\n", tagState &= ~TAG_LIST);
 	}
 
 	if(strncmp("url=", tag, 4) == 0) {
@@ -524,6 +567,9 @@ static const char* formatUnescapedUrl(ostream& o, const char* ptr) {
 		o << "</a>";
 		return end;
 	}
+
+	if(!isWowhead)
+		path = ptr;
 
 	o << "<a href=\"";
 	streamHtmlEncode(o, path, len);
