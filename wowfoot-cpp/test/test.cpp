@@ -10,6 +10,20 @@
 
 #include <curl/curl.h>
 
+#include "util/numof.h"
+
+#include "build/tdb/db_creature_template.h"
+#include "build/tdb/db_gameobject_template.h"
+#include "build/tdb/db_item.h"
+#include "build/tdb/db_quest.h"
+#include "build/dbcAchievement/dbcAchievement.h"
+#include "build/dbcCharTitles/dbcCharTitles.h"
+#include "build/dbcFaction/dbcFaction.h"
+#include "build/dbcItemSet/dbcItemSet.h"
+#include "build/dbcSpell/dbcSpell.h"
+#include "build/dbcWorldMapArea/dbcWorldMapArea.h"
+#include "config.h"
+
 using namespace std;
 
 #define LOG printf
@@ -18,6 +32,7 @@ using namespace std;
 static void fatalError() __attribute((noreturn));
 static void testUrl(const string& url);
 static void parse(const char* html, size_t size);
+static void generateUrls(vector<string>& urls);
 
 #define TCM(func) do { CURLMcode _res = (func); if(_res != CURLM_OK) { IN_FILE_ON_LINE;\
 	LOG("CURLM error %i (%s)\n", _res, curl_multi_strerror(_res)); fatalError(); } } while(0)
@@ -27,16 +42,21 @@ static void parse(const char* html, size_t size);
 	fatalError(); } } while(0)
 
 int main() {
-	printf("Loading URLs...\n");
-	ifstream urlFile("urlsToTest.txt");
 	vector<string> urls;
-	while(urlFile.good()) {
-		string s;
-		getline(urlFile, s);
-		if(!s.empty())
-			urls.push_back(s);
+	ifstream urlFile("urlsToTest.txt");
+	if(urlFile.good()) {
+		printf("Loading URLs...\n");
+		while(urlFile.good()) {
+			string s;
+			getline(urlFile, s);
+			if(!s.empty())
+				urls.push_back(s);
+		}
+	} else {
+		printf("Generating URLs...\n");
+		generateUrls(urls);
 	}
-	printf("%" PRIuPTR " urls loaded.\n", urls.size());
+	printf("%" PRIuPTR " urls.\n", urls.size());
 
 	for(size_t i=0; i<urls.size(); i++) {
 		testUrl(urls[i]);
@@ -44,6 +64,56 @@ int main() {
 		//abort();	//temp
 	}
 	return 0;
+}
+
+template<class Map> void addPageUrls(const string& base_url, const char* name, Map& map, vector<string>& urls) {
+	map.load();
+	const string pBaseUrl = base_url+name+"=";
+	for(auto itr = map.begin(); itr != map.end(); ++itr) {
+		char buf[32];
+		sprintf(buf, "%i", itr->first);
+		urls.push_back(pBaseUrl+buf);
+	}
+}
+#define PURLS(name, map) addPageUrls(base_url, name, map, urls)
+
+static void generateUrls(vector<string>& urls) {
+	const char* searches[] = {
+		"foo",
+		"bar",
+		"hell",
+		"the people",
+	};
+
+	char buf[64];
+	sprintf(buf, "http://localhost:%i/", CONFIG_PORT);
+	const string base_url = buf;
+
+	//urls.push_back(base_url+"zones");
+	urls.push_back(base_url+"quests");
+	urls.push_back(base_url+"items");
+	urls.push_back(base_url+"spells");
+
+	for(size_t i=0; i<NUMOF(searches); i++) {
+		urls.push_back(base_url+"search="+searches[i]);
+	}
+
+	PURLS("title", gTitles);
+	PURLS("achievement", gAchievements);
+	PURLS("faction", gFactions);
+	PURLS("itemset", gItemSets);
+	PURLS("spell", gSpells);
+	PURLS("zone", gWorldMapAreas);
+	PURLS("npc", gNpcs);
+	PURLS("object", gObjects);
+	PURLS("quest", gQuests);
+	PURLS("item", gItems);
+
+	// write to disk
+	ofstream urlFile("urlsToTest.txt");
+	for(size_t i=0; i<urls.size(); i++) {
+		urlFile << urls[i] << "\n";
+	}
 }
 
 #ifdef WIN32

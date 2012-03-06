@@ -433,7 +433,7 @@ end
 TEST = ExeWork.new
 TEST.instance_eval do
 	@SOURCES = ['test']
-	@EXTRA_INCLUDES = CONFIG_LOCAL_INCLUDES
+	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
 	@LIBRARIES = ['tidy']
 	if(HOST == :win32)
 		@LIBRARIES << 'curldll'
