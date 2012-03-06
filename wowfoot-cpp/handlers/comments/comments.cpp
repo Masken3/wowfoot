@@ -181,15 +181,17 @@ static string formatComment(const char* src) {
 	bool pNeeded = true;
 	while(*ptr) {
 		char c = *ptr;
-		if(tagState == 0 && pNeeded) {
+		if(tagState == 0 && pNeeded && ts.empty()) {
 			o << "<p>\n";
 			pNeeded = false;
 		}
 		if(tagState != 0)
 			pNeeded = true;
-		if(BETWEEN_LIST && c != '[' && !isspace(c) && c != '\\') {
-			o << "<li>";
-			tagState |= TAG_LIST_ITEM;
+		if(BETWEEN_LIST && !isspace(c) && c != '\\') {
+			if(!(c == '[' && (ptr[1] == '/' || STREQ(ptr+1, "li]")))) {
+				o << "<li>";
+				tagState |= TAG_LIST_ITEM;
+			}
 		}
 		if(STREQ(ptr, "http://") && !IN_ANCHOR) {	// unescaped link
 			ptr = formatUnescapedUrl(o, ptr);
@@ -413,8 +415,8 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 				if(tagsFollow(tag + len+1, sEndLiTags)) {
 					o << "</li>";
 				} else {
-					o << "</li><li>";
-					tagState |= TAG_LIST_ITEM;
+					o << "</li>";
+					//tagState |= TAG_LIST_ITEM;
 				}
 				return tagState;
 			}
