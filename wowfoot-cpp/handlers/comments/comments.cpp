@@ -185,7 +185,7 @@ static string formatComment(const char* src) {
 			o << "<p>\n";
 			pNeeded = false;
 		}
-		if(tagState != 0)
+		if(tagState & TAG_LIST)
 			pNeeded = true;
 		if(BETWEEN_LIST && !isspace(c) && c != '\\') {
 			if(!(c == '[' && (ptr[1] == '/' || STREQ(ptr+1, "li]")))) {
@@ -495,6 +495,17 @@ static const char* memmem(const char* a, size_t alen, const char* b, size_t blen
 #endif
 
 static void formatUrl(ostream& o, const char* url, size_t len) {
+	// check for whitespace.
+	// skip whitespace and any data afterwards.
+	const char* ptr = url;
+	const char* end = url + len;
+	while(ptr < end) {
+		if(isspace(*ptr))
+			break;
+		ptr++;
+	}
+	len = ptr - url;
+
 	// s/http://*.wowhead.com/
 	const char* whf = (char*)memmem(url, len, WH, strlen(WH));
 	if(whf) {
