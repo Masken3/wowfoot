@@ -38,7 +38,7 @@ def rootSendSignal(works)
 end
 
 def findPrerequisites(main, level=0)
-	a = ''
+	a = []
 	WORKS.each do |w| w.prerequisites.each do |pre|
 		next unless(pre.to_s.endsWith(DLL_FILE_ENDING))
 		name = File.basename(pre.to_s, DLL_FILE_ENDING)
@@ -46,9 +46,9 @@ def findPrerequisites(main, level=0)
 			next unless(p.to_s.endsWith(DLL_FILE_ENDING))
 			pn = File.basename(p.to_s, DLL_FILE_ENDING)
 			if(pn == main)
-				a << name+','
+				a << name
 				puts 'Found: ' + main + ' in ' + (' '*level) + name
-				a << findPrerequisites(name, level + 1)
+				a += findPrerequisites(name, level + 1)
 			end
 		end
 	end; end
@@ -68,16 +68,16 @@ class DllTask
 		# send a signal containing all the
 		# idHandlers that depends on this DLL (including itself).
 		# wait for a "finished" signal from the server.
-		idHandlerWorks = ''
 		main = File.basename(self.to_s, DLL_FILE_ENDING)
 
-		idHandlerWorks << findPrerequisites(main)
+		idHandlerWorks = findPrerequisites(main)
 		#if(@work.respond_to?(:newDllName) && HOST == :linux)
 		if(false)
 			setNewName
-			idHandlerWorks << main << ':' << @NAME
+			idHandlerWorks << (main + ':' + @NAME)
 		end
-		rootSendSignal(idHandlerWorks) if(!idHandlerWorks.empty?)
+		idHandlerWorks.uniq!
+		rootSendSignal(idHandlerWorks.join(',')) if(!idHandlerWorks.empty?)
 	end
 	def readCount
 		cn = "#{@work.baseName}.count"
