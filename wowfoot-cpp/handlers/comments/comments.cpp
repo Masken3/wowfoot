@@ -23,12 +23,37 @@ using namespace std;
 
 typedef unsigned char byte;
 
+#define TAG_TYPES(m) \
+	m(NO_TYPE, true)\
+	m(LIST, true)\
+	m(LIST_ITEM, true)\
+	m(TABLE, true)\
+	m(ANCHOR, false)\
+	m(BOLD, false)\
+	m(ITALIC, false)\
+	m(UNDERLINE, true)\
+	m(SMALL, true)\
+	m(COLOR, true)\
+
+enum TagType {
+#define _TAG_TYPE_ENUM(name, allowMultiple) name,
+	TAG_TYPES(_TAG_TYPE_ENUM)
+	_TAG_TYPE_COUNT
+};
+
+static const bool sTagTypeAllowMultiple[] = {
+#define _TAG_TYPE_ALLOW(name, allowMultiple) allowMultiple,
+	TAG_TYPES(_TAG_TYPE_ALLOW)
+};
+
 struct Tag {
 	const char* t;
 	size_t len;
+	TagType type;
 };
 class TagStack : public stack<Tag> {
 public:
+#if 0
 	bool contains(const Tag& t) const {
 		container_type::const_iterator itr = c.begin();
 		for(; itr != c.end(); ++itr) {
@@ -37,6 +62,20 @@ public:
 		}
 		return false;
 	}
+#endif
+	void dump() {
+		container_type::const_iterator itr = c.begin();
+		for(; itr != c.end(); ++itr) {
+			printf("[%.*s]", (int)itr->len, itr->t);
+		}
+		printf("\n");
+	}
+};
+
+struct TagState {
+	TagStack ts;
+	// counts of these tag types on the stack.
+	int count[_TAG_TYPE_COUNT];
 };
 
 static sqlite3* sDB;
@@ -54,9 +93,20 @@ static void closeDb() {
 }
 
 static string formatComment(const char* src);
-static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagStack&);
+static void formatTag(ostream& o, const char* tag, size_t len, TagState&);
 static void formatUrl(ostream& o, const char* url, size_t len);
 static const char* formatUnescapedUrl(ostream& o, const char* ptr);
+static bool tagsFollow(const char* ptr, const char** tags);
+
+static void closeUnclosedTag(ostream& o, TagState& ts) {
+	Tag t = ts.ts.top();
+	ts.count[t.type]--;
+	ts.ts.pop();
+	printf("Closing unclosed tag: %*s\n", (int)t.len, t.t);
+	o << "</";
+	o.write(t.t, t.len);
+	o << ">";
+}
 
 enum CompRes {
 	crMatch,
@@ -64,8 +114,8 @@ enum CompRes {
 	crIgnore,
 };
 
-static CompRes compareTag(const char* src, size_t srcLen, const char* tag, size_t tagLen,
-	bool& hasAttributes, TagStack& tagStack)
+static CompRes compareTag(ostream& o, const char* src, size_t srcLen, const char* tag, size_t tagLen,
+	bool& hasAttributes, TagState& ts, TagType type)
 {
 	bool match = strncmp(src, tag, srcLen) == 0 &&
 		(tagLen == srcLen || (hasAttributes = isspace(tag[tagLen])));
@@ -73,23 +123,31 @@ static CompRes compareTag(const char* src, size_t srcLen, const char* tag, size_
 		return crMismatch;
 	if(src[0] == '/') {	// end tag
 		CompRes cr = crIgnore;
-		if(!tagStack.empty()) {
-			const Tag& t(tagStack.top());
+		if(!ts.ts.empty()) while(ts.count[type] > 0 && cr == crIgnore) {
+			const Tag& t(ts.ts.top());
 			if(t.len == srcLen-1 && strncmp(src+1, t.t, t.len) == 0)
 				cr = crMatch;
+			else {
+				printf("tag stack top not matching [%.*s]: is [%.*s]\n",
+					(int)tagLen, tag, (int)t.len, t.t);
+				ts.ts.dump();
+				closeUnclosedTag(o, ts);
+			}
 		}
 		if(cr == crMatch) {
-			tagStack.pop();
+			ts.count[type]--;
+			ts.ts.pop();
 		} else {
 			// this message is now potentially false
 			//printf("Superflous end tag detected: %.*s\n", (int)tagLen, tag);
 		}
 		return cr;
 	} else {	// start tag
-		Tag t = { src, srcLen };
 		// check that tag isn't already on the stack
-		if(tagStack.contains(t))
+		if(ts.count[type] > 0 && !sTagTypeAllowMultiple[type])
 			return crIgnore;
+
+		Tag t = { src, srcLen, type };
 
 		// also check that it isn't immediately followed by its end tag.
 		if(tag[tagLen] == ']' && tag[tagLen+1] == '[' &&
@@ -98,12 +156,13 @@ static CompRes compareTag(const char* src, size_t srcLen, const char* tag, size_
 			return crIgnore;
 
 		// push tag onto stack
-		tagStack.push(t);
+		ts.count[type]++;
+		ts.ts.push(t);
 		return crMatch;
 	}
 }
 
-#define PUSH(literal) { Tag t = { literal, sizeof(literal)-1 }; tagStack.push(t); }
+#define PUSH(literal, type) { Tag t = { literal, sizeof(literal)-1, type }; ts.ts.push(t); ts.count[type]++; }
 
 Tab* getComments(const char* type, int id) {
 	sqlite3_stmt* stmt = NULL;
@@ -163,34 +222,35 @@ static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.';
 }
 
-#define TAG_LIST 1
-#define TAG_LIST_ITEM 2
-#define TAG_ANCHOR 4
-#define TAG_TABLE 8
-#define TAG_PLAINTEXT 0x10
-#define BETWEEN_LIST (((tagState & TAG_LIST) != 0) && ((tagState & TAG_LIST_ITEM) == 0))
-#define ALLOW_BR (!BETWEEN_LIST && !(tagState & TAG_TABLE))
-#define IN_ANCHOR ((tagState & TAG_ANCHOR) != 0)
-#define IN_LIST_ITEM ((tagState & (TAG_LIST|TAG_LIST_ITEM)) == (TAG_LIST|TAG_LIST_ITEM))
+#define BETWEEN_LIST ((ts.count[LIST] > 0) && (ts.count[LIST_ITEM] < ts.count[LIST]))
+#define ALLOW_BR (!BETWEEN_LIST && ts.count[TABLE] == 0 && !pNeeded)
+#define IN_ANCHOR (ts.count[ANCHOR] != 0)
+#define IN_LIST_ITEM (ts.count[LIST_ITEM] == ts.count[LIST] && ts.count[LIST] > 0)
 
 static string formatComment(const char* src) {
 	ostringstream o;
-	int tagState = 0;
-	TagStack ts;
+	TagState ts;
+	memset(ts.count, 0, sizeof(ts.count));
 	const char* ptr = src;
 	bool pNeeded = true;
 	while(*ptr) {
 		char c = *ptr;
-		if(tagState == 0 && pNeeded && ts.empty()) {
-			o << "<p>\n";
-			pNeeded = false;
+		if(pNeeded && ts.ts.empty() && !isspace(c) && c != '\\') {
+			static const char* liTags[] = { "ul]", "ol]" };
+			if(!tagsFollow(ptr, liTags)) {
+				o << "<p>\n";
+				pNeeded = false;
+			}
 		}
-		if(tagState & TAG_LIST)
+		if(ts.count[LIST] > 0) {
 			pNeeded = true;
+		}
 		if(BETWEEN_LIST && !isspace(c) && c != '\\') {
 			if(!(c == '[' && (ptr[1] == '/' || STREQ(ptr+1, "li]")))) {
 				o << "<li>";
-				tagState |= TAG_LIST_ITEM;
+				PUSH("li", LIST_ITEM);
+				//printf("inserted <li>. ");
+				//ts.ts.dump();
 			}
 		}
 		if(STREQ(ptr, "http://") && !IN_ANCHOR) {	// unescaped link
@@ -208,7 +268,7 @@ static string formatComment(const char* src) {
 				o << (ptr-1);
 				break;
 			}
-			tagState = formatTag(o, ptr, endPtr - ptr, tagState, ts);
+			formatTag(o, ptr, endPtr - ptr, ts);
 			ptr = endPtr + 1;
 		} else if(c == '\\' && *ptr == 'n') {
 			ptr++;
@@ -226,37 +286,14 @@ static string formatComment(const char* src) {
 			o << c;
 		}
 	}
-	while(!ts.empty()) {
-		Tag t = ts.top();
-		ts.pop();
-		printf("Closing unclosed tag: %*s\n", (int)t.len, t.t);
-		o << "</";
-		o.write(t.t, t.len);
-		o << ">";
+	while(!ts.ts.empty()) {
+		closeUnclosedTag(o, ts);
 	}
 	return o.str();
 }
 
-static bool tagFlag(int& tagState, int flag) {
-	if(!flag)
-		return true;
-	if(!(tagState & flag)) {
-		tagState |= flag;
-		return true;
-	}
-	return false;
-}
-
-static bool untagFlag(int& tagState, int flag) {
-	if(!flag)
-		return true;
-	if(tagState & flag) {
-		tagState &= ~flag;
-		return true;
-	}
-	return false;
-}
-
+// returns true if any of \a tags follow \a ptr.
+// \a tags is a NULL-terminated array of strings.
 static bool tagsFollow(const char* ptr, const char** tags) {
 	//printf("tagsFollow %s\n", ptr);
 	// skip whitespace
@@ -267,7 +304,7 @@ static bool tagsFollow(const char* ptr, const char** tags) {
 				ptr++;
 				continue;
 			} else {
-				printf("backslash\n");
+				//printf("backslash\n");
 				return false;
 			}
 		}
@@ -276,7 +313,7 @@ static bool tagsFollow(const char* ptr, const char** tags) {
 		ptr++;
 	}
 	if(*ptr != '[') {
-		printf("not a tag\n");
+		//printf("not a tag\n");
 		return false;
 	}
 	ptr++;
@@ -285,7 +322,7 @@ static bool tagsFollow(const char* ptr, const char** tags) {
 			return true;
 		tags++;
 	}
-	printf("not a matching tag\n");
+	//printf("not a matching tag\n");
 	return false;
 }
 
@@ -367,87 +404,68 @@ static bool pageTag(const char* type, size_t typeLen, const char* tag, size_t ta
 }
 
 // intentional fallthrough
-#define COMPARE_TAG(t, matchAction) { CompRes cr = compareTag(t, strlen(t), tag, len, hasAttributes, tagStack);\
+#define COMPARE_TAG(t, type, matchAction) { CompRes cr = compareTag(o, t, strlen(t), tag, len, hasAttributes, ts, type);\
 	switch(cr) {\
-	case crIgnore: return tagState;\
+	case crIgnore: printf("Ignored tag: %s\n", t); return;\
 	case crMatch: matchAction\
 	case crMismatch: break;\
 	} }
 
 #define STREAM_TAG_ATTRS(t) ; if(hasAttributes) streamTagAttrs(o, tag + strlen(t)); o <<
 
-#define COMPLEX_TAG(src, dst, flag) COMPARE_TAG(src, o << dst; flag; return tagState;)
-#define FLAG_TAG(t, flag, end) \
-	COMPARE_TAG(t, if(tagFlag(tagState, flag)) { o << "<" t STREAM_TAG_ATTRS(t) ">"; return tagState; })\
-	COMPARE_TAG("/" t, if(untagFlag(tagState, flag)) { o << "</" t ">"end; return tagState; })
-#define SIMPLE_TAG(t) CHECK_TAG(t,"<"t STREAM_TAG_ATTRS(t) ">",); COMPLEX_TAG("/" t, "</"t">",)
-#define CHECK_TAG(t, dst, flag) \
-	COMPARE_TAG(t, if(nextEndTagIs(tag+len, "/" t)) { o << dst; flag; return tagState; })
+#define COMPLEX_TAG(src, type, dst) COMPARE_TAG(src, type, o << dst; return;)
+// differs from simple_tag in that it allows other tags inside?
+#define FLAG_TAG(t, type) \
+	COMPARE_TAG(t, type, o << "<" t STREAM_TAG_ATTRS(t) ">"; return;)\
+	COMPARE_TAG("/" t, type, o << "</" t ">"; return;)
+#define SIMPLE_TAG(t, type) CHECK_TAG(t, type,"<"t STREAM_TAG_ATTRS(t) ">"); COMPLEX_TAG("/" t, type, "</"t">")
+#define CHECK_TAG(t, type, dst) \
+	COMPARE_TAG(t, type, if(nextEndTagIs(tag+len, "/" t)) { o << dst; return; } else { ts.ts.pop(); ts.count[type]--; } )
 
-static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagStack& tagStack) {
+static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
-	SIMPLE_TAG("b");
-	SIMPLE_TAG("i");
-	CHECK_TAG("small", "<span class=\"small\">",);
-	COMPLEX_TAG("/small", "</span>",);
-	FLAG_TAG("table", TAG_TABLE,);
-	SIMPLE_TAG("tr");
-	SIMPLE_TAG("td");
-	CHECK_TAG("u", "<span class=\"underlined\">",);
-	COMPLEX_TAG("/u", "</span>",);
-	if(tagState & TAG_LIST) {
-		if(strncmp("li", tag, len) == 0) {
-			if(IN_LIST_ITEM) {
-				o << "</li>";
-				tagState &= ~TAG_LIST_ITEM;
-			}
-			if(tagFlag(tagState, TAG_LIST_ITEM)) {
-				o << "<li>";
-				return tagState;
-			}
+	SIMPLE_TAG("b", BOLD);
+	SIMPLE_TAG("i", ITALIC);
+	CHECK_TAG("small", SMALL, "<span class=\"small\">");
+	COMPLEX_TAG("/small", SMALL, "</span>");
+	FLAG_TAG("table", TABLE);
+	SIMPLE_TAG("tr", NO_TYPE);
+	SIMPLE_TAG("td", NO_TYPE);
+	CHECK_TAG("u", UNDERLINE, "<span class=\"underlined\">");
+	COMPLEX_TAG("/u", UNDERLINE, "</span>");
+	if(ts.count[LIST] > 0) {
+		if(IN_LIST_ITEM) {
+			COMPLEX_TAG("li", NO_TYPE, "</li><li>"; ts.ts.pop(); printf("combo </li> "); ts.ts.dump(););
 		}
-		if(strncmp("/li", tag, len) == 0) {
-			// if any of these tags follow /li, print /li.
-			// otherwise, discard it to maintain valid HTML.
-			static const char* sEndLiTags[] = { "/ul]", "/ol]", "li]", NULL };
-			if(untagFlag(tagState, TAG_LIST_ITEM)) {
-				if(tagsFollow(tag + len+1, sEndLiTags)) {
-					o << "</li>";
-				} else {
-					o << "</li>";
-					//tagState |= TAG_LIST_ITEM;
-				}
-				return tagState;
-			}
-		}
+		SIMPLE_TAG("li", LIST_ITEM);
 	} else {
 		// discard invalid tags
-		COMPLEX_TAG("li", "\n",);
-		COMPLEX_TAG("/li", "\n",);
-		tagState &= ~TAG_LIST_ITEM;
+		COMPLEX_TAG("li", NO_TYPE, "\n"; ts.ts.pop());
+		COMPLEX_TAG("/li", NO_TYPE, "\n"; ts.ts.pop());
 	}
-	if(tagState & TAG_TABLE) {
-		FLAG_TAG("ul", TAG_LIST,);
-		FLAG_TAG("ol", TAG_LIST,);
+	if(ts.count[TABLE] > 0 || ts.count[LIST] > 0) {
+		SIMPLE_TAG("ul", LIST);
+		SIMPLE_TAG("ol", LIST);
 	} else {
-		COMPLEX_TAG("ul", "</p>\n<ul>", tagState |= TAG_LIST);
-		COMPLEX_TAG("/ul", "</ul>\n", tagState &= ~TAG_LIST);
-		COMPLEX_TAG("ol", "</p>\n<ol>", tagState |= TAG_LIST);
-		COMPLEX_TAG("/ol", "</ol>\n", tagState &= ~TAG_LIST);
+#define ENDP (ts.count[LIST] == 0 ? "</p>\n" : "") <<
+		COMPLEX_TAG("ul", LIST, ENDP "<ul>");
+		COMPLEX_TAG("/ul", LIST, "</ul>\n");
+		COMPLEX_TAG("ol", LIST, ENDP "<ol>");
+		COMPLEX_TAG("/ol", LIST, "</ol>\n");
 	}
 
-	if(strncmp("url=", tag, 4) == 0) {
+	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4)) {
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
 		o << "<a href=\"";
 		formatUrl(o, url, urlLen);
 		o << "\">";
-		PUSH("url");
-		return tagState | TAG_ANCHOR;
+		PUSH("url", ANCHOR);
+		return;
 	}
-	COMPLEX_TAG("/url", "</a>", tagState &= ~TAG_ANCHOR);
+	COMPLEX_TAG("/url", ANCHOR, "</a>");
 
 	if(strncmp("color=", tag, 6) == 0) {
 		const char* idString = tag + 6;
@@ -455,12 +473,12 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 		o << "<span class=\"";
 		o.write(idString, idLen);
 		o << "\">";
-		PUSH("color");
-		return tagState;
+		PUSH("color", COLOR);
+		return;
 	}
-	COMPLEX_TAG("/color", "</span>",);
+	COMPLEX_TAG("/color", COLOR, "</span>");
 
-#define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map, o)) return tagState;
+#define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map, o)) return;
 
 	PAGE_TAGS(PAGE_TAG);
 
@@ -469,7 +487,6 @@ static int formatTag(ostream& o, const char* tag, size_t len, int tagState, TagS
 	o << "[";
 	o.write(tag, len);
 	o << "]";
-	return tagState;
 }
 
 static void streamHtmlEncode(ostream& o, const char* url, size_t len) {

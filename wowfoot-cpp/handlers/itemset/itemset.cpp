@@ -11,6 +11,7 @@ using namespace std;
 void itemsetChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gItemSets.load();
 	gItems.load();
+	gSpells.load();
 
 	int id = toInt(urlPart);
 	a = gItemSets.find(id);

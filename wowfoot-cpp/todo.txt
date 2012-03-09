@@ -16,6 +16,10 @@ Example: http://localhost:3002/item=30450
 ** Test DLL reloading under heavy load (like the test program).
 *** I've seen one crash already.
 
+* Comment errors not caught by automated tools:
+** http://localhost:3002/achievement=40
+*** cranee
+
 Feature list, per page, with YES/NO for "implemented?":
 * zone
 ** Map	YES

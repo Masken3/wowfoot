@@ -204,7 +204,7 @@ class HandlerWork < DllWork
 			'.', CHTML_BUILDDIR,
 			TDB_BUILDDIR,
 			'win32',
-		]
+		] + CONFIG_LOCAL_INCLUDES
 		handlerDeps.each do |dll|
 			@EXTRA_INCLUDES << "handlers/#{dll}"
 			f ="build/#{dll}"
@@ -220,6 +220,7 @@ class HandlerWork < DllWork
 		@LIBRARIES << 'imagehlp' if(HOST == :win32)
 		@LIBRARIES << 'dl' if(HOST != :win32)
 		@LOCAL_DLLS << 'win32' if(HOST == :win32)
+		@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIBDIRS
 		@NAME = name
 		WORKS << self
 		WORK_MAP[name] = self
@@ -285,7 +286,7 @@ HandlerWork.new('tdb').instance_eval do
 	@LIBRARIES << 'mysqlclient'
 	if(HOST == :win32)
 		@EXTRA_INCLUDES += CONFIG_MYSQL_INCLUDES
-		@EXTRA_LINKFLAGS = CONFIG_MYSQL_LIBDIRS
+		@EXTRA_LINKFLAGS << CONFIG_MYSQL_LIBDIRS
 		@LIBRARIES << 'ws2_32'
 	else
 		@EXTRA_INCLUDES << '/usr/include/mysql'
@@ -321,7 +322,6 @@ HandlerWork.new('icon', ['dbc']).instance_eval do
 	end
 	@EXTRA_OBJECTS = [copy(LIBMPQ), copy(BLP), copy(SQUISH), copy(PALBMP), copy(CRBLIB)]
 	@LIBRARIES += ['png', 'jpeg']
-	@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIB
 end
 
 TdbWork.new('db_achievement_reward')
