@@ -186,11 +186,22 @@ Tab* getComments(const char* type, int id) {
 		Comment c;
 		c.user = (const char*)sqlite3_column_text(stmt, 0);
 		c.originalBody = (const char*)sqlite3_column_text(stmt, 1);
-		for(size_t i=0; i<c.originalBody.size(); i++) {
+		for(size_t i=0; i<c.originalBody.size(); ) {
+			// blank out invalid utf-8 sequences.
+			wchar_t w;
+			int rs = mbtowc(&w, c.originalBody.c_str() + i, c.originalBody.size() - i);
+			if(rs <= 0) {
+				c.originalBody[i] = ' ';
+				i++;
+				continue;
+			}
+			// transform '-' to avoid the HTML end-comment combo "-->".
 			if(c.originalBody[i] == '-')
 				c.originalBody[i] = '_';
+			// transform EOL for readability.
 			if(c.originalBody[i] == 'n' && c.originalBody[i-1] == '\\')
 				c.originalBody[i] = '\n';
+			i += rs;
 		}
 		c.body = formatComment((const char*)sqlite3_column_text(stmt, 1));
 		c.rating = sqlite3_column_int(stmt, 2);
@@ -234,6 +245,14 @@ static string formatComment(const char* src) {
 	const char* ptr = src;
 	bool pNeeded = true;
 	while(*ptr) {
+		// skip invalid utf-8 sequences.
+		wchar_t w;
+		int res = mbtowc(&w, ptr, 4);
+		if(res <= 0) {
+			ptr++;
+			continue;
+		}
+
 		char c = *ptr;
 		if(pNeeded && ts.ts.empty() && !isspace(c) && c != '\\') {
 			static const char* liTags[] = { "ul]", "ol]" };
