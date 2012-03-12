@@ -475,6 +475,15 @@ static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	}
 
 	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4)) {
+		while(IN_ANCHOR) {
+			if(ts.ts.top().type == ANCHOR) {
+				ts.count[ANCHOR]--;
+				ts.ts.pop();
+				o << "</a>";
+			} else {
+				closeUnclosedTag(o, ts);
+			}
+		}
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
