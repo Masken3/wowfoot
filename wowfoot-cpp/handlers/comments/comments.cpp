@@ -177,6 +177,12 @@ static CompRes compareTag(ostream& o, const char* src, size_t srcLen, const char
 			strncmp(tag + tagLen + 3, tag, tagLen) == 0)
 			return crIgnore;
 
+		// or a copy of itself.
+		if(tag[tagLen] == ']' && tag[tagLen+1] == '[' &&
+			tag[tagLen+2+tagLen] == ']' &&
+			strncmp(tag + tagLen + 2, tag, tagLen) == 0)
+			return crIgnore;
+
 		// if tag is immediately followed by "http", an unescaped URL,
 		// and the next tag is not an end tag, make sure this tag is closed
 		// right after the unescaped URL.
@@ -274,6 +280,7 @@ static string formatComment(const char* src) {
 		}
 
 		char c = *ptr;
+		// add <p> if needed.
 		if(pNeeded && ts.ts.empty() && !isspace(c) && c != '\\') {
 			static const char* liTags[] = { "ul]", "ol]" };
 			if(!tagsFollow(ptr, liTags)) {
@@ -284,6 +291,7 @@ static string formatComment(const char* src) {
 		if(ts.count[LIST] > 0) {
 			pNeeded = true;
 		}
+		// add <li> if needed.
 		if(BETWEEN_LIST && !isspace(c) && c != '\\') {
 			if(!(c == '[' && (ptr[1] == '/' || STREQ(ptr+1, "li]")))) {
 				o << "<li>";
