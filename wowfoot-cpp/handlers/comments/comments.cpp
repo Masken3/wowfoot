@@ -24,26 +24,31 @@ using namespace std;
 typedef unsigned char byte;
 
 #define TAG_TYPES(m) \
-	m(NO_TYPE, true)\
-	m(LIST, true)\
-	m(LIST_ITEM, true)\
-	m(TABLE, true)\
-	m(ANCHOR, false)\
-	m(BOLD, false)\
-	m(ITALIC, false)\
-	m(UNDERLINE, true)\
-	m(SMALL, true)\
-	m(COLOR, true)\
+	m(NO_TYPE, true, NULL)\
+	m(LIST, true, NULL)\
+	m(LIST_ITEM, true, NULL)\
+	m(TABLE, true, NULL)\
+	m(ANCHOR, false, "a")\
+	m(BOLD, false, NULL)\
+	m(ITALIC, false, NULL)\
+	m(UNDERLINE, true, "span")\
+	m(SMALL, true, "span")\
+	m(COLOR, true, "span")\
 
 enum TagType {
-#define _TAG_TYPE_ENUM(name, allowMultiple) name,
+#define _TAG_TYPE_ENUM(name, allowMultiple, endTag) name,
 	TAG_TYPES(_TAG_TYPE_ENUM)
 	_TAG_TYPE_COUNT
 };
 
 static const bool sTagTypeAllowMultiple[] = {
-#define _TAG_TYPE_ALLOW(name, allowMultiple) allowMultiple,
+#define _TAG_TYPE_ALLOW(name, allowMultiple, endTag) allowMultiple,
 	TAG_TYPES(_TAG_TYPE_ALLOW)
+};
+
+static const char* const sTagTypeEnders[] = {
+#define _TAG_TYPE_ENDER(name, allowMultiple, endTag) endTag,
+	TAG_TYPES(_TAG_TYPE_ENDER)
 };
 
 struct Tag {
@@ -76,6 +81,8 @@ struct TagState {
 	TagStack ts;
 	// counts of these tag types on the stack.
 	int count[_TAG_TYPE_COUNT];
+	// -1 if disabled, >= 0 otherwise.
+	int unescapedUrlHackLevel;
 };
 
 static sqlite3* sDB;
@@ -84,6 +91,17 @@ static sqlite3* sDB;
 	sqlite3_finalize(stmt); stmt = NULL;\
 	printf("%s:%i: %s\n", __FILE__, __LINE__, sqlite3_errmsg(sDB));\
 	throw Exception("sqlite"); } } while(0)
+
+#define PUSH(literal, type) { Tag t = { literal, sizeof(literal)-1, type }; ts.ts.push(t); ts.count[type]++; }
+#define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
+
+#define BETWEEN_LIST ((ts.count[LIST] > 0) && (ts.count[LIST_ITEM] < ts.count[LIST]))
+#define ALLOW_BR (!BETWEEN_LIST && ts.count[TABLE] == 0 && !pNeeded)
+#define IN_ANCHOR (ts.count[ANCHOR] != 0)
+#define IN_LIST_ITEM (ts.count[LIST_ITEM] == ts.count[LIST] && ts.count[LIST] > 0)
+
+#define WH ".wowhead.com/"
+#define WW ".wowwiki.com/"
 
 static void closeDb() {
 	if(sDB) {
@@ -104,7 +122,11 @@ static void closeUnclosedTag(ostream& o, TagState& ts) {
 	ts.ts.pop();
 	printf("Closing unclosed tag: %*s\n", (int)t.len, t.t);
 	o << "</";
-	o.write(t.t, t.len);
+	if(sTagTypeEnders[t.type]) {
+		o << sTagTypeEnders[t.type];
+	} else {
+		o.write(t.t, t.len);
+	}
 	o << ">";
 }
 
@@ -155,14 +177,20 @@ static CompRes compareTag(ostream& o, const char* src, size_t srcLen, const char
 			strncmp(tag + tagLen + 3, tag, tagLen) == 0)
 			return crIgnore;
 
+		// if tag is immediately followed by "http", an unescaped URL,
+		// and the next tag is not an end tag, make sure this tag is closed
+		// right after the unescaped URL.
+		if(STREQ(tag + tagLen+1, "http://") && !IN_ANCHOR) {
+			printf("Unescaped URL hack: %*.s\n", (int)tagLen, tag);
+			ts.unescapedUrlHackLevel = (int)ts.ts.size();
+		}
+
 		// push tag onto stack
 		ts.count[type]++;
 		ts.ts.push(t);
 		return crMatch;
 	}
 }
-
-#define PUSH(literal, type) { Tag t = { literal, sizeof(literal)-1, type }; ts.ts.push(t); ts.count[type]++; }
 
 Tab* getComments(const char* type, int id) {
 	sqlite3_stmt* stmt = NULL;
@@ -219,10 +247,6 @@ Tab* getComments(const char* type, int id) {
 	return ct;
 }
 
-#define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
-#define WH ".wowhead.com/"
-#define WW ".wowwiki.com/"
-
 static bool isUrlChar(char c) {
 	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
 	//sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
@@ -233,15 +257,11 @@ static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.';
 }
 
-#define BETWEEN_LIST ((ts.count[LIST] > 0) && (ts.count[LIST_ITEM] < ts.count[LIST]))
-#define ALLOW_BR (!BETWEEN_LIST && ts.count[TABLE] == 0 && !pNeeded)
-#define IN_ANCHOR (ts.count[ANCHOR] != 0)
-#define IN_LIST_ITEM (ts.count[LIST_ITEM] == ts.count[LIST] && ts.count[LIST] > 0)
-
 static string formatComment(const char* src) {
 	ostringstream o;
 	TagState ts;
 	memset(ts.count, 0, sizeof(ts.count));
+	ts.unescapedUrlHackLevel = -1;
 	const char* ptr = src;
 	bool pNeeded = true;
 	while(*ptr) {
@@ -274,6 +294,12 @@ static string formatComment(const char* src) {
 		}
 		if(STREQ(ptr, "http://") && !IN_ANCHOR) {	// unescaped link
 			ptr = formatUnescapedUrl(o, ptr);
+			if(ts.unescapedUrlHackLevel >= 0) {
+				while((int)ts.ts.size() > ts.unescapedUrlHackLevel) {
+					closeUnclosedTag(o, ts);
+				}
+				ts.unescapedUrlHackLevel = -1;
+			}
 			continue;
 		}
 		ptr++;
@@ -476,13 +502,7 @@ static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 
 	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4)) {
 		while(IN_ANCHOR) {
-			if(ts.ts.top().type == ANCHOR) {
-				ts.count[ANCHOR]--;
-				ts.ts.pop();
-				o << "</a>";
-			} else {
-				closeUnclosedTag(o, ts);
-			}
+			closeUnclosedTag(o, ts);
 		}
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
@@ -540,12 +560,19 @@ static const char* memmem(const char* a, size_t alen, const char* b, size_t blen
 #endif
 
 static void formatUrl(ostream& o, const char* url, size_t len) {
+	// check for start-quote mark.
+	if(*url == '"') {
+		url++;
+		len--;
+	}
+
 	// check for whitespace.
 	// skip whitespace and any data afterwards.
 	const char* ptr = url;
 	const char* end = url + len;
 	while(ptr < end) {
-		if(isspace(*ptr))
+		// also check for end-quote mark
+		if(isspace(*ptr) || *ptr == '"')
 			break;
 		ptr++;
 	}

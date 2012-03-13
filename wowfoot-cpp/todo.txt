@@ -19,6 +19,8 @@ Example: http://localhost:3002/item=30450
 * Comment errors not caught by automated tools:
 ** http://localhost:3002/achievement=40
 *** cranee
+** http://localhost:3002/itemset=668
+*** Souldivider
 
 Feature list, per page, with YES/NO for "implemented?":
 * zone
