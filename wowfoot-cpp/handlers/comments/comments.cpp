@@ -296,8 +296,8 @@ static string formatComment(const char* src) {
 			if(!(c == '[' && (ptr[1] == '/' || STREQ(ptr+1, "li]")))) {
 				o << "<li>";
 				PUSH("li", LIST_ITEM);
-				//printf("inserted <li>. ");
-				//ts.ts.dump();
+				printf("inserted <li>.(%c%c%c%c) ", ptr[0], ptr[1], ptr[2], ptr[3]);
+				ts.ts.dump();
 			}
 		}
 		if(STREQ(ptr, "http://") && !IN_ANCHOR) {	// unescaped link
@@ -379,6 +379,7 @@ static bool tagsFollow(const char* ptr, const char** tags) {
 	return false;
 }
 
+#if 0
 static bool nextEndTagIs(const char* ptr, const char* tag) {
 	const char* k = strchr(ptr, '[');
 	if(!k)
@@ -390,6 +391,7 @@ static bool nextEndTagIs(const char* ptr, const char* tag) {
 		return true;
 	return strncmp(k+1, tag, (e-k)-1) == 0;
 }
+#endif
 
 // attrs ends with ']'
 static void streamTagAttrs(ostream& o, const char* attrs) {
@@ -473,7 +475,7 @@ static bool pageTag(const char* type, size_t typeLen, const char* tag, size_t ta
 	COMPARE_TAG("/" t, type, o << "</" t ">"; return;)
 #define SIMPLE_TAG(t, type) CHECK_TAG(t, type,"<"t STREAM_TAG_ATTRS(t) ">"); COMPLEX_TAG("/" t, type, "</"t">")
 #define CHECK_TAG(t, type, dst) \
-	COMPARE_TAG(t, type, if(nextEndTagIs(tag+len, "/" t)) { o << dst; return; } else { ts.ts.pop(); ts.count[type]--; } )
+	COMPARE_TAG(t, type, /*if(nextEndTagIs(tag+len, "/" t))*/ { o << dst; return; } /*else { ts.ts.pop(); ts.count[type]--; }*/ )
 
 static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	bool hasAttributes;
@@ -490,12 +492,14 @@ static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	if(ts.count[LIST] > 0) {
 		if(IN_LIST_ITEM) {
 			COMPLEX_TAG("li", NO_TYPE, "</li><li>"; ts.ts.pop(); printf("combo </li> "); ts.ts.dump(););
+			COMPLEX_TAG("/li", LIST_ITEM, "</li>");
+		} else {
+			SIMPLE_TAG("li", LIST_ITEM);
 		}
-		SIMPLE_TAG("li", LIST_ITEM);
 	} else {
 		// discard invalid tags
 		COMPLEX_TAG("li", NO_TYPE, "\n"; ts.ts.pop());
-		COMPLEX_TAG("/li", NO_TYPE, "\n"; ts.ts.pop());
+		//COMPLEX_TAG("/li", NO_TYPE, "\n"; ts.ts.pop());
 	}
 	if(ts.count[TABLE] > 0 || ts.count[LIST] > 0) {
 		SIMPLE_TAG("ul", LIST);
@@ -539,7 +543,7 @@ static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	PAGE_TAGS(PAGE_TAG);
 
 	// unknown tag
-	//printf("unknown tag: %i %.*s\n", tagState, (int)len, tag);
+	printf("unknown tag (list count %i): %.*s\n", ts.count[LIST], (int)len, tag);
 	o << "[";
 	o.write(tag, len);
 	o << "]";
