@@ -21,6 +21,8 @@ Example: http://localhost:3002/item=30450
 *** cranee
 ** http://localhost:3002/itemset=668
 *** Souldivider
+** http://localhost:3002/itemset=750
+*** warhead0
 
 Feature list, per page, with YES/NO for "implemented?":
 * zone

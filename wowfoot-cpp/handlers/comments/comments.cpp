@@ -186,7 +186,7 @@ static CompRes compareTag(ostream& o, const char* src, size_t srcLen, const char
 		// if tag is immediately followed by "http", an unescaped URL,
 		// and the next tag is not an end tag, make sure this tag is closed
 		// right after the unescaped URL.
-		if(STREQ(tag + tagLen+1, "http://") && !IN_ANCHOR) {
+		if(STREQ(tag + tagLen+1, "http://") && !IN_ANCHOR && !sTagTypeAllowMultiple[type]) {
 			printf("Unescaped URL hack: %*.s\n", (int)tagLen, tag);
 			ts.unescapedUrlHackLevel = (int)ts.ts.size();
 		}
@@ -491,7 +491,8 @@ static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	COMPLEX_TAG("/u", UNDERLINE, "</span>");
 	if(ts.count[LIST] > 0) {
 		if(IN_LIST_ITEM) {
-			COMPLEX_TAG("li", NO_TYPE, "</li><li>"; ts.ts.pop(); printf("combo </li> "); ts.ts.dump(););
+			COMPARE_TAG("li", NO_TYPE, ts.ts.pop(); while(IN_LIST_ITEM) { closeUnclosedTag(o, ts); }
+				printf("combo </li> "); ts.ts.dump(); return;);
 			COMPLEX_TAG("/li", LIST_ITEM, "</li>");
 		} else {
 			SIMPLE_TAG("li", LIST_ITEM);
