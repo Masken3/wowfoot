@@ -31,9 +31,9 @@ typedef unsigned char byte;
 	m(ANCHOR, false, "a")\
 	m(BOLD, false, NULL)\
 	m(ITALIC, false, NULL)\
-	m(UNDERLINE, true, "span")\
-	m(SMALL, true, "span")\
-	m(COLOR, true, "span")\
+	m(UNDERLINE, false, "span")\
+	m(SMALL, false, "span")\
+	m(COLOR, false, "span")\
 
 enum TagType {
 #define _TAG_TYPE_ENUM(name, allowMultiple, endTag) name,
@@ -182,6 +182,15 @@ static CompRes compareTag(ostream& o, const char* src, size_t srcLen, const char
 			tag[tagLen+2+tagLen] == ']' &&
 			strncmp(tag + tagLen + 2, tag, tagLen) == 0)
 			return crIgnore;
+
+		// q&d hack: if a style tag is followed by a formatting tag, ignore the style tag.
+		if(!sTagTypeAllowMultiple[type] &&
+			(STREQ(tag + tagLen+1, "[ul]") ||
+			STREQ(tag + tagLen+1, "[ol]") ||
+			STREQ(tag + tagLen+1, "[li]")))
+		{
+			return crIgnore;
+		}
 
 		// if tag is immediately followed by "http", an unescaped URL,
 		// and the next tag is not an end tag, make sure this tag is closed
@@ -475,7 +484,7 @@ static bool pageTag(const char* type, size_t typeLen, const char* tag, size_t ta
 	COMPARE_TAG("/" t, type, o << "</" t ">"; return;)
 #define SIMPLE_TAG(t, type) CHECK_TAG(t, type,"<"t STREAM_TAG_ATTRS(t) ">"); COMPLEX_TAG("/" t, type, "</"t">")
 #define CHECK_TAG(t, type, dst) \
-	COMPARE_TAG(t, type, /*if(nextEndTagIs(tag+len, "/" t))*/ { o << dst; return; } /*else { ts.ts.pop(); ts.count[type]--; }*/ )
+	COMPARE_TAG(t, type, o << dst; return;)
 
 static void formatTag(ostream& o, const char* tag, size_t len, TagState& ts) {
 	bool hasAttributes;

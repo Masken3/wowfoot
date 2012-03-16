@@ -24,6 +24,11 @@ Example: http://localhost:3002/item=30450
 ** http://localhost:3002/itemset=750
 *** warhead0
 
+* Comment parsing needs to be more advanced. I think we should build a DOM tree,
+then run a recursive/repeating reduction pass on it, and then print it.
+Slower, uses some more memory, but it's the only sane way I can think of to fix
+the more advanced problems.
+
 Feature list, per page, with YES/NO for "implemented?":
 * zone
 ** Map	YES
