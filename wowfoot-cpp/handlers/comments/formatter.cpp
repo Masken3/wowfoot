@@ -91,13 +91,26 @@ void Formatter::dumpTreeNode(int level, const Node* n) {
 void Formatter::optimize() {
 	setupBasicTree();
 
-	// walk the tree
-#if 0
-	Node* n = mFirstNode;
-	while(n) {
+	LOG("optimizing...\n");
+	optimizeNode(&mFirstNode);
+}
 
+void Formatter::optimizeNode(Node** np) {
+	// walk the tree
+	while(*np) {
+		Node& n(**np);
+		if(n.child) {
+			optimizeNode(&n.child);
+
+			// collapse [url] if UrlNode is inside.
+			if(n.tagType() == ANCHOR && n.child->hasUrl()) {
+				LOG("collapsed outer url node.\n");
+				*np = n.child;
+			}
+		}
+
+		np = &(*np)->next;
 	}
-#endif
 }
 
 string Formatter::printArray()  {

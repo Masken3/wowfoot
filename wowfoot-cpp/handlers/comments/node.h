@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include <ostream>
+#include "nodeTypes.h"
 
 #define _DECLARE_MEMBER(type, name) type name;
 
@@ -9,25 +10,40 @@
 #define _DECLARE_ARGUMENT_S(type, name) ,type _##name
 #define _INITIALIZE_MEMBER_F(type, name) name(_##name)
 #define _INITIALIZE_MEMBER_S(type, name) ,name(_##name)
+#define _MEMBER_ARG_F(type, name) _##name
+#define _MEMBER_ARG_S(type, name) ,_##name
 
 #define _DEFINE_CONSTRUCTOR(m, name)\
 	name(m(_DECLARE_ARGUMENT_F, _DECLARE_ARGUMENT_S)) :\
 	m(_INITIALIZE_MEMBER_F, _INITIALIZE_MEMBER_S) {}
 
+#define _DEFINE_INHERIT_CONSTRUCTOR(m, name, base)\
+	name(m(_DECLARE_ARGUMENT_F, _DECLARE_ARGUMENT_S)) :\
+	base(m(_MEMBER_ARG_F, _MEMBER_ARG_S)) {}
+
+#define _DECLARE_FUNCTIONS(m, name)\
+	void print(std::ostream&) const;\
+	void doDump() const;\
+
 #define _DECLARE_ALL(m, name)\
 	m(_DECLARE_MEMBER, _DECLARE_MEMBER)\
 	_DEFINE_CONSTRUCTOR(m, name)\
-	void print(std::ostream&) const;\
-	void doDump() const;\
+	_DECLARE_FUNCTIONS(m, name)\
+
+#define _DECLARE_INHERIT(m, name, base)\
+	_DEFINE_INHERIT_CONSTRUCTOR(m, name, base)\
+	_DECLARE_FUNCTIONS(m, name)\
 
 class Node {
 public:
 	virtual void print(std::ostream&) const = 0;
 	virtual bool isTag() const = 0;
+	virtual TagType tagType() const { return NO_TYPE; }
 	virtual bool isEndTagOf(const Node&) const { return false; }
 	// returns the value of the tag required to close this node, if it is a start tag.
 	// otherwise, returns NULL.
 	virtual const char* endTag() const { return NULL; }
+	virtual bool hasUrl() const { return false; }
 	void dump(int level) const;
 	Node* next;
 	Node* child;
@@ -42,11 +58,13 @@ public:
 #define _TAG_NODE(f, m)\
 	f(const char*, tag)\
 	m(size_t, len)\
+	m(TagType, type)\
 	m(const char*, dst)\
 	m(const char*, end)\
 
 _DECLARE_ALL(_TAG_NODE, TagNode)
 	bool isTag() const { return true; }
+	TagType tagType() const { return type; }
 	bool isEndTagOf(const Node&) const;
 	const char* endTag() const { return end; }
 };
@@ -88,20 +106,17 @@ public:
 _DECLARE_ALL(_TEXT_LEN, UrlNode)
 	bool isTag() const { return true; }
 	const char* endTag() const { return "/a"; }
+	bool hasUrl() const { return true; }
 };
 
-class WowfootUrlNode : public Node {
+class WowfootUrlNode : public UrlNode {
 public:
-_DECLARE_ALL(_TEXT_LEN, WowfootUrlNode)
-	bool isTag() const { return true; }
-	const char* endTag() const { return "/a"; }
+_DECLARE_INHERIT(_TEXT_LEN, WowfootUrlNode, UrlNode)
 };
 
-class WowpediaUrlNode : public Node {
+class WowpediaUrlNode : public UrlNode {
 public:
-_DECLARE_ALL(_TEXT_LEN, WowpediaUrlNode)
-	bool isTag() const { return true; }
-	const char* endTag() const { return "/a"; }
+_DECLARE_INHERIT(_TEXT_LEN, WowpediaUrlNode, UrlNode)
 };
 
 template<class Map>

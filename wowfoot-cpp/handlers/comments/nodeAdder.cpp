@@ -11,7 +11,7 @@ void NodeAdder::addLinebreakNode() {
 // tLen: length of basic tag (without attributes or whitespace)
 // dst: static string; HTML representation of tag (without <>, so it can be used with attributes).
 void NodeAdder::addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst, const char* end) {
-	mArray.add(TagNode(tag, len, dst, end));
+	mArray.add(TagNode(tag, len, type, dst, end));
 }
 
 void NodeAdder::addColorTag(const char* id, size_t len) {
@@ -39,7 +39,7 @@ void NodeAdder::addTextNode(const char* text, size_t len) {
 }
 
 void NodeAdder::addUrlEndNode() {
-	mArray.add(TagNode("/url", 4, "/a", NULL));
+	mArray.add(TagNode("/url", 4, ANCHOR, "/a", NULL));
 }
 
 template<class Map>

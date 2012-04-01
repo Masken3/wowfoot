@@ -49,11 +49,18 @@ T& varray<Base, MaxSize>::alloc() {
 	return *t;
 }
 
+#if 0
+#define my_static_assert(a) \
+	static char const static_assertion[(a) ? 1 : -1] = {'!'}
+#else
+#define my_static_assert(a) static_assert(a, #a)
+#endif
+
 // the reference returned by this function is valid until clear() or alloc() is called.
 template<class Base, size_t MaxSize> template<class T>
 T& varray<Base, MaxSize>::add(const T& t) {
 	assert(mAllocAllowed);
-	assert(sizeof(T) <= MaxSize);
+	my_static_assert(sizeof(T) <= MaxSize);
 	m.resize(m.size()+1);
 	Base* b((T*)&m[m.size()-1]);	// Make sure that T is a subclass of Base.
 	T* tp = (T*)b;

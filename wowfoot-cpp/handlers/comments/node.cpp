@@ -3,7 +3,8 @@
 #include <string.h>
 
 void Node::dump(int level) const {
-	printf("%i (%p): %p, %p\n", _i, this, child, next);
+	//printf("%i (%p): %p, %p\n", _i, this, child, next);
+	printf("%i:", _i);
 	if(level)
 		printf("%*c", level, ' ');
 	doDump();

@@ -1,3 +1,6 @@
+#ifndef NODETYPES_H
+#define NODETYPES_H
+
 #define NODE_TYPES(m) \
 	m(TEXT)\
 
@@ -23,3 +26,5 @@ enum TagType {
 	TAG_TYPES(_TAG_TYPE_ENUM)
 	_TAG_TYPE_COUNT
 };
+
+#endif	//NODETYPES_H

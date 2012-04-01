@@ -128,19 +128,18 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 
 #define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, type, addTagNode(type, tag, len, strlen(t), dst, end); return;)
 #define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); COMPLEX_TAG("/" t, type, "/" t, NULL)
+#define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); COMPLEX_TAG("/" t, type, end, NULL)
 
 void Parser::parseTag(const char* tag, size_t len) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b", BOLD);
 	SIMPLE_TAG("i", ITALIC);
-	COMPLEX_TAG("small", SMALL, "span class=\"small\"", "/span");
-	COMPLEX_TAG("/small", SMALL, "/span", NULL);
+	C_TAG("small", SMALL, "span class=\"small\"", "/span");
 	SIMPLE_TAG("table", TABLE);
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
-	COMPLEX_TAG("u", UNDERLINE, "span class=\"underlined\"", "/span");
-	COMPLEX_TAG("/u", UNDERLINE, "/span", NULL);
+	C_TAG("u", UNDERLINE, "span class=\"underlined\"", "/span");
 	SIMPLE_TAG("li", LIST_ITEM);
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
@@ -152,8 +151,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 		parseUrl(url, urlLen);
 		return;
 	}
-	COMPLEX_TAG("url", ANCHOR, "a", "/a");
-	COMPLEX_TAG("/url", ANCHOR, "/a", NULL);
+	C_TAG("url", ANCHOR, "a", "/a");
 
 	if(strncmp("color=", tag, 6) == 0) {
 		const char* idString = tag + 6;

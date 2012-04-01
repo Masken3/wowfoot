@@ -20,6 +20,7 @@ private:
 	Node* setupBasicNode(size_t& i, const Node* parent);
 	void setupBasicTree();
 	void dumpTreeNode(int level, const Node*);
+	void optimizeNode(Node** n);
 
 	Node* mFirstNode;
 };

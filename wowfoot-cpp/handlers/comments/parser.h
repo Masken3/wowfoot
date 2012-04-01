@@ -9,7 +9,7 @@ class Node;
 
 class NodeAdder {
 protected:
-	varray<Node, 64> mArray;
+	varray<Node, 96> mArray;
 public:
 	void addLinebreakNode();
 
