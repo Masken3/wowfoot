@@ -10,10 +10,18 @@ using namespace std;
 class Formatter : Parser {
 public:
 	Formatter();
-	string formatComment(const char* src);
+	static string formatComment(const char* src);
 private:
 	void optimize();
-	string print();
+	string printArray();
+	void printNode(ostream&, const Node*);
+	string printTree();
+
+	Node* setupBasicNode(size_t& i, const Node* parent);
+	void setupBasicTree();
+	void dumpTreeNode(int level, const Node*);
+
+	Node* mFirstNode;
 };
 
 #endif	//FORMATTER_H

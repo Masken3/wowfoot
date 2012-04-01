@@ -7,21 +7,100 @@
 
 using namespace std;
 
+#define LOG printf
+
 string Formatter::formatComment(const char* src) {
 	Formatter f;
+	LOG("source: %s\n", src);
 	f.parse(src);
-	//f.compile();
 	f.optimize();
-	return f.print();
+	f.dumpTreeNode(1, f.mFirstNode);
+	return f.printTree();
 }
 
 Formatter::Formatter() {
 }
 
-void Formatter::optimize() {
+// returns the value of parent.next,
+// unless parent is NULL, in which case the return value is undefined.
+Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
+	LOG("setupBasicNode(%zu, %p)\n", i, parent);
+	for(; i<mArray.size(); i++) {
+		LOG("node %zu\n", i);
+		Node& n(mArray[i]);
+		n._i = i;
+		if(n.isTag()) {
+			LOG("isTag. parent: %p\n", parent);
+			if(parent) if(n.isEndTagOf(*parent)) {
+				LOG("found end tag 1.\n");
+				return &n;
+			}
+			if(i == mArray.size()-1)
+				break;
+			Node& m(mArray[i+1]);
+			if(m.isEndTagOf(n)) {
+				LOG("is end tag.\n");
+				n.child = NULL;
+				n.next = &m;
+			} else {
+				LOG("has child.\n");
+				n.child = &m;
+				i++;
+				n.next = setupBasicNode(i, &n);
+			}
+		} else {
+			if(i == mArray.size()-1)
+				break;
+			n.child = NULL;
+			Node& m(mArray[i+1]);
+			if(parent) if(m.isEndTagOf(*parent)) {
+				LOG("found end tag 2.\n");
+				n.next = NULL;
+				m.next = NULL;
+				m.child = NULL;
+				return &m;
+			}
+			n.next = &m;
+		}
+	}
+	LOG("return NULL;\n");
+	return NULL;
 }
 
-string Formatter::print()  {
+void Formatter::setupBasicTree() {
+	// walk the array
+	assert(mArray.size() > 0);
+	mFirstNode = &mArray[0];
+	size_t i=0;
+	setupBasicNode(i, NULL);
+	Node& n(mArray[mArray.size()-1]);
+	n.child = NULL;
+	n.next = NULL;
+}
+
+void Formatter::dumpTreeNode(int level, const Node* n) {
+	while(n) {
+		//LOG("dumpTreeNode(%i, %p)\n", level, n);
+		n->dump(level);
+		if(n->child)
+			dumpTreeNode(level+1, n->child);
+		n = n->next;
+	}
+}
+
+void Formatter::optimize() {
+	setupBasicTree();
+
+	// walk the tree
+#if 0
+	Node* n = mFirstNode;
+	while(n) {
+
+	}
+#endif
+}
+
+string Formatter::printArray()  {
 	ostringstream o;
 	for(size_t i=0; i<mArray.size(); i++) {
 		mArray[i].print(o);
@@ -29,53 +108,16 @@ string Formatter::print()  {
 	return o.str();
 }
 
-void NodeAdder::addLinebreakNode() {
-	mArray.alloc<LinebreakNode>();
+void Formatter::printNode(ostream& o, const Node* n) {
+	while(n) {
+		n->print(o);
+		printNode(o, n->child);
+		n = n->next;
+	}
 }
 
-// tag: pointer to tag in source data.
-// len: length of tag in source data.
-// tLen: length of basic tag (without attributes or whitespace)
-// dst: static string; HTML representation of tag (without <>, so it can be used with attributes).
-void NodeAdder::addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst) {
-	mArray.add(TagNode(tag, len, dst));
+string Formatter::printTree() {
+	ostringstream o;
+	printNode(o, mFirstNode);
+	return o.str();
 }
-
-void NodeAdder::addColorTag(const char* id, size_t len) {
-	mArray.add(ColorNode(id, len));
-}
-
-void NodeAdder::addWowfootUrlNode(const char* path, size_t len) {
-	mArray.add(WowfootUrlNode(path, len));
-}
-
-void NodeAdder::addWowpediaUrlNode(const char* path, size_t len) {
-	mArray.add(WowpediaUrlNode(path, len));
-}
-
-void NodeAdder::addUrlNode(const char* url, size_t len) {
-	mArray.add(UrlNode(url, len));
-}
-
-void NodeAdder::addStaticTextNode(const char* text) {
-	mArray.add(StaticTextNode(text));
-}
-
-void NodeAdder::addTextNode(const char* text, size_t len) {
-	mArray.add(TextNode(text, len));
-}
-
-void NodeAdder::addUrlEndNode() {
-	mArray.add(TagNode("/url", 4, "/a"));
-}
-
-template<class Map>
-void NodeAdder::addPageNode(Map& map, const char* type, const char* id, size_t len)
-{
-	mArray.add(PageNode<Map>(map, type, id, len));
-}
-
-#define INSTANTIATE_ADDPAGENODE(name, map)\
-	template void NodeAdder::addPageNode<typeof(map)>(typeof(map)&, const char* type, const char* id, size_t len);
-
-PAGE_TAGS(INSTANTIATE_ADDPAGENODE);

@@ -126,21 +126,21 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 	case crMismatch: break;\
 	} }
 
-#define COMPLEX_TAG(t, type, dst) COMPARE_TAG(t, type, addTagNode(type, tag, len, strlen(t), dst); return;)
-#define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t); COMPLEX_TAG("/" t, type, "/" t)
+#define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, type, addTagNode(type, tag, len, strlen(t), dst, end); return;)
+#define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); COMPLEX_TAG("/" t, type, "/" t, NULL)
 
 void Parser::parseTag(const char* tag, size_t len) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
 	SIMPLE_TAG("b", BOLD);
 	SIMPLE_TAG("i", ITALIC);
-	COMPLEX_TAG("small", SMALL, "span class=\"small\"");
-	COMPLEX_TAG("/small", SMALL, "/span");
+	COMPLEX_TAG("small", SMALL, "span class=\"small\"", "/span");
+	COMPLEX_TAG("/small", SMALL, "/span", NULL);
 	SIMPLE_TAG("table", TABLE);
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
-	COMPLEX_TAG("u", UNDERLINE, "span class=\"underlined\"");
-	COMPLEX_TAG("/u", UNDERLINE, "/span");
+	COMPLEX_TAG("u", UNDERLINE, "span class=\"underlined\"", "/span");
+	COMPLEX_TAG("/u", UNDERLINE, "/span", NULL);
 	SIMPLE_TAG("li", LIST_ITEM);
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
@@ -152,7 +152,8 @@ void Parser::parseTag(const char* tag, size_t len) {
 		parseUrl(url, urlLen);
 		return;
 	}
-	COMPLEX_TAG("/url", ANCHOR, "/a");
+	COMPLEX_TAG("url", ANCHOR, "a", "/a");
+	COMPLEX_TAG("/url", ANCHOR, "/a", NULL);
 
 	if(strncmp("color=", tag, 6) == 0) {
 		const char* idString = tag + 6;
@@ -160,15 +161,17 @@ void Parser::parseTag(const char* tag, size_t len) {
 		addColorTag(idString, idLen);
 		return;
 	}
-	COMPLEX_TAG("/color", COLOR, "/span");
+	COMPLEX_TAG("/color", COLOR, "/span", NULL);
 
 #define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map)) return;
 
 	PAGE_TAGS(PAGE_TAG);
 
-	// unknown tag
+	// Unknown tag.
+	// Assume it is intended to be printed as plain text, with its brackets[].
 	printf("unknown tag: %.*s\n", (int)len, tag);
-	flush(tag+len);
+	mNodeStart = tag-1;
+	flush(tag+len+1);
 }
 
 #ifdef WIN32

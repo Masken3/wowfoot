@@ -17,7 +17,8 @@ public:
 	// len: length of tag in source data.
 	// tLen: length of basic tag (without attributes or whitespace)
 	// dst: static string; HTML representation of tag (without <>, so it can be used with attributes).
-	void addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst);
+	// end: static string; HTMP end tag. NULL if this is an end tag or a tag that has no end.
+	void addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst, const char* end);
 
 	void addColorTag(const char* id, size_t len);
 	void addWowfootUrlNode(const char* path, size_t len);
