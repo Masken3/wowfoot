@@ -1,14 +1,6 @@
 #ifndef NODETYPES_H
 #define NODETYPES_H
 
-#define NODE_TYPES(m) \
-	m(TEXT)\
-
-enum NodeType {
-#define _ENUM_NODE_TYPE(id) id,
-	NODE_TYPES(_ENUM_NODE_TYPE)
-};
-
 #define TAG_TYPES(m) \
 	m(NO_TYPE, true, NULL)\
 	m(LIST, true, NULL)\

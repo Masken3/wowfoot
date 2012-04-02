@@ -3,7 +3,7 @@
 #include "pageTags.h"
 
 void NodeAdder::addLinebreakNode() {
-	mArray.alloc<LinebreakNode>();
+	mArray.add(LinebreakNode(true));
 }
 
 // tag: pointer to tag in source data.

@@ -14,7 +14,6 @@ string Formatter::formatComment(const char* src) {
 	LOG("source: %s\n", src);
 	f.parse(src);
 	f.optimize();
-	f.dumpTreeNode(1, f.mFirstNode);
 	return f.printTree();
 }
 
@@ -33,6 +32,7 @@ Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
 			LOG("isTag. parent: %p\n", parent);
 			if(parent) if(n.isEndTagOf(*parent)) {
 				LOG("found end tag 1.\n");
+				i--;
 				return &n;
 			}
 			if(i == mArray.size()-1)
@@ -40,6 +40,9 @@ Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
 			Node& m(mArray[i+1]);
 			if(m.isEndTagOf(n)) {
 				LOG("is end tag.\n");
+				n.child = NULL;
+				n.next = &m;
+			} else if(n.isEndTag()) {
 				n.child = NULL;
 				n.next = &m;
 			} else {
@@ -90,9 +93,11 @@ void Formatter::dumpTreeNode(int level, const Node* n) {
 
 void Formatter::optimize() {
 	setupBasicTree();
+	dumpTreeNode(1, mFirstNode);
 
 	LOG("optimizing...\n");
 	optimizeNode(&mFirstNode);
+	dumpTreeNode(1, mFirstNode);
 }
 
 void Formatter::optimizeNode(Node** np) {
@@ -106,6 +111,16 @@ void Formatter::optimizeNode(Node** np) {
 			if(n.tagType() == ANCHOR && n.child->hasUrl()) {
 				LOG("collapsed outer url node.\n");
 				*np = n.child;
+			}
+
+			// remove linebreaks between [ul] and [li]
+			if(n.tagType() == LIST && n.child->isLinebreak()) {
+				((LinebreakNode*)n.child)->visible = false;
+			}
+		}
+		if(n.next) {
+			if(n.tagType() == LIST_ITEM && n.isEndTag() && n.next->isLinebreak()) {
+				((LinebreakNode*)n.next)->visible = false;
 			}
 		}
 

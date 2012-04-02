@@ -44,6 +44,8 @@ public:
 	// otherwise, returns NULL.
 	virtual const char* endTag() const { return NULL; }
 	virtual bool hasUrl() const { return false; }
+	virtual bool isLinebreak() const { return false; }
+	bool isEndTag() const { return isTag() && !endTag(); }
 	void dump(int level) const;
 	Node* next;
 	Node* child;
@@ -70,9 +72,13 @@ _DECLARE_ALL(_TAG_NODE, TagNode)
 };
 
 class LinebreakNode : public Node {
-	void print(std::ostream&) const;
-	void doDump() const;
+public:
+#define _LINEBREAK_NODE(f, m)\
+	f(bool, visible)\
+
+_DECLARE_ALL(_LINEBREAK_NODE, LinebreakNode)
 	bool isTag() const { return false; }
+	bool isLinebreak() const { return true; }
 };
 
 #define _TEXT_LEN(f, m)\

@@ -4,18 +4,20 @@
 
 void Node::dump(int level) const {
 	//printf("%i (%p): %p, %p\n", _i, this, child, next);
-	printf("%i:", _i);
+	printf("%3i:", _i);
 	if(level)
 		printf("%*c", level, ' ');
 	doDump();
 }
 
 void LinebreakNode::print(std::ostream& o) const {
-	o << "<br>\n";
+	if(visible)
+		o << "<br>";
+	o << "\n";
 }
 
 void LinebreakNode::doDump() const {
-	printf("Linebreak\n");
+	printf("Linebreak %svisible\n", visible ? "" : "in");
 }
 
 void TextNode::print(std::ostream& o) const {
@@ -96,6 +98,8 @@ void TagNode::doDump() const {
 
 bool TagNode::isEndTagOf(const Node& n) const {
 	printf("isEndTagOf '%s' (%s)\n", dst, n.endTag());
+	if(!n.endTag())
+		return false;
 	return (strcmp(dst, n.endTag()) == 0);
 }
 
