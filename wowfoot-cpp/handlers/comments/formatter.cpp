@@ -32,12 +32,18 @@ Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
 			LOG("isTag. parent: %p\n", parent);
 			if(parent) if(n.isEndTagOf(*parent)) {
 				LOG("found end tag 1.\n");
-				i--;
+				n.next = NULL;
+				n.child = NULL;
 				return &n;
 			}
 			if(i == mArray.size()-1)
 				break;
 			Node& m(mArray[i+1]);
+			if(parent) if(m.isEndTagOf(*parent)) {
+				n.child = NULL;
+				n.next = NULL;
+				return &m;
+			}
 			if(m.isEndTagOf(n)) {
 				LOG("is end tag.\n");
 				n.child = NULL;
@@ -59,8 +65,6 @@ Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
 			if(parent) if(m.isEndTagOf(*parent)) {
 				LOG("found end tag 2.\n");
 				n.next = NULL;
-				m.next = NULL;
-				m.child = NULL;
 				return &m;
 			}
 			n.next = &m;
