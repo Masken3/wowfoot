@@ -1,9 +1,9 @@
 #ifndef FORMATTER_H
 #define FORMATTER_H
 
+#include <string>
 #include "parser.h"
 #include "vtree.h"
-#include <string>
 
 using namespace std;
 
@@ -14,15 +14,15 @@ public:
 private:
 	void optimize();
 	string printArray();
-	void printNode(ostream&, const Node*);
+	void printNode(ostream&, int node);
 	string printTree();
 
-	Node* setupBasicNode(size_t& i, const Node* parent);
+	int setupBasicNode(unsigned& i, int parent);
 	void setupBasicTree();
-	void dumpTreeNode(int level, const Node*);
-	void optimizeNode(Node** n);
+	void dumpTreeNode(int level, int node);
+	void optimizeNode(int* n);
 
-	Node* mFirstNode;
+	int mFirstNode;
 };
 
 #endif	//FORMATTER_H

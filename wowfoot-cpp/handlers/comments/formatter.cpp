@@ -20,78 +20,86 @@ string Formatter::formatComment(const char* src) {
 Formatter::Formatter() {
 }
 
+#define REF(i) mArray[i]
+#define VALID(i) (i >= 0)
+#define INVALID (-1)
+
 // returns the value of parent.next,
-// unless parent is NULL, in which case the return value is undefined.
-Node* Formatter::setupBasicNode(size_t& i, const Node* parent) {
-	LOG("setupBasicNode(%zu, %p)\n", i, parent);
+// unless parent is INVALID, in which case the return value is undefined.
+int Formatter::setupBasicNode(unsigned& i, int parent) {
+	LOG("setupBasicNode(%u, %i)\n", i, parent);
 	for(; i<mArray.size(); i++) {
-		LOG("node %zu\n", i);
+		LOG("node %u\n", i);
 		Node& n(mArray[i]);
 		n._i = i;
 		if(n.isTag()) {
-			LOG("isTag. parent: %p\n", parent);
-			if(parent) if(n.isEndTagOf(*parent)) {
+			LOG("isTag. parent: %i\n", parent);
+			if(VALID(parent)) if(n.isEndTagOf(REF(parent))) {
 				LOG("found end tag 1.\n");
-				n.next = NULL;
-				n.child = NULL;
-				return &n;
+				n.next = INVALID;
+				n.child = INVALID;
+				return i;
 			}
 			if(i == mArray.size()-1)
 				break;
 			Node& m(mArray[i+1]);
-			if(parent) if(m.isEndTagOf(*parent)) {
-				n.child = NULL;
-				n.next = NULL;
-				return &m;
+			if(VALID(parent)) if(m.isEndTagOf(REF(parent))) {
+				n.child = INVALID;
+				n.next = INVALID;
+				return i+1;
 			}
 			if(m.isEndTagOf(n)) {
 				LOG("is end tag.\n");
-				n.child = NULL;
-				n.next = &m;
+				n.child = INVALID;
+				n.next = i+1;
 			} else if(n.isEndTag()) {
-				n.child = NULL;
-				n.next = &m;
+				n.child = INVALID;
+				n.next = i+1;
 			} else {
 				LOG("has child.\n");
-				n.child = &m;
 				i++;
-				n.next = setupBasicNode(i, &n);
+				n.child = i;
+				n.next = setupBasicNode(i, i-1);
+				if(!VALID(n.next)) {
+					n.next = (int)mArray.size();
+					addTagNode(n.tagType(), NULL, 0, 0, n.endTag(), NULL);
+				}
 			}
 		} else {
 			if(i == mArray.size()-1)
 				break;
-			n.child = NULL;
+			n.child = INVALID;
 			Node& m(mArray[i+1]);
-			if(parent) if(m.isEndTagOf(*parent)) {
+			if(VALID(parent)) if(m.isEndTagOf(REF(parent))) {
 				LOG("found end tag 2.\n");
-				n.next = NULL;
-				return &m;
+				n.next = INVALID;
+				return i+1;
 			}
-			n.next = &m;
+			n.next = i+1;
 		}
 	}
-	LOG("return NULL;\n");
-	return NULL;
+	LOG("return INVALID;\n");
+	return INVALID;
 }
 
 void Formatter::setupBasicTree() {
 	// walk the array
 	assert(mArray.size() > 0);
-	mFirstNode = &mArray[0];
-	size_t i=0;
-	setupBasicNode(i, NULL);
+	mFirstNode = 0;
+	unsigned i=0;
+	setupBasicNode(i, INVALID);
 	Node& n(mArray[mArray.size()-1]);
-	n.child = NULL;
-	n.next = NULL;
+	n.child = INVALID;
+	n.next = INVALID;
 }
 
-void Formatter::dumpTreeNode(int level, const Node* n) {
-	while(n) {
+void Formatter::dumpTreeNode(int level, int n) {
+	while(VALID(n)) {
 		//LOG("dumpTreeNode(%i, %p)\n", level, n);
-		n->dump(level);
-		if(n->child)
-			dumpTreeNode(level+1, n->child);
-		n = n->next;
+		REF(n).dump(level);
+		if(VALID(REF(n).child))
+			dumpTreeNode(level+1, REF(n).child);
+		n = REF(n).next;
 	}
 }
 
@@ -104,31 +112,34 @@ void Formatter::optimize() {
 	dumpTreeNode(1, mFirstNode);
 }
 
-void Formatter::optimizeNode(Node** np) {
+void Formatter::optimizeNode(int* np) {
 	// walk the tree
-	while(*np) {
-		Node& n(**np);
-		if(n.child) {
-			optimizeNode(&n.child);
+	for(; VALID(*np); np = &REF(*np).next) {
+		int n = *np;
+		if(VALID(REF(n).child)) {
+			optimizeNode(&REF(n).child);
+			if(!VALID(REF(n).child))
+				continue;
 
 			// collapse [url] if UrlNode is inside.
-			if(n.tagType() == ANCHOR && n.child->hasUrl()) {
+			if(REF(n).tagType() == ANCHOR && REF(REF(n).child).hasUrl()) {
 				LOG("collapsed outer url node.\n");
-				*np = n.child;
+				*np = REF(n).child;
+				n = *np;
 			}
+			if(!VALID(REF(n).child))
+				continue;
 
 			// remove linebreaks between [ul] and [li]
-			if(n.tagType() == LIST && n.child->isLinebreak()) {
-				((LinebreakNode*)n.child)->visible = false;
+			if(REF(n).tagType() == LIST && REF(REF(n).child).isLinebreak()) {
+				((LinebreakNode&)REF(REF(n).child)).visible = false;
 			}
 		}
-		if(n.next) {
-			if(n.tagType() == LIST_ITEM && n.isEndTag() && n.next->isLinebreak()) {
-				((LinebreakNode*)n.next)->visible = false;
+		if(VALID(REF(n).next)) {
+			if(REF(n).tagType() == LIST_ITEM && REF(n).isEndTag() && REF(REF(n).next).isLinebreak()) {
+				((LinebreakNode&)REF(REF(n).next)).visible = false;
 			}
 		}
-
-		np = &(*np)->next;
 	}
 }
 
@@ -140,11 +151,11 @@ string Formatter::printArray()  {
 	return o.str();
 }
 
-void Formatter::printNode(ostream& o, const Node* n) {
-	while(n) {
-		n->print(o);
-		printNode(o, n->child);
-		n = n->next;
+void Formatter::printNode(ostream& o, int n) {
+	while(VALID(n)) {
+		REF(n).print(o);
+		printNode(o, REF(n).child);
+		n = REF(n).next;
 	}
 }
 

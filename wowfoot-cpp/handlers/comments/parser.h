@@ -1,15 +1,17 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <stdlib.h>
 #include "nodeTypes.h"
 #include "vtree.h"
-#include <stdlib.h>
 
 class Node;
 
 class NodeAdder {
+public:
+	typedef varray<Node, 96> Array;
 protected:
-	varray<Node, 96> mArray;
+	Array mArray;
 public:
 	void addLinebreakNode();
 

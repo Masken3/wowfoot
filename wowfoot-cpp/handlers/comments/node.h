@@ -47,10 +47,10 @@ public:
 	virtual bool isLinebreak() const { return false; }
 	bool isEndTag() const { return isTag() && !endTag(); }
 	void dump(int level) const;
-	Node* next;
-	Node* child;
-	int _i;
-	Node() : next((Node*)-1), child((Node*)-1), _i(-1) {}
+	int next;
+	int child;
+	int _i;	// for debugging. todo: add #if.
+	Node() : next(-2), child(-2), _i(-1) {}
 protected:
 	virtual void doDump() const = 0;
 };

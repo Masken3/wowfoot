@@ -7,7 +7,7 @@
 // Virtual-container array
 template<class Base, size_t MaxSize>
 class varray {
-private:
+protected:
 	typedef unsigned char byte;
 	struct Container {
 		byte a[MaxSize];
@@ -30,14 +30,14 @@ varray<Base, MaxSize>::varray() {
 	clear();
 }
 
-// the reference returned by this function is valid until clear() is called.
+// the reference returned by this function is valid until clear(), add() or alloc() is called.
 template<class Base, size_t MaxSize>
 Base& varray<Base, MaxSize>::operator[](size_t i) {
-	mAllocAllowed = false;
+	//mAllocAllowed = false;
 	return *(Base*)&m[i];
 }
 
-// the reference returned by this function is valid until clear() or alloc() is called.
+// the reference returned by this function is valid until clear(), add() or alloc() is called.
 template<class Base, size_t MaxSize> template<class T>
 T& varray<Base, MaxSize>::alloc() {
 	assert(mAllocAllowed);
@@ -73,5 +73,31 @@ void varray<Base, MaxSize>::clear() {
 	mAllocAllowed = true;
 	m.resize(0);
 }
+
+template<class Base, size_t MaxSize>
+class vvector : public varray<Base, MaxSize> {
+private:
+public:
+	class vref {
+	private:
+		int index;
+		vvector& v;
+	public:
+		bool isValid() const { return index >= 0; }
+		Base* operator ->() const { assert(isValid); return &v[index]; }
+		vref(vvector& _v, int i) : v(_v), index(i) {}
+
+		vref& operator=(const vref& o) {
+			assert(&v == &o.v);
+			index = o.index;
+		}
+	};
+
+	const vref Null;
+
+	vref operator[](size_t i) { return vref(*this, i); }
+
+	vvector() : Null(*this, -2) {}
+};
 
 #endif	//VTREE_H
