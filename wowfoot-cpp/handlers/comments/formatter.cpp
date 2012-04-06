@@ -4,6 +4,7 @@
 #include "util/exception.h"
 #include "util/minmax.h"
 #include <sstream>
+#include <string.h>
 
 using namespace std;
 
@@ -24,6 +25,11 @@ Formatter::Formatter() {
 #define VALID(i) (i >= 0)
 #define INVALID (-1)
 
+static const bool sTagTypeAllowMultiple[] = {
+#define _TAG_TYPE_ALLOW(name, allowMultiple, endTag) allowMultiple,
+	TAG_TYPES(_TAG_TYPE_ALLOW)
+};
+
 // returns the value of parent.next,
 // unless parent is INVALID, in which case the return value is undefined.
 int Formatter::setupBasicNode(unsigned& i, int parent) {
@@ -34,12 +40,15 @@ int Formatter::setupBasicNode(unsigned& i, int parent) {
 		n._i = i;
 		if(n.isTag()) {
 			LOG("isTag. parent: %i\n", parent);
+			// parenting
 			if(VALID(parent)) if(n.isEndTagOf(REF(parent))) {
 				LOG("found end tag 1.\n");
 				n.next = INVALID;
 				n.child = INVALID;
 				return i;
 			}
+
+			// next node: child or sibling?
 			if(i == mArray.size()-1)
 				break;
 			Node& m(mArray[i+1]);
@@ -86,6 +95,7 @@ void Formatter::setupBasicTree() {
 	// walk the array
 	assert(mArray.size() > 0);
 	mFirstNode = 0;
+	memset(mTagCount, 0, sizeof(mTagCount));
 	unsigned i=0;
 	setupBasicNode(i, INVALID);
 	Node& n(mArray[mArray.size()-1]);
@@ -112,32 +122,62 @@ void Formatter::optimize() {
 	dumpTreeNode(1, mFirstNode);
 }
 
+#define N REF(n)
+#define RC REF(N.child)
+#define VC VALID(N.child)
+#define RN REF(N.next)
+#define VN VALID(N.next)
+
+// set *np to remove the current tag.
 void Formatter::optimizeNode(int* np) {
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
 		int n = *np;
-		if(VALID(REF(n).child)) {
-			optimizeNode(&REF(n).child);
-			if(!VALID(REF(n).child))
+
+		// remove disallowed multiple tag
+		if(N.isTag() && !N.isEndTag() &&
+			!sTagTypeAllowMultiple[N.tagType()] && mTagCount[N.tagType()] > 0)
+		{
+			*np = N.child;
+			continue;
+		}
+
+		if(VC) {
+			// update tag count
+			if(N.isTag()) {
+				int diff = N.isEndTag() ? -1 : 1;
+				mTagCount[N.tagType()] += diff;
+			}
+
+			optimizeNode(&N.child);
+			if(!VC)
 				continue;
 
 			// collapse [url] if UrlNode is inside.
-			if(REF(n).tagType() == ANCHOR && REF(REF(n).child).hasUrl()) {
+			if(N.tagType() == ANCHOR && RC.hasUrl()) {
 				LOG("collapsed outer url node.\n");
-				*np = REF(n).child;
+				*np = N.child;
 				n = *np;
 			}
-			if(!VALID(REF(n).child))
+			if(!VC)
 				continue;
 
-			// remove linebreaks between [ul] and [li]
-			if(REF(n).tagType() == LIST && REF(REF(n).child).isLinebreak()) {
-				((LinebreakNode&)REF(REF(n).child)).visible = false;
+			// remove linebreak between [ul] and [li]
+			if(N.tagType() == LIST && RC.isLinebreak()) {
+				((LinebreakNode&)RC).visible = false;
 			}
 		}
-		if(VALID(REF(n).next)) {
-			if(REF(n).tagType() == LIST_ITEM && REF(n).isEndTag() && REF(REF(n).next).isLinebreak()) {
-				((LinebreakNode&)REF(REF(n).next)).visible = false;
+		if(VN) {
+			// remove linebreak between [/li] and [li]
+			if(N.tagType() == LIST_ITEM && N.isEndTag() && RN.isLinebreak()) {
+				((LinebreakNode&)RN).visible = false;
+			}
+
+			// remove empty tag
+			if(RN.isEndTagOf(N) && !VC) {
+				*np = RN.next;
+				if(!VALID(*np))
+					break;
 			}
 		}
 	}
@@ -153,9 +193,9 @@ string Formatter::printArray()  {
 
 void Formatter::printNode(ostream& o, int n) {
 	while(VALID(n)) {
-		REF(n).print(o);
-		printNode(o, REF(n).child);
-		n = REF(n).next;
+		N.print(o);
+		printNode(o, N.child);
+		n = N.next;
 	}
 }
 

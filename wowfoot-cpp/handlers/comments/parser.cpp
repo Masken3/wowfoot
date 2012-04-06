@@ -12,17 +12,6 @@
 #define WH ".wowhead.com/"
 #define WW ".wowwiki.com/"
 
-
-static const bool sTagTypeAllowMultiple[] = {
-#define _TAG_TYPE_ALLOW(name, allowMultiple, endTag) allowMultiple,
-	TAG_TYPES(_TAG_TYPE_ALLOW)
-};
-
-static const char* const sTagTypeEnders[] = {
-#define _TAG_TYPE_ENDER(name, allowMultiple, endTag) endTag,
-	TAG_TYPES(_TAG_TYPE_ENDER)
-};
-
 #define FLUSH flush(ptr)
 
 void Parser::flush(const char* end) {

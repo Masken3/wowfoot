@@ -23,6 +23,7 @@ private:
 	void optimizeNode(int* n);
 
 	int mFirstNode;
+	int mTagCount[_TAG_TYPE_COUNT];
 };
 
 #endif	//FORMATTER_H
