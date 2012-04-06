@@ -1,6 +1,7 @@
 #include "node.h"
 #include "pageTags.h"
 #include <string.h>
+#include "chtmlUtil.h"
 
 void Node::dump(int level) const {
 	//printf("%i (%p): %p, %p\n", _i, this, child, next);
@@ -20,20 +21,14 @@ void LinebreakNode::doDump() const {
 	printf("Linebreak %svisible\n", visible ? "" : "in");
 }
 
-void TextNode::print(std::ostream& o) const {
-	//o.write(text, len);
+static void streamHtmlEscape(std::ostream& o, const char* text, size_t len) {
 	for(size_t i=0; i<len; i++) {
-		char c = text[i];
-		if(c == '&') {
-			o << "&amp;";
-		} else if(c == '<') {
-			o << "&lt;";
-		} else if(c == '>') {
-			o << "&gt;";
-		} else {
-			o << c;
-		}
+		::streamHtmlEscape(o, text[i]);
 	}
+}
+
+void TextNode::print(std::ostream& o) const {
+	streamHtmlEscape(o, text, len);
 }
 
 void TextNode::doDump() const {
@@ -60,7 +55,7 @@ void ColorNode::doDump() const {
 
 void UrlNode::print(std::ostream& o) const {
 	o << "<a href=\"";
-	o.write(text, len);
+	streamHtmlEscape(o, text, len);
 	o << "\">";
 }
 
@@ -70,7 +65,7 @@ void UrlNode::doDump() const {
 
 void WowfootUrlNode::print(std::ostream& o) const {
 	o << "<a href=\"";
-	o.write(text, len);
+	streamHtmlEscape(o, text, len);
 	o << "\">";
 }
 
@@ -80,7 +75,7 @@ void WowfootUrlNode::doDump() const {
 
 void WowpediaUrlNode::print(std::ostream& o) const {
 	o << "<a href=\"http://www.wowpedia.org/";
-	o.write(text, len);
+	streamHtmlEscape(o, text, len);
 	o << "\">";
 }
 
@@ -103,10 +98,6 @@ bool TagNode::isEndTagOf(const Node& n) const {
 	return (strcmp(dst, n.endTag()) == 0);
 }
 
-
-template<class T> void streamName(ostream& o, const T& t) {
-	o << t.name;
-}
 template<> void streamName<Quest>(ostream& o, const Quest& t) {
 	o << t.title;
 }
