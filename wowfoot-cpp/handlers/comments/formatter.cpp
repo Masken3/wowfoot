@@ -11,101 +11,44 @@ using namespace std;
 #define LOG printf
 
 string Formatter::formatComment(const char* src) {
-	Formatter f;
+	// clear
+	mFirstNode = INVALID;
+	mPreviousNode = INVALID;
+	mArray.clear();
+
 	LOG("source: %s\n", src);
-	f.parse(src);
-	f.optimize();
-	return f.printTree();
+	parse(src);
+
+	// cleanup after parsing
+	// collapse any remaining node-stack frames
+#define R REF(r)
+	Ref r = mFirstNode;
+	while(VALID(r)) {
+		mFirstNode = R.next;
+		R.next = r+1;
+		printf("%i.next .= %i\n", r, r+1);
+		r = mFirstNode;
+	}
+
+	mFirstNode = 0;
+	memset(mTagCount, 0, sizeof(mTagCount));
+
+	optimize();
+	return printTree();
 }
 
 Formatter::Formatter() {
 }
-
-#define REF(i) mArray[i]
-#define VALID(i) (i >= 0)
-#define INVALID (-1)
 
 static const bool sTagTypeAllowMultiple[] = {
 #define _TAG_TYPE_ALLOW(name, allowMultiple, endTag) allowMultiple,
 	TAG_TYPES(_TAG_TYPE_ALLOW)
 };
 
-// returns the value of parent.next,
-// unless parent is INVALID, in which case the return value is undefined.
-int Formatter::setupBasicNode(unsigned& i, int parent) {
-	LOG("setupBasicNode(%u, %i)\n", i, parent);
-	for(; i<mArray.size(); i++) {
-		LOG("node %u\n", i);
-		Node& n(mArray[i]);
-		n._i = i;
-		if(n.isTag()) {
-			LOG("isTag. parent: %i\n", parent);
-			// parenting
-			if(VALID(parent)) if(n.isEndTagOf(REF(parent))) {
-				LOG("found end tag 1.\n");
-				n.next = INVALID;
-				n.child = INVALID;
-				return i;
-			}
-
-			// next node: child or sibling?
-			if(i == mArray.size()-1)
-				break;
-			Node& m(mArray[i+1]);
-			if(VALID(parent)) if(m.isEndTagOf(REF(parent))) {
-				n.child = INVALID;
-				n.next = INVALID;
-				return i+1;
-			}
-			if(m.isEndTagOf(n)) {
-				LOG("is end tag.\n");
-				n.child = INVALID;
-				n.next = i+1;
-			} else if(n.isEndTag()) {
-				n.child = INVALID;
-				n.next = i+1;
-			} else {
-				LOG("has child.\n");
-				i++;
-				n.child = i;
-				n.next = setupBasicNode(i, i-1);
-				if(!VALID(n.next)) {
-					n.next = (int)mArray.size();
-					addTagNode(n.tagType(), NULL, 0, 0, n.endTag(), NULL);
-				}
-			}
-		} else {
-			if(i == mArray.size()-1)
-				break;
-			n.child = INVALID;
-			Node& m(mArray[i+1]);
-			if(VALID(parent)) if(m.isEndTagOf(REF(parent))) {
-				LOG("found end tag 2.\n");
-				n.next = INVALID;
-				return i+1;
-			}
-			n.next = i+1;
-		}
-	}
-	LOG("return INVALID;\n");
-	return INVALID;
-}
-
-void Formatter::setupBasicTree() {
-	// walk the array
-	assert(mArray.size() > 0);
-	mFirstNode = 0;
-	memset(mTagCount, 0, sizeof(mTagCount));
-	unsigned i=0;
-	setupBasicNode(i, INVALID);
-	Node& n(mArray[mArray.size()-1]);
-	n.child = INVALID;
-	n.next = INVALID;
-}
-
 void Formatter::dumpTreeNode(int level, int n) {
+	LOG("dumpTreeNode(%i, %i)\n", level, n);
+	EASSERT(level < 8);
 	while(VALID(n)) {
-		//LOG("dumpTreeNode(%i, %p)\n", level, n);
 		REF(n).dump(level);
 		if(VALID(REF(n).child))
 			dumpTreeNode(level+1, REF(n).child);
@@ -114,7 +57,7 @@ void Formatter::dumpTreeNode(int level, int n) {
 }
 
 void Formatter::optimize() {
-	setupBasicTree();
+	//setupBasicTree();
 	dumpTreeNode(1, mFirstNode);
 
 	LOG("optimizing...\n");
@@ -138,24 +81,26 @@ void Formatter::optimizeNode(int* np) {
 		if(N.isTag() && !N.isEndTag() &&
 			!sTagTypeAllowMultiple[N.tagType()] && mTagCount[N.tagType()] > 0)
 		{
+			LOG("removing multiple: %i (count[%i]: %i)\n", n, N.tagType(), mTagCount[N.tagType()]);
 			*np = N.child;
 			continue;
 		}
 
-		if(VC) {
-			// update tag count
-			if(N.isTag()) {
-				int diff = N.isEndTag() ? -1 : 1;
-				mTagCount[N.tagType()] += diff;
-			}
+		// update tag count
+		if(N.isTag()) {
+			int diff = N.isEndTag() ? -1 : 1;
+			LOG("tag count %i: %s%i\n", N.tagType(), diff > 0 ? "+" : "", diff);
+			mTagCount[N.tagType()] += diff;
+		}
 
+		if(VC) {
 			optimizeNode(&N.child);
 			if(!VC)
 				continue;
 
 			// collapse [url] if UrlNode is inside.
 			if(N.tagType() == ANCHOR && RC.hasUrl()) {
-				LOG("collapsed outer url node.\n");
+				LOG("collapsed outer url node: %i\n", n);
 				*np = N.child;
 				n = *np;
 			}
@@ -175,6 +120,7 @@ void Formatter::optimizeNode(int* np) {
 
 			// remove empty tag
 			if(RN.isEndTagOf(N) && !VC) {
+				LOG("removing empty: %i\n", n);
 				*np = RN.next;
 				if(!VALID(*np))
 					break;

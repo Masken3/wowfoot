@@ -4,14 +4,25 @@
 #include <stdlib.h>
 #include "nodeTypes.h"
 #include "vtree.h"
+#include <stack>
 
 class Node;
+
+#define REF(i) mArray[i]
+#define VALID(i) (i >= 0)
+#define INVALID (-1)
 
 class NodeAdder {
 public:
 	typedef varray<Node, 96> Array;
+	typedef int Ref;
 protected:
+	Ref mFirstNode;
+	Ref mPreviousNode;
 	Array mArray;
+private:
+	void add(const Node& n);
+	Ref findStartTag(const Node& endTag);
 public:
 	void addLinebreakNode();
 

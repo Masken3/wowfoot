@@ -10,7 +10,7 @@ using namespace std;
 class Formatter : Parser {
 public:
 	Formatter();
-	static string formatComment(const char* src);
+	string formatComment(const char* src);
 private:
 	void optimize();
 	string printArray();
@@ -22,7 +22,6 @@ private:
 	void dumpTreeNode(int level, int node);
 	void optimizeNode(int* n);
 
-	int mFirstNode;
 	int mTagCount[_TAG_TYPE_COUNT];
 };
 

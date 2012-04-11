@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <vector>
+#include <string.h>
 
 // Virtual-container array
 template<class Base, size_t MaxSize>
@@ -64,7 +65,9 @@ T& varray<Base, MaxSize>::add(const T& t) {
 	m.resize(m.size()+1);
 	Base* b((T*)&m[m.size()-1]);	// Make sure that T is a subclass of Base.
 	T* tp = (T*)b;
-	new (tp) T(t);	// Invoke T's copy constructor.
+	//new (tp) T(t);	// Invoke T's copy constructor.
+	// copy T data. warning: this will cause non-POD objects to become unstable and cause crashes.
+	memcpy(tp, &t, MaxSize);
 	return *tp;
 }
 
