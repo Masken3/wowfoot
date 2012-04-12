@@ -22,6 +22,8 @@ private:
 	void dumpTreeNode(int level, int node);
 	void optimizeNode(int* n);
 
+	Ref findChildTag(Ref root, TagType type);
+
 	int mTagCount[_TAG_TYPE_COUNT];
 };
 

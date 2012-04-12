@@ -17,7 +17,7 @@ NodeAdder::Ref NodeAdder::findStartTag(const Node& endTag) {
 // during the parsing step, mFirstNode refs the top of the tag stack.
 // each stack frame (start tag) has 'next' ref its parent.
 void NodeAdder::add(const Node& n) {
-	n.dump(0);
+	//n.dump(0);
 	Ref newPrev;
 	if(n.isEndTag()) {
 		// if there is no start tag, discard this end tag.
@@ -31,33 +31,33 @@ void NodeAdder::add(const Node& n) {
 			r = mFirstNode;
 			mFirstNode = R.next;
 			R.next = r+1;
-			printf("%i.next .= %i\n", r, r+1);
+			//printf("%i.next .= %i\n", r, r+1);
 		} while(r != s);
 		mPreviousNode = INVALID;
 	} else {
 		newPrev = mArray.size();
 		Node& t(mArray.add(n));
 		t._i = newPrev;
-		t.dump(0);
+		//t.dump(0);
 		if(n.isTag()) {
 			// this is the most recent parent; add it to the stack.
 			t.next = mFirstNode;
-			printf("%i.next := %i\n", newPrev, mFirstNode);
+			//printf("%i.next := %i\n", newPrev, mFirstNode);
 			mFirstNode = newPrev;
 			// add n's end tag.
 			Node& e(mArray.add(TagNode(t.endTag(), strlen(t.endTag()), t.tagType(), t.endTag(), NULL)));
 			e._i = newPrev+1;
-			e.dump(0);
+			//e.dump(0);
 		}
 	}
 	// set refs.
 	if(VALID(mPreviousNode)) {
 		Node& p(REF(mPreviousNode));
 		if(p.isTag() && !p.isEndTag()) {
-			printf("%i.child = %i\n", mPreviousNode, newPrev);
+			//printf("%i.child = %i\n", mPreviousNode, newPrev);
 			p.child = newPrev;
 		} else {
-			printf("%i.next = %i\n", mPreviousNode, newPrev);
+			//printf("%i.next = %i\n", mPreviousNode, newPrev);
 			p.next = newPrev;
 		}
 		p._i = mPreviousNode;

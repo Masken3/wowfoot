@@ -71,11 +71,27 @@ void Formatter::optimize() {
 #define RN REF(N.next)
 #define VN VALID(N.next)
 
+// returns the Ref of an immediate child tag of the given root and type.
+// returns INVALID if no such child exists.
+// skips over Linebreak nodes, but no others.
+Formatter::Ref Formatter::findChildTag(Ref root, TagType type) {
+	Ref c = REF(root).child;
+	while(VALID(c)) {
+		if(REF(c).tagType() == type)
+			return c;
+		if(REF(c).isLinebreak())
+			c = REF(c).next;
+		else
+			break;
+	}
+	return INVALID;
+}
+
 // set *np to remove the current tag.
-void Formatter::optimizeNode(int* np) {
+void Formatter::optimizeNode(Ref* np) {
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
-		int n = *np;
+		Ref n = *np;
 
 		// remove disallowed multiple tag
 		if(N.isTag() && !N.isEndTag() &&
@@ -89,7 +105,7 @@ void Formatter::optimizeNode(int* np) {
 		// update tag count
 		if(N.isTag()) {
 			int diff = N.isEndTag() ? -1 : 1;
-			LOG("tag count %i: %s%i\n", N.tagType(), diff > 0 ? "+" : "", diff);
+			//LOG("tag count %i: %s%i\n", N.tagType(), diff > 0 ? "+" : "", diff);
 			mTagCount[N.tagType()] += diff;
 		}
 
@@ -103,6 +119,14 @@ void Formatter::optimizeNode(int* np) {
 				LOG("collapsed outer url node: %i\n", n);
 				*np = N.child;
 				n = *np;
+			}
+			if(!VC)
+				continue;
+
+			// remove duplicate [ul]
+			Ref r;
+			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
+				n = *np = r;
 			}
 			if(!VC)
 				continue;

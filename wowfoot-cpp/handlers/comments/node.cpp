@@ -92,7 +92,7 @@ void TagNode::doDump() const {
 }
 
 bool TagNode::isEndTagOf(const Node& n) const {
-	printf("isEndTagOf '%s' (%s)\n", dst, n.endTag());
+	//printf("isEndTagOf '%s' (%s)\n", dst, n.endTag());
 	if(!n.endTag())
 		return false;
 	return (strcmp(dst, n.endTag()) == 0);
