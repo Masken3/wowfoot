@@ -113,6 +113,7 @@ _DECLARE_ALL(_TEXT_LEN, UrlNode)
 	bool isTag() const { return true; }
 	const char* endTag() const { return "/a"; }
 	bool hasUrl() const { return true; }
+	virtual TagType tagType() const { return ANCHOR; }
 };
 
 class WowfootUrlNode : public UrlNode {
@@ -136,6 +137,7 @@ public:
 
 _DECLARE_ALL(_PAGE_NODE, PageNode)
 	bool isTag() const { return false; }
+	bool hasUrl() const { return true; }
 };
 
 #endif	//NODE_H

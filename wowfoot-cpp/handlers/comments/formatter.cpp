@@ -114,7 +114,7 @@ void Formatter::optimizeNode(Ref* np) {
 			if(!VC)
 				continue;
 
-			// collapse [url] if UrlNode is inside.
+			// collapse outer [url] if UrlNode is inside.
 			if(N.tagType() == ANCHOR && RC.hasUrl()) {
 				LOG("collapsed outer url node: %i\n", n);
 				*np = N.child;
