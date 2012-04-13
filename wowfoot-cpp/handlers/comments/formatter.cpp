@@ -98,7 +98,12 @@ void Formatter::optimizeNode(Ref* np) {
 			!sTagTypeAllowMultiple[N.tagType()] && mTagCount[N.tagType()] > 0)
 		{
 			LOG("removing multiple: %i (count[%i]: %i)\n", n, N.tagType(), mTagCount[N.tagType()]);
-			*np = N.child;
+			if(VC)
+				*np = N.child;
+			else if(VN)
+				*np = RN.next;
+			if(!VALID(*np))
+				return;
 			continue;
 		}
 
