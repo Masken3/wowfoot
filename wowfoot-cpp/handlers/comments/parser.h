@@ -12,6 +12,9 @@ class Node;
 #define VALID(i) (i >= 0)
 #define INVALID (-1)
 
+#define R REF(r)
+#define VR VALID(r)
+
 class NodeAdder {
 public:
 	typedef varray<Node, 96> Array;

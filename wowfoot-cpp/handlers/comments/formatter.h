@@ -23,6 +23,7 @@ private:
 	void optimizeNode(int* n);
 
 	Ref findChildTag(Ref root, TagType type);
+	Ref findNext2Li(Ref first);
 
 	int mTagCount[_TAG_TYPE_COUNT];
 };

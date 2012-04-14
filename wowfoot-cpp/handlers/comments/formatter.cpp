@@ -87,6 +87,18 @@ Formatter::Ref Formatter::findChildTag(Ref root, TagType type) {
 	return INVALID;
 }
 
+// returns the Ref of the first sibling of N such that a LIST_ITEM is its next,
+// or INVALID if no such sibling exists.
+Formatter::Ref Formatter::findNext2Li(Ref n) {
+	Ref r = n;
+	while(VR) {
+		if(VALID(R.next) && REF(R.next).tagType() == LIST_ITEM)
+			return r;
+		r = R.next;
+	}
+	return INVALID;
+}
+
 // set *np to remove the current tag.
 void Formatter::optimizeNode(Ref* np) {
 	// walk the tree
@@ -136,15 +148,39 @@ void Formatter::optimizeNode(Ref* np) {
 			if(!VC)
 				continue;
 
-			// remove linebreak between [ul] and [li]
+			// hide linebreak between [ul] and [li]
 			if(N.tagType() == LIST && RC.isLinebreak()) {
 				((LinebreakNode&)RC).visible = false;
 			}
 		}
 		if(VN) {
-			// remove linebreak between [/li] and [li]
-			if(N.tagType() == LIST_ITEM && N.isEndTag() && RN.isLinebreak()) {
-				((LinebreakNode&)RN).visible = false;
+			// deal with what comes after [/li].
+			if(N.tagType() == LIST_ITEM && N.isEndTag()) {
+				Ref r = N.next;
+				do {
+					// hide linebreaks.
+					if(R.isLinebreak()) {
+						((LinebreakNode&)RN).visible = false;
+					// add [li] around content nodes.
+					} else if(R.tagType() != LIST_ITEM) {
+						printf("Adding [li] around %i\n", r);
+						Ref next2Li = findNext2Li(r);
+						Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
+						r = N.next;
+						N.next = mArray.size();
+						Node& t(mArray.add(TagNode("li", 2, LIST_ITEM, "li", "/li")));
+						t._i = N.next;
+						t.child = r;
+						t.next = mArray.size();
+						Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
+						e._i = t.next;
+						e.child = INVALID;
+						e.next = nextLi;
+						if(VALID(next2Li))
+							REF(next2Li).next = INVALID;
+					}
+					r = R.next;
+				} while(VR);
 			}
 
 			// remove empty tag

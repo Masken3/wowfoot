@@ -2,8 +2,6 @@
 #include "node.h"
 #include "pageTags.h"
 
-#define R REF(r)
-
 NodeAdder::Ref NodeAdder::findStartTag(const Node& endTag) {
 	Ref r = mFirstNode;
 	while(VALID(r)) {
