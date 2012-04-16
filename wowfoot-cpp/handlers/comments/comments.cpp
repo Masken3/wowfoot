@@ -38,6 +38,7 @@ Tab* getComments(const char* type, int id) {
 	int res;
 	commentTabChtml* ct = new commentTabChtml();
 	Formatter f;
+	try {
 	while((res = sqlite3_step(stmt)) == SQLITE_ROW) {
 		Comment c;
 		c.user = (const char*)sqlite3_column_text(stmt, 0);
@@ -67,6 +68,10 @@ Tab* getComments(const char* type, int id) {
 	}
 	if(res != SQLITE_DONE) {
 		SQLT(res);
+	}
+	} catch(Exception& e) {
+		SQLT(sqlite3_finalize(stmt));
+		throw e;
 	}
 	SQLT(sqlite3_finalize(stmt));
 	ct->id = "comments";

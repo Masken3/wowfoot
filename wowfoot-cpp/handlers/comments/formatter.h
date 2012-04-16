@@ -22,8 +22,11 @@ private:
 	void dumpTreeNode(int level, int node);
 	void optimizeNode(int* n);
 
-	Ref findChildTag(Ref root, TagType type);
-	Ref findNext2Li(Ref first);
+	// optimize subroutines
+	Ref findChildTag(Ref, TagType type);
+	Ref findNext2Li(Ref);
+	Ref findLastSibling(Ref);
+	void updateTagCount(const Node& n, int baseDiff);
 
 	int mTagCount[_TAG_TYPE_COUNT];
 };

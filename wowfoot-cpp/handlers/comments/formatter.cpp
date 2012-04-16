@@ -48,7 +48,7 @@ static const bool sTagTypeAllowMultiple[] = {
 
 void Formatter::dumpTreeNode(int level, int n) {
 	LOG("dumpTreeNode(%i, %i)\n", level, n);
-	EASSERT(level < 8);
+	EASSERT(level < 16);
 	while(VALID(n)) {
 		REF(n).dump(level);
 		if(VALID(REF(n).child))
@@ -64,6 +64,14 @@ void Formatter::optimize() {
 	LOG("optimizing...\n");
 	optimizeNode(&mFirstNode);
 	dumpTreeNode(1, mFirstNode);
+
+	// check that tag counts are valid (zero)
+	for(int i=0; i<_TAG_TYPE_COUNT; i++) {
+		if(mTagCount[i] != 0) {
+			printf("mTagCount[%i]: %i\n", i, mTagCount[i]);
+			FAIL("Bad tagCount");
+		}
+	}
 }
 
 #define N REF(n)
@@ -100,10 +108,32 @@ Formatter::Ref Formatter::findNext2Li(Ref n) {
 	return INVALID;
 }
 
+Formatter::Ref Formatter::findLastSibling(Ref n) {
+	Ref r = n;
+	while(VR) {
+		if(!VALID(R.next))
+			return r;
+		r = R.next;
+	}
+	return INVALID;
+}
+
+void Formatter::updateTagCount(const Node& n, int baseDiff) {
+	if(n.isTag()) {
+		int diff = n.isEndTag() ? -baseDiff : baseDiff;
+		mTagCount[n.tagType()] += diff;
+		LOG("tag count %i: %s%i (v %i, n %i)\n",
+			n.tagType(), diff > 0 ? "+" : "", diff, mTagCount[n.tagType()], n._i);
+	}
+}
+
+#define RESTART do { updateTagCount(N, -1); goto loop; } while(0)
+
 // set *np to remove the current tag.
 void Formatter::optimizeNode(Ref* np) {
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
+		loop:
 		Ref n = *np;
 
 		// remove disallowed multiple tag
@@ -117,37 +147,49 @@ void Formatter::optimizeNode(Ref* np) {
 				*np = RN.next;
 			if(!VALID(*np))
 				return;
-			continue;
+			goto loop;
 		}
 
 		// update tag count
-		if(N.isTag()) {
-			int diff = N.isEndTag() ? -1 : 1;
-			//LOG("tag count %i: %s%i\n", N.tagType(), diff > 0 ? "+" : "", diff);
-			mTagCount[N.tagType()] += diff;
-		}
+		updateTagCount(N, 1);
 
 		if(VC) {
 			optimizeNode(&N.child);
 			if(!VC)
-				continue;
+				RESTART;
 
 			// collapse outer [url] if UrlNode is inside.
 			if(N.tagType() == ANCHOR && RC.hasUrl()) {
 				LOG("collapsed outer url node: %i\n", n);
 				*np = N.child;
 				n = *np;
+				mTagCount[ANCHOR]--;
 			}
 			if(!VC)
-				continue;
+				RESTART;
 
 			// remove duplicate [ul]
 			Ref r;
 			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
+				LOG("collapsed duplicate [ul]: %i\n", n);
 				n = *np = r;
+				//mTagCount[LIST]--;
 			}
 			if(!VC)
-				continue;
+				RESTART;
+
+			// collapse [li] if outside LIST.
+			if(N.tagType() == LIST_ITEM && mTagCount[LIST] < mTagCount[LIST_ITEM]) {
+				LOG("collapsed invalid [li]: %i\n", n);
+				mTagCount[LIST_ITEM]--;
+				EASSERT(VN);
+				EASSERT(RN.tagType() == LIST_ITEM && RN.isEndTag());
+				r = RN.next;
+				n = *np = N.child;
+				N.next = r;
+			}
+			if(!VC)
+				RESTART;
 
 			// hide linebreak between [ul] and [li]
 			if(N.tagType() == LIST && RC.isLinebreak()) {
@@ -187,6 +229,7 @@ void Formatter::optimizeNode(Ref* np) {
 			// remove empty tag
 			if(RN.isEndTagOf(N) && !VC) {
 				LOG("removing empty: %i\n", n);
+				mTagCount[N.tagType()]--;
 				*np = RN.next;
 				if(!VALID(*np))
 					break;
