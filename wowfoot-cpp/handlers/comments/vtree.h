@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <vector>
 #include <string.h>
+#include "util/exception.h"
 
 // Virtual-container array
 template<class Base, size_t MaxSize>
@@ -35,6 +36,7 @@ varray<Base, MaxSize>::varray() {
 template<class Base, size_t MaxSize>
 Base& varray<Base, MaxSize>::operator[](size_t i) {
 	//mAllocAllowed = false;
+	EASSERT(i < m.size());
 	return *(Base*)&m[i];
 }
 

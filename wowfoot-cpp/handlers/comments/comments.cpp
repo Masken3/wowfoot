@@ -19,19 +19,12 @@ static void closeDb() {
 	}
 }
 
-Tab* getComments(const char* type, int id) {
+static Tab* getComments(const char* query) {
 	sqlite3_stmt* stmt = NULL;
 	if(!sDB) {
 		SQLT(sqlite3_open("../wowfoot-import/imports.db", &sDB));
 		atexit(&closeDb);
 	}
-
-	char query[1024];
-	sprintf(query, "SELECT user, body, rating, date, indent"
-		" FROM comments"
-		" INNER JOIN %s_comments on commentId = id"
-		" WHERE %s_comments.entry = %i",
-		type, type, id);
 
 	SQLT(sqlite3_prepare_v2(sDB, query, -1, &stmt, NULL));
 
@@ -60,10 +53,12 @@ Tab* getComments(const char* type, int id) {
 				c.originalBody[i] = '\n';
 			i += rs;
 		}
-		c.body = f.formatComment((const char*)sqlite3_column_text(stmt, 1));
 		c.rating = sqlite3_column_int(stmt, 2);
 		c.date = (const char*)sqlite3_column_text(stmt, 3);
 		c.indent = sqlite3_column_int(stmt, 4);
+		c.id = sqlite3_column_int(stmt, 5);
+		printf("Comment %i\n", c.id);
+		c.body = f.formatComment((const char*)sqlite3_column_text(stmt, 1));
 		ct->mComments.push_back(c);
 	}
 	if(res != SQLITE_DONE) {
@@ -78,4 +73,23 @@ Tab* getComments(const char* type, int id) {
 	ct->title = "Comments";
 	ct->count = ct->mComments.size();
 	return ct;
+}
+
+Tab* getComments(const char* type, int id) {
+	char query[1024];
+	sprintf(query, "SELECT user, body, rating, date, indent, id"
+		" FROM comments"
+		" INNER JOIN %s_comments on commentId = id"
+		" WHERE %s_comments.entry = %i",
+		type, type, id);
+	return getComments(query);
+}
+
+Tab* getComment(int id) {
+	char query[1024];
+	sprintf(query, "SELECT user, body, rating, date, indent, id"
+		" FROM comments"
+		" WHERE id = %i",
+		id);
+	return getComments(query);
 }

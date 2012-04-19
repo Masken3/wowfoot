@@ -4,8 +4,12 @@
 % indentHtml(stream, c.indent);
 <div class="comment-wrapper">
 <div class="comment">
-By <span class="comment-user"><%=c.user%></span> <%=c.date%> (Patch <%=patch(c.date.c_str())%>)
-<span class="comment-rating">Rating: <%if(c.rating > 0){%>+<%}%><%=c.rating%></span> Indent: <%=c.indent%><br>
+By <span class="comment-user"><%=c.user%></span>
+<%=c.date%> (Patch <%=patch(c.date.c_str())%>)
+<span class="comment-rating">Rating: <%if(c.rating > 0){%>+<%}%><%=c.rating%></span>
+Indent: <%=c.indent%>
+Id: <a href="comment=<%=c.id%>"><%=c.id%></a>
+<br>
 <div class="comment-body">
 %= c.body
 </div>

@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title><%= mId %> - Comment - WowFoot</title>
+	<LINK href="static/style.css" rel="stylesheet" type="text/css">
+	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<p>Comment: <span class="itemName"><%=mId%></span></p>
+
+% returnCode = tabsChtml::run(stream);
+
+</body>
+</html>

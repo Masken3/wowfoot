@@ -163,6 +163,13 @@ static void testUrl(const string& url) {
 	fflush(memStream);
 #endif
 
+	long rc;
+	TCE(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rc));
+	if(rc != 200) {
+		printf("Response code: %li\n", rc);
+		exit(1);
+	}
+
 	parse(mem, memSize);
 
 	curl_easy_cleanup(curl);

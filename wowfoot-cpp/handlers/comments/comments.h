@@ -4,5 +4,6 @@
 #include "tabs.h"
 
 Tab* getComments(const char* type, int id) VISIBLE;
+Tab* getComment(int id) VISIBLE;
 
 #endif	//COMMENTS_H

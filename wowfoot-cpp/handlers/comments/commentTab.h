@@ -14,6 +14,7 @@ struct Comment {
 	int rating;
 	string date;
 	int indent;
+	int id;
 };
 
 class commentTabChtml : public Tab {

@@ -10,6 +10,7 @@
 using namespace std;
 
 #define LOG printf
+#define DUMPINT(i) LOG(#i ": %i\n", i)
 
 string Formatter::formatComment(const char* src) {
 	// clear
@@ -131,6 +132,8 @@ void Formatter::updateTagCount(const Node& n, int baseDiff) {
 
 // set *np to remove the current tag.
 void Formatter::optimizeNode(Ref* np) {
+	int originalTagCount[_TAG_TYPE_COUNT];
+	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
 		loop:
@@ -146,7 +149,7 @@ void Formatter::optimizeNode(Ref* np) {
 			else if(VN)
 				*np = RN.next;
 			if(!VALID(*np))
-				return;
+				break;
 			goto loop;
 		}
 
@@ -164,9 +167,8 @@ void Formatter::optimizeNode(Ref* np) {
 				*np = N.child;
 				n = *np;
 				mTagCount[ANCHOR]--;
-			}
-			if(!VC)
 				RESTART;
+			}
 
 			// remove duplicate [ul]
 			Ref r;
@@ -174,22 +176,23 @@ void Formatter::optimizeNode(Ref* np) {
 				LOG("collapsed duplicate [ul]: %i\n", n);
 				n = *np = r;
 				//mTagCount[LIST]--;
-			}
-			if(!VC)
 				RESTART;
+			}
 
 			// collapse [li] if outside LIST.
 			if(N.tagType() == LIST_ITEM && mTagCount[LIST] < mTagCount[LIST_ITEM]) {
-				LOG("collapsed invalid [li]: %i\n", n);
+				LOG("collapsed invalid [li]: %i (%i < %i)\n",
+					n, mTagCount[LIST], mTagCount[LIST_ITEM]);
 				mTagCount[LIST_ITEM]--;
 				EASSERT(VN);
 				EASSERT(RN.tagType() == LIST_ITEM && RN.isEndTag());
-				r = RN.next;
+				EASSERT(!VALID(RN.child));	// end tags may not have a child node.
+				Ref next = RN.next;	// the node after [/li]. may be INVALID.
 				n = *np = N.child;
-				N.next = r;
-			}
-			if(!VC)
+				r = findLastSibling(n);
+				R.next = next;
 				RESTART;
+			}
 
 			// hide linebreak between [ul] and [li]
 			if(N.tagType() == LIST && RC.isLinebreak()) {
@@ -200,29 +203,37 @@ void Formatter::optimizeNode(Ref* np) {
 			// deal with what comes after [/li].
 			if(N.tagType() == LIST_ITEM && N.isEndTag()) {
 				Ref r = N.next;
+				Ref prev = n;
 				do {
 					// hide linebreaks.
 					if(R.isLinebreak()) {
 						((LinebreakNode&)RN).visible = false;
-					// add [li] around content nodes.
-					} else if(R.tagType() != LIST_ITEM) {
-						printf("Adding [li] around %i\n", r);
-						Ref next2Li = findNext2Li(r);
-						Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
-						r = N.next;
-						N.next = mArray.size();
-						Node& t(mArray.add(TagNode("li", 2, LIST_ITEM, "li", "/li")));
-						t._i = N.next;
-						t.child = r;
-						t.next = mArray.size();
-						Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
-						e._i = t.next;
-						e.child = INVALID;
-						e.next = nextLi;
-						if(VALID(next2Li))
-							REF(next2Li).next = INVALID;
+						prev = r;
+						r = R.next;
+						continue;
+					} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
+						break;
 					}
-					r = R.next;
+					// add [li] around content nodes.
+					printf("Adding [li] around %i\n", r);
+					Ref next2Li = findNext2Li(r);
+					Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
+					REF(prev).next = mArray.size();
+					Node& t(mArray.add(TagNode("li", 2, LIST_ITEM, "li", "/li")));
+					t._i = REF(prev).next;
+					t.child = r;
+					t.next = mArray.size();
+					Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
+					e._i = t.next;
+					e.child = INVALID;
+					e.next = nextLi;
+					if(VALID(next2Li))
+						REF(next2Li).next = INVALID;
+					r = next2Li;
+					DUMPINT(next2Li);
+					prev = r;
+					if(VR)
+						r = R.next;
 				} while(VR);
 			}
 
@@ -234,6 +245,12 @@ void Formatter::optimizeNode(Ref* np) {
 				if(!VALID(*np))
 					break;
 			}
+		}
+	}
+	for(int i=0; i<_TAG_TYPE_COUNT; i++) {
+		if(mTagCount[i] != originalTagCount[i]) {
+			printf("Error: o[%i]: %i => %i\n", i, originalTagCount[i], mTagCount[i]);
+			FAIL("tagCount");
 		}
 	}
 }
