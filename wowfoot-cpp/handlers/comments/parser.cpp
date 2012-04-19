@@ -108,14 +108,14 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 }
 
 // intentional fallthrough
-#define COMPARE_TAG(t, type, matchAction) { CompRes cr = compareTag(t, strlen(t), tag, len, hasAttributes);\
+#define COMPARE_TAG(t, matchAction) { CompRes cr = compareTag(t, strlen(t), tag, len, hasAttributes);\
 	switch(cr) {\
 	case crIgnore: printf("Ignored tag: %s\n", t); return;\
 	case crMatch: matchAction\
 	case crMismatch: break;\
 	} }
 
-#define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, type, addTagNode(type, tag, len, strlen(t), dst, end); return;)
+#define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, addTagNode(type, tag, len, strlen(t), dst, end); return;)
 #define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); COMPLEX_TAG("/" t, type, "/" t, NULL)
 #define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); COMPLEX_TAG("/" t, type, end, NULL)
 
@@ -130,7 +130,9 @@ void Parser::parseTag(const char* tag, size_t len) {
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
 	C_TAG("u", UNDERLINE, "span class=\"underlined\"", "/span");
-	SIMPLE_TAG("li", LIST_ITEM);
+	//SIMPLE_TAG("li", LIST_ITEM);
+	COMPARE_TAG("li", addListItem(); return;);
+	COMPLEX_TAG("/li", LIST_ITEM, "/li", NULL);
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
 

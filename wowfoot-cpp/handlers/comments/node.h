@@ -109,6 +109,19 @@ _DECLARE_ALL(_TEXT_LEN, ColorNode)
 	const char* endTag() const { return "/span"; }
 };
 
+class ListItemNode : public Node {
+public:
+	int value;
+	bool styleNone;
+
+	ListItemNode() : value(-1), styleNone(false) {}
+
+_DECLARE_FUNCTIONS(,)
+	bool isTag() const { return true; }
+	virtual TagType tagType() const { return LIST_ITEM; }
+	const char* endTag() const { return "/li"; }
+};
+
 class UrlNode : public Node {
 public:
 _DECLARE_ALL(_TEXT_LEN, UrlNode)

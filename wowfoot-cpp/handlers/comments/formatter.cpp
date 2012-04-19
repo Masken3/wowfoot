@@ -146,11 +146,14 @@ void Formatter::updateTagCount(const Node& n, int baseDiff) {
 	}
 }
 
-#define RESTART do { updateTagCount(N, -1); goto loop; } while(0)
+#define RESTART do { updateTagCount(N, -1); \
+	if(N.tagType() == LIST_ITEM && !N.isEndTag()) { listItemCount--; } \
+	goto loop; } while(0)
 
 // set *np to remove the current tag.
 void Formatter::optimizeNode(Ref* np) {
 	int originalTagCount[_TAG_TYPE_COUNT];
+	int listItemCount = 1;
 	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
@@ -169,6 +172,11 @@ void Formatter::optimizeNode(Ref* np) {
 			if(!VALID(*np))
 				break;
 			goto loop;
+		}
+
+		// set list item value
+		if(N.tagType() == LIST_ITEM && !N.isEndTag()) {
+			((ListItemNode&)N).value = listItemCount++;
 		}
 
 		// update tag count
@@ -208,50 +216,53 @@ void Formatter::optimizeNode(Ref* np) {
 				RESTART;
 			}
 
-			// hide linebreak between [ul] and [li]
-			if(N.tagType() == LIST && RC.isLinebreak()) {
-				((LinebreakNode&)RC).visible = false;
+		}
+
+		// inbetween LISTs and their ITEMs.
+		if((N.tagType() == LIST_ITEM && N.isEndTag()) || (N.tagType() == LIST && !N.isEndTag())) {
+			Ref r;
+			if(N.isEndTag())
+				r = N.next;
+			else
+				r = N.child;
+			Ref prev = n;
+			while(VR) {
+				// hide linebreaks.
+				if(R.isLinebreak() || R.isSpace()) {
+					if(R.isLinebreak())
+						((LinebreakNode&)R).visible = false;
+					prev = r;
+					r = R.next;
+					continue;
+				} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
+					break;
+				}
+				// add [li] around content nodes.
+				LOG("Adding [li] around %i\n", r);
+				Ref next2Li = findNext2Li(r);
+				Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
+				REF(prev).next = mArray.size();
+				ListItemNode& t(mArray.add(ListItemNode()));
+				t.styleNone = true;
+				t._i = REF(prev).next;
+				t.child = r;
+				t.next = mArray.size();
+				Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
+				e._i = t.next;
+				e.child = INVALID;
+				e.next = nextLi;
+				if(VALID(next2Li))
+					REF(next2Li).next = INVALID;
+				r = next2Li;
+				DUMPINT(next2Li);
+				prev = r;
+				if(VR)
+					r = R.next;
 			}
 		}
+
 		if(VN) {
-			// deal with what comes after [/li].
-			if(N.tagType() == LIST_ITEM && N.isEndTag()) {
-				Ref r = N.next;
-				Ref prev = n;
-				do {
-					// hide linebreaks.
-					if(R.isLinebreak() || R.isSpace()) {
-						if(R.isLinebreak())
-							((LinebreakNode&)R).visible = false;
-						prev = r;
-						r = R.next;
-						continue;
-					} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
-						break;
-					}
-					// add [li] around content nodes.
-					LOG("Adding [li] around %i\n", r);
-					Ref next2Li = findNext2Li(r);
-					Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
-					REF(prev).next = mArray.size();
-					Node& t(mArray.add(TagNode("li", 2, LIST_ITEM, "li", "/li")));
-					t._i = REF(prev).next;
-					t.child = r;
-					t.next = mArray.size();
-					Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
-					e._i = t.next;
-					e.child = INVALID;
-					e.next = nextLi;
-					if(VALID(next2Li))
-						REF(next2Li).next = INVALID;
-					r = next2Li;
-					DUMPINT(next2Li);
-					prev = r;
-					if(VR)
-						r = R.next;
-				} while(VR);
-			}
-			// linebreak after LIST.
+			// linebreak after [/ul].
 			if(N.tagType() == LIST && N.isEndTag() && RN.isLinebreak()) {
 				((LinebreakNode&)RN).visible = false;
 			}

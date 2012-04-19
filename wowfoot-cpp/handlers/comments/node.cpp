@@ -53,6 +53,24 @@ void StaticTextNode::doDump() const {
 	printf("StaticText: '%s'\n", text);
 }
 
+void ListItemNode::print(std::ostream& o) const {
+	o << "<li";
+	if(styleNone) {
+		o << " style=\"list-style: none\">";
+	} else {
+		o << " value=\""<<value<<"\">";
+	}
+}
+
+void ListItemNode::doDump() const {
+	printf("ListItemNode: ");
+	if(styleNone) {
+		printf("styleNone\n");
+	} else {
+		printf("%i\n", value);
+	}
+}
+
 void ColorNode::print(std::ostream& o) const {
 	o << "<span class=\"";
 	o.write(text, len);

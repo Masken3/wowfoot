@@ -42,6 +42,7 @@ public:
 	void addUrlNode(const char* url, size_t len);
 	void addStaticTextNode(const char* text);
 	void addTextNode(const char* text, size_t len);
+	void addListItem();
 	void addUrlEndNode();
 	template<class Map> void addPageNode(Map&, const char* type, const char* id, size_t len);
 };

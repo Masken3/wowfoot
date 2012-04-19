@@ -104,6 +104,10 @@ void NodeAdder::addTextNode(const char* text, size_t len) {
 	ADD(TextNode(text, len));
 }
 
+void NodeAdder::addListItem() {
+	ADD(ListItemNode());
+}
+
 template<class Map>
 void NodeAdder::addPageNode(Map& map, const char* type, const char* id, size_t len)
 {
