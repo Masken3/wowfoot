@@ -461,6 +461,7 @@ end
 def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 
 target :default do
+	common.invoke
 	win32.invoke if(HOST == :win32)
 	# required for unload to function properly
 	@wfc.invoke

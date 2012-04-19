@@ -49,6 +49,9 @@ BLP.instance_eval do
 	@SOURCES = ['src/libs/blp']
 	@EXTRA_INCLUDES = ['src/libs/blp'] + CONFIG_BLP_INCLUDES
 	@EXTRA_CFLAGS = ' -Wno-all -Wno-error -Wno-extra'
+	@SPECIFIC_CFLAGS = {
+		'MemImage.cpp' => ' -Wno-clobbered',
+	}
 	@EXTRA_CPPFLAGS = ' -DXMD_H -DHAVE_BOOLEAN' if(HOST == :win32)
 	#@LIBRARIES = ['png']	# ignored by *LibWork
 	@NAME = 'libblp'

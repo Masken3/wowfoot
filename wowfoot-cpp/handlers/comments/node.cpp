@@ -1,7 +1,9 @@
 #include "node.h"
 #include "pageTags.h"
-#include <string.h>
 #include "chtmlUtil.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void Node::dump(int level) const {
 	//printf("%i (%p): %p, %p\n", _i, this, child, next);

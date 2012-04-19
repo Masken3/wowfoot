@@ -3,6 +3,7 @@
 #include "util/exception.h"
 #include "formatter.h"
 #include <sqlite3.h>
+#include <stdio.h>
 
 static sqlite3* sDB;
 
