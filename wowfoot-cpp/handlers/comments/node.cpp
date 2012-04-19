@@ -37,6 +37,14 @@ void TextNode::doDump() const {
 	printf("Text: '%.*s'\n", (int)len, text);
 }
 
+bool TextNode::isSpace() const {
+	for(size_t i=0; i<len; i++) {
+		if(!isspace(text[i]))
+			return false;
+	}
+	return true;
+}
+
 void StaticTextNode::print(std::ostream& o) const {
 	o << text;
 }

@@ -206,8 +206,9 @@ void Formatter::optimizeNode(Ref* np) {
 				Ref prev = n;
 				do {
 					// hide linebreaks.
-					if(R.isLinebreak()) {
-						((LinebreakNode&)RN).visible = false;
+					if(R.isLinebreak() || R.isSpace()) {
+						if(R.isLinebreak())
+							((LinebreakNode&)R).visible = false;
 						prev = r;
 						r = R.next;
 						continue;

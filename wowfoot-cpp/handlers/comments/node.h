@@ -45,6 +45,7 @@ public:
 	virtual const char* endTag() const { return NULL; }
 	virtual bool hasUrl() const { return false; }
 	virtual bool isLinebreak() const { return false; }
+	virtual bool isSpace() const { return false; }
 	bool isEndTag() const { return isTag() && !endTag(); }
 	void dump(int level) const;
 	int next;
@@ -89,6 +90,7 @@ class TextNode : public Node {
 public:
 _DECLARE_ALL(_TEXT_LEN, TextNode)
 	bool isTag() const { return false; }
+	bool isSpace() const;
 };
 
 class StaticTextNode : public Node {
