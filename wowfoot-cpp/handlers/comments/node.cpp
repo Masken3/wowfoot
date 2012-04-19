@@ -108,10 +108,6 @@ bool TagNode::isEndTagOf(const Node& n) const {
 	return (strcmp(dst, n.endTag()) == 0);
 }
 
-template<> void streamName<Quest>(ostream& o, const Quest& t) {
-	o << t.title;
-}
-
 template<class Map>
 void PageNode<Map>::print(std::ostream& o) const {
 	o << "<a href=\""<<type;

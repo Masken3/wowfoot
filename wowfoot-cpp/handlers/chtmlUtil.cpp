@@ -44,6 +44,13 @@ void streamHtmlEscape(ostream& os, const string& src) {
 	}
 }
 
+void streamHtmlEscape(ostream& os, const char* src) {
+	while(*src) {
+		streamHtmlEscape(os, *src);
+		src++;
+	}
+}
+
 void streamHtmlEscape(ostream& os, char c) {
 	switch(c) {
 	case '&': os << "&amp;"; break;

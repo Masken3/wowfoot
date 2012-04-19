@@ -17,13 +17,21 @@ string htmlEscape(const string& src) VISIBLE;
 string jsEscape(const string& src) VISIBLE;
 
 void streamHtmlEscape(ostream&, const string& src) VISIBLE;
+void streamHtmlEscape(ostream&, const char* src) VISIBLE;
 void streamHtmlEscape(ostream&, char) VISIBLE;
+
+#define ESCAPE(i) streamHtmlEscape(stream, i)
 
 void streamWowFormattedText(ostream&, const string& src) VISIBLE;
 
 template<class T> void streamName(ostream& os, const T& t) {
-	os << t.name;
+	streamHtmlEscape(os, t.name);
 }
+#ifdef DB_QUEST_STRUCT_H
+template<> void streamName<Quest>(ostream& os, const Quest& t) {
+	streamHtmlEscape(os, t.title);
+}
+#endif
 #define NAME(i) streamName(stream, i)
 
 template<class T> void streamNameById(ostream& os, const T& map, int id) {

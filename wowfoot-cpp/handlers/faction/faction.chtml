@@ -1,18 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title><%= mTitle %> - Faction - WowFoot</title>
+	<title><%ESCAPE(mTitle);%> - Faction - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 
 % if(!a) {
-Faction <%=mTitle%> does not exist.
+Faction <%ESCAPE(mTitle);%> does not exist.
 % } else {
-<p>Faction: <span class="itemName"><%=a->name%></span></p>
+<p>Faction: <span class="itemName"><%ESCAPE(a->name);%></span></p>
 
-<p><%=a->description%></p>
+<p><%ESCAPE(a->description);%></p>
 
 % returnCode = tabsChtml::run(stream);
 

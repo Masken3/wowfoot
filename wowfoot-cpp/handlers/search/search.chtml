@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title><%= urlPart %> - Search results - WowFoot</title>
+	<title><%ESCAPE(urlPart);%> - Search results - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -19,7 +19,7 @@ static string questArea(quest) {
 }*/
 %>
 
-<p>Search results for: <%= urlPart %></p>
+<p>Search results for: <%ESCAPE(urlPart);%></p>
 
 % returnCode = tabsChtml::run(stream);
 

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title><%= mTitle %> - Achievement - WowFoot</title>
+	<title><%ESCAPE(mTitle);%> - Achievement - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
@@ -9,19 +9,19 @@
 
 % if(a) {
 <p>
-<span class="itemName">Achievement: <%= mTitle %></span><br>
+<span class="itemName">Achievement: <%ESCAPE(mTitle);%></span><br>
 % if(a->description) {
-<span class="itemDescription"><%=a->description%></span><br>
+<span class="itemDescription"><%ESCAPE(a->description);%></span><br>
 % }
 </p>
 
 <p><%=a->points%> points.</p>
 
 % if(a->reward) {
-<p>Reward description: <%=a->reward%></p>
+<p>Reward description: <%ESCAPE(a->reward);%></p>
 % }
 % } else {
-<p><%= mTitle %> not found.</p>
+<p><%ESCAPE(mTitle);%> not found.</p>
 % }
 
 % if(ar) {
@@ -54,7 +54,7 @@ Message: <% streamWowFormattedText(stream, ar->text); %><br>
 <p>
 Faction: <%=FACTION(a->faction)%><br>
 % if(a->previous) {
-Previous: <a href="achievement=<%=a->previous%>"><%=gAchievements[a->previous].name%></a><br>
+Previous: <a href="achievement=<%=a->previous%>"><%ESCAPE(gAchievements[a->previous].name);%></a><br>
 % }
 </p>
 

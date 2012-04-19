@@ -1,17 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title><%= mTitle %> - Spell - WowFoot</title>
+	<title><%ESCAPE(mTitle);%> - Spell - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 
 % if(!a) {
-Spell <%=mTitle%> does not exist.
+Spell <%ESCAPE(mTitle);%> does not exist.
 % } else {
 <p>
-<span class="itemName"><%=a->name%></span><br>
+<span class="itemName"><%ESCAPE(a->name);%></span><br>
 
 %// icon
 <p>

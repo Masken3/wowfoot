@@ -1,16 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title><%= mTitle %> - Quest - WowFoot</title>
+	<title><%ESCAPE(mTitle);%> - Quest - WowFoot</title>
 	<LINK href="static/style.css" rel="stylesheet" type="text/css">
 	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 
 % if(!a) {
-Quest <%=mTitle%> does not exist.
+Quest <%ESCAPE(mTitle);%> does not exist.
 % } else {
-<p>Quest: <span class="itemName"><%=a->title%></span></p>
+<p>Quest: <span class="itemName"><%ESCAPE(a->title);%></span></p>
 
 <p>
 MinLevel: <%=a->minLevel%><br>
