@@ -183,8 +183,6 @@ void Formatter::optimizeNode(Ref* np) {
 			if(N.tagType() == ANCHOR && RC.hasUrl()) {
 				LOG("collapsed outer url node: %i\n", n);
 				*np = N.child;
-				n = *np;
-				mTagCount[ANCHOR]--;
 				RESTART;
 			}
 
@@ -192,8 +190,7 @@ void Formatter::optimizeNode(Ref* np) {
 			Ref r;
 			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
 				LOG("collapsed duplicate [ul]: %i\n", n);
-				n = *np = r;
-				//mTagCount[LIST]--;
+				*np = r;
 				RESTART;
 			}
 
@@ -201,13 +198,12 @@ void Formatter::optimizeNode(Ref* np) {
 			if(N.tagType() == LIST_ITEM && mTagCount[LIST] < mTagCount[LIST_ITEM]) {
 				LOG("collapsed invalid [li]: %i (%i < %i)\n",
 					n, mTagCount[LIST], mTagCount[LIST_ITEM]);
-				mTagCount[LIST_ITEM]--;
 				EASSERT(VN);
 				EASSERT(RN.tagType() == LIST_ITEM && RN.isEndTag());
 				EASSERT(!VALID(RN.child));	// end tags may not have a child node.
 				Ref next = RN.next;	// the node after [/li]. may be INVALID.
-				n = *np = N.child;
-				r = findLastSibling(n);
+				*np = N.child;
+				r = findLastSibling(*np);
 				R.next = next;
 				RESTART;
 			}
@@ -234,7 +230,7 @@ void Formatter::optimizeNode(Ref* np) {
 						break;
 					}
 					// add [li] around content nodes.
-					printf("Adding [li] around %i\n", r);
+					LOG("Adding [li] around %i\n", r);
 					Ref next2Li = findNext2Li(r);
 					Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
 					REF(prev).next = mArray.size();
@@ -262,11 +258,13 @@ void Formatter::optimizeNode(Ref* np) {
 
 			// remove empty tag
 			if(RN.isEndTagOf(N) && tagIsEmpty(n)) {
-				LOG("removing empty: %i\n", n);
-				mTagCount[N.tagType()]--;
+				LOG("removing empty: %i. Next: %i\n", n, RN.next);
 				*np = RN.next;
-				if(!VALID(*np))
+				if(!VALID(*np)) {
+					mTagCount[N.tagType()]--;
 					break;
+				}
+				RESTART;
 			}
 		}
 	}
