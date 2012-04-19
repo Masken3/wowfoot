@@ -24,6 +24,7 @@ public:
 	template<class T> T& alloc();
 	void clear();
 	Base& operator[](size_t i);
+	const Base& operator[](size_t i) const;
 	size_t size() const { return m.size(); }
 };
 
@@ -35,6 +36,14 @@ varray<Base, MaxSize>::varray() {
 // the reference returned by this function is valid until clear(), add() or alloc() is called.
 template<class Base, size_t MaxSize>
 Base& varray<Base, MaxSize>::operator[](size_t i) {
+	//mAllocAllowed = false;
+	EASSERT(i < m.size());
+	return *(Base*)&m[i];
+}
+
+// the reference returned by this function is valid until clear(), add() or alloc() is called.
+template<class Base, size_t MaxSize>
+const Base& varray<Base, MaxSize>::operator[](size_t i) const {
 	//mAllocAllowed = false;
 	EASSERT(i < m.size());
 	return *(Base*)&m[i];

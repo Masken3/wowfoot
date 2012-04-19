@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define LOG printf
+#define LOG if(mLog) printf
 #define DUMPINT(i) LOG(#i ": %i\n", i)
 
 string Formatter::formatComment(const char* src) {
@@ -39,7 +39,9 @@ string Formatter::formatComment(const char* src) {
 	return printTree();
 }
 
-Formatter::Formatter() {
+Formatter::Formatter(bool log)
+: mLog(log)
+{
 }
 
 static const bool sTagTypeAllowMultiple[] = {
@@ -47,7 +49,9 @@ static const bool sTagTypeAllowMultiple[] = {
 	TAG_TYPES(_TAG_TYPE_ALLOW)
 };
 
-void Formatter::dumpTreeNode(int level, int n) {
+void Formatter::dumpTreeNode(int level, int n) const {
+	if(!mLog)
+		return;
 	LOG("dumpTreeNode(%i, %i)\n", level, n);
 	EASSERT(level < 16);
 	while(VALID(n)) {
@@ -84,13 +88,13 @@ void Formatter::optimize() {
 // returns the Ref of an immediate child tag of the given root and type.
 // returns INVALID if no such child exists.
 // skips over Linebreak nodes, but no others.
-Formatter::Ref Formatter::findChildTag(Ref root, TagType type) {
-	Ref c = REF(root).child;
-	while(VALID(c)) {
-		if(REF(c).tagType() == type)
-			return c;
-		if(REF(c).isLinebreak())
-			c = REF(c).next;
+Formatter::Ref Formatter::findChildTag(Ref root, TagType type) const {
+	Ref r = REF(root).child;
+	while(VR) {
+		if(R.tagType() == type)
+			return r;
+		if(R.isLinebreak() || R.isSpace())
+			r = R.next;
 		else
 			break;
 	}
@@ -99,7 +103,7 @@ Formatter::Ref Formatter::findChildTag(Ref root, TagType type) {
 
 // returns the Ref of the first sibling of N such that a LIST_ITEM is its next,
 // or INVALID if no such sibling exists.
-Formatter::Ref Formatter::findNext2Li(Ref n) {
+Formatter::Ref Formatter::findNext2Li(Ref n) const {
 	Ref r = n;
 	while(VR) {
 		if(VALID(R.next) && REF(R.next).tagType() == LIST_ITEM)
@@ -109,7 +113,7 @@ Formatter::Ref Formatter::findNext2Li(Ref n) {
 	return INVALID;
 }
 
-Formatter::Ref Formatter::findLastSibling(Ref n) {
+Formatter::Ref Formatter::findLastSibling(Ref n) const {
 	Ref r = n;
 	while(VR) {
 		if(!VALID(R.next))
@@ -117,6 +121,20 @@ Formatter::Ref Formatter::findLastSibling(Ref n) {
 		r = R.next;
 	}
 	return INVALID;
+}
+
+// returns true if n's children are all unprintable,
+// or if there are no children.
+bool Formatter::tagIsEmpty(Ref n) const {
+	Ref r = N.child;
+	EASSERT(N.isTag() && !N.isEndTag());
+	while(VR) {
+		if(!(R.isLinebreak() || R.isSpace()))
+			return false;
+		EASSERT(!VALID(R.child));
+		r = R.next;
+	}
+	return true;
 }
 
 void Formatter::updateTagCount(const Node& n, int baseDiff) {
@@ -237,9 +255,13 @@ void Formatter::optimizeNode(Ref* np) {
 						r = R.next;
 				} while(VR);
 			}
+			// linebreak after LIST.
+			if(N.tagType() == LIST && N.isEndTag() && RN.isLinebreak()) {
+				((LinebreakNode&)RN).visible = false;
+			}
 
 			// remove empty tag
-			if(RN.isEndTagOf(N) && !VC) {
+			if(RN.isEndTagOf(N) && tagIsEmpty(n)) {
 				LOG("removing empty: %i\n", n);
 				mTagCount[N.tagType()]--;
 				*np = RN.next;
@@ -256,7 +278,7 @@ void Formatter::optimizeNode(Ref* np) {
 	}
 }
 
-string Formatter::printArray()  {
+string Formatter::printArray() const {
 	ostringstream o;
 	for(size_t i=0; i<mArray.size(); i++) {
 		mArray[i].print(o);
@@ -264,7 +286,7 @@ string Formatter::printArray()  {
 	return o.str();
 }
 
-void Formatter::printNode(ostream& o, int n) {
+void Formatter::printNode(ostream& o, int n) const {
 	while(VALID(n)) {
 		N.print(o);
 		printNode(o, N.child);
@@ -272,7 +294,7 @@ void Formatter::printNode(ostream& o, int n) {
 	}
 }
 
-string Formatter::printTree() {
+string Formatter::printTree() const {
 	ostringstream o;
 	printNode(o, mFirstNode);
 	return o.str();

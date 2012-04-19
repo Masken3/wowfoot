@@ -19,7 +19,7 @@ static void closeDb() {
 	}
 }
 
-static Tab* getComments(const char* query) {
+static Tab* getComments(const char* query, bool log) {
 	sqlite3_stmt* stmt = NULL;
 	if(!sDB) {
 		SQLT(sqlite3_open("../wowfoot-import/imports.db", &sDB));
@@ -30,7 +30,7 @@ static Tab* getComments(const char* query) {
 
 	int res;
 	commentTabChtml* ct = new commentTabChtml();
-	Formatter f;
+	Formatter f(log);
 	try {
 	while((res = sqlite3_step(stmt)) == SQLITE_ROW) {
 		Comment c;
@@ -82,7 +82,7 @@ Tab* getComments(const char* type, int id) {
 		" INNER JOIN %s_comments on commentId = id"
 		" WHERE %s_comments.entry = %i",
 		type, type, id);
-	return getComments(query);
+	return getComments(query, false);
 }
 
 Tab* getComment(int id) {
@@ -91,5 +91,5 @@ Tab* getComment(int id) {
 		" FROM comments"
 		" WHERE id = %i",
 		id);
-	return getComments(query);
+	return getComments(query, true);
 }
