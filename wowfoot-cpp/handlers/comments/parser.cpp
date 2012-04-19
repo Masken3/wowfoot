@@ -125,6 +125,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 	SIMPLE_TAG("b", BOLD);
 	SIMPLE_TAG("i", ITALIC);
 	C_TAG("small", SMALL, "span class=\"small\"", "/span");
+	C_TAG("s", SMALL, "span class=\"small\"", "/span");
 	SIMPLE_TAG("table", TABLE);
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
