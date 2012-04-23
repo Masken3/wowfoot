@@ -12,7 +12,9 @@ Faction <%ESCAPE(mTitle);%> does not exist.
 % } else {
 <p>Faction: <span class="itemName"><%ESCAPE(a->name);%></span></p>
 
+% if(*a->description) {
 <p><%ESCAPE(a->description);%></p>
+% }
 
 % returnCode = tabsChtml::run(stream);
 
