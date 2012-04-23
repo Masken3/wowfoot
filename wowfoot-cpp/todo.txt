@@ -23,6 +23,7 @@ Example: http://localhost:3002/item=30450
 *** Souldivider
 ** http://localhost:3002/itemset=750
 *** warhead0
+** http://localhost:3002/npc=25881
 
 * Comment parsing needs to be more advanced. I think we should build a DOM tree,
 then run a recursive/repeating reduction pass on it, and then print it.

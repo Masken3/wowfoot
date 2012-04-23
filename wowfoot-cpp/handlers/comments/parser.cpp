@@ -136,7 +136,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
 
-	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4)) {
+	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4) || !strncmp("url ", tag, 4)) {
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
@@ -178,13 +178,19 @@ static bool isUrlChar(char c) {
 	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
 	//sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
 	return isalnum(c) || c == '_' || c == '#' || c == '?' || c == '/' || c == '-' ||
-		c == '=' || c == '.' || c == ':' || c == '&';
+		c == '=' || c == '.' || c == ':' || c == '&' || c == '(' || c == ')';
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.' || c == '-';
 }
 
 void Parser::parseUrl(const char* url, size_t len) {
+	// skip starting whitespace
+	while(isspace(*url)) {
+		len--;
+		url++;
+	}
+
 	// check for start-quote mark.
 	if(*url == '"') {
 		url++;
@@ -196,8 +202,8 @@ void Parser::parseUrl(const char* url, size_t len) {
 	const char* ptr = url;
 	const char* end = url + len;
 	while(ptr < end) {
-		// also check for end-quote mark
-		if(isspace(*ptr) || *ptr == '"')
+		// also check for end-quote mark and the invalid start-tag marker.
+		if(isspace(*ptr) || *ptr == '"' || *ptr == '[')
 			break;
 		ptr++;
 	}
