@@ -10,7 +10,7 @@
 % if(a) {
 <p>
 <span class="itemName">Achievement: <%ESCAPE(mTitle);%></span><br>
-% if(a->description) {
+% if(a->description) if(*a->description) {
 <span class="itemDescription"><%ESCAPE(a->description);%></span><br>
 % }
 </p>
