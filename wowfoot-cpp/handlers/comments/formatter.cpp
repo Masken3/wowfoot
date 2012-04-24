@@ -67,7 +67,7 @@ void Formatter::optimize() {
 	dumpTreeNode(1, mFirstNode);
 
 	LOG("optimizing...\n");
-	optimizeNode(&mFirstNode);
+	while(optimizeNode(&mFirstNode));
 	dumpTreeNode(1, mFirstNode);
 
 	// check that tag counts are valid (zero)
@@ -151,7 +151,8 @@ void Formatter::updateTagCount(const Node& n, int baseDiff) {
 	goto loop; } while(0)
 
 // set *np to remove the current tag.
-void Formatter::optimizeNode(Ref* np) {
+bool Formatter::optimizeNode(Ref* np) {
+	bool needAnotherRun = false;
 	int originalTagCount[_TAG_TYPE_COUNT];
 	int listItemCount = 1;
 	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
@@ -174,7 +175,8 @@ void Formatter::optimizeNode(Ref* np) {
 			goto loop;
 		}
 
-		// set list item value
+		// set list item value.
+		// after this point, use RESTART instead of goto loop.
 		if(N.tagType() == LIST_ITEM && !N.isEndTag()) {
 			((ListItemNode&)N).value = listItemCount++;
 		}
@@ -183,7 +185,7 @@ void Formatter::optimizeNode(Ref* np) {
 		updateTagCount(N, 1);
 
 		if(VC) {
-			optimizeNode(&N.child);
+			while(optimizeNode(&N.child));
 			if(!VC)
 				RESTART;
 
@@ -271,10 +273,15 @@ void Formatter::optimizeNode(Ref* np) {
 			if(RN.isEndTagOf(N) && tagIsEmpty(n)) {
 				LOG("removing empty: %i. Next: %i\n", n, RN.next);
 				*np = RN.next;
+				// if removed end tag has no sibling
 				if(!VALID(*np)) {
 					mTagCount[N.tagType()]--;
 					break;
 				}
+				// go back to previous sibling.
+				// needed for example in this situation: ...[/li]\n[li][/li]\n
+				// can't go back; whitespace nodes in the way.
+				needAnotherRun = true;
 				RESTART;
 			}
 		}
@@ -285,6 +292,7 @@ void Formatter::optimizeNode(Ref* np) {
 			FAIL("tagCount");
 		}
 	}
+	return needAnotherRun;
 }
 
 string Formatter::printArray() const {

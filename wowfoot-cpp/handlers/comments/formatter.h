@@ -20,7 +20,7 @@ private:
 	int setupBasicNode(unsigned& i, int parent);
 	void setupBasicTree();
 	void dumpTreeNode(int level, int node) const;
-	void optimizeNode(int* n);
+	bool optimizeNode(int* n);
 
 	// optimize subroutines
 	Ref findChildTag(Ref, TagType type) const;

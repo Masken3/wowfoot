@@ -57,7 +57,7 @@ static Tab* getComments(const char* query, bool log) {
 		c.date = (const char*)sqlite3_column_text(stmt, 3);
 		c.indent = sqlite3_column_int(stmt, 4);
 		c.id = sqlite3_column_int(stmt, 5);
-		printf("Comment %i\n", c.id);
+		//printf("Comment %i\n", c.id);
 		c.body = f.formatComment((const char*)sqlite3_column_text(stmt, 1));
 		ct->mComments.push_back(c);
 	}
