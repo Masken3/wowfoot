@@ -118,18 +118,20 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 #define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, addTagNode(type, tag, len, strlen(t), dst, end); return;)
 #define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); COMPLEX_TAG("/" t, type, "/" t, NULL)
 #define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); COMPLEX_TAG("/" t, type, end, NULL)
+#define FORMATTING_TAG(t, type, end) COMPARE_TAG(t, addFormattingTag(type); return;);\
+	COMPLEX_TAG("/" t, _##type, end, NULL)
 
 void Parser::parseTag(const char* tag, size_t len) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
-	SIMPLE_TAG("b", BOLD);
-	SIMPLE_TAG("i", ITALIC);
-	C_TAG("small", SMALL, "span class=\"small\"", "/span");
-	C_TAG("s", SMALL, "span class=\"small\"", "/span");
+	FORMATTING_TAG("b", BOLD, "/b");
+	FORMATTING_TAG("i", ITALIC, "/i");
+	FORMATTING_TAG("small", SMALL, "/span");
+	FORMATTING_TAG("s", SMALL, "/span");
+	FORMATTING_TAG("u", UNDERLINED, "/span");
 	SIMPLE_TAG("table", TABLE);
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
-	C_TAG("u", UNDERLINE, "span class=\"underlined\"", "/span");
 	//SIMPLE_TAG("li", LIST_ITEM);
 	COMPARE_TAG("li", addListItem(); return;);
 	COMPLEX_TAG("/li", LIST_ITEM, "/li", NULL);
@@ -178,7 +180,8 @@ static bool isUrlChar(char c) {
 	//gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
 	//sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
 	return isalnum(c) || c == '_' || c == '#' || c == '?' || c == '/' || c == '-' ||
-		c == '=' || c == '.' || c == ':' || c == '&' || c == '(' || c == ')';
+		c == '=' || c == '.' || c == ':' || c == '&' || c == '(' || c == ')' ||
+		c == '%';
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.' || c == '-';

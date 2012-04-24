@@ -36,6 +36,7 @@ public:
 	// end: static string; HTMP end tag. NULL if this is an end tag or a tag that has no end.
 	void addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst, const char* end);
 
+	void addFormattingTag(FormattingType);
 	void addColorTag(const char* id, size_t len);
 	void addWowfootUrlNode(const char* path, size_t len);
 	void addWowpediaUrlNode(const char* path, size_t len);

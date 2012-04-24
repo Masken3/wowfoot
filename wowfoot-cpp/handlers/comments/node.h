@@ -46,6 +46,7 @@ public:
 	virtual bool hasUrl() const { return false; }
 	virtual bool isLinebreak() const { return false; }
 	virtual bool isSpace() const { return false; }
+	virtual bool isFormattingTag() const { return false; }
 	bool isEndTag() const { return isTag() && !endTag(); }
 	void dump(int level) const;
 	int next;
@@ -102,11 +103,31 @@ _DECLARE_ALL(_STATIC_TEXT_NODE, StaticTextNode)
 	bool isTag() const { return false; }
 };
 
-class ColorNode : public Node {
+class BaseFormattingNode : public Node {
+public:
+	bool div;
+	BaseFormattingNode() : div(false) {}
+
+	bool isTag() const { return true; }
+	bool isFormattingTag() const { return true; }
+};
+
+class FormattingNode : public BaseFormattingNode {
+public:
+	const FormattingType type;
+
+	FormattingNode(FormattingType t) : type(t) {}
+
+_DECLARE_FUNCTIONS(,)
+	const char* endTag() const;
+	TagType tagType() const;
+};
+
+class ColorNode : public BaseFormattingNode {
 public:
 _DECLARE_ALL(_TEXT_LEN, ColorNode)
-	bool isTag() const { return true; }
-	const char* endTag() const { return "/span"; }
+	const char* endTag() const { return div ? "/div" : "/span"; }
+	TagType tagType() const { return COLOR; }
 };
 
 class ListItemNode : public Node {

@@ -71,14 +71,60 @@ void ListItemNode::doDump() const {
 	}
 }
 
+struct FormattingInfo {
+	const char* span;
+	const char* spanEnd;
+	const char* div;
+	TagType tagType;
+};
+
+static const FormattingInfo sFormattingInfos[] = {
+#define _FORMATTING_INFO(name, span, div) {(*span ? span : NULL), (*span ? "/" span : NULL), div, _##name},
+	FORMATTING_TYPES(_FORMATTING_INFO)
+};
+
+const char* FormattingNode::endTag() const {
+	if(div)
+		return "/div";
+	const FormattingInfo& fi(sFormattingInfos[type]);
+	if(fi.spanEnd)
+		return fi.spanEnd;
+	else
+		return "/span";
+}
+
+TagType FormattingNode::tagType() const {
+	const FormattingInfo& fi(sFormattingInfos[type]);
+	return fi.tagType;
+}
+
+void FormattingNode::print(std::ostream& o) const {
+	const FormattingInfo& fi(sFormattingInfos[type]);
+	if(div) {
+		o << "<div class=\"" << fi.div << "\">";
+	} if(fi.span) {
+		o << "<" << fi.span << ">";
+	} else {
+		o << "<span class=\"" << fi.div << "\">";
+	}
+}
+
+void FormattingNode::doDump() const {
+	const FormattingInfo& fi(sFormattingInfos[type]);
+	printf("Format: %s %s\n", fi.div, div ? "div" : "span");
+}
+
 void ColorNode::print(std::ostream& o) const {
-	o << "<span class=\"";
+	if(div)
+		o << "<div class=\"";
+	else
+		o << "<span class=\"";
 	o.write(text, len);
 	o << "\">";
 }
 
 void ColorNode::doDump() const {
-	printf("Color: '%.*s'\n", (int)len, text);
+	printf("Color: '%.*s' %s\n", (int)len, text, div ? "div" : "span");
 }
 
 void UrlNode::print(std::ostream& o) const {

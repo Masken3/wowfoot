@@ -87,7 +87,7 @@ void Formatter::optimize() {
 
 // returns the Ref of an immediate child tag of the given root and type.
 // returns INVALID if no such child exists.
-// skips over Linebreak nodes, but no others.
+// skips over whitespace nodes.
 Formatter::Ref Formatter::findChildTag(Ref root, TagType type) const {
 	Ref r = REF(root).child;
 	while(VR) {
@@ -218,6 +218,18 @@ bool Formatter::optimizeNode(Ref* np) {
 				RESTART;
 			}
 
+			// if [small] is followed by [ul], render it as a <div> rather than a <span>.
+			if(N.isFormattingTag()) {
+				LOG("found formatting tag: %i\n", n);
+			}
+			if(N.isFormattingTag() && (r = findChildTag(n, LIST)) != INVALID) {
+				LOG("found formatting tag with list child: %i\n", n);
+				BaseFormattingNode& bfn((BaseFormattingNode&)N);
+				bfn.div = true;
+				// also fix the end tag.
+				TagNode& et((TagNode&)RN);
+				et.dst = bfn.endTag();
+			}
 		}
 
 		// inbetween LISTs and their ITEMs.

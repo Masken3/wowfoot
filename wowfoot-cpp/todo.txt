@@ -30,6 +30,8 @@ then run a recursive/repeating reduction pass on it, and then print it.
 Slower, uses some more memory, but it's the only sane way I can think of to fix
 the more advanced problems.
 ** Separate sections: parser, optimizer, printer.
+** Printer got tangled up in the node definition.
+** Remove end tag nodes; they are not needed. The start tag nodes can print their own ends.
 
 Feature list, per page, with YES/NO for "implemented?":
 * zone

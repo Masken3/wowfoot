@@ -80,6 +80,10 @@ void NodeAdder::addUrlEndNode() {
 	addTagNode(ANCHOR, "/url", 4, 4, "/a", NULL);
 }
 
+void NodeAdder::addFormattingTag(FormattingType type) {
+	ADD(FormattingNode(type));
+}
+
 void NodeAdder::addColorTag(const char* id, size_t len) {
 	ADD(ColorNode(id, len));
 }
