@@ -25,34 +25,43 @@
 	void print(std::ostream&) const;\
 	void doDump() const;\
 
+#define _DECLARE_ALL_FUNCTIONS(m, name)\
+	void print(std::ostream&) const;\
+	void doDump() const;\
+	void printEndTag(std::ostream&) const;\
+
 #define _DECLARE_ALL(m, name)\
 	m(_DECLARE_MEMBER, _DECLARE_MEMBER)\
 	_DEFINE_CONSTRUCTOR(m, name)\
-	_DECLARE_FUNCTIONS(m, name)\
+	_DECLARE_ALL_FUNCTIONS(m, name)\
 
 #define _DECLARE_INHERIT(m, name, base)\
 	_DEFINE_INHERIT_CONSTRUCTOR(m, name, base)\
 	_DECLARE_FUNCTIONS(m, name)\
 
+#define VALID(i) (i >= 0)
+#define INVALID (-1)
+#define UNDEFINED (-2)
+
 class Node {
 public:
 	virtual void print(std::ostream&) const = 0;
+	virtual void printEndTag(std::ostream&) const = 0;
 	virtual bool isTag() const = 0;
+	// return true if a is the end tag of this.
+	virtual bool hasEndTag(const char* e) const = 0;
 	virtual TagType tagType() const { return NO_TYPE; }
-	virtual bool isEndTagOf(const Node&) const { return false; }
 	// returns the value of the tag required to close this node, if it is a start tag.
 	// otherwise, returns NULL.
-	virtual const char* endTag() const { return NULL; }
 	virtual bool hasUrl() const { return false; }
 	virtual bool isLinebreak() const { return false; }
 	virtual bool isSpace() const { return false; }
 	virtual bool isFormattingTag() const { return false; }
-	bool isEndTag() const { return isTag() && !endTag(); }
 	void dump(int level) const;
 	int next;
 	int child;
 	int _i;	// for debugging. todo: add #if.
-	Node() : next(-2), child(-2), _i(-1) {}
+	Node() : next(UNDEFINED), child(UNDEFINED), _i(-1) {}
 protected:
 	virtual void doDump() const = 0;
 };
@@ -62,6 +71,7 @@ public:
 #define _TAG_NODE(f, m)\
 	f(const char*, tag)\
 	m(size_t, len)\
+	m(size_t, tLen)\
 	m(TagType, type)\
 	m(const char*, dst)\
 	m(const char*, end)\
@@ -69,8 +79,7 @@ public:
 _DECLARE_ALL(_TAG_NODE, TagNode)
 	bool isTag() const { return true; }
 	TagType tagType() const { return type; }
-	bool isEndTagOf(const Node&) const;
-	const char* endTag() const { return end; }
+	bool hasEndTag(const char*) const;
 };
 
 class LinebreakNode : public Node {
@@ -81,6 +90,7 @@ public:
 _DECLARE_ALL(_LINEBREAK_NODE, LinebreakNode)
 	bool isTag() const { return false; }
 	bool isLinebreak() const { return true; }
+	bool hasEndTag(const char*) const { return false; }
 };
 
 #define _TEXT_LEN(f, m)\
@@ -92,6 +102,7 @@ public:
 _DECLARE_ALL(_TEXT_LEN, TextNode)
 	bool isTag() const { return false; }
 	bool isSpace() const;
+	bool hasEndTag(const char*) const { return false; }
 };
 
 class StaticTextNode : public Node {
@@ -101,33 +112,35 @@ public:
 
 _DECLARE_ALL(_STATIC_TEXT_NODE, StaticTextNode)
 	bool isTag() const { return false; }
+	bool hasEndTag(const char*) const { return false; }
 };
 
 class BaseFormattingNode : public Node {
 public:
-	bool div;
-	BaseFormattingNode() : div(false) {}
-
 	bool isTag() const { return true; }
 	bool isFormattingTag() const { return true; }
+
+	//virtual const char* divClass() const = 0;
 };
 
 class FormattingNode : public BaseFormattingNode {
 public:
-	const FormattingType type;
+#define _FORMATTING_NODE(f, m)\
+	f(const char*, tag)\
+	m(size_t, len)\
+	m(size_t, tLen)\
+	m(const FormattingType, type)\
 
-	FormattingNode(FormattingType t) : type(t) {}
-
-_DECLARE_FUNCTIONS(,)
-	const char* endTag() const;
+_DECLARE_ALL(_FORMATTING_NODE, FormattingNode)
 	TagType tagType() const;
+	bool hasEndTag(const char*) const;
 };
 
 class ColorNode : public BaseFormattingNode {
 public:
 _DECLARE_ALL(_TEXT_LEN, ColorNode)
-	const char* endTag() const { return div ? "/div" : "/span"; }
 	TagType tagType() const { return COLOR; }
+	bool hasEndTag(const char*) const;
 };
 
 class ListItemNode : public Node {
@@ -137,10 +150,11 @@ public:
 
 	ListItemNode() : value(-1), styleNone(false) {}
 
-_DECLARE_FUNCTIONS(,)
+_DECLARE_ALL_FUNCTIONS(,)
 	bool isTag() const { return true; }
 	virtual TagType tagType() const { return LIST_ITEM; }
 	const char* endTag() const { return "/li"; }
+	bool hasEndTag(const char*) const;
 };
 
 class UrlNode : public Node {
@@ -150,6 +164,7 @@ _DECLARE_ALL(_TEXT_LEN, UrlNode)
 	const char* endTag() const { return "/a"; }
 	bool hasUrl() const { return true; }
 	virtual TagType tagType() const { return ANCHOR; }
+	bool hasEndTag(const char*) const;
 };
 
 class WowfootUrlNode : public UrlNode {
@@ -174,6 +189,7 @@ public:
 _DECLARE_ALL(_PAGE_NODE, PageNode)
 	bool isTag() const { return false; }
 	bool hasUrl() const { return true; }
+	bool hasEndTag(const char*) const { return false; }
 };
 
 #endif	//NODE_H

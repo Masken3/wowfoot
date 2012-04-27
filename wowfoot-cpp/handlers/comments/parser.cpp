@@ -116,25 +116,25 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 	} }
 
 #define COMPLEX_TAG(t, type, dst, end) COMPARE_TAG(t, addTagNode(type, tag, len, strlen(t), dst, end); return;)
-#define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); COMPLEX_TAG("/" t, type, "/" t, NULL)
-#define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); COMPLEX_TAG("/" t, type, end, NULL)
-#define FORMATTING_TAG(t, type, end) COMPARE_TAG(t, addFormattingTag(type); return;);\
-	COMPLEX_TAG("/" t, _##type, end, NULL)
+#define END_TAG(t) COMPARE_TAG(t, addEndTag(t); return;)
+#define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); END_TAG("/" t)
+#define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); END_TAG("/" t)
+#define FORMATTING_TAG(t, type) COMPARE_TAG(t, addFormattingTag(tag, len, strlen(t), type); return;); END_TAG("/" t)
 
 void Parser::parseTag(const char* tag, size_t len) {
 	bool hasAttributes;
 	//printf("tag: %i %.*s\n", tagState, (int)len, tag);
-	FORMATTING_TAG("b", BOLD, "/b");
-	FORMATTING_TAG("i", ITALIC, "/i");
-	FORMATTING_TAG("small", SMALL, "/span");
-	FORMATTING_TAG("s", SMALL, "/span");
-	FORMATTING_TAG("u", UNDERLINED, "/span");
+	FORMATTING_TAG("b", BOLD);
+	FORMATTING_TAG("i", ITALIC);
+	FORMATTING_TAG("small", SMALL);
+	FORMATTING_TAG("s", SMALL);
+	FORMATTING_TAG("u", UNDERLINED);
 	SIMPLE_TAG("table", TABLE);
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
 	//SIMPLE_TAG("li", LIST_ITEM);
 	COMPARE_TAG("li", addListItem(); return;);
-	COMPLEX_TAG("/li", LIST_ITEM, "/li", NULL);
+	END_TAG("/li");
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
 
@@ -153,7 +153,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 		addColorTag(idString, idLen);
 		return;
 	}
-	COMPLEX_TAG("/color", COLOR, "/span", NULL);
+	END_TAG("/color");
 
 #define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map)) return;
 

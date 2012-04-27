@@ -12,7 +12,20 @@ using namespace std;
 #define LOG if(mLog) printf
 #define DUMPINT(i) LOG(#i ": %i\n", i)
 
+#define N REF(n)
+#define RC REF(N.child)
+#define VC VALID(N.child)
+#define RN REF(N.next)
+#define VN VALID(N.next)
+
+struct Formatter::NodeStackFrame {
+	Ref n;
+	Ref Node::* mPtr;
+	const NodeStackFrame* prevFrame;
+};
+
 string Formatter::formatComment(const char* src) {
+	//printf("mLog: %i\n", mLog);
 	// clear
 	mFirstNode = INVALID;
 	mPreviousNode = INVALID;
@@ -21,14 +34,14 @@ string Formatter::formatComment(const char* src) {
 	LOG("source: %s\n", src);
 	parse(src);
 
+
 	// cleanup after parsing
 	// collapse any remaining node-stack frames
-#define R REF(r)
 	Ref r = mFirstNode;
-	while(VALID(r)) {
+	while(VR) {
 		mFirstNode = R.next;
-		R.next = r+1;
-		printf("%i.next .= %i\n", r, r+1);
+		R.next = INVALID;
+		printf("%i.next .= %i\n", r, INVALID);
 		r = mFirstNode;
 	}
 
@@ -36,17 +49,20 @@ string Formatter::formatComment(const char* src) {
 	memset(mTagCount, 0, sizeof(mTagCount));
 
 	optimize();
+	//printf("mLog: %i\n", mLog);
 	return printTree();
 }
 
 Formatter::Formatter(bool log)
-: mLog(log)
+: Parser(log)
 {
 }
 
-static const bool sTagTypeAllowMultiple[] = {
+static const bool sTagTypeAllowMultiple[_TAG_TYPE_COUNT] = {
 #define _TAG_TYPE_ALLOW(name, allowMultiple, endTag) allowMultiple,
 	TAG_TYPES(_TAG_TYPE_ALLOW)
+#define _FORMATTING_TYPE_ALLOW(name, span, div) false,
+	FORMATTING_TYPES(_FORMATTING_TYPE_ALLOW)
 };
 
 void Formatter::dumpTreeNode(int level, int n) const {
@@ -55,10 +71,12 @@ void Formatter::dumpTreeNode(int level, int n) const {
 	LOG("dumpTreeNode(%i, %i)\n", level, n);
 	EASSERT(level < 16);
 	while(VALID(n)) {
-		REF(n).dump(level);
-		if(VALID(REF(n).child))
-			dumpTreeNode(level+1, REF(n).child);
-		n = REF(n).next;
+		N.dump(level);
+		EASSERT(N.child > n || N.child < 0);
+		EASSERT(N.next > n || N.next < 0);
+		if(VALID(N.child))
+			dumpTreeNode(level+1, N.child);
+		n = N.next;
 	}
 }
 
@@ -67,7 +85,10 @@ void Formatter::optimize() {
 	dumpTreeNode(1, mFirstNode);
 
 	LOG("optimizing...\n");
-	while(optimizeNode(&mFirstNode));
+	NodeStackFrame nsf;
+	nsf.n = INVALID;
+	nsf.prevFrame = NULL;
+	while(optimizeNode(nsf));
 	dumpTreeNode(1, mFirstNode);
 
 	// check that tag counts are valid (zero)
@@ -79,16 +100,10 @@ void Formatter::optimize() {
 	}
 }
 
-#define N REF(n)
-#define RC REF(N.child)
-#define VC VALID(N.child)
-#define RN REF(N.next)
-#define VN VALID(N.next)
-
 // returns the Ref of an immediate child tag of the given root and type.
 // returns INVALID if no such child exists.
 // skips over whitespace nodes.
-Formatter::Ref Formatter::findChildTag(Ref root, TagType type) const {
+Ref Formatter::findChildTag(Ref root, TagType type) const {
 	Ref r = REF(root).child;
 	while(VR) {
 		if(R.tagType() == type)
@@ -103,7 +118,7 @@ Formatter::Ref Formatter::findChildTag(Ref root, TagType type) const {
 
 // returns the Ref of the first sibling of N such that a LIST_ITEM is its next,
 // or INVALID if no such sibling exists.
-Formatter::Ref Formatter::findNext2Li(Ref n) const {
+Ref Formatter::findNext2Li(Ref n) const {
 	Ref r = n;
 	while(VR) {
 		if(VALID(R.next) && REF(R.next).tagType() == LIST_ITEM)
@@ -113,7 +128,7 @@ Formatter::Ref Formatter::findNext2Li(Ref n) const {
 	return INVALID;
 }
 
-Formatter::Ref Formatter::findLastSibling(Ref n) const {
+Ref Formatter::findLastSibling(Ref n) const {
 	Ref r = n;
 	while(VR) {
 		if(!VALID(R.next))
@@ -126,8 +141,9 @@ Formatter::Ref Formatter::findLastSibling(Ref n) const {
 // returns true if n's children are all unprintable,
 // or if there are no children.
 bool Formatter::tagIsEmpty(Ref n) const {
+	if(!N.isTag())
+		return false;
 	Ref r = N.child;
-	EASSERT(N.isTag() && !N.isEndTag());
 	while(VR) {
 		if(!(R.isLinebreak() || R.isSpace()))
 			return false;
@@ -137,39 +153,46 @@ bool Formatter::tagIsEmpty(Ref n) const {
 	return true;
 }
 
-void Formatter::updateTagCount(const Node& n, int baseDiff) {
-	if(n.isTag()) {
-		int diff = n.isEndTag() ? -baseDiff : baseDiff;
-		mTagCount[n.tagType()] += diff;
-		LOG("tag count %i: %s%i (v %i, n %i)\n",
-			n.tagType(), diff > 0 ? "+" : "", diff, mTagCount[n.tagType()], n._i);
-	}
-}
-
-#define RESTART do { updateTagCount(N, -1); \
-	if(N.tagType() == LIST_ITEM && !N.isEndTag()) { listItemCount--; } \
+#define RESTART do { \
+	if(N.tagType() == LIST_ITEM) { listItemCount--; } \
 	goto loop; } while(0)
 
 // set *np to remove the current tag.
-bool Formatter::optimizeNode(Ref* np) {
+bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	bool needAnotherRun = false;
 	int originalTagCount[_TAG_TYPE_COUNT];
 	int listItemCount = 1;
 	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
+
+	Ref* np;
+	if(VALID(nsf.n))
+		np = &(REF(nsf.n).*nsf.mPtr);
+	else
+		np = &mFirstNode;
 	// walk the tree
 	for(; VALID(*np); np = &REF(*np).next) {
 		loop:
 		Ref n = *np;
 
+		if(VC) {
+			// collapse outer [url] if UrlNode is inside.
+			if(N.tagType() == ANCHOR && RC.hasUrl()) {
+				LOG("collapsed outer url node: %i\n", n);
+				*np = N.child;
+				goto loop;
+			}
+		}
+
 		// remove disallowed multiple tag
-		if(N.isTag() && !N.isEndTag() &&
-			!sTagTypeAllowMultiple[N.tagType()] && mTagCount[N.tagType()] > 0)
+		if(N.isTag() &&
+			!sTagTypeAllowMultiple[N.tagType()] &&
+			mTagCount[N.tagType()] > 0)
 		{
 			LOG("removing multiple: %i (count[%i]: %i)\n", n, N.tagType(), mTagCount[N.tagType()]);
 			if(VC)
 				*np = N.child;
-			else if(VN)
-				*np = RN.next;
+			else
+				*np = N.next;
 			if(!VALID(*np))
 				break;
 			goto loop;
@@ -177,24 +200,24 @@ bool Formatter::optimizeNode(Ref* np) {
 
 		// set list item value.
 		// after this point, use RESTART instead of goto loop.
-		if(N.tagType() == LIST_ITEM && !N.isEndTag()) {
+		if(N.tagType() == LIST_ITEM) {
 			((ListItemNode&)N).value = listItemCount++;
 		}
 
-		// update tag count
-		updateTagCount(N, 1);
-
 		if(VC) {
-			while(optimizeNode(&N.child));
+			EASSERT(N.isTag());
+			{
+				NodeStackFrame csf;
+				csf.n = n;
+				csf.mPtr = &Node::child;
+				csf.prevFrame = &nsf;
+
+				mTagCount[N.tagType()]++;
+				while(optimizeNode(csf));
+				mTagCount[N.tagType()]--;
+			}
 			if(!VC)
 				RESTART;
-
-			// collapse outer [url] if UrlNode is inside.
-			if(N.tagType() == ANCHOR && RC.hasUrl()) {
-				LOG("collapsed outer url node: %i\n", n);
-				*np = N.child;
-				RESTART;
-			}
 
 			// remove duplicate [ul]
 			Ref r;
@@ -205,97 +228,44 @@ bool Formatter::optimizeNode(Ref* np) {
 			}
 
 			// collapse [li] if outside LIST.
-			if(N.tagType() == LIST_ITEM && mTagCount[LIST] < mTagCount[LIST_ITEM]) {
-				LOG("collapsed invalid [li]: %i (%i < %i)\n",
+			if(N.tagType() == LIST_ITEM && mTagCount[LIST] <= mTagCount[LIST_ITEM]) {
+				LOG("collapsed invalid [li]: %i (%i <= %i)\n",
 					n, mTagCount[LIST], mTagCount[LIST_ITEM]);
-				EASSERT(VN);
-				EASSERT(RN.tagType() == LIST_ITEM && RN.isEndTag());
-				EASSERT(!VALID(RN.child));	// end tags may not have a child node.
-				Ref next = RN.next;	// the node after [/li]. may be INVALID.
+				Ref next = N.next;	// the node after [/li]. may be INVALID.
 				*np = N.child;
 				r = findLastSibling(*np);
 				R.next = next;
 				RESTART;
 			}
-
-			// if [small] is followed by [ul], render it as a <div> rather than a <span>.
-			if(N.isFormattingTag()) {
-				LOG("found formatting tag: %i\n", n);
-			}
-			if(N.isFormattingTag() && (r = findChildTag(n, LIST)) != INVALID) {
-				LOG("found formatting tag with list child: %i\n", n);
-				BaseFormattingNode& bfn((BaseFormattingNode&)N);
-				bfn.div = true;
-				// also fix the end tag.
-				TagNode& et((TagNode&)RN);
-				et.dst = bfn.endTag();
-			}
 		}
 
 		// inbetween LISTs and their ITEMs.
-		if((N.tagType() == LIST_ITEM && N.isEndTag()) || (N.tagType() == LIST && !N.isEndTag())) {
-			Ref r;
-			if(N.isEndTag())
-				r = N.next;
-			else
-				r = N.child;
-			Ref prev = n;
-			while(VR) {
-				// hide linebreaks.
-				if(R.isLinebreak() || R.isSpace()) {
-					if(R.isLinebreak())
-						((LinebreakNode&)R).visible = false;
-					prev = r;
-					r = R.next;
-					continue;
-				} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
-					break;
-				}
-				// add [li] around content nodes.
-				LOG("Adding [li] around %i\n", r);
-				Ref next2Li = findNext2Li(r);
-				Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
-				REF(prev).next = mArray.size();
-				ListItemNode& t(mArray.add(ListItemNode()));
-				t.styleNone = true;
-				t._i = REF(prev).next;
-				t.child = r;
-				t.next = mArray.size();
-				Node& e(mArray.add(TagNode("/li", 3, LIST_ITEM, "/li", NULL)));
-				e._i = t.next;
-				e.child = INVALID;
-				e.next = nextLi;
-				if(VALID(next2Li))
-					REF(next2Li).next = INVALID;
-				r = next2Li;
-				DUMPINT(next2Li);
-				prev = r;
-				if(VR)
-					r = R.next;
-			}
+		if(N.tagType() == LIST) {
+			handleList(N.child, n);
+		} else if(N.tagType() == LIST_ITEM) {
+			handleList(N.next, n);
 		}
 
 		if(VN) {
 			// linebreak after [/ul].
-			if(N.tagType() == LIST && N.isEndTag() && RN.isLinebreak()) {
+			if(N.tagType() == LIST && RN.isLinebreak()) {
 				((LinebreakNode&)RN).visible = false;
 			}
+		}
 
-			// remove empty tag
-			if(RN.isEndTagOf(N) && tagIsEmpty(n)) {
-				LOG("removing empty: %i. Next: %i\n", n, RN.next);
-				*np = RN.next;
-				// if removed end tag has no sibling
-				if(!VALID(*np)) {
-					mTagCount[N.tagType()]--;
-					break;
-				}
-				// go back to previous sibling.
-				// needed for example in this situation: ...[/li]\n[li][/li]\n
-				// can't go back; whitespace nodes in the way.
-				needAnotherRun = true;
-				RESTART;
+		// remove empty tag
+		if(tagIsEmpty(n)) {
+			LOG("removing empty: %i. Next: %i\n", n, N.next);
+			*np = N.next;
+			// if removed end tag has no sibling
+			if(!VALID(*np)) {
+				break;
 			}
+			// go back to previous sibling.
+			// needed for example in this situation: ...[/li]\n[li][/li]\n
+			// can't go back; whitespace nodes in the way.
+			needAnotherRun = true;
+			RESTART;
 		}
 	}
 	for(int i=0; i<_TAG_TYPE_COUNT; i++) {
@@ -305,6 +275,38 @@ bool Formatter::optimizeNode(Ref* np) {
 		}
 	}
 	return needAnotherRun;
+}
+
+void Formatter::handleList(Ref r, Ref prev) {
+	while(VR) {
+		// hide linebreaks.
+		if(R.isLinebreak() || R.isSpace()) {
+			if(R.isLinebreak())
+				((LinebreakNode&)R).visible = false;
+			prev = r;
+			r = R.next;
+			continue;
+		} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
+			break;
+		}
+		// add [li] around content nodes.
+		LOG("Adding [li] around %i\n", r);
+		Ref next2Li = findNext2Li(r);
+		Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
+		REF(prev).next = mArray.size();
+		ListItemNode& t(mArray.add(ListItemNode()));
+		t.styleNone = true;
+		t._i = REF(prev).next;
+		t.child = r;
+		t.next = nextLi;
+		if(VALID(next2Li))
+			REF(next2Li).next = INVALID;
+		r = next2Li;
+		DUMPINT(next2Li);
+		prev = r;
+		if(VR)
+			r = R.next;
+	}
 }
 
 string Formatter::printArray() const {
@@ -319,6 +321,7 @@ void Formatter::printNode(ostream& o, int n) const {
 	while(VALID(n)) {
 		N.print(o);
 		printNode(o, N.child);
+		N.printEndTag(o);
 		n = N.next;
 	}
 }

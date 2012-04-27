@@ -1,9 +1,11 @@
+#define __STDC_FORMAT_MACROS
 #include "node.h"
 #include "pageTags.h"
 #include "chtmlUtil.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 void Node::dump(int level) const {
 	//printf("%i (%p): %p, %p\n", _i, this, child, next);
@@ -19,6 +21,9 @@ void LinebreakNode::print(std::ostream& o) const {
 	o << "\n";
 }
 
+void LinebreakNode::printEndTag(std::ostream& o) const {
+}
+
 void LinebreakNode::doDump() const {
 	printf("Linebreak %svisible\n", visible ? "" : "in");
 }
@@ -31,6 +36,9 @@ static void streamHtmlEscape(std::ostream& o, const char* text, size_t len) {
 
 void TextNode::print(std::ostream& o) const {
 	streamHtmlEscape(o, text, len);
+}
+
+void TextNode::printEndTag(std::ostream& o) const {
 }
 
 void TextNode::doDump() const {
@@ -49,6 +57,9 @@ void StaticTextNode::print(std::ostream& o) const {
 	o << text;
 }
 
+void StaticTextNode::printEndTag(std::ostream& o) const {
+}
+
 void StaticTextNode::doDump() const {
 	printf("StaticText: '%s'\n", text);
 }
@@ -62,6 +73,10 @@ void ListItemNode::print(std::ostream& o) const {
 	}
 }
 
+void ListItemNode::printEndTag(std::ostream& o) const {
+	o << "</li>";
+}
+
 void ListItemNode::doDump() const {
 	printf("ListItemNode: ");
 	if(styleNone) {
@@ -69,6 +84,10 @@ void ListItemNode::doDump() const {
 	} else {
 		printf("%i\n", value);
 	}
+}
+
+bool ListItemNode::hasEndTag(const char* e) const {
+	return strcmp(e, "/li") == 0;
 }
 
 struct FormattingInfo {
@@ -83,16 +102,6 @@ static const FormattingInfo sFormattingInfos[] = {
 	FORMATTING_TYPES(_FORMATTING_INFO)
 };
 
-const char* FormattingNode::endTag() const {
-	if(div)
-		return "/div";
-	const FormattingInfo& fi(sFormattingInfos[type]);
-	if(fi.spanEnd)
-		return fi.spanEnd;
-	else
-		return "/span";
-}
-
 TagType FormattingNode::tagType() const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
 	return fi.tagType;
@@ -100,31 +109,54 @@ TagType FormattingNode::tagType() const {
 
 void FormattingNode::print(std::ostream& o) const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
-	if(div) {
-		o << "<div class=\"" << fi.div << "\">";
-	} if(fi.span) {
+	if(fi.span) {
 		o << "<" << fi.span << ">";
 	} else {
 		o << "<span class=\"" << fi.div << "\">";
 	}
 }
 
+void FormattingNode::printEndTag(std::ostream& o) const {
+	const FormattingInfo& fi(sFormattingInfos[type]);
+	if(fi.span) {
+		o << "</" << fi.span << ">";
+	} else {
+		o << "</span>";
+	}
+}
+
 void FormattingNode::doDump() const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
-	printf("Format: %s %s\n", fi.div, div ? "div" : "span");
+	printf("Format: %s\n", fi.div);
+}
+
+bool FormattingNode::hasEndTag(const char* e) const {
+	if(*e == '/')
+		e++;
+	else
+		return false;
+	//printf("hasEndTag(%s, %s, %" PRIuPTR ")\n", tag, e, tLen);
+	if(strncmp(tag, e, tLen) != 0)
+		return false;
+	return e[tLen] == 0;
 }
 
 void ColorNode::print(std::ostream& o) const {
-	if(div)
-		o << "<div class=\"";
-	else
-		o << "<span class=\"";
+	o << "<span class=\"";
 	o.write(text, len);
 	o << "\">";
 }
 
+void ColorNode::printEndTag(std::ostream& o) const {
+	o << "</span>";
+}
+
 void ColorNode::doDump() const {
-	printf("Color: '%.*s' %s\n", (int)len, text, div ? "div" : "span");
+	printf("Color: '%.*s'\n", (int)len, text);
+}
+
+bool ColorNode::hasEndTag(const char* e) const {
+	return strcmp(e, "/color") == 0;
 }
 
 void UrlNode::print(std::ostream& o) const {
@@ -133,8 +165,16 @@ void UrlNode::print(std::ostream& o) const {
 	o << "\">";
 }
 
+void UrlNode::printEndTag(std::ostream& o) const {
+	o << "</a>";
+}
+
 void UrlNode::doDump() const {
 	printf("Url: '%.*s'\n", (int)len, text);
+}
+
+bool UrlNode::hasEndTag(const char* e) const {
+	return strcmp(e, "/url") == 0;
 }
 
 void WowfootUrlNode::print(std::ostream& o) const {
@@ -161,15 +201,22 @@ void TagNode::print(std::ostream& o) const {
 	o << "<" << dst << ">";
 }
 
+void TagNode::printEndTag(std::ostream& o) const {
+	o << "<" << end << ">";
+}
+
 void TagNode::doDump() const {
 	printf("Tag: '%.*s'\n", (int)len, tag);
 }
 
-bool TagNode::isEndTagOf(const Node& n) const {
-	//printf("isEndTagOf '%s' (%s)\n", dst, n.endTag());
-	if(!n.endTag())
+bool TagNode::hasEndTag(const char* e) const {
+	if(*e == '/')
+		e++;
+	else
 		return false;
-	return (strcmp(dst, n.endTag()) == 0);
+	if(strncmp(tag, e, tLen) != 0)
+		return false;
+	return e[tLen] == 0;
 }
 
 template<class Map>
@@ -190,6 +237,10 @@ void PageNode<Map>::print(std::ostream& o) const {
 		streamName(o, *s);
 	}
 	o << "</a>";
+}
+
+template<class Map>
+void PageNode<Map>::printEndTag(std::ostream& o) const {
 }
 
 template<class Map>

@@ -1,11 +1,14 @@
 #include "parser.h"
 #include "node.h"
 #include "pageTags.h"
+#include <stdio.h>
 
-NodeAdder::Ref NodeAdder::findStartTag(const Node& endTag) {
+#define LOG if(mLog) printf
+
+Ref NodeAdder::findStartTag(const char* endTag) {
 	Ref r = mFirstNode;
 	while(VALID(r)) {
-		if(endTag.isEndTagOf(R))
+		if(R.hasEndTag(endTag))
 			return r;
 		r = R.next;
 	}
@@ -16,52 +19,56 @@ NodeAdder::Ref NodeAdder::findStartTag(const Node& endTag) {
 // each stack frame (start tag) has 'next' ref its parent.
 void NodeAdder::add(const Node& n) {
 	//n.dump(0);
-	Ref newPrev;
-	if(n.isEndTag()) {
-		// if there is no start tag, discard this end tag.
-		Ref s = findStartTag(n);
-		if(!VALID(s))
-			return;
-		// close all tags in between.
-		newPrev = s+1;
-		Ref r;
-		do {
-			r = mFirstNode;
-			mFirstNode = R.next;
-			R.next = r+1;
-			//printf("%i.next .= %i\n", r, r+1);
-		} while(r != s);
-		mPreviousNode = INVALID;
-	} else {
-		newPrev = mArray.size();
-		Node& t(mArray.add(n));
-		t._i = newPrev;
-		//t.dump(0);
-		if(n.isTag()) {
-			// this is the most recent parent; add it to the stack.
-			t.next = mFirstNode;
-			//printf("%i.next := %i\n", newPrev, mFirstNode);
-			mFirstNode = newPrev;
-			// add n's end tag.
-			Node& e(mArray.add(TagNode(t.endTag(), strlen(t.endTag()), t.tagType(), t.endTag(), NULL)));
-			e._i = newPrev+1;
-			//e.dump(0);
-		}
+	Ref newPrev = mArray.size();
+	Node& t(mArray.add(n));
+	t._i = newPrev;
+	if(mLog)
+		t.dump(0);
+	if(n.isTag()) {
+		// this is the most recent parent; add it to the stack.
+		t.next = mFirstNode;
+		LOG("%i.next := %i\n", newPrev, mFirstNode);
+		mFirstNode = newPrev;
+		//e.dump(0);
 	}
+	setRefs(newPrev, false);
+}
+
+void NodeAdder::addEndTag(const char* endTag) {
+	// if there is no start tag, discard this end tag.
+	Ref s = findStartTag(endTag);
+	if(!VALID(s))
+		return;
+	LOG("endTag %s to %i\n", endTag, s);
+	// close all tags in between.
+	Ref r;
+	do {
+		r = mFirstNode;
+		mFirstNode = R.next;
+		R.next = INVALID;
+		LOG("%i.next .= %i\n", r, INVALID);
+	} while(r != s);
+	setRefs(INVALID, true);
+	mPreviousNode = r;
+}
+
+void NodeAdder::setRefs(Ref newPrev, bool end) {
 	// set refs.
 	if(VALID(mPreviousNode)) {
 		Node& p(REF(mPreviousNode));
-		if(p.isTag() && !p.isEndTag()) {
-			//printf("%i.child = %i\n", mPreviousNode, newPrev);
+		if(p.isTag() && !end && p.child == UNDEFINED) {
+			LOG("%i.child = %i\n", mPreviousNode, newPrev);
 			p.child = newPrev;
 		} else {
-			//printf("%i.next = %i\n", mPreviousNode, newPrev);
+			if(p.child == UNDEFINED)
+				p.child = INVALID;
+			LOG("%i.next = %i\n", mPreviousNode, newPrev);
 			p.next = newPrev;
 		}
-		p._i = mPreviousNode;
 	}
 	mPreviousNode = newPrev;
 }
+
 #define ADD(n) add(n)
 
 void NodeAdder::addLinebreakNode() {
@@ -73,15 +80,15 @@ void NodeAdder::addLinebreakNode() {
 // tLen: length of basic tag (without attributes or whitespace)
 // dst: static string; HTML representation of tag (without <>, so it can be used with attributes).
 void NodeAdder::addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst, const char* end) {
-	ADD(TagNode(tag, len, type, dst, end));
+	ADD(TagNode(tag, len, tLen, type, dst, end));
 }
 
 void NodeAdder::addUrlEndNode() {
-	addTagNode(ANCHOR, "/url", 4, 4, "/a", NULL);
+	addEndTag("/url");
 }
 
-void NodeAdder::addFormattingTag(FormattingType type) {
-	ADD(FormattingNode(type));
+void NodeAdder::addFormattingTag(const char* tag, size_t len, size_t tLen, FormattingType type) {
+	ADD(FormattingNode(tag, len, tLen, type));
 }
 
 void NodeAdder::addColorTag(const char* id, size_t len) {

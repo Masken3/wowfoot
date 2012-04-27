@@ -1,4 +1,4 @@
-This is an experiment. A wowfoot server, identical in interface to wowfoot-webrick, but written in C++.
+This is an experiment. A wowfoot server, similar in interface to wowfoot-webrick, but written in C++.
 
 Startup time is expected to increase to 20-30 seconds, as the entire database is copied to C++ containers.
 Memory usage is expected to increase to 300-600 MB.
@@ -6,7 +6,7 @@ Page serving speed is expected to increase a great deal, since NoSQL is used ins
 Windows compatibility has increased, as this server doesn't rely on buggy Ruby implementations.
 Graphics has been improved, as icons from MPQs can be accessed directly.
 
-The server is not monolithic; it will have a core, but all the page renderers are DLLs
+The server is not monolithic; it has a core, but all the page renderers are DLLs
 that can be reloaded as they change, without the need to restart the entire server.
 
 Databases are copied from a MySQL server into hash tables. These tables are self-contained

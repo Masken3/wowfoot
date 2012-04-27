@@ -9,23 +9,26 @@
 class Node;
 
 #define REF(i) mArray[i]
-#define VALID(i) (i >= 0)
-#define INVALID (-1)
 
 #define R REF(r)
 #define VR VALID(r)
 
+typedef int Ref;
+
 class NodeAdder {
 public:
 	typedef varray<Node, 96> Array;
-	typedef int Ref;
 protected:
 	Ref mFirstNode;
 	Ref mPreviousNode;
 	Array mArray;
+	const bool mLog;
+
+	NodeAdder(bool log) : mLog(log) {}
 private:
 	void add(const Node& n);
-	Ref findStartTag(const Node& endTag);
+	Ref findStartTag(const char* endTag);
+	void setRefs(Ref newPrev, bool end);
 public:
 	void addLinebreakNode();
 
@@ -33,10 +36,12 @@ public:
 	// len: length of tag in source data.
 	// tLen: length of basic tag (without attributes or whitespace)
 	// dst: static string; HTML representation of tag (without <>, so it can be used with attributes).
-	// end: static string; HTMP end tag. NULL if this is an end tag or a tag that has no end.
+	// end: static string; HTML end tag. NULL if this is an end tag or a tag that has no end.
 	void addTagNode(TagType type, const char* tag, size_t len, size_t tLen, const char* dst, const char* end);
 
-	void addFormattingTag(FormattingType);
+	void addEndTag(const char* endTag);
+
+	void addFormattingTag(const char* tag, size_t len, size_t tLen, FormattingType);
 	void addColorTag(const char* id, size_t len);
 	void addWowfootUrlNode(const char* path, size_t len);
 	void addWowpediaUrlNode(const char* path, size_t len);
@@ -49,6 +54,8 @@ public:
 };
 
 class Parser : protected NodeAdder {
+protected:
+	Parser(bool log) : NodeAdder(log) {}
 public:
 	void parse(const char* src);
 private:
