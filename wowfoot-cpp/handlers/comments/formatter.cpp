@@ -164,21 +164,18 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	int listItemCount = 1;
 	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
 
-	Ref* np;
-	if(VALID(nsf.n))
-		np = &(REF(nsf.n).*nsf.mPtr);
-	else
-		np = &mFirstNode;
+	NodeStackFrame localNsf = nsf;
+#define NR (VALID(localNsf.n) ? (REF(localNsf.n).*localNsf.mPtr) : mFirstNode)
 	// walk the tree
-	for(; VALID(*np); np = &REF(*np).next) {
+	for(; VALID(NR); localNsf.n = NR, localNsf.mPtr = &Node::next) {
 		loop:
-		Ref n = *np;
+		Ref n = NR;
 
 		if(VC) {
 			// collapse outer [url] if UrlNode is inside.
 			if(N.tagType() == ANCHOR && RC.hasUrl()) {
 				LOG("collapsed outer url node: %i\n", n);
-				*np = N.child;
+				NR = N.child;
 				goto loop;
 			}
 		}
@@ -190,10 +187,10 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		{
 			LOG("removing multiple: %i (count[%i]: %i)\n", n, N.tagType(), mTagCount[N.tagType()]);
 			if(VC)
-				*np = N.child;
+				NR = N.child;
 			else
-				*np = N.next;
-			if(!VALID(*np))
+				NR = N.next;
+			if(!VALID(NR))
 				break;
 			goto loop;
 		}
@@ -223,7 +220,7 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			Ref r;
 			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
 				LOG("collapsed duplicate [ul]: %i\n", n);
-				*np = r;
+				NR = r;
 				RESTART;
 			}
 
@@ -232,8 +229,8 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				LOG("collapsed invalid [li]: %i (%i <= %i)\n",
 					n, mTagCount[LIST], mTagCount[LIST_ITEM]);
 				Ref next = N.next;	// the node after [/li]. may be INVALID.
-				*np = N.child;
-				r = findLastSibling(*np);
+				NR = N.child;
+				r = findLastSibling(NR);
 				R.next = next;
 				RESTART;
 			}
@@ -256,9 +253,9 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		// remove empty tag
 		if(tagIsEmpty(n)) {
 			LOG("removing empty: %i. Next: %i\n", n, N.next);
-			*np = N.next;
+			NR = N.next;
 			// if removed end tag has no sibling
-			if(!VALID(*np)) {
+			if(!VALID(NR)) {
 				break;
 			}
 			// go back to previous sibling.
@@ -294,6 +291,7 @@ void Formatter::handleList(Ref r, Ref prev) {
 		Ref next2Li = findNext2Li(r);
 		Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
 		REF(prev).next = mArray.size();
+		// would invalidate np.
 		ListItemNode& t(mArray.add(ListItemNode()));
 		t.styleNone = true;
 		t._i = REF(prev).next;

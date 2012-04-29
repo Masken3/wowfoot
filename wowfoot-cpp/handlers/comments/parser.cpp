@@ -155,6 +155,8 @@ void Parser::parseTag(const char* tag, size_t len) {
 	}
 	END_TAG("/color");
 
+	// todo: code, quote
+
 #define PAGE_TAG(name, map) if(pageTag(name "=", sizeof(name), tag, len, map)) return;
 
 	PAGE_TAGS(PAGE_TAG);
