@@ -22,9 +22,10 @@ private:
 	int setupBasicNode(unsigned& i, int parent);
 	void setupBasicTree();
 	void dumpTreeNode(int level, int node) const;
-	bool optimizeNode(const NodeStackFrame&);
+	int optimizeNode(const NodeStackFrame&);
 
 	// optimize subroutines
+	void dumpNodeStack(const NodeStackFrame& nsf) const;
 	Ref findChildTag(Ref, TagType type) const;
 	Ref findNext2Li(Ref) const;
 	Ref findLastSibling(Ref) const;

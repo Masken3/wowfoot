@@ -72,8 +72,8 @@ void Formatter::dumpTreeNode(int level, int n) const {
 	EASSERT(level < 16);
 	while(VALID(n)) {
 		N.dump(level);
-		EASSERT(N.child > n || N.child < 0);
-		EASSERT(N.next > n || N.next < 0);
+		//EASSERT(N.child > n || N.child < 0);
+		//EASSERT(N.next > n || N.next < 0);
 		if(VALID(N.child))
 			dumpTreeNode(level+1, N.child);
 		n = N.next;
@@ -88,7 +88,9 @@ void Formatter::optimize() {
 	NodeStackFrame nsf;
 	nsf.n = INVALID;
 	nsf.prevFrame = NULL;
-	while(optimizeNode(nsf));
+	int o;
+	while((o = optimizeNode(nsf)) == 0);
+	EASSERT(o < 0);
 	dumpTreeNode(1, mFirstNode);
 
 	// check that tag counts are valid (zero)
@@ -157,12 +159,23 @@ bool Formatter::tagIsEmpty(Ref n) const {
 	if(N.tagType() == LIST_ITEM) { listItemCount--; } \
 	goto loop; } while(0)
 
+void Formatter::dumpNodeStack(const NodeStackFrame& nsf) const {
+	LOG(" %i", nsf.n);
+	if(nsf.prevFrame)
+		dumpNodeStack(*nsf.prevFrame);
+}
+
 // set *np to remove the current tag.
-bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
-	bool needAnotherRun = false;
+// returns the number of levels that need rerunning.
+// <0 means none, 0 means the child, >0 means 1 or more parent levels.
+int Formatter::optimizeNode(const NodeStackFrame& nsf) {
+	bool rerunChild = false;
+	int rerunParent = 0;
 	int originalTagCount[_TAG_TYPE_COUNT];
 	int listItemCount = 1;
 	memcpy(originalTagCount, mTagCount, sizeof(mTagCount));
+	//dumpNodeStack(nsf);
+	//LOG("\n");
 
 	NodeStackFrame localNsf = nsf;
 #define NR (VALID(localNsf.n) ? (REF(localNsf.n).*localNsf.mPtr) : mFirstNode)
@@ -210,8 +223,13 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				csf.prevFrame = &nsf;
 
 				mTagCount[N.tagType()]++;
-				while(optimizeNode(csf));
+				int o;
+				while((o = optimizeNode(csf)) == 0);
 				mTagCount[N.tagType()]--;
+				if(o == 1)
+					RESTART;
+				if(o > 1)
+					return o-1;
 			}
 			if(!VC)
 				RESTART;
@@ -243,13 +261,6 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			handleList(N.next, n);
 		}
 
-		if(VN) {
-			// linebreak after [/ul].
-			if(N.tagType() == LIST && RN.isLinebreak()) {
-				((LinebreakNode&)RN).visible = false;
-			}
-		}
-
 		// remove empty tag
 		if(tagIsEmpty(n)) {
 			LOG("removing empty: %i. Next: %i\n", n, N.next);
@@ -261,8 +272,58 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			// go back to previous sibling.
 			// needed for example in this situation: ...[/li]\n[li][/li]\n
 			// can't go back; whitespace nodes in the way.
-			needAnotherRun = true;
+			rerunChild = true;
 			RESTART;
+		}
+
+		// spans are not allowed around structure tags.
+		// close them and replace with divs.
+#define IS_STRUCTURE_TAG(node) ((node).tagType() == LIST || (node).tagType() == TABLE)
+		if(IS_STRUCTURE_TAG(N)) {
+			// check the node stack
+			bool foundFormattingTag = false;
+			const NodeStackFrame* nsfp = &nsf;
+			Ref r;
+			Ref newChild = n;
+			while(VALID(r = nsfp->n)) {
+				// let's assume no other tags between N and formatting.
+#if 0
+				if(IS_STRUCTURE_TAG(R))
+					break;
+				rerunParent++;
+				if(R.isFormattingTag()) {
+#else
+				if(!R.isFormattingTag()) {
+					break;
+				} else {
+#endif
+					BaseFormattingNode& bfn((BaseFormattingNode&)R);
+					if(bfn.div)
+						break;
+					LOG("found formatting tag %i outside %i\n", r, n);
+					foundFormattingTag = true;
+					rerunParent++;
+					EASSERT(!bfn.div);
+					// add div
+					int i = mArray.size();
+					BaseFormattingNode& t(mArray.add(bfn));
+					t.div = true;
+					t._i = i;
+					t.child = newChild;
+					newChild = i;
+					t.next = bfn.next;
+					// fix span
+					NR = INVALID;
+					bfn.next = i;
+					// todo: add spans after div
+				}
+				nsfp = nsfp->prevFrame;
+				EASSERT(nsfp);
+			}
+			if(foundFormattingTag)
+				break;
+			else
+				rerunParent = 0;
 		}
 	}
 	for(int i=0; i<_TAG_TYPE_COUNT; i++) {
@@ -271,7 +332,7 @@ bool Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			FAIL("tagCount");
 		}
 	}
-	return needAnotherRun;
+	return rerunParent ? rerunParent : (rerunChild ? 0 : -1);
 }
 
 void Formatter::handleList(Ref r, Ref prev) {

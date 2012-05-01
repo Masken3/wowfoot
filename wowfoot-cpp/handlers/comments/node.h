@@ -39,7 +39,7 @@
 	_DEFINE_INHERIT_CONSTRUCTOR(m, name, base)\
 	_DECLARE_FUNCTIONS(m, name)\
 
-#define VALID(i) (i >= 0)
+#define VALID(i) ((i) >= 0)
 #define INVALID (-1)
 #define UNDEFINED (-2)
 
@@ -117,10 +117,14 @@ _DECLARE_ALL(_STATIC_TEXT_NODE, StaticTextNode)
 
 class BaseFormattingNode : public Node {
 public:
+	bool div;
+
 	bool isTag() const { return true; }
 	bool isFormattingTag() const { return true; }
 
 	//virtual const char* divClass() const = 0;
+protected:
+	BaseFormattingNode() : div(false) {}
 };
 
 class FormattingNode : public BaseFormattingNode {

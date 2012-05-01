@@ -109,7 +109,9 @@ TagType FormattingNode::tagType() const {
 
 void FormattingNode::print(std::ostream& o) const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
-	if(fi.span) {
+	if(div) {
+		o << "<div class=\"" << fi.div << "\">";
+	} else if(fi.span) {
 		o << "<" << fi.span << ">";
 	} else {
 		o << "<span class=\"" << fi.div << "\">";
@@ -118,7 +120,9 @@ void FormattingNode::print(std::ostream& o) const {
 
 void FormattingNode::printEndTag(std::ostream& o) const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
-	if(fi.span) {
+	if(div) {
+		o << "</div>";
+	} else if(fi.span) {
 		o << "</" << fi.span << ">";
 	} else {
 		o << "</span>";
@@ -127,7 +131,7 @@ void FormattingNode::printEndTag(std::ostream& o) const {
 
 void FormattingNode::doDump() const {
 	const FormattingInfo& fi(sFormattingInfos[type]);
-	printf("Format: %s\n", fi.div);
+	printf("Format: %s%s\n", fi.div, div ? " div" : "");
 }
 
 bool FormattingNode::hasEndTag(const char* e) const {
@@ -142,17 +146,23 @@ bool FormattingNode::hasEndTag(const char* e) const {
 }
 
 void ColorNode::print(std::ostream& o) const {
-	o << "<span class=\"";
+	if(div)
+		o << "<div class=\"";
+	else
+		o << "<span class=\"";
 	o.write(text, len);
 	o << "\">";
 }
 
 void ColorNode::printEndTag(std::ostream& o) const {
-	o << "</span>";
+	if(div)
+		o << "</div>";
+	else
+		o << "</span>";
 }
 
 void ColorNode::doDump() const {
-	printf("Color: '%.*s'\n", (int)len, text);
+	printf("Color: '%.*s'%s\n", (int)len, text, div ? " div" : "");
 }
 
 bool ColorNode::hasEndTag(const char* e) const {
