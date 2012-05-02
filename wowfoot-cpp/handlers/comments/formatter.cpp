@@ -160,7 +160,7 @@ bool Formatter::tagIsEmpty(Ref n) const {
 	goto loop; } while(0)
 
 void Formatter::dumpNodeStack(const NodeStackFrame& nsf) const {
-	LOG(" %i", nsf.n);
+	LOG(" %i", VALID(nsf.n) ? nsf.n : mFirstNode);
 	if(nsf.prevFrame)
 		dumpNodeStack(*nsf.prevFrame);
 }
@@ -215,6 +215,7 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		}
 
 		if(VC) {
+			// run the child node
 			EASSERT(N.isTag());
 			{
 				NodeStackFrame csf;
@@ -222,10 +223,16 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				csf.mPtr = &Node::child;
 				csf.prevFrame = &nsf;
 
+	/*LOG("s");
+	dumpNodeStack(nsf);
+	LOG("\n");*/
 				mTagCount[N.tagType()]++;
 				int o;
 				while((o = optimizeNode(csf)) == 0);
 				mTagCount[N.tagType()]--;
+	/*LOG("e");
+	dumpNodeStack(nsf);
+	LOG("\n");*/
 				if(o == 1)
 					RESTART;
 				if(o > 1)
@@ -256,9 +263,9 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 
 		// inbetween LISTs and their ITEMs.
 		if(N.tagType() == LIST) {
-			handleList(N.child, n);
+			handleList(n, &Node::child);
 		} else if(N.tagType() == LIST_ITEM) {
-			handleList(N.next, n);
+			handleList(n, &Node::next);
 		}
 
 		// remove empty tag
@@ -335,13 +342,15 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	return rerunParent ? rerunParent : (rerunChild ? 0 : -1);
 }
 
-void Formatter::handleList(Ref r, Ref prev) {
+void Formatter::handleList(Ref n, Ref Node::* mPtr) {
+	Ref r = N.*mPtr;
 	while(VR) {
 		// hide linebreaks.
 		if(R.isLinebreak() || R.isSpace()) {
 			if(R.isLinebreak())
 				((LinebreakNode&)R).visible = false;
-			prev = r;
+			n = r;
+			mPtr = &Node::next;
 			r = R.next;
 			continue;
 		} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
@@ -351,18 +360,19 @@ void Formatter::handleList(Ref r, Ref prev) {
 		LOG("Adding [li] around %i\n", r);
 		Ref next2Li = findNext2Li(r);
 		Ref nextLi = VALID(next2Li) ? REF(next2Li).next : INVALID;
-		REF(prev).next = mArray.size();
+		N.*mPtr = mArray.size();
 		// would invalidate np.
 		ListItemNode& t(mArray.add(ListItemNode()));
 		t.styleNone = true;
-		t._i = REF(prev).next;
+		t._i = N.*mPtr;
 		t.child = r;
 		t.next = nextLi;
 		if(VALID(next2Li))
 			REF(next2Li).next = INVALID;
 		r = next2Li;
 		DUMPINT(next2Li);
-		prev = r;
+		n = r;
+		mPtr = &Node::next;
 		if(VR)
 			r = R.next;
 	}
