@@ -353,7 +353,12 @@ void Formatter::handleList(Ref n, Ref Node::* mPtr) {
 			mPtr = &Node::next;
 			r = R.next;
 			continue;
-		} else if(R.tagType() == LIST_ITEM || R.tagType() == LIST) {
+		} else if(R.tagType() == LIST) {
+			// collapse invalid LIST nodes.
+			LOG("collapsed invalid [ul]: %i\n", r);
+			N.*mPtr = r = R.child;
+			continue;
+		} else if(R.tagType() == LIST_ITEM) {
 			break;
 		}
 		// add [li] around content nodes.
