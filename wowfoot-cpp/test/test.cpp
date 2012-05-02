@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <set>
 
 #include <tidy/tidy.h>
 #include <tidy/buffio.h>
@@ -30,7 +31,7 @@ using namespace std;
 #define IN_FILE_ON_LINE LOG("%s:%i:\n", __FILE__, __LINE__)
 
 static void fatalError() __attribute((noreturn));
-static void testUrl(const string& url);
+static void testUrl(const string& url, ostream& tu);
 static void parse(const char* html, size_t size);
 static void generateUrls(vector<string>& urls);
 
@@ -43,6 +44,7 @@ static void generateUrls(vector<string>& urls);
 
 int main() {
 	vector<string> urls;
+	{
 	ifstream urlFile("urlsToTest.txt");
 	if(urlFile.good()) {
 		printf("Loading URLs...\n");
@@ -56,10 +58,28 @@ int main() {
 		printf("Generating URLs...\n");
 		generateUrls(urls);
 	}
+	}
 	printf("%" PRIuPTR " urls.\n", urls.size());
 
+	set<string> testedUrls;
+	{
+		ifstream tuFile("testedUrls.txt");
+		if(tuFile.good()) {
+			printf("Loading tested URLs...\n");
+			while(tuFile.good()) {
+				string s;
+				getline(tuFile, s);
+				if(!s.empty())
+					testedUrls.insert(s);
+			}
+		}
+	}
+	printf("%" PRIuPTR " tested urls.\n", testedUrls.size());
+
+	ofstream tuFile("testedUrls.txt", ios_base::out | ios_base::app);
 	for(size_t i=0; i<urls.size(); i++) {
-		testUrl(urls[i]);
+		if(testedUrls.find(urls[i]) == testedUrls.end())
+			testUrl(urls[i], tuFile);
 		//printf("done.\n");
 		//abort();	//temp
 	}
@@ -134,7 +154,7 @@ static size_t memstream_write(void* src, size_t size, size_t nmemb, void* userda
 }
 #endif
 
-static void testUrl(const string& url) {
+static void testUrl(const string& url, ostream& tu) {
 	static char* mem = NULL;
 	static size_t memSize = 0;
 	printf("%s\n", url.c_str());
@@ -179,6 +199,7 @@ static void testUrl(const string& url) {
 #else
 	fclose(memStream);
 #endif
+	tu << url << endl;
 }
 
 static void fatalError() {
