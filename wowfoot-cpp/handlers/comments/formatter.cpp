@@ -183,6 +183,8 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	for(; VALID(NR); localNsf.n = NR, localNsf.mPtr = &Node::next) {
 		loop:
 		Ref n = NR;
+		if(!VALID(n))
+			break;
 
 		if(VC) {
 			// collapse outer [url] if UrlNode is inside.
@@ -235,13 +237,17 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	/*LOG("e");
 	dumpNodeStack(nsf);
 	LOG("\n");*/
-				if(o == 1)
+				if(o == 1) {
+					LOG("oN restart\n");
 					RESTART;
+				}
 				if(o > 1)
 					return o-1;
 			}
-			if(!VC)
+			if(!VC) {
+				LOG("oN VC restart\n");
 				RESTART;
+			}
 
 			// remove duplicate [ul]
 			Ref r;
@@ -264,14 +270,16 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		}
 
 		// inbetween LISTs and their ITEMs.
-		bool listed;
+		bool listed = false;
 		if(N.tagType() == LIST) {
 			listed = handleList(n, &Node::child);
 		} else if(N.tagType() == LIST_ITEM) {
 			listed = handleList(n, &Node::next);
 		}
-		if(listed)
+		if(listed) {
+			LOG("listed RESTART\n");
 			RESTART;
+		}
 
 		// remove empty tag
 		if(tagIsEmpty(n)) {
