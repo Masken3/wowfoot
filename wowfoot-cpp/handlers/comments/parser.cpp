@@ -196,6 +196,12 @@ void Parser::parseUrl(const char* url, size_t len) {
 		url++;
 	}
 
+	// skip broken '['
+	if(*url == '[') {
+		url++;
+		len--;
+	}
+
 	// check for start-quote mark.
 	if(*url == '"') {
 		url++;
