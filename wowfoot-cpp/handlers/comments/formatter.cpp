@@ -211,7 +211,9 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		// set list item value.
 		// after this point, use RESTART instead of goto loop.
 		if(N.tagType() == LIST_ITEM) {
-			((ListItemNode&)N).value = listItemCount++;
+			ListItemNode& lin((ListItemNode&)N);
+			if(!lin.styleNone)
+				lin.value = listItemCount++;
 		}
 
 		if(VC) {
@@ -262,11 +264,14 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		}
 
 		// inbetween LISTs and their ITEMs.
+		bool listed;
 		if(N.tagType() == LIST) {
-			handleList(n, &Node::child);
+			listed = handleList(n, &Node::child);
 		} else if(N.tagType() == LIST_ITEM) {
-			handleList(n, &Node::next);
+			listed = handleList(n, &Node::next);
 		}
+		if(listed)
+			RESTART;
 
 		// remove empty tag
 		if(tagIsEmpty(n)) {
@@ -292,12 +297,13 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			const NodeStackFrame* nsfp = &nsf;
 			Ref r;
 			Ref newChild = n;
+			int rp = 0;
 			while(VALID(r = nsfp->n)) {
 				// let's assume no other tags between N and formatting.
 #if 0
 				if(IS_STRUCTURE_TAG(R))
 					break;
-				rerunParent++;
+				rp++;
 				if(R.isFormattingTag()) {
 #else
 				if(!R.isFormattingTag()) {
@@ -330,7 +336,9 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			if(foundFormattingTag)
 				break;
 			else
-				rerunParent = 0;
+				rp = 0;
+			if(rp > rerunParent)
+				rerunParent = rp;
 		}
 	}
 	for(int i=0; i<_TAG_TYPE_COUNT; i++) {
@@ -342,8 +350,9 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 	return rerunParent ? rerunParent : (rerunChild ? 0 : -1);
 }
 
-void Formatter::handleList(Ref n, Ref Node::* mPtr) {
+bool Formatter::handleList(Ref n, Ref Node::* mPtr) {
 	Ref r = N.*mPtr;
+	bool listed = false;
 	while(VR) {
 		// hide linebreaks.
 		if(R.isLinebreak() || R.isSpace()) {
@@ -357,6 +366,7 @@ void Formatter::handleList(Ref n, Ref Node::* mPtr) {
 			// collapse invalid LIST nodes.
 			LOG("collapsed invalid [ul]: %i\n", r);
 			N.*mPtr = r = R.child;
+			listed = true;
 			continue;
 		} else if(R.tagType() == LIST_ITEM) {
 			break;
@@ -380,7 +390,9 @@ void Formatter::handleList(Ref n, Ref Node::* mPtr) {
 		mPtr = &Node::next;
 		if(VR)
 			r = R.next;
+		listed = true;
 	}
+	return listed;
 }
 
 string Formatter::printArray() const {

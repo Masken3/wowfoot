@@ -30,7 +30,7 @@ private:
 	Ref findNext2Li(Ref) const;
 	Ref findLastSibling(Ref) const;
 	bool tagIsEmpty(Ref) const;
-	void handleList(Ref, Ref Node::*);
+	bool handleList(Ref, Ref Node::*);
 
 	int mTagCount[_TAG_TYPE_COUNT];
 };
