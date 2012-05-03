@@ -32,6 +32,11 @@ string Formatter::formatComment(const char* src) {
 	mArray.clear();
 
 	LOG("source: %s\n", src);
+	if(mLog) {
+		FILE* f = fopen("comment_source.txt", "wb");
+		fwrite(src, strlen(src), 1, f);
+		fclose(f);
+	}
 	parse(src);
 
 

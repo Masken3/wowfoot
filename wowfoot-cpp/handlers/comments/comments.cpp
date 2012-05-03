@@ -37,6 +37,7 @@ static Tab* getComments(const char* query, bool log) {
 		c.user = (const char*)sqlite3_column_text(stmt, 0);
 		c.originalBody = (const char*)sqlite3_column_text(stmt, 1);
 		for(size_t i=0; i<c.originalBody.size(); ) {
+#if 0
 			// blank out invalid utf-8 sequences.
 			wchar_t w;
 			int rs = mbtowc(&w, c.originalBody.c_str() + i, c.originalBody.size() - i);
@@ -45,13 +46,18 @@ static Tab* getComments(const char* query, bool log) {
 				i++;
 				continue;
 			}
+#else
+			// blank out all non-printable ascii characters.
+			if((unsigned int)c.originalBody[i] > 127 || iscntrl(c.originalBody[i]))
+				c.originalBody[i] = ' ';
+#endif
 			// transform '-' to avoid the HTML end-comment combo "-->".
 			if(c.originalBody[i] == '-')
 				c.originalBody[i] = '_';
 			// transform EOL for readability.
 			if(c.originalBody[i] == 'n' && c.originalBody[i-1] == '\\')
 				c.originalBody[i] = '\n';
-			i += rs;
+			i++;
 		}
 		c.rating = sqlite3_column_int(stmt, 2);
 		c.date = (const char*)sqlite3_column_text(stmt, 3);

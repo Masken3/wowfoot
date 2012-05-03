@@ -186,7 +186,7 @@ static bool isUrlChar(char c) {
 		c == '%';
 }
 static bool isWowheadNonUrlChar(char c) {
-	return c == '/' || c == '?' || c == '.' || c == '-';
+	return c == '/' || c == '?' || c == '.' || c == '-' || c == '&' || ((unsigned int)c) > 127;
 }
 
 void Parser::parseUrl(const char* url, size_t len) {
@@ -227,6 +227,16 @@ void Parser::parseUrl(const char* url, size_t len) {
 		if(*path == '?')
 			path += 1;
 		size_t pathLen = len - (path - url);
+
+		// cut off broken parts
+		const char* c = path;
+		while(c < (path + pathLen)) {
+			if(isWowheadNonUrlChar(*c))
+				break;
+			c++;
+		}
+		pathLen = c - path;
+
 		addWowfootUrlNode(path, pathLen);
 		return;
 	}

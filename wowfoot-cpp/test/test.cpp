@@ -192,6 +192,9 @@ static void testUrl(const string& url, ostream& tu) {
 
 	parse(mem, memSize);
 
+	// todo: SGML validation.
+	// todo: link validation.
+
 	curl_easy_cleanup(curl);
 
 #ifdef WIN32
