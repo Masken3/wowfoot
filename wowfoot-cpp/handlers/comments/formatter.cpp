@@ -272,6 +272,11 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				R.next = next;
 				RESTART;
 			}
+
+			// hide linebreaks after structure tags.
+			if(N.isStructureTag() && RC.isLinebreak()) {
+				((LinebreakNode&)RC).visible = false;
+			}
 		}
 
 		// inbetween LISTs and their ITEMs.
@@ -299,6 +304,13 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			// can't go back; whitespace nodes in the way.
 			rerunChild = true;
 			RESTART;
+		}
+
+		if(VN) {
+			// hide linebreaks after structure tags.
+			if(N.isStructureTag() && RN.isLinebreak()) {
+				((LinebreakNode&)RN).visible = false;
+			}
 		}
 
 		// spans are not allowed around structure tags.
