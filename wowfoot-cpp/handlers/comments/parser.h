@@ -43,6 +43,8 @@ public:
 
 	void addFormattingTag(const char* tag, size_t len, size_t tLen, FormattingType);
 	void addColorTag(const char* id, size_t len);
+	void addCodeTag();
+	void addQuoteTag();
 	void addWowfootUrlNode(const char* path, size_t len);
 	void addWowpediaUrlNode(const char* path, size_t len);
 	void addUrlNode(const char* url, size_t len);

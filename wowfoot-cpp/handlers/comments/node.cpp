@@ -145,6 +145,10 @@ bool FormattingNode::hasEndTag(const char* e) const {
 	return e[tLen] == 0;
 }
 
+bool FormattingNode::isStructureTag() const {
+	return div;
+}
+
 void ColorNode::print(std::ostream& o) const {
 	if(div)
 		o << "<div class=\"";
@@ -227,6 +231,10 @@ bool TagNode::hasEndTag(const char* e) const {
 	if(strncmp(tag, e, tLen) != 0)
 		return false;
 	return e[tLen] == 0;
+}
+
+bool TagNode::isStructureTag() const {
+	return type == LIST || type == TABLE;
 }
 
 template<class Map>

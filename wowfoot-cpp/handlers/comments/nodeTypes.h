@@ -14,6 +14,8 @@
 	m(ITALIC, "i", "italic")\
 	m(UNDERLINED, "", "underlined")\
 	m(SMALL, "", "small")\
+	m(CODE, "", "code")\
+	m(QUOTE, "", "quote")\
 
 enum TagType {
 #define _TAG_TYPE_ENUM(name, allowMultiple, endTag) name,

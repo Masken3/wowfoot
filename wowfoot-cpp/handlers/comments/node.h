@@ -57,6 +57,8 @@ public:
 	virtual bool isLinebreak() const { return false; }
 	virtual bool isSpace() const { return false; }
 	virtual bool isFormattingTag() const { return false; }
+	virtual bool isStructureTag() const { return false; }
+
 	void dump(int level) const;
 	int next;
 	int child;
@@ -80,6 +82,7 @@ _DECLARE_ALL(_TAG_NODE, TagNode)
 	bool isTag() const { return true; }
 	TagType tagType() const { return type; }
 	bool hasEndTag(const char*) const;
+	bool isStructureTag() const;
 };
 
 class LinebreakNode : public Node {
@@ -138,6 +141,7 @@ public:
 _DECLARE_ALL(_FORMATTING_NODE, FormattingNode)
 	TagType tagType() const;
 	bool hasEndTag(const char*) const;
+	bool isStructureTag() const;
 };
 
 class ColorNode : public BaseFormattingNode {

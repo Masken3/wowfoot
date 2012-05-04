@@ -95,6 +95,18 @@ void NodeAdder::addColorTag(const char* id, size_t len) {
 	ADD(ColorNode(id, len));
 }
 
+void NodeAdder::addCodeTag() {
+	FormattingNode f("code", 4, 4, CODE);
+	f.div = true;
+	ADD(f);
+}
+
+void NodeAdder::addQuoteTag() {
+	FormattingNode f("quote", 5, 5, QUOTE);
+	f.div = true;
+	ADD(f);
+}
+
 void NodeAdder::addWowfootUrlNode(const char* path, size_t len) {
 	ADD(WowfootUrlNode(path, len));
 }

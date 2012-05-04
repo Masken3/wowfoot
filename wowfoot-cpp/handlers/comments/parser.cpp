@@ -120,6 +120,7 @@ static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t ta
 #define SIMPLE_TAG(t, type) COMPLEX_TAG(t, type, t, "/" t); END_TAG("/" t)
 #define C_TAG(t, type, dst, end) COMPLEX_TAG(t, type, dst, end); END_TAG("/" t)
 #define FORMATTING_TAG(t, type) COMPARE_TAG(t, addFormattingTag(tag, len, strlen(t), type); return;); END_TAG("/" t)
+#define SPECIAL_TAG(t, addFunc) COMPARE_TAG(t, addFunc; return;); END_TAG("/" t)
 
 void Parser::parseTag(const char* tag, size_t len) {
 	bool hasAttributes;
@@ -133,8 +134,9 @@ void Parser::parseTag(const char* tag, size_t len) {
 	SIMPLE_TAG("tr", NO_TYPE);
 	SIMPLE_TAG("td", NO_TYPE);
 	//SIMPLE_TAG("li", LIST_ITEM);
-	COMPARE_TAG("li", addListItem(); return;);
-	END_TAG("/li");
+	SPECIAL_TAG("li", addListItem());
+	SPECIAL_TAG("code", addCodeTag());
+	SPECIAL_TAG("quote", addQuoteTag());
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
 

@@ -303,8 +303,7 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 
 		// spans are not allowed around structure tags.
 		// close them and replace with divs.
-#define IS_STRUCTURE_TAG(node) ((node).tagType() == LIST || (node).tagType() == TABLE)
-		if(IS_STRUCTURE_TAG(N)) {
+		if(N.isStructureTag()) {
 			// check the node stack
 			bool foundFormattingTag = false;
 			const NodeStackFrame* nsfp = &nsf;
