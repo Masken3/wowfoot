@@ -73,7 +73,7 @@ static const bool sTagTypeAllowMultiple[_TAG_TYPE_COUNT] = {
 void Formatter::dumpTreeNode(int level, int n) const {
 	if(!mLog)
 		return;
-	LOG("dumpTreeNode(%i, %i)\n", level, n);
+	//LOG("dumpTreeNode(%i, %i)\n", level, n);
 	EASSERT(level < 16);
 	while(VALID(n)) {
 		N.dump(level);
@@ -224,36 +224,6 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		}
 
 		if(VC) {
-			// run the child node
-			EASSERT(N.isTag());
-			{
-				NodeStackFrame csf;
-				csf.n = n;
-				csf.mPtr = &Node::child;
-				csf.prevFrame = &nsf;
-
-	/*LOG("s");
-	dumpNodeStack(nsf);
-	LOG("\n");*/
-				mTagCount[N.tagType()]++;
-				int o;
-				while((o = optimizeNode(csf)) == 0);
-				mTagCount[N.tagType()]--;
-	/*LOG("e");
-	dumpNodeStack(nsf);
-	LOG("\n");*/
-				if(o == 1) {
-					LOG("oN restart\n");
-					RESTART;
-				}
-				if(o > 1)
-					return o-1;
-			}
-			if(!VC) {
-				LOG("oN VC restart\n");
-				RESTART;
-			}
-
 			// remove duplicate [ul]
 			Ref r;
 			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
@@ -270,6 +240,41 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				NR = N.child;
 				r = findLastSibling(NR);
 				R.next = next;
+				RESTART;
+			}
+
+			// run the child node
+			EASSERT(N.isTag());
+			{
+				NodeStackFrame csf;
+				csf.n = n;
+				csf.mPtr = &Node::child;
+				csf.prevFrame = &nsf;
+
+#define DUMP_NODES 0
+#if DUMP_NODES
+	LOG("s");
+	dumpNodeStack(nsf);
+	LOG("\n");
+#endif
+				mTagCount[N.tagType()]++;
+				int o;
+				while((o = optimizeNode(csf)) == 0);
+				mTagCount[N.tagType()]--;
+#if DUMP_NODES
+	LOG("e");
+	dumpNodeStack(nsf);
+	LOG("\n");
+#endif
+				if(o == 1) {
+					LOG("oN restart\n");
+					RESTART;
+				}
+				if(o > 1)
+					return o-1;
+			}
+			if(!VC) {
+				LOG("oN VC restart\n");
 				RESTART;
 			}
 
