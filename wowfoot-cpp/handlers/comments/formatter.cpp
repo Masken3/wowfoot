@@ -39,7 +39,6 @@ string Formatter::formatComment(const char* src) {
 	}
 	parse(src);
 
-
 	// cleanup after parsing
 	// collapse any remaining node-stack frames
 	Ref r = mFirstNode;
@@ -50,7 +49,10 @@ string Formatter::formatComment(const char* src) {
 		r = mFirstNode;
 	}
 
-	mFirstNode = 0;
+	if(mArray.size() > 0)
+		mFirstNode = 0;
+	else
+		mFirstNode = INVALID;
 	memset(mTagCount, 0, sizeof(mTagCount));
 
 	optimize();
