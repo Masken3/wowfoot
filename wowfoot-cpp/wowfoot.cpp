@@ -41,6 +41,8 @@ int main(int argc, const char** argv) {
 	}
 	sDllDir = argv[1];
 
+	setlocale(LC_CTYPE, "");	// set locale.
+
 	prepareHttpd(CONFIG_PORT);
 
 	mountIdPage("zone");

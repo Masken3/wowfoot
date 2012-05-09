@@ -1,3 +1,4 @@
+#define __STDC_FORMAT_MACROS
 #include "parser.h"
 
 #include "pageTags.h"
@@ -6,6 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
+#include <limits.h>
 
 #define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
 
@@ -26,11 +29,15 @@ void Parser::flush(const char* end) {
 void Parser::parse(const char* src) {
 	const char* ptr = src;
 	mNodeStart = ptr;
+	mbtowc(NULL, NULL, 0);	// reset shift state.
 	while(*ptr) {
 		// skip invalid utf-8 sequences.
 		wchar_t w;
-		int res = mbtowc(&w, ptr, 4);
+		int res = mbtowc(&w, ptr, MB_LEN_MAX);
 		if(res <= 0) {
+			if(res < 0) {
+				printf("Invalid UTF-8 0x%x @ pos %" PRIuPTR "\n", (unsigned char)*ptr, ptr - src);
+			}
 			FLUSH;
 			ptr++;
 			mNodeStart = ptr;
