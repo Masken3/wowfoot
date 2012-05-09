@@ -31,9 +31,9 @@ static Tab* getComments(const char* query, bool log) {
 	int res;
 	commentTabChtml* ct = new commentTabChtml();
 	Formatter f(log);
-	try {
 	while((res = sqlite3_step(stmt)) == SQLITE_ROW) {
 		Comment c;
+	try {
 		c.user = (const char*)sqlite3_column_text(stmt, 0);
 		c.originalBody = (const char*)sqlite3_column_text(stmt, 1);
 		for(size_t i=0; i<c.originalBody.size(); ) {
@@ -67,13 +67,14 @@ static Tab* getComments(const char* query, bool log) {
 			printf("Comment %i\n", c.id);
 		c.body = f.formatComment((const char*)sqlite3_column_text(stmt, 1));
 		ct->mComments.push_back(c);
+	} catch(Exception& e) {
+		printf("Exception in comment %i\n", c.id);
+		SQLT(sqlite3_finalize(stmt));
+		throw e;
+	}
 	}
 	if(res != SQLITE_DONE) {
 		SQLT(res);
-	}
-	} catch(Exception& e) {
-		SQLT(sqlite3_finalize(stmt));
-		throw e;
 	}
 	SQLT(sqlite3_finalize(stmt));
 	ct->id = "comments";
