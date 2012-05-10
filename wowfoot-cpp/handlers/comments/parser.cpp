@@ -270,20 +270,33 @@ void Parser::parseUrl(const char* url, size_t len) {
 
 // returns new ptr.
 const char* Parser::parseUnescapedUrl(const char* ptr) {
+	// find the end of the URL
+	const char* end = ptr;
+	while(isUrlChar(*end)) {
+		end++;
+	}
+	size_t len = end - ptr;
+
+	// check for path
 	const char* domain = ptr + 7;
-	const char* slash = strchr(domain, '/');
-	if(!slash)
-		return domain;
+	const char* slash = (char*)memchr(domain, '/', end - domain);
+	if(!slash) {
+		addUrlNode(ptr, len);
+		addTextNode(ptr, len);
+		addUrlEndNode();
+		return end;
+	}
 	const char* path = slash + 1;
 
 	// we can assume wowhead urls never have slashes '/',
 	// or '?', except as the first character in the path.
+	// todo: if(len < strlen(WH))...
 	const char* subdomain = slash - (strlen(WH) - 1);
 	//printf("sd: %s\n", subdomain);
 	bool isWowhead = STREQ(subdomain, WH);
 	if(isWowhead && *path == '?')
 		path++;
-	const char* end = path;
+	end = path;
 	while(isUrlChar(*end)) {
 		if(isWowhead && isWowheadNonUrlChar(*end))
 			break;
@@ -292,7 +305,6 @@ const char* Parser::parseUnescapedUrl(const char* ptr) {
 	size_t pathLen = end - path;
 	size_t urlLen = end - ptr;
 	//printf("uu: %i %.*s\n", isWowhead, urlLen, ptr);
-	size_t len;
 	if(isWowhead) {
 		// write name of linked entity (item, object, spell, quest, et. al)
 		// use PAGE_TAG code
