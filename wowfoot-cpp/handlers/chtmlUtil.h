@@ -16,20 +16,25 @@ string toupper(string s) VISIBLE;
 string htmlEscape(const string& src) VISIBLE;
 string jsEscape(const string& src) VISIBLE;
 
-void streamHtmlEscape(ostream&, const string& src) VISIBLE;
-void streamHtmlEscape(ostream&, const char* src) VISIBLE;
-void streamHtmlEscape(ostream&, char) VISIBLE;
+typedef void (*Escapist)(ostream&, char);
 
-#define ESCAPE(i) streamHtmlEscape(stream, i)
+void streamEscape(Escapist, ostream&, const string& src) VISIBLE;
+void streamEscape(Escapist, ostream&, const char* src) VISIBLE;
+void streamEscape(Escapist, ostream&, const char* src, size_t len) VISIBLE;
+
+void streamHtmlEscape(ostream&, char) VISIBLE;
+void streamUrlEscape(ostream&, char) VISIBLE;
+
+#define ESCAPE(i) streamEscape(streamHtmlEscape, stream, i)
 
 void streamWowFormattedText(ostream&, const string& src) VISIBLE;
 
 template<class T> void streamName(ostream& os, const T& t) {
-	streamHtmlEscape(os, t.name);
+	streamEscape(streamHtmlEscape, os, t.name);
 }
 #ifdef DB_QUEST_STRUCT_H
 template<> void streamName<Quest>(ostream& os, const Quest& t) {
-	streamHtmlEscape(os, t.title);
+	streamEscape(streamHtmlEscape, os, t.title);
 }
 #endif
 #define NAME(i) streamName(stream, i)

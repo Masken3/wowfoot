@@ -38,16 +38,20 @@ string htmlEscape(const string& src) {
 	return dst;
 }
 
-void streamHtmlEscape(ostream& os, const string& src) {
-	for(size_t i=0; i<src.size(); i++) {
-		streamHtmlEscape(os, src[i]);
+void streamEscape(Escapist e, ostream& os, const string& src) {
+	streamEscape(e, os, src.c_str(), src.size());
+}
+
+void streamEscape(Escapist e, ostream& os, const char* src) {
+	while(*src) {
+		e(os, *src);
+		src++;
 	}
 }
 
-void streamHtmlEscape(ostream& os, const char* src) {
-	while(*src) {
-		streamHtmlEscape(os, *src);
-		src++;
+void streamEscape(Escapist e, std::ostream& o, const char* text, size_t len) {
+	for(size_t i=0; i<len; i++) {
+		e(o, text[i]);
 	}
 }
 
@@ -58,6 +62,15 @@ void streamHtmlEscape(ostream& os, char c) {
 	case '>': os << "&gt;"; break;
 	case '<': os << "&lt;"; break;
 	default: os << c;
+	}
+}
+
+void streamUrlEscape(ostream& os, char c) {
+	unsigned char uc = c;
+	if(uc > 127) {
+		os << "%" << hex << (int)uc;
+	} else {
+		streamHtmlEscape(os, c);
 	}
 }
 

@@ -28,14 +28,8 @@ void LinebreakNode::doDump() const {
 	printf("Linebreak %svisible\n", visible ? "" : "in");
 }
 
-static void streamHtmlEscape(std::ostream& o, const char* text, size_t len) {
-	for(size_t i=0; i<len; i++) {
-		::streamHtmlEscape(o, text[i]);
-	}
-}
-
 void TextNode::print(std::ostream& o) const {
-	streamHtmlEscape(o, text, len);
+	streamEscape(streamHtmlEscape, o, text, len);
 }
 
 void TextNode::printEndTag(std::ostream& o) const {
@@ -175,7 +169,7 @@ bool ColorNode::hasEndTag(const char* e) const {
 
 void UrlNode::print(std::ostream& o) const {
 	o << "<a href=\"";
-	streamHtmlEscape(o, text, len);
+	streamEscape(streamUrlEscape, o, text, len);
 	o << "\">";
 }
 
@@ -193,7 +187,7 @@ bool UrlNode::hasEndTag(const char* e) const {
 
 void WowfootUrlNode::print(std::ostream& o) const {
 	o << "<a href=\"";
-	streamHtmlEscape(o, text, len);
+	streamEscape(streamUrlEscape, o, text, len);
 	o << "\">";
 }
 
@@ -203,7 +197,7 @@ void WowfootUrlNode::doDump() const {
 
 void WowpediaUrlNode::print(std::ostream& o) const {
 	o << "<a href=\"http://www.wowpedia.org/";
-	streamHtmlEscape(o, text, len);
+	streamEscape(streamUrlEscape, o, text, len);
 	o << "\">";
 }
 
