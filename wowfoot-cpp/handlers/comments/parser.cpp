@@ -154,7 +154,9 @@ void Parser::parseTag(const char* tag, size_t len) {
 		parseUrl(url, urlLen);
 		return;
 	}
-	C_TAG("url", ANCHOR, "a", "/a");
+	//C_TAG("url", ANCHOR, "a", "/a");
+	COMPARE_TAG("url", return;);	// get rid of empty [url] tags.
+	END_TAG("/url");
 
 	if(strncmp("color=", tag, 6) == 0) {
 		const char* idString = tag + 6;
