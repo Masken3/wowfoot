@@ -284,6 +284,20 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			if(N.isStructureTag() && RC.isLinebreak()) {
 				((LinebreakNode&)RC).visible = false;
 			}
+
+			// switch out structure tags inside ANCHORs.
+			if(N.tagType() == ANCHOR && RC.isStructureTag()) {
+				LOG("switching %i and %i\n", n, N.child);
+				r = N.child;
+				Ref oNext = N.next;
+				Ref iNext = R.next;
+				NR = r;
+				N.child = R.child;
+				R.child = n;
+				r = iNext;
+				if(VR)
+					R.next = oNext;
+			}
 		}
 
 		// inbetween LISTs and their ITEMs.
