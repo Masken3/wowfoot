@@ -2,8 +2,13 @@
 int id = toInt(urlPart);
 WorldMapAreas::ptr a = gWorldMapAreas.find(id);
 string title;
+AreaTable::ptr ap = gAreaTable.find(id);
 if(a) {
-	title = gAreaTable[id].name;
+	if(ap) {
+		title = ap->name;
+	} else {
+		title = a->name;
+	}
 } else {
 	title = urlPart;
 	returnCode = 404;
@@ -21,7 +26,7 @@ if(a) {
 
 <p>Zone: <%ESCAPE(title);%></p>
 
-% if(a) {
+% if(ap) {
 <p>
 <img id="map" width="40%" src="output/<%= a->name %>.jpeg" alt="<%= a->name %>">
 </p>
