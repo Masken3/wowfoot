@@ -223,7 +223,9 @@ void Parser::parseUrl(const char* url, size_t len) {
 	const char* end = url + len;
 	while(ptr < end) {
 		// also check for end-quote mark and the invalid start-tag marker.
-		if(isspace(*ptr) || *ptr == '"' || *ptr == '[')
+		// and linebreak.
+		if(isspace(*ptr) || *ptr == '"' || *ptr == '[' ||
+			(ptr[0] == '\\' && ptr[1] == 'n'))
 			break;
 		ptr++;
 	}
