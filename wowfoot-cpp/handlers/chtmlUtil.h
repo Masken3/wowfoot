@@ -26,6 +26,7 @@ void streamHtmlEscape(ostream&, char) VISIBLE;
 void streamUrlEscape(ostream&, char) VISIBLE;
 
 #define ESCAPE(i) streamEscape(streamHtmlEscape, stream, i)
+#define ESCAPE_URL(i) streamEscape(streamUrlEscape, stream, i)
 
 void streamWowFormattedText(ostream&, const string& src) VISIBLE;
 

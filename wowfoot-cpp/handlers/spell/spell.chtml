@@ -10,20 +10,19 @@
 % if(!a) {
 Spell <%ESCAPE(mTitle);%> does not exist.
 % } else {
-<p>
-<span class="itemName"><%ESCAPE(a->name);%></span><br>
+<p class="itemName"><%ESCAPE(a->name);%></p>
 
 %// icon
 <p>
 % const SpellIcon* si = gSpellIcons.find(a->spellIconID);
 % if(si) {
-<img src="<%=getIconRaw(si->icon)%>" alt="<%=si->icon%>">
+<img src="<%ESCAPE_URL(getIconRaw(si->icon));%>" alt="<%ESCAPE(si->icon);%>">
 % } else {
 Warning: invalid icon id (<%=a->spellIconID%>)
 % }
 % if(a->activeIconID) { si = gSpellIcons.find(a->activeIconID);
 % if(si) {
-<img src="<%=getIconRaw(si->icon)%>" alt="<%=si->icon%>">
+<img src="<%ESCAPE_URL(getIconRaw(si->icon));%>" alt="<%ESCAPE(si->icon);%>">
 % } else {
 Warning: invalid icon id (<%=a->activeIconID%>)
 % }
@@ -31,9 +30,8 @@ Warning: invalid icon id (<%=a->activeIconID%>)
 </p>
 
 % if(a->description) {
-<span class="itemDescription"><%=a->description%></span><br>
+<p class="itemDescription"><%ESCAPE(a->description);%></p>
 % }
-</p>
 <p>Rank: <%=a->rank%></p>
 <p>Tooltip: <%=a->toolTip%></p>
 
