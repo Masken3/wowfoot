@@ -33,7 +33,7 @@ Warning: invalid icon id (<%=a->activeIconID%>)
 <p class="itemDescription"><%ESCAPE(a->description);%></p>
 % }
 <p>Rank: <%=a->rank%></p>
-<p>Tooltip: <%=a->toolTip%></p>
+<p>Tooltip: <%ESCAPE(a->toolTip);%></p>
 
 % returnCode = tabsChtml::run(stream);
 
