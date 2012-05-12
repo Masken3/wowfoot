@@ -244,8 +244,10 @@ void Parser::parseUrl(const char* url, size_t len) {
 		}
 		pathLen = c - path;
 
-		addWowfootUrlNode(path, pathLen);
-		return;
+		if(pathLen > 0) {
+			addWowfootUrlNode(path, pathLen);
+			return;
+		}
 	}
 	// s/http://*.wowwiki.com/
 	//printf("URL test: %*s\n", (int)len, url);
@@ -263,7 +265,8 @@ void Parser::parseUrl(const char* url, size_t len) {
 		len -= 2;
 	}
 
-	addUrlNode(url, len);
+	if(len > 0)
+		addUrlNode(url, len);
 }
 
 // returns new ptr.
