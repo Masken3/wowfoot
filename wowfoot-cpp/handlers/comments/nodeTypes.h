@@ -6,6 +6,8 @@
 	m(LIST, true, NULL)\
 	m(LIST_ITEM, true, NULL)\
 	m(TABLE, true, NULL)\
+	m(TR, true, NULL)\
+	m(TD, true, NULL)\
 	m(ANCHOR, false, "a")\
 	m(COLOR, false, "span")\
 

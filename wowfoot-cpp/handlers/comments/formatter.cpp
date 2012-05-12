@@ -299,7 +299,7 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 		}
 
 		// remove empty tag
-		if(tagIsEmpty(n)) {
+		if(tagIsEmpty(n) && N.tagType() != TD) {
 			LOG("removing empty: %i. Next: %i\n", n, N.next);
 			NR = N.next;
 			// if removed end tag has no sibling
@@ -317,6 +317,23 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			// hide linebreaks after structure tags.
 			if(N.isStructureTag() && RN.isLinebreak()) {
 				((LinebreakNode&)RN).visible = false;
+			}
+		}
+
+		// hide linebreaks in [table] but outside [td].
+		if(N.isLinebreak()) {
+			// scan stack for TABLE. abort if TD is found first.
+			const NodeStackFrame* nsfp = &nsf;
+			Ref r;
+			while(VALID(r = nsfp->n)) {
+				if(R.tagType() == TABLE) {
+					((LinebreakNode&)N).visible = false;
+					break;
+				}
+				if(R.tagType() == TD)
+					break;
+				nsfp = nsfp->prevFrame;
+				EASSERT(nsfp);
 			}
 		}
 

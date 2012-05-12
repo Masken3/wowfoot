@@ -206,7 +206,10 @@ void WowpediaUrlNode::doDump() const {
 }
 
 void TagNode::print(std::ostream& o) const {
-	o << "<" << dst << ">";
+	o << "<" << dst;
+	if(type == TABLE)
+		o << " summary=\"table\"";
+	o << ">";
 }
 
 void TagNode::printEndTag(std::ostream& o) const {

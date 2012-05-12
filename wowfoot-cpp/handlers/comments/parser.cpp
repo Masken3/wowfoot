@@ -138,8 +138,8 @@ void Parser::parseTag(const char* tag, size_t len) {
 	FORMATTING_TAG("s", SMALL);
 	FORMATTING_TAG("u", UNDERLINED);
 	SIMPLE_TAG("table", TABLE);
-	SIMPLE_TAG("tr", NO_TYPE);
-	SIMPLE_TAG("td", NO_TYPE);
+	SIMPLE_TAG("tr", TR);
+	SIMPLE_TAG("td", TD);
 	//SIMPLE_TAG("li", LIST_ITEM);
 	SPECIAL_TAG("li", addListItem());
 	SPECIAL_TAG("code", addCodeTag());
