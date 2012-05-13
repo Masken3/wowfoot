@@ -260,7 +260,7 @@ void PageNode<Map>::printEndTag(std::ostream& o) const {
 
 template<class Map>
 void PageNode<Map>::doDump() const {
-	printf("Tag: '%.*s'\n", (int)idLen, idString);
+	printf("PageNode: %s'%.*s'\n", type, (int)idLen, idString);
 }
 
 #define INSTANTIATE_PAGENODE(name, map)\

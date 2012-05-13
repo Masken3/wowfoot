@@ -194,9 +194,12 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			break;
 
 		if(VC) {
+			Ref r;
 			// collapse outer [url] if UrlNode is inside.
-			if(N.tagType() == ANCHOR && RC.hasUrl()) {
+			if(N.tagType() == ANCHOR && VALID(r = findChildTag(n, ANCHOR))) {
 				LOG("collapsed outer url node: %i\n", n);
+				r = findLastSibling(r);
+				R.next = N.next;
 				NR = N.child;
 				goto loop;
 			}

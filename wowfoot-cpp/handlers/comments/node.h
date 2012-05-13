@@ -197,6 +197,7 @@ public:
 _DECLARE_ALL(_PAGE_NODE, PageNode)
 	bool isTag() const { return false; }
 	bool hasUrl() const { return true; }
+	TagType tagType() const { return ANCHOR; }
 	bool hasEndTag(const char*) const { return false; }
 };
 
