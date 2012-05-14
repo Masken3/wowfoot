@@ -83,7 +83,7 @@ template<class Map>
 bool Parser::pageTag(const char* type, size_t typeLen, const char* tag, size_t tagLen,
 	Map& map)
 {
-	if(strncmp(type, tag, typeLen) != 0)
+	if(strncasecmp(type, tag, typeLen) != 0)
 		return false;
 	//printf("%*s tag: %.*s\n", (int)(typeLen-1), type, (int)tagLen, tag);
 	const char* idString = tag + typeLen;
@@ -107,7 +107,7 @@ enum CompRes {
 static CompRes compareTag(const char* t, size_t tLen, const char* tag, size_t tagLen,
 	bool& hasAttributes)
 {
-	bool match = strncmp(t, tag, tLen) == 0 &&
+	bool match = strncasecmp(t, tag, tLen) == 0 &&
 		(tagLen == tLen || (hasAttributes = isspace(tag[tLen])));
 	if(!match)
 		return crMismatch;
@@ -147,7 +147,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 	SIMPLE_TAG("ul", LIST);
 	SIMPLE_TAG("ol", LIST);
 
-	if(!strncmp("url=", tag, 4) || !strncmp("url:", tag, 4) || !strncmp("url ", tag, 4)) {
+	if(!strncasecmp("url=", tag, 4) || !strncasecmp("url:", tag, 4) || !strncasecmp("url ", tag, 4)) {
 		//printf("url tag: %i %.*s\n", tagState, (int)len, tag);
 		const char* url = tag + 4;
 		size_t urlLen = len - 4;
@@ -158,7 +158,7 @@ void Parser::parseTag(const char* tag, size_t len) {
 	COMPARE_TAG("url", return;);	// get rid of empty [url] tags.
 	END_TAG("/url");
 
-	if(strncmp("color=", tag, 6) == 0) {
+	if(strncasecmp("color=", tag, 6) == 0) {
 		const char* idString = tag + 6;
 		size_t idLen = len - 6;
 		addColorTag(idString, idLen);
