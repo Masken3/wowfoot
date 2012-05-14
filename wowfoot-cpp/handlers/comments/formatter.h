@@ -2,6 +2,7 @@
 #define FORMATTER_H
 
 #include <string>
+#include <sstream>
 #include "parser.h"
 #include "vtree.h"
 
@@ -33,6 +34,7 @@ private:
 	bool handleList(Ref, Ref Node::*);
 
 	int mTagCount[_TAG_TYPE_COUNT];
+	mutable ostringstream mSS;
 };
 
 #endif	//FORMATTER_H

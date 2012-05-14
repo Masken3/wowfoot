@@ -384,15 +384,15 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 					EASSERT(!bfn.div);
 					// add div
 					int i = mArray.size();
-					BaseFormattingNode& t(mArray.add(bfn));
+					// calling add invalidates the reference bfn.
+					BaseFormattingNode& t(mArray.add_copy(bfn));
 					t.div = true;
 					t._i = i;
 					t.child = newChild;
 					newChild = i;
-					t.next = bfn.next;
 					// fix span
 					NR = INVALID;
-					bfn.next = i;
+					R.next = i;
 					// todo: add spans after div
 				}
 				nsfp = nsfp->prevFrame;
@@ -461,11 +461,11 @@ bool Formatter::handleList(Ref n, Ref Node::* mPtr) {
 }
 
 string Formatter::printArray() const {
-	ostringstream o;
+	mSS.str("");
 	for(size_t i=0; i<mArray.size(); i++) {
-		mArray[i].print(o);
+		mArray[i].print(mSS);
 	}
-	return o.str();
+	return mSS.str();
 }
 
 void Formatter::printNode(ostream& o, int n) const {
@@ -478,7 +478,7 @@ void Formatter::printNode(ostream& o, int n) const {
 }
 
 string Formatter::printTree() const {
-	ostringstream o;
-	printNode(o, mFirstNode);
-	return o.str();
+	mSS.str("");
+	printNode(mSS, mFirstNode);
+	return mSS.str();
 }

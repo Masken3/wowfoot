@@ -55,7 +55,7 @@ static Tab* getComments(const char* query, bool log) {
 			if(c.originalBody[i] == '-')
 				c.originalBody[i] = '_';
 			// transform EOL for readability.
-			if(c.originalBody[i] == 'n' && c.originalBody[i-1] == '\\')
+			if(i >= 1) if(c.originalBody[i] == 'n' && c.originalBody[i-1] == '\\')
 				c.originalBody[i] = '\n';
 			i++;
 		}

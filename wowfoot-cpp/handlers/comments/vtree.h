@@ -21,6 +21,7 @@ public:
 	//~varray();
 
 	template<class T> T& add(const T&);
+	template<class T> T& add_copy(const T&);
 	template<class T> T& alloc();
 	void clear();
 	Base& operator[](size_t i);
@@ -80,6 +81,13 @@ T& varray<Base, MaxSize>::add(const T& t) {
 	// copy T data. warning: this will cause non-POD objects to become unstable and cause crashes.
 	memcpy(tp, &t, MaxSize);
 	return *tp;
+}
+
+template<class Base, size_t MaxSize> template<class T>
+T& varray<Base, MaxSize>::add_copy(const T& t) {
+	char buf[MaxSize];
+	memcpy(buf, &t, MaxSize);
+	return add(*(T*)buf);
 }
 
 template<class Base, size_t MaxSize>
