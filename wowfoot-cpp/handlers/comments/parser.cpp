@@ -195,7 +195,8 @@ static bool isUrlChar(char c) {
 		c == '%';
 }
 static bool isWowheadNonUrlChar(char c) {
-	return c == '/' || c == '?' || c == '.' || c == '-' || c == '&' || ((unsigned int)c) > 127;
+	return c == '/' || c == '?' || c == '.' || c == '-' || c == '&' ||
+		((unsigned int)c) > 127 || !isUrlChar(c);
 }
 
 void Parser::parseUrl(const char* url, size_t len) {
