@@ -107,7 +107,7 @@ static const char* sTypes[] = {
 static const int snTypes = sizeof(sTypes) / sizeof(char*);
 
 void objectChtml::type(ostream& o) {
-	if(a->type < 0 || a->type > snTypes) {
+	if(a->type < 0 || a->type >= snTypes) {
 		o << "Invalid type " << a->type;
 		return;
 	}
