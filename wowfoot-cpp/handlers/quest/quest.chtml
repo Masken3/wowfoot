@@ -10,7 +10,11 @@
 % if(!a) {
 Quest <%ESCAPE(mTitle);%> does not exist.
 % } else {
-<p>Quest: <span class="itemName"><%ESCAPE(a->title);%></span></p>
+<p>Quest:
+% if(a->title[0]) {
+<span class="itemName"><%ESCAPE(a->title);%></span>
+% }
+</p>
 
 <p>
 MinLevel: <%=a->minLevel%><br>
