@@ -26,6 +26,36 @@ void Parser::flush(const char* end) {
 	}
 }
 
+static const char* fixTag(const char* ptr, const char* endPtr) {
+	// if we have space, followed by alnum, followed by '[', before the end of the tag,
+	// consider the tag broken and end it at the space.
+	const char* tp = ptr;
+	// find space
+	while(tp < endPtr) {
+		if(isspace(*tp))
+			break;
+		tp++;
+	}
+	if(tp == endPtr)
+		return endPtr;
+	const char* space = tp;
+	// skip extra space
+	while(tp < endPtr) {
+		if(!isspace(*tp))
+			break;
+		tp++;
+	}
+	if(tp == endPtr)
+		return endPtr;
+	if(!isalnum(*tp))
+		return endPtr;
+	if(memchr(tp, '[', endPtr - tp)) {
+		printf("broken tag found (pos %" PRIuPTR "/%" PRIuPTR ")\n", tp - ptr, endPtr - ptr);
+		return space;
+	}
+	return endPtr;
+}
+
 void Parser::parse(const char* src) {
 	const char* ptr = src;
 	mNodeStart = ptr;
@@ -64,10 +94,18 @@ void Parser::parse(const char* src) {
 			if(!endPtr) {
 				break;
 			}
+			const char* newEndPtr = fixTag(ptr, endPtr);
+			bool diff = newEndPtr != endPtr;
+			endPtr = newEndPtr;
 			flush(ptr-1);
-			mNodeStart = ptr;
-			parseTag(ptr, endPtr - ptr);
-			ptr = endPtr + 1;
+			if(!diff) {
+				mNodeStart = ptr;
+				parseTag(ptr, endPtr - ptr);
+			}
+			ptr = endPtr;
+			if(!diff) {
+				ptr++;
+			}
 			mNodeStart = ptr;
 		} else if(c == '\\' && *ptr == 'n') {
 			flush(ptr-1);

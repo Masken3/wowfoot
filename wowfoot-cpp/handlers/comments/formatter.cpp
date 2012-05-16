@@ -234,6 +234,8 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 			if(N.tagType() == LIST && (r = findChildTag(n, LIST)) != INVALID) {
 				LOG("collapsed duplicate [ul]: %i\n", n);
 				NR = r;
+				r = findLastSibling(r);
+				R.next = N.next;
 				RESTART;
 			}
 
