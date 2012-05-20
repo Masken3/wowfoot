@@ -370,7 +370,7 @@ void streamItemClassHtml(std::ostream& o, const Item& i) {
 		return;
 	}
 	const ItemClass& c(gItemClasses[i.class_]);
-	o << c.name;
+	streamEscape(streamHtmlEscape, o, c.name);
 	if((size_t)i.class_ >= gItemSubClasses.size()) {
 		o << " / Bad item.class (" << i.class_ << ")";
 		return;
@@ -384,9 +384,9 @@ void streamItemClassHtml(std::ostream& o, const Item& i) {
 		}
 		const ItemSubClass& sc(isc[i.subclass]);
 		if(*sc.plural)
-			o << sc.plural;
+			streamEscape(streamHtmlEscape, o, sc.plural);
 		else
-			o << sc.name;
+			streamEscape(streamHtmlEscape, o, sc.name);
 	}
 }
 

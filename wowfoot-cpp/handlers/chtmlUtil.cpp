@@ -69,6 +69,8 @@ void streamUrlEscape(ostream& os, char c) {
 	unsigned char uc = c;
 	if(uc > 127 || isspace(uc)) {
 		os << "%" << hex << (int)uc;
+	} else if(c == '\\') {
+		os << '/';
 	} else {
 		streamHtmlEscape(os, c);
 	}

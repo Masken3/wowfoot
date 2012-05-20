@@ -36,6 +36,7 @@ the more advanced problems.
 ** Done.
 
 * Quest page seems slow. Profile, speed it up.
+* Some item pages are also slow.
 
 * Test program should multi-thread; retrieve the next page while parsing the last.
 ** Best done, I think, with a thread pool for multiple instances of testUrl().
