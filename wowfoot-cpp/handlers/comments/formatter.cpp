@@ -167,7 +167,7 @@ bool Formatter::tagIsEmpty(Ref n) const {
 	goto loop; } while(0)
 
 void Formatter::dumpNodeStack(const NodeStackFrame& nsf) const {
-	LOG(" %i", VALID(nsf.n) ? nsf.n : mFirstNode);
+	LOG(" %i", VALID(nsf.n) ? nsf.n : -1);
 	if(nsf.prevFrame)
 		dumpNodeStack(*nsf.prevFrame);
 }
@@ -373,6 +373,14 @@ int Formatter::optimizeNode(const NodeStackFrame& nsf) {
 				rp++;
 				if(R.isFormattingTag()) {
 #else
+				// close anchors outside divs.
+				if(R.tagType() == ANCHOR) {
+					LOG("closed anchor %i outside %i\n", r, n);
+					NR = INVALID;
+					R.next = newChild;
+					return rerunParent + 1;
+				}
+				else
 				if(!R.isFormattingTag()) {
 					break;
 				} else {
