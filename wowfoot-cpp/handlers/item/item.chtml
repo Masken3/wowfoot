@@ -16,7 +16,7 @@ Item <%=mTitle%> does not exist.
 <p>
 % const ItemDisplayInfo* di = gItemDisplayInfos.find(a->displayId);
 % if(di) {
-<img src="<%ESCAPE_URL(getIcon(di->icon));%>" alt="<%=di->icon%>">
+<img src="<%ESCAPE_URL(getIcon(di->icon));%>" alt="<%ESCAPE(di->icon);%>">
 % } else {
 Warning: invalid display id (<%=a->displayId%>)
 % }
