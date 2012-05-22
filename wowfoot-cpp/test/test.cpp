@@ -136,7 +136,9 @@ static void generateUrls(vector<string>& urls) {
 	}
 }
 
-#ifdef WIN32
+#define USE_OPEN_MEMSTREAM 0
+
+#if !USE_OPEN_MEMSTREAM
 struct Memstream {
 	char** buf;
 	size_t* size;
@@ -155,21 +157,21 @@ static size_t memstream_write(void* src, size_t size, size_t nmemb, void* userda
 #endif
 
 static void testUrl(const string& url, ostream& tu) {
-	static char* mem = NULL;
-	static size_t memSize = 0;
+	char* mem = NULL;
+	size_t memSize = 0;
 	printf("%s\n", url.c_str());
 
 	CURL* curl;
 	TCP(curl = curl_easy_init());
 	TCE(curl_easy_setopt(curl, CURLOPT_URL, url.c_str()));
 
-#ifdef WIN32
+#if USE_OPEN_MEMSTREAM
+	FILE* memStream = open_memstream(&mem, &memSize);
+#else
 	// WIN32 doesn't support open_memstream.
 	TCE(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memstream_write));
 	Memstream ms = { &mem, &memSize };
 	Memstream* memStream = &ms;
-#else
-	FILE* memStream = open_memstream(&mem, &memSize);
 #endif
 	TCE(curl_easy_setopt(curl, CURLOPT_WRITEDATA, memStream));
 
@@ -179,7 +181,7 @@ static void testUrl(const string& url, ostream& tu) {
 
 	TCE(curl_easy_perform(curl));
 
-#ifndef WIN32
+#if USE_OPEN_MEMSTREAM
 	fflush(memStream);
 #endif
 
@@ -197,11 +199,11 @@ static void testUrl(const string& url, ostream& tu) {
 
 	curl_easy_cleanup(curl);
 
-#ifdef WIN32
-	memSize = 0;
-#else
+#if USE_OPEN_MEMSTREAM
 	fclose(memStream);
 #endif
+	free(mem);
+
 	tu << url << endl;
 }
 
