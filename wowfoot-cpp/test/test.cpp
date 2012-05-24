@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <omp.h>
 
 #include <tidy/tidy.h>
 #include <tidy/buffio.h>
@@ -77,7 +78,14 @@ int main() {
 	printf("%" PRIuPTR " tested urls.\n", testedUrls.size());
 
 	ofstream tuFile("testedUrls.txt", ios_base::out | ios_base::app);
+	bool printed = false;
+	#pragma omp parallel for
 	for(size_t i=0; i<urls.size(); i++) {
+		#pragma omp critical
+		if(!printed) {
+			printf("OpenMP activated, %i threads.\n", omp_get_max_threads());
+			printed = true;
+		}
 		if(testedUrls.find(urls[i]) == testedUrls.end())
 			testUrl(urls[i], tuFile);
 		//printf("done.\n");
@@ -204,6 +212,7 @@ static void testUrl(const string& url, ostream& tu) {
 #endif
 	free(mem);
 
+	#pragma omp critical
 	tu << url << endl;
 }
 

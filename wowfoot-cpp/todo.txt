@@ -41,6 +41,7 @@ the more advanced problems.
 * Test program should multi-thread; retrieve the next page while parsing the last.
 ** Best done, I think, with a thread pool for multiple instances of testUrl().
 *** This would allow us to do any number of threads, not just two. The server is already multi-threaded.
+** Done.
 
 Feature list, per page, with YES/NO for "implemented?":
 * zone

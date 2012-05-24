@@ -453,7 +453,8 @@ TEST.instance_eval do
 		'dbcWorldMapArea',
 		'dbcSpell',
 	]
-	@EXTRA_LINKFLAGS = ' -Wl,-rpath,.' + CONFIG_LOCAL_LIBDIRS
+	@EXTRA_CPPFLAGS = ' -fopenmp'
+	@EXTRA_LINKFLAGS = ' -fopenmp -Wl,-rpath,.' + CONFIG_LOCAL_LIBDIRS
 
 	@NAME = 'wowfoot-test'
 	def run; sh @TARGET; end

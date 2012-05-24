@@ -10,6 +10,7 @@ Release/
 *.suo
 *.user
 ipch/
+.gdbinit
 
 /wowhead-downloader/curl-config.txt
 
