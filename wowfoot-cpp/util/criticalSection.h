@@ -66,6 +66,6 @@ public:
 
 #define LOCK(cs) CriticalSectionLocker _lock(cs)
 
-#define LOCK_AND_LOAD if(sCS.isLoaded()) return; CriticalSectionLoader _load(sCS)
+#define LOCK_AND_LOAD CriticalSectionLoader _load(sCS); if(sCS.isLoaded()) return
 
 #endif	//CRITICAL_SECTION_H
