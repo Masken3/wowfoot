@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include "util/exception.h"
+#include "util/fileExists.h"
 
 class FileDescriptor {
 private:
@@ -42,7 +43,6 @@ public:
 static string getIconBase(const char* name, const char* mpqName);
 
 string getIconRaw(const char* path) {
-	printf("Loading icon %s\n", path);
 	const char* fileName = strrchr(path, '\\');
 	if(fileName)
 		fileName++;
@@ -53,19 +53,23 @@ string getIconRaw(const char* path) {
 }
 
 string getIcon(const char* name) {
-	printf("Loading icon %s\n", name);
 	string mpqName = string("Interface\\ICONS\\") + name + ".blp";
 	return getIconBase(name, mpqName.c_str());
 }
 
 static string getIconBase(const char* name, const char* mpqName) {
+	string httpName = string("icon/") + name + ".png";
+	string localName = "build/" + httpName;
+	if(fileExists(localName.c_str()))
+		return httpName;
+
+	printf("Extracting icon %s...\n", name);
+
 	DBC::load();
 	MPQFile file(mpqName);
 	//MemImage::s_bVerbose = true;
 
-	string httpName = string("icon/") + name + ".png";
 	if(file.getSize() > 0) {
-		string localName = "build/" + httpName;
 #if 0
 		FileDescriptor fd = open(localName.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
 		ERRNO(fd.writeFully(file.getBuffer(), file.getSize()));
