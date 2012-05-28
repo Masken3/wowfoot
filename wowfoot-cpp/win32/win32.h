@@ -14,8 +14,11 @@ time_t timegm(struct tm*);
 
 #include "strptime.h"
 
+int utf8towc(wchar_t *p, const char *s, size_t n);
+
 #else
 #define O_BINARY 0
+#define utf8towc mbtowc
 #endif
 
 #endif	//WIN32_H

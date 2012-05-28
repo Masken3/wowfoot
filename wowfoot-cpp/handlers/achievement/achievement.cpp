@@ -31,7 +31,10 @@ void achievementChtml::getResponse2(const char* urlPart, DllResponseData* drd, o
 		mTitle = urlPart;
 		drd->code = 404;
 	}
-	drd->code = run(os);
+}
+
+void achievementChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }
 
 const char* achievementChtml::FACTION(int id) {

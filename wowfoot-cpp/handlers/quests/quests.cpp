@@ -23,11 +23,12 @@ void questsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	getArguments(drd);
 
 	mPair = new SimpleItrPair<Quests, QuestMaxRepTest>(gQuests.begin(), gQuests.end());
-
-	drd->code = run(os);
 }
 
-questsChtml::questsChtml() : mPair(NULL) {}
+void questsChtml::title(std::ostream& os) {
+}
+
+questsChtml::questsChtml() : PageContext("Quests"), mPair(NULL) {}
 
 questsChtml::~questsChtml() {
 	if(mPair)

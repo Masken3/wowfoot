@@ -9,6 +9,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <limits.h>
+#include "win32.h"
 
 #define STREQ(src, literal) (strncmp(src, literal, strlen(literal)) == 0)
 
@@ -63,7 +64,7 @@ void Parser::parse(const char* src) {
 	while(*ptr) {
 		// skip invalid utf-8 sequences.
 		wchar_t w;
-		int res = mbtowc(&w, ptr, MB_LEN_MAX);
+		int res = utf8towc(&w, ptr, 4);
 		if(res <= 0) {
 			if(res < 0) {
 				printf("Invalid UTF-8 0x%x @ pos %" PRIuPTR "\n", (unsigned char)*ptr, ptr - src);

@@ -1,4 +1,4 @@
-#include "chtmlBase.h"
+#include "pageContext.h"
 #include "chtmlUtil.h"
 #include "dbcSpell.h"
 #include "dbcSpellIcon.h"
@@ -7,7 +7,8 @@
 class spellsChtml : public PageContext {
 public:
 	spellsChtml();
-	int run(ostream& stream);
+	void title(ostream&);
+	int runPage(ostream&);
 	void getResponse2(const char* urlPart, DllResponseData* drd, ostream& os);
 	void httpArgument(const char* key, const char* value);
 	virtual ~spellsChtml();

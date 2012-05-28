@@ -105,6 +105,8 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	mTabs.push_back(standardSearch(gTitles, urlPart, "Titles"));
 	mTabs.push_back(standardSearch2(gQuests, urlPart, "Quests", &Quest::title));
 	mTabs.push_back(standardSearch(gFactions, urlPart, "Factions"));
+}
 
-	drd->code = run(os);
+void searchChtml::title(ostream& stream) {
+	ESCAPE(urlPart);
 }

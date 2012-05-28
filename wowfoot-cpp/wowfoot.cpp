@@ -41,7 +41,8 @@ int main(int argc, const char** argv) {
 	}
 	sDllDir = argv[1];
 
-	setlocale(LC_CTYPE, "");	// set locale.
+	// required for mbtowc() to work properly on GNU systems.
+	setlocale(LC_CTYPE, "");
 
 	prepareHttpd(CONFIG_PORT);
 

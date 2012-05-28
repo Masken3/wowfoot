@@ -1,4 +1,4 @@
-#include "chtmlBase.h"
+#include "pageContext.h"
 #include "tabs.h"
 #include "db_creature_template.h"
 #include "spawnPoints.h"
@@ -7,7 +7,9 @@
 
 class npcChtml : public tabsChtml, public PageContext {
 public:
-	int run(ostream& stream);
+	npcChtml();
+	void title(ostream&);
+	int runPage(ostream&);
 	void getResponse2(const char* urlPart, DllResponseData* drd, ostream& os);
 
 	const char* mTitle;

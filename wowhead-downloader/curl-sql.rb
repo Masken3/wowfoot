@@ -9,6 +9,7 @@ require '../wowfoot-ex/output/ItemSet.rb'
 require '../wowfoot-ex/output/WorldMapArea.rb'
 require '../wowfoot-ex/output/Spell.rb'
 require '../wowfoot-ex/output/Title.rb'
+require '../wowfoot-ex/output/Skill.rb'
 
 @hasPrintedVersion = false
 
@@ -110,7 +111,7 @@ def downloadMapId(name, map, num_length)
 	end
 end
 
-# todo: add spells
+downloadMapId('skill', SKILL, 4)
 downloadMapId('title', TITLE, 4)
 downloadMapId('spell', SPELL, 5)
 downloadMapId('achievement', ACHIEVEMENT, 4)

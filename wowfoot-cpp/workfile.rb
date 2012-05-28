@@ -189,13 +189,13 @@ win32.instance_eval do
 end
 
 class HandlerWork < DllWork
-	def initialize(name, handlerDeps = [], isPage = false)
+	def initialize(name, handlerDeps = [], isPage = false, options = {})
 		super()
 		hasChtml = false
 		@EXTRA_SOURCETASKS = Dir["handlers/#{name}/*.chtml"].collect do |chtml|
 			hasChtml = true
 			bn = File.basename(chtml, '.chtml')
-			ChtmlCompileTask.new(self, CHTML_BUILDDIR, bn, chtml, isPage)
+			ChtmlCompileTask.new(self, CHTML_BUILDDIR, bn, chtml, isPage, options)
 		end
 		@SOURCES = ["handlers/#{name}"]
 		@EXTRA_SOURCEFILES = []
@@ -254,8 +254,9 @@ class TdbWork < HandlerWork
 end
 
 class PageWork < HandlerWork
-	def initialize(name, handlerDeps = [])
-		super(name, handlerDeps, true)
+	def initialize(name, handlerDeps = [], options = {})
+		super(name, ['pageContext'] + handlerDeps, true, options)
+		@EXTRA_LINKFLAGS = ' -u cleanup'
 	end
 end
 
@@ -350,6 +351,7 @@ DbcWork.new('dbcItemExtendedCost', ['db_npc_vendor', 'db_creature_template', 'db
 DbcWork.new('dbcChrClasses')
 DbcWork.new('dbcChrRaces')
 
+HandlerWork.new('pageContext')
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
@@ -371,7 +373,8 @@ end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
 PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
-PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'])
+PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
+	{:constructor => true})
 PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCharTitles',
 	'db_achievement_reward'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
@@ -402,8 +405,10 @@ PageWork.new('object', ['db_gameobject_template',
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template', 'dbcSpellIcon', 'icon'])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
-	'dbcSpellIcon', 'icon'])
-PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'])
+	'dbcSpellIcon', 'icon'],
+	{:constructor => true})
+PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
+	{:constructor => true})
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do

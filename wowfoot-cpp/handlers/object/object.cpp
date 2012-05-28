@@ -38,7 +38,10 @@ void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 		mTitle = urlPart;
 		drd->code = 404;
 	}
-	drd->code = run(os);
+}
+
+void objectChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }
 
 static Tab* contains(int entry) {

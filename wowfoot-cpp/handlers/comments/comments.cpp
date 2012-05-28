@@ -40,7 +40,7 @@ static Tab* getComments(const char* query, bool log) {
 #if 0
 			// blank out invalid utf-8 sequences.
 			wchar_t w;
-			int rs = mbtowc(&w, c.originalBody.c_str() + i, c.originalBody.size() - i);
+			int rs = utf8towc(&w, c.originalBody.c_str() + i, c.originalBody.size() - i);
 			if(rs <= 0) {
 				c.originalBody[i] = ' ';
 				i++;

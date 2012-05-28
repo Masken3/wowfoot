@@ -12,5 +12,8 @@ void zoneChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	gAreaTable.load();
 
 	urlPart = u;
-	drd->code = run(os);
+}
+
+void zoneChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }

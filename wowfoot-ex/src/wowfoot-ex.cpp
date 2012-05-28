@@ -114,7 +114,7 @@ static void dumpArchiveSet() {
 		(*itr)->GetFileListCallback(&::insert);
 	}
 	printf("%"PFZT" files, excluding duplicates.\n", sFileSet.size());
-#if 0
+#if CONFIG_OUTPUT_MPQSET
 	FILE* out = fopen("output/mpqSet.txt", "w");
 	for(InSet::const_iterator itr = sFileSet.begin(); itr != sFileSet.end(); ++itr) {
 		fprintf(out, "%s\n", itr->c_str());
@@ -350,6 +350,23 @@ int main() {
 	}
 
 	mkdir("output");
+
+	printf("Opening SkillLine.dbc...\n");
+	DBCFile sl("DBFilesClient\\SkillLine.dbc");
+	res = sl.open();
+	if(!res)
+		return 1;
+	printf("Extracting %" PRIuPTR " skills...\n", sl.getRecordCount());
+	out = fopen("output/Skill.rb", "w");
+	fprintf(out, "SKILL = {\n");
+	for(DBCFile::Iterator itr = sl.begin(); itr != sl.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		int id = r.getInt(0);
+		const char* name = r.getString(3);
+		fprintf(out, "\t%i => { :name => \"%s\" },\n",
+			id, name);
+	}
+	fprintf(out, "}\n");
 
 	printf("Opening CharTitles.dbc...\n");
 	DBCFile ct("DBFilesClient\\CharTitles.dbc");

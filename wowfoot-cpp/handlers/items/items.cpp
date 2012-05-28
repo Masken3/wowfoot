@@ -64,11 +64,12 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		}
 	}
 #endif
-
-	drd->code = run(os);
 }
 
-itemsChtml::itemsChtml() : mPair(NULL) {}
+void itemsChtml::title(ostream& stream) {
+}
+
+itemsChtml::itemsChtml() : PageContext("Items"), mPair(NULL) {}
 
 itemsChtml::~itemsChtml() {
 	if(mPair)

@@ -22,5 +22,8 @@ void itemsetChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostre
 		mTitle = urlPart;
 		drd->code = 404;
 	}
-	drd->code = run(os);
+}
+
+void itemsetChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }

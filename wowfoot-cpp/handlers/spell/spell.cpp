@@ -60,6 +60,8 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		mTitle = urlPart;
 		drd->code = 404;
 	}
+}
 
-	drd->code = run(os);
+void spellChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }

@@ -1,2 +1,3 @@
 #define WOW_INSTALL_DIR "c:/Program Files/World of Warcraft/"
 #define WOW_LOCALE "enGB"
+#define CONFIG_OUTPUT_MPQSET 0

@@ -46,11 +46,12 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	getArguments(drd);
 
 	mPair = new SimpleItrPair<Spells, SpellActiveIconTest>(gSpells.begin(), gSpells.end());
-
-	drd->code = run(os);
 }
 
-spellsChtml::spellsChtml() : mPair(NULL) {}
+void spellsChtml::title(ostream& stream) {
+}
+
+spellsChtml::spellsChtml() : PageContext("Spells"), mPair(NULL) {}
 
 spellsChtml::~spellsChtml() {
 	if(mPair)

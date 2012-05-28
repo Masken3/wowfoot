@@ -1,12 +1,15 @@
 require File.expand_path '../rules/task.rb'
 
 class ChtmlCompileTask < MultiFileTask
-	def initialize(work, builddir, name, src, isPage = false)
+	def initialize(work, builddir, name, src, isPage, options)
 		@name = name
 		@cpp = "#{builddir}/#{name}.chtml.cpp"
 		@header = "#{builddir}/#{name}.chtml.h"
+		# todo: a change to any of these variable is cause for rebuild.
 		@src = src
-		@isPage = isPage	# todo: a change to this variable is cause for rebuild.
+		@isPage = isPage
+		@options = options
+
 		super(work, @cpp, @header)
 		@prerequisites << DirTask.new(work, builddir)
 		@prerequisites << FileTask.new(work, @src)
@@ -24,6 +27,10 @@ class ChtmlCompileTask < MultiFileTask
 		cpp << "\n"
 		dllexport = ' __declspec(dllexport)' if(HOST == :win32)
 		if(@isPage)
+			if(!@options[:constructor])
+				cpp << "#{@name}Chtml::#{@name}Chtml() : PageContext(\"#{@name.capitalize}\") {}\n"
+				cpp << "\n"
+			end
 			cpp << "extern \"C\"\n"
 			cpp << "void#{dllexport} getResponse(const char* urlPart, DllResponseData* drd) {\n"
 			cpp << "	#{@name}Chtml context;\n"
@@ -31,7 +38,8 @@ class ChtmlCompileTask < MultiFileTask
 			cpp << "}\n"
 			cpp << "\n"
 		end
-		cpp << "int#{dllexport} #{@name}Chtml::run(ostream& stream) {\n"
+		runFunctionName = @isPage ? 'runPage' : 'run';
+		cpp << "int#{dllexport} #{@name}Chtml::#{runFunctionName}(ostream& stream) {\n"
 		cpp << "int returnCode = 200;\n"
 		cpp << "# 1 \"#{File.expand_path(@src)}\"\n"
 

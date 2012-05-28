@@ -1,11 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-	<title>Items - WowFoot</title>
-	<LINK href="static/style.css" rel="stylesheet" type="text/css">
-	<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-</head>
-<body>
 
 <p>List items:</p>
 
@@ -92,6 +84,3 @@ document.getElementById("itemClass").onchange = itemClass_onchange;
 </table>
 <p><%=count%> items.</p>
 % }
-
-</body>
-</html>

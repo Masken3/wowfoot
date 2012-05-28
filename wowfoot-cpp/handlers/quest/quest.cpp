@@ -43,8 +43,6 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		mTitle = urlPart;
 		drd->code = 404;
 	}
-
-	drd->code = run(os);
 }
 
 int questChtml::rewRepValue(int index) {
@@ -58,4 +56,8 @@ int questChtml::rewRepValue(int index) {
 	} else {
 		return a->rewardFactionValueIdOverride[index] / 100;
 	}
+}
+
+void questChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }

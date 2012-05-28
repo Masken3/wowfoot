@@ -88,8 +88,10 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 		drd->code = 404;
 	}
 	mTabs.push_back(getComments("item", id));
+}
 
-	drd->code = run(os);
+void itemChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }
 
 static void createTabs(vector<Tab*>& tabs, const Item& a) {

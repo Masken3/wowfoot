@@ -47,8 +47,10 @@ void factionChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostre
 		mTitle = urlPart;
 		drd->code = 404;
 	}
+}
 
-	drd->code = run(os);
+void factionChtml::title(ostream& stream) {
+	ESCAPE(mTitle);
 }
 
 static Tab* members(int factionId) {

@@ -1,4 +1,4 @@
-#include "chtmlBase.h"
+#include "pageContext.h"
 #include "chtmlUtil.h"
 #include "tabs.h"
 #include "db_gameobject_template.h"
@@ -6,7 +6,9 @@
 
 class objectChtml : public tabsChtml, public PageContext {
 public:
-	int run(ostream& stream);
+	objectChtml();
+	void title(ostream&);
+	int runPage(ostream&);
 	void getResponse2(const char* urlPart, DllResponseData* drd, ostream& os);
 
 	void type(ostream&);

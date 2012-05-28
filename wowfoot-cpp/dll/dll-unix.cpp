@@ -21,7 +21,11 @@ bool Dll::open(const char* fileName) {
 }
 
 void* Dll::get(const char* functionName) {
-	return dlsym(mHandle, functionName);
+	void* res = dlsym(mHandle, functionName);
+	if(!res) {
+		printf("dlsym(%s) error: %s\n", functionName, dlerror());
+	}
+	return res;
 }
 
 void Dll::close() {

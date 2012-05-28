@@ -27,6 +27,7 @@ static bool beginsWith(const string& s, const string& with) {
 static NORETURN(handleErrno());
 static void handleErrno() {
 	printf("Errno: %i (%s)\n", errno, strerror(errno));
+	*(char*)NULL = 0;
 	abort();
 }
 
