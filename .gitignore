@@ -1,23 +1,23 @@
 config.rb
-output/
+output
 build
 config.h
-Debug/
-Release/
+Debug
+Release
 *.opensdf
 *.sdf
 *.sln
 *.suo
 *.user
-ipch/
+ipch
 .gdbinit
 
-/wowhead-downloader/curl-config.txt
+wowhead-downloader/curl-config.txt
 
-/wowfoot-import/*.db
-/wowfoot-import/query.sql
+wowfoot-import/*.db
+wowfoot-import/query.sql
 
-/wowfoot-*/testedUrls.*
-/wowfoot-*/urlsToTest.*
-/wowfoot-*/dump.html
-/wowfoot-*/comment_source.txt
+wowfoot-*/testedUrls.*
+wowfoot-*/urlsToTest.*
+wowfoot-*/dump.html
+wowfoot-*/comment_source.txt

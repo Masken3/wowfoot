@@ -66,6 +66,8 @@ int main(int argc, const char** argv) {
 	mountStaticDirectory("output", "../wowfoot-ex/output/");
 	mountStaticDirectory("static", "../wowfoot-webrick/htdocs/static/");
 	mountStaticDirectory("icon", "build/icon/");
+	mountStaticFile("COPYING", "../COPYING");
+	mountSource();
 
 	runHttpd();
 }

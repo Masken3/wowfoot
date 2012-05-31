@@ -10,15 +10,29 @@
 
 using namespace std;
 
-class StaticDirHandler : public RequestHandler {
+class StaticHandler : public RequestHandler {
 public:
-	StaticDirHandler(const string& localDir);
-	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 	virtual void cleanup(ResponseData*) __attribute__((noreturn));
 	virtual void unload(const char*, size_t) {}
 	virtual void load() {}
+protected:
+	ResponseData* handleRequest2(const char* filename, MHD_Connection*);
+};
+
+class StaticDirHandler : public StaticHandler {
+public:
+	StaticDirHandler(const string& localDir);
+	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
 private:
 	const string mLocalDir;
+};
+
+class StaticFileHandler : public StaticHandler {
+public:
+	StaticFileHandler(const char* name);
+	virtual ResponseData* handleRequest(const char* urlPart, MHD_Connection*);
+private:
+	const char* mName;
 };
 
 #define HANDLE_ERRNO return handleErrno(size, code, __FILE__, __LINE__)
@@ -38,13 +52,13 @@ static char* handleErrno(uint64_t& size, int& code, const char* file, int line) 
 // or an error message if the file could not be read.
 // \a code is the appropriate HTTP status code.
 // may return NULL if reqDate >= fileDate.
-static char* readFileForHTTP(const string& filename, uint64_t& size, time_t reqDate, time_t& fileDate, int& code) {
+char* readFileForHTTP(const char* filename, uint64_t& size, time_t reqDate, time_t& fileDate, int& code) {
 	char* buf;
 	// open file
-	int fd = open(filename.c_str(), O_RDONLY | O_BINARY);
+	int fd = open(filename, O_RDONLY | O_BINARY);
 	if(fd < 0) {
 		if(errno == ENOENT) {
-			size = asprintf(&buf, "File not found: %s\n", filename.c_str());
+			size = asprintf(&buf, "File not found: %s\n", filename);
 			puts(buf);
 			code = 404;
 		} else {
@@ -119,7 +133,22 @@ static const char* parse_date(const char *input, struct tm *tm) {
 }
 
 
+StaticFileHandler::StaticFileHandler(const char* name)
+: mName(name)
+{
+}
+
+ResponseData* StaticFileHandler::handleRequest(const char* urlPart, MHD_Connection* conn) {
+	// we handle one file only. no variations.
+	assert(*urlPart == 0);
+	return handleRequest2(mName, conn);
+}
+
 ResponseData* StaticDirHandler::handleRequest(const char* urlPart, MHD_Connection* conn) {
+	return handleRequest2((mLocalDir + urlPart).c_str(), conn);
+}
+
+ResponseData* StaticHandler::handleRequest2(const char* filename, MHD_Connection* conn) {
 	int res;
 	MHD_Response* resp;
 	char* text = NULL;
@@ -148,7 +177,7 @@ ResponseData* StaticDirHandler::handleRequest(const char* urlPart, MHD_Connectio
 
 	// load file
 	time_t fileDate;
-	text = readFileForHTTP(mLocalDir + urlPart, size, reqDate, fileDate, code);
+	text = readFileForHTTP(filename, size, reqDate, fileDate, code);
 	if(text) {
 		resp = MHD_create_response_from_data(size, text, 1, 0);
 	} else {
@@ -175,11 +204,15 @@ ResponseData* StaticDirHandler::handleRequest(const char* urlPart, MHD_Connectio
 	MHD_destroy_response(resp);
 	return NULL;
 }
-void StaticDirHandler::cleanup(ResponseData*) {
+void StaticHandler::cleanup(ResponseData*) {
 	// this function should never be called.
 	abort();
 }
 
 void mountStaticDirectory(const char* mountName, const char* localPath) {
 	insertPattern(PatternPair("/"+string(mountName)+"/", new StaticDirHandler(localPath)));
+}
+
+void mountStaticFile(const char* urlPath, const char* localPath) {
+	insertExactPattern(PatternPair("/"+string(urlPath), new StaticFileHandler(localPath)));
 }

@@ -15,6 +15,12 @@ Example: http://localhost:3002/item=30450
 *** Done.
 ** Test DLL reloading under heavy load (like the test program).
 *** I've seen one crash already.
+*** Problem here is, DLLs are unloaded at the start of compilation,
+	but reloaded as soon as they are needed, which (under load) is before they've been compiled.
+	Thus we get a critical assert failure.
+**** We need to suspend all operations until compilation is complete.
+**** The unload operation also needs to wait until all active operations are complete before actually unloading anything.
+
 
 * Comment errors not caught by automated tools:
 ** http://localhost:3002/achievement=40
@@ -160,4 +166,4 @@ Feature list, per page, with YES/NO for "implemented?":
 
 * main page	NO
 
-* link to source code and license on every page (required by AGPL)	NO
+* link to source code and license on every page (required by AGPL)	YES

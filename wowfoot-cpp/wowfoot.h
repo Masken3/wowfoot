@@ -24,6 +24,10 @@ void mountIdPage(const char* name);
 void mountTextIdPage(const char* name);
 void mountFormPage(const char* name);
 void mountStaticDirectory(const char* mountName, const char* localPath);
+void mountStaticFile(const char* urlPath, const char* localPath);
+void mountSource();
+
+char* readFileForHTTP(const char* filename, uint64_t& size, time_t reqDate, time_t& fileDate, int& code);
 
 // calls load() on all handlers.
 void loadAllHandlers();
