@@ -12,6 +12,18 @@ void zoneChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	gAreaTable.load();
 
 	urlPart = u;
+	mId = toInt(urlPart);
+	mWMA = gWorldMapAreas.find(mId);
+	mAT = gAreaTable.find(mId);
+	if(mWMA) {
+		if(mAT) {
+			mTitle = mAT->name;
+		} else {
+			mTitle = mWMA->name;
+		}
+	} else {
+		mTitle = urlPart;
+	}
 }
 
 void zoneChtml::title(ostream& stream) {

@@ -13,4 +13,7 @@ public:
 
 	const char* urlPart;
 	string mTitle;
+	int mId;
+	WorldMapAreas::ptr mWMA;
+	AreaTable::ptr mAT;
 };
