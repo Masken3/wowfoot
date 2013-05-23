@@ -12,6 +12,12 @@
 using namespace std;
 
 void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gCreatureQuestGivers.load();
+	gObjectQuestGivers.load();
+	printf("Loading finishers...\n");
+	gCreatureQuestFinishers.load();
+	gObjectQuestFinishers.load();
+	printf("Finishers loaded.\n");
 	gFactions.load();
 	gQuestFactionRewards.load();
 	gNpcs.load();

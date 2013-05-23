@@ -49,6 +49,9 @@ the more advanced problems.
 *** This would allow us to do any number of threads, not just two. The server is already multi-threaded.
 ** Done.
 
+* Entities (npcs and objects) can be summoned by spells or scripts.
+We should endeavour to display the points where this might happen on the map.
+
 Feature list, per page, with YES/NO for "implemented?":
 * zone
 ** Map	YES
@@ -116,6 +119,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** stats	NO
 ** spawnpoints	YES
 *** out-of-map points	NO
+*** conjured-by-others points NO
 ** comments	YES
 ** quests	NO
 ** drops	NO
@@ -128,6 +132,7 @@ Feature list, per page, with YES/NO for "implemented?":
 
 * object
 ** spawnpoints	YES
+*** conjured-by-others points NO
 ** comments	YES
 ** contains	YES
 ** spell use	NO

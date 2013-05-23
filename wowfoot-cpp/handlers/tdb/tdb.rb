@@ -11,8 +11,8 @@ end
 def mc(type, array, count, postfix = '')
 	return c(type, nil, array, count, postfix)
 end
-def renamed(type, dbName, cName)
-	col = c(type, dbName)
+def renamed(type, dbName, cName, array = nil)
+	col = c(type, dbName, array)
 	col.cName = cName
 	return col
 end
@@ -29,6 +29,8 @@ def cEscape(name)
 	return name
 end
 
+Table = Struct.new(:sql, :structName)
+
 class TdbGenTask < MemoryGeneratedFileTask
 	FORMATS = {
 		:int => 'CDT_INT',
@@ -41,6 +43,16 @@ class TdbGenTask < MemoryGeneratedFileTask
 		@prerequisites = [DirTask.new(self, TDB_BUILDDIR)]
 		instance_eval(open(src).read, src)
 		@loaded = true
+		if(!@tables)
+			if(@prefixes)
+				@tables = []
+				@prefixes.each do |pre|
+					@tables << Table.new("#{pre}#{@mysql_db_name}", "#{pre.capitalize}#{@structName}s")
+				end
+			else
+				@tables = [Table.new(@mysql_db_name, "#{@structName}s")]
+			end
+		end
 	end
 	def initialize(work, name, template, dstName)
 		load(work, name, dstName)
@@ -150,13 +162,16 @@ class TdbExtHeaderTask < TdbGenTask
 
 using namespace std;
 
+class CriticalSectionLoadGuard;
+
 class <%=@structName%>s : public <%=@cppContainer%> {
 private:
 	const char* const mTableName;
+	CriticalSectionLoadGuard& mCS;
 public:
 	const char* const name;
 
-	<%=@structName%>s(const char* tableName);
+	<%=@structName%>s(const char* tableName, CriticalSectionLoadGuard&);
 	void load() VISIBLE;
 ) + IF_INDEX + %q(
 	struct <%=istruct%> {<%args.each do |arg|%>
@@ -184,11 +199,8 @@ public:
 <%=@extraClassDefinitionCode%>
 };
 
-<% if(@prefixes)
-@prefixes.each do |pre| %>
-extern <%=@structName%>s g<%=pre.capitalize%><%=@structName%>s VISIBLE;<% end; else %>
-extern <%=@structName%>s g<%=@structName%>s VISIBLE;
-<% end %>
+<% @tables.each do |t| %>
+extern <%=@structName%>s g<%=t.structName%> VISIBLE;<% end %>
 
 #endif	//<%=upName%>_H
 )
@@ -207,15 +219,18 @@ class TdbCppTask < TdbGenTask
 #include "<%=name%>.format.h"
 #include "util/criticalSection.h"
 
-static CriticalSectionLoadGuard sCS;
+// removed: big problem when using multiple tables; only one will get loaded.
+//static CriticalSectionLoadGuard sCS;
 <%=@extraHeaderCode%>
 
-<%=@structName%>s::<%=@structName%>s(const char* tableName) : mTableName(tableName),
+<%=@structName%>s::<%=@structName%>s(const char* tableName,
+	CriticalSectionLoadGuard& cs)
+	: mTableName(tableName), mCS(cs),
 name("<%=@structName.downcase%>")
 {}
 
 void <%=@structName%>s::load() {
-	LOCK_AND_LOAD;
+	LOCK_AND_LOAD_EX(mCS);
 	TDB<<%=@structName%>>::fetchTable(mTableName, s<%=@structName%>Formats,
 		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);
 ) + IF_INDEX + %q(
@@ -235,11 +250,9 @@ void <%=@structName%>s::load() {
 <%=@extraInitCode%>
 }
 
-<% if(@prefixes)
-@prefixes.each do |pre| %>
-<%=@structName%>s g<%=pre.capitalize%><%=@structName%>s("<%=pre%><%=@mysql_db_name%>");<% end; else %>
-<%=@structName%>s g<%=@structName%>s("<%=@mysql_db_name%>");
-<% end %>
+<% @tables.each do |t| %>
+static CriticalSectionLoadGuard sCS<%=t.structName%>;
+<%=@structName%>s g<%=t.structName%>("<%=t.sql%>", sCS<%=t.structName%>);<% end %>
 
 ) + IF_INDEX + %q(
 <%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>

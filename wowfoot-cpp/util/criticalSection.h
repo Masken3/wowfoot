@@ -66,6 +66,9 @@ public:
 
 #define LOCK(cs) CriticalSectionLocker _lock(cs)
 
-#define LOCK_AND_LOAD CriticalSectionLoader _load(sCS); if(sCS.isLoaded()) return
+// warning: can only be used once per file.
+#define LOCK_AND_LOAD LOCK_AND_LOAD_EX(sCS)
+
+#define LOCK_AND_LOAD_EX(cs) CriticalSectionLoader _load(cs); if(cs.isLoaded()) return
 
 #endif	//CRITICAL_SECTION_H

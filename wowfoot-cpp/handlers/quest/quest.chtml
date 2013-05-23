@@ -53,6 +53,33 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 % }
 </p>
 
+<p>Giver:
+% for(auto pair = gCreatureQuestGivers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
+% const QuestRelation& qr(*pair.first->second);
+<a href="npc=<%=qr.id%>"><%NAMELINK(gNpcs, qr.id);%></a><br>
+% }
+% for(auto pair = gObjectQuestGivers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
+% const QuestRelation& qr(*pair.first->second);
+<a href="object=<%=qr.id%>"><%NAMELINK(gObjects, qr.id);%></a><br>
+% }
+</p>
+
+<p>Finisher:
+% for(auto pair = gCreatureQuestFinishers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
+% const QuestRelation& qr(*pair.first->second);
+% printf("cqf: %i\n", qr.id);
+<a href="npc=<%=qr.id%>"><%NAMELINK(gNpcs, qr.id);%></a><br>
+% }
+% for(auto pair = gObjectQuestFinishers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
+% const QuestRelation& qr(*pair.first->second);
+<a href="object=<%=qr.id%>"><%NAMELINK(gObjects, qr.id);%></a><br>
+% }
+</p>
+
+<p>
+% //streamQuestFinishers(stream, a);
+</p>
+
 
 <p>Details:<br>
 % streamWowFormattedText(stream, a->details);

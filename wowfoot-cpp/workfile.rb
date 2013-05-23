@@ -372,18 +372,20 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
+TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest'])
+
 PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
 PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCharTitles',
 	'db_achievement_reward'])
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
-	'db_item', 'dbcFaction', 'dbcQuestFactionReward'])
+	'db_item', 'dbcFaction', 'dbcQuestFactionReward', 'db_questrelation', 'db_gameobject_template'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
 	'db_item', 'db_creature_template', 'db_achievement_reward'])
 PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
-	'dbcFaction', 'dbcFactionTemplate'])
+	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest',
@@ -401,7 +403,7 @@ PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'com
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'item'])
 PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
-	'db_loot_template', 'db_item'])
+	'db_loot_template', 'db_item', 'db_questrelation'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template', 'dbcSpellIcon', 'icon'])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
