@@ -126,6 +126,12 @@ if(s){ESCAPE(s->name);}else{%><%=id%><%}
 <br>
 Part of set: <%NAMELINK(gItemSets, a->itemset);%><br>
 % }
+
+% if(a->startQuest) {
+<br>
+Starts quest: <%NAMELINK(gQuests, a->startQuest);%><br>
+% }
+
 </p>
 
 % if(mTabs.size() == 0) {

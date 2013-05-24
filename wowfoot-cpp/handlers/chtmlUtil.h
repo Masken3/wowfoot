@@ -33,11 +33,8 @@ void streamWowFormattedText(ostream&, const string& src) VISIBLE;
 template<class T> void streamName(ostream& os, const T& t) {
 	streamEscape(streamHtmlEscape, os, t.name);
 }
-#ifdef DB_QUEST_STRUCT_H
-template<> void streamName<Quest>(ostream& os, const Quest& t) {
-	streamEscape(streamHtmlEscape, os, t.title);
-}
-#endif
+class Quest;
+template<> void streamName<Quest>(ostream& os, const Quest& t) VISIBLE;
 #define NAME(i) streamName(stream, i)
 
 template<class T> void streamNameById(ostream& os, const T& map, int id) {

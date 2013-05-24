@@ -19,8 +19,8 @@ class ChtmlCompileTask < MultiFileTask
 		src = File.new(@src, 'r')
 		cpp = File.new(@cpp, 'w')
 		header = File.new(@header, 'w')
-		header << "#include \"chtmlUtil.h\"\n"
 		header << "#include \"#{@name}.h\"\n"
+		header << "#include \"chtmlUtil.h\"\n"
 
 		@state = :norm
 		cpp << "#include <#{@name}.chtml.h>\n"

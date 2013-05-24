@@ -16,7 +16,8 @@
 
 def error(msg)
 	puts "Error: #{msg}"
-	raise msg
+	#raise msg
+	exit(1)
 end
 
 def warning(msg)

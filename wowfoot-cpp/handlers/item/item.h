@@ -1,5 +1,5 @@
+#include "db_quest.h"
 #include "pageContext.h"
-#include "chtmlUtil.h"
 #include "tabTable.h"
 #include "db_item.h"
 #include "dbcTotemCategory.h"
@@ -10,6 +10,7 @@
 #include "dbcItemDisplayInfo.h"
 #include "item_shared.h"
 #include "icon.h"
+#include "chtmlUtil.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:

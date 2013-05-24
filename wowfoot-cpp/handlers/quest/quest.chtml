@@ -62,6 +62,10 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 % const QuestRelation& qr(*pair.first->second);
 <a href="object=<%=qr.id%>"><%NAMELINK(gObjects, qr.id);%></a><br>
 % }
+% for(auto pair = gItems.findStartQuest(a->id); pair.first != pair.second; ++pair.first) {
+% const Item& i(*pair.first->second);
+<a href="item=<%=i.entry%>"><%NAMELINK(gItems, i.entry);%></a><br>
+% }
 </p>
 
 <p>Finisher:

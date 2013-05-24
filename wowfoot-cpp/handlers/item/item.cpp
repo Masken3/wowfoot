@@ -63,6 +63,7 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gObjects.load();
 	gGameobjectLoots.load();
 	gItemSets.load();
+	gQuests.load();
 
 	string buffer;
 

@@ -10,6 +10,7 @@ enum QrRowId {
 
 Tab* getQuestRelations(const char* title, QuestRelations& set, int id) {
 	set.load();
+	gQuests.load();
 
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = title;
