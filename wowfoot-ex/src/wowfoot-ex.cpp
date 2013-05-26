@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <set>
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -113,7 +114,7 @@ static void dumpArchiveSet() {
 	for(ArchiveSet::const_iterator itr = gOpenArchives.begin(); itr != gOpenArchives.end(); ++itr) {
 		(*itr)->GetFileListCallback(&::insert);
 	}
-	printf("%"PFZT" files, excluding duplicates.\n", sFileSet.size());
+	printf("%" PFZT " files, excluding duplicates.\n", sFileSet.size());
 #if CONFIG_OUTPUT_MPQSET
 	FILE* out = fopen("output/mpqSet.txt", "w");
 	for(InSet::const_iterator itr = sFileSet.begin(); itr != sFileSet.end(); ++itr) {
@@ -328,10 +329,10 @@ int main() {
 	FILE* out2;
 
 	printf("Opening MPQ files:\n");
-	MPQArchive locale(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
-	MPQArchive patch(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
-	MPQArchive patch2(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
-	MPQArchive patch3(WOW_INSTALL_DIR "Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
+	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
+	MPQArchive patch(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ");
+	MPQArchive patch2(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ");
+	MPQArchive patch3(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ");
 	LoadCommonMPQFiles();
 
 	mkdir("output");

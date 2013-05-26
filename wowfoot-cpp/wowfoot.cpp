@@ -105,7 +105,7 @@ static void runHttpd() {
 #endif
 
 		res = MHD_get_timeout(sMhd, &timeout);
-		printf("MHD_get_timeout: %i (%"PRIxLL")\n", res, timeout);
+		printf("MHD_get_timeout: %i (%" PRIxLL ")\n", res, timeout);
 
 #ifdef WIN32
 		Sleep(10000000);

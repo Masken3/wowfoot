@@ -245,7 +245,7 @@ void <%=@structName%>s::load() {
 		if(isArray) %>
 		}}<%end%>
 	}
-	printf("Loaded %"PRIuPTR" rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
+	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
 <%end; end%>
 <%=@extraInitCode%>
 }

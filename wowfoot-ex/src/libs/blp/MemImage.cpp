@@ -531,7 +531,7 @@ bool MemImage::AllocateBuffer(DWORD bytes)
 	m_buffer = new BYTE[bytes];
 	if (NULL == m_buffer)
 	{
-		LOG("ERROR: Failed to allocate buffer (%"PRuDWORD" bytes).\n", bytes);
+		LOG("ERROR: Failed to allocate buffer (%" PRuDWORD " bytes).\n", bytes);
 		return false;
 	}
 	m_bufferBytes = bytes;

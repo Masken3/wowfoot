@@ -87,7 +87,7 @@ char* readFileForHTTP(const char* filename, uint64_t& size, time_t reqDate, time
 	// allocate buffer
 	buf = (char*)malloc(size);
 	if(!buf) {
-		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %"PRIu64, size);
+		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %" PRIu64, size);
 		code = 500;
 		return buf;
 	}

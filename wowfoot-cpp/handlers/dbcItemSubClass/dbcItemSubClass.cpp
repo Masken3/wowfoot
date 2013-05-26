@@ -20,7 +20,7 @@ void ItemSubClasses::load() {
 	printf("Opening ItemSubClass.dbc...\n");
 	bool res = sDbc.open();
 	assert(res);
-	printf("Extracting %"PRIuPTR" itemsubclasses...\n", sDbc.getRecordCount());
+	printf("Extracting %" PRIuPTR " itemsubclasses...\n", sDbc.getRecordCount());
 	int i=-1;
 	for(DBCFile::Iterator itr = sDbc.begin(); itr != sDbc.end(); ++itr) {
 		const DBCFile::Record& r(*itr);

@@ -6,6 +6,7 @@
 #include "dbc.h"
 #include <assert.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "util/exception.h"
 #include "util/fileExists.h"

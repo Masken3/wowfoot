@@ -30,4 +30,4 @@ spawnCount('gameobject', 'Object', %q(
 ))
 
 @extraInitCode << %q(
-printf("Loaded %"PRIuPTR" rows into %s\n", mLootMap.size(), "mLootMap");)
+printf("Loaded %" PRIuPTR " rows into %s\n", mLootMap.size(), "mLootMap");)

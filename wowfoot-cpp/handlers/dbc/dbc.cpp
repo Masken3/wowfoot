@@ -1,5 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include <unistd.h>
 #include "libs/mpq_libmpq04.h"
 #include "libs/dbcfile.h"
 #include "dbc.h"
@@ -36,7 +37,7 @@ static void LoadCommonMPQFiles() {
 	int count = sizeof(CONF_mpq_list)/sizeof(char*);
 	for(int i = 0; i < count; ++i)
 	{
-		sprintf(filename, WOW_INSTALL_DIR"Data/%s", CONF_mpq_list[i]);
+		sprintf(filename, WOW_INSTALL_DIR "Data/%s", CONF_mpq_list[i]);
 		if(fileExists(filename))
 			new MPQArchive(filename);
 	}
@@ -47,9 +48,9 @@ void DBC::load() {
 
 	printf("Opening MPQ files:\n");
 	// the objects need to survive past this function.
-	new MPQArchive(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/locale-"WOW_LOCALE".MPQ");
-	new MPQArchive(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE".MPQ");
-	new MPQArchive(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-2.MPQ");
-	new MPQArchive(WOW_INSTALL_DIR"Data/"WOW_LOCALE"/patch-"WOW_LOCALE"-3.MPQ");
+	new MPQArchive(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
+	new MPQArchive(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ");
+	new MPQArchive(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ");
+	new MPQArchive(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ");
 	LoadCommonMPQFiles();
 }

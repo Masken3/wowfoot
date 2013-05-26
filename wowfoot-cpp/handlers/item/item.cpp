@@ -633,7 +633,7 @@ const itemChtml::Flag itemChtml::ITEM_FLAGS[] = {
 	//{134221824, "Bind to Account"},
 	{268435456, "Enchanting scroll"},
 	{536870912, "Millable"},
-	{2147483648u, "Bind on Pickup tradeable"},
+	{(int)2147483648u, "Bind on Pickup tradeable"},
 };
 const int itemChtml::nITEM_FLAGS = sizeof(ITEM_FLAGS) / sizeof(itemChtml::Flag);
 

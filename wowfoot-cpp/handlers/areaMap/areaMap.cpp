@@ -1,5 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include "areaMap.h"
@@ -107,7 +108,7 @@ void AreaMap::load() {
 	}
 	// nMaps is not actually valid, because of some WDTs that can't be loaded.
 	//assert(map.size == nMaps);
-	printf("Loaded %"PRIuPTR" maps\n", size());
+	printf("Loaded %" PRIuPTR " maps\n", size());
 }
 
 AreaMap gAreaMap;

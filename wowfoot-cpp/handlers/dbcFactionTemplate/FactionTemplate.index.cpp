@@ -23,7 +23,7 @@ void FactionTemplateIndex::load() {
 		sFactionMap.insert(pair<int, FactionTemplates::citr>(itr->second.nameId, itr));
 	}
 
-	printf("FactionTemplateIndex: Loaded %"PRIuPTR" rows into %s\n",
+	printf("FactionTemplateIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sFactionMap.size(), "sFactionMap");
 }
 

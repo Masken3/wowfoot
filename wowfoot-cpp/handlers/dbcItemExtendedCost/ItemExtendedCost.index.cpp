@@ -69,13 +69,13 @@ void ItemExtendedCostIndex::load() {
 			}
 		}
 	}
-	printf("ItemExtendedCostIndex: Loaded %"PRIuPTR" rows into %s\n",
+	printf("ItemExtendedCostIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sItemCostMap.size(), "sItemCostMap");
-	printf("ItemExtendedCostIndex: Loaded %"PRIuPTR" rows into %s\n",
+	printf("ItemExtendedCostIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sItemVendorCostMap.size(), "sItemVendorCostMap");
-	printf("ItemExtendedCostIndex: Loaded %"PRIuPTR" rows into %s\n",
+	printf("ItemExtendedCostIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sItemVendorMap.size(), "sItemVendorMap");
-	printf("ItemExtendedCostIndex: Loaded %"PRIuPTR" rows into %s\n",
+	printf("ItemExtendedCostIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sItemItemMap.size(), "sItemItemMap");
 }
 
