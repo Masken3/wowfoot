@@ -1,4 +1,5 @@
 #include "zone.chtml.h"
+#include "questrelation.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -18,6 +19,10 @@ void zoneChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 	if(mWMA) {
 		if(mAT) {
 			mTitle = mAT->name;
+
+			mSpawnPointsChtml.addSpawns(creatureZoneQuestGiverSpawns(mId));
+			mSpawnPointsChtml.addSpawns(objectZoneQuestGiverSpawns(mId));
+			//mTabs.push_back(getZoneQuestGivers(mId));
 		} else {
 			mTitle = mWMA->name;
 		}

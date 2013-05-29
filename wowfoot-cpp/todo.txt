@@ -55,7 +55,7 @@ We should endeavour to display the points where this might happen on the map.
 Feature list, per page, with YES/NO for "implemented?":
 * zone
 ** Map	YES
-** Quests	NO
+** Quests	HARD-CODED
 ** NPCs	NO
 ** Objects	NO
 ** Areas?	NO

@@ -1,3 +1,5 @@
+# include this file in db_<entity>_template.rb.
+
 def spawnCount(spawnDb, templateStruct, perTemplateCode = '')
 s = spawnDb.capitalize
 

@@ -1,5 +1,3 @@
-% prepare();
-
 <p>
 <%= mSpawnCount %> spawn-points.
 </p>

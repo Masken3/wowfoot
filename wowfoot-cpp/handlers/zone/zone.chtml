@@ -2,12 +2,11 @@
 <p>Zone: <%ESCAPE(mTitle);%></p>
 
 % if(mAT) {
-<p>
-<img id="map" width="40%" src="output/<%= mWMA->name %>.jpeg" alt="<%= mWMA->name %>">
-</p>
+% returnCode = mSpawnPointsChtml.run(stream);
+% if(returnCode == 200) {
+% returnCode = tabsChtml::run(stream);
+% }
 % } else {
 <%= mId %> not found.
 % return 404;
 % }
-
-% returnCode = mapSizeChtml().run(stream);

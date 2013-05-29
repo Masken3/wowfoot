@@ -37,7 +37,7 @@ void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 		}
 		mTabs.push_back(getComments("object", id));
 
-		mSpawnPointsChtml.mSpawns = gGameobjectSpawns.findId(id);
+		mSpawnPointsChtml.addSpawns(gGameobjectSpawns.findId(id));
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;

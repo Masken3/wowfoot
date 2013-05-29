@@ -3,8 +3,10 @@
 #include "dbcWorldMapArea.h"
 #include "dbcArea.h"
 #include "mapSize.h"
+#include "tabs.h"
+#include "spawnPoints.h"
 
-class zoneChtml : public PageContext {
+class zoneChtml : public tabsChtml, public PageContext {
 public:
 	zoneChtml();
 	void title(ostream&);
@@ -16,4 +18,5 @@ public:
 	int mId;
 	WorldMapAreas::ptr mWMA;
 	AreaTable::ptr mAT;
+	spawnPointsChtml mSpawnPointsChtml;
 };

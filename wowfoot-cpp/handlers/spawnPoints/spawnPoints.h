@@ -12,7 +12,11 @@ using namespace std;
 
 class spawnPointsChtml : public mapSizeChtml {
 public:
-	Spawns::IdPair mSpawns;
+	spawnPointsChtml() VISIBLE;
+
+	// call this before calling run().
+	void addSpawns(Spawns::IdPair) VISIBLE;
+
 	int run(ostream& stream) VISIBLE;
 private:
 	void prepare();
@@ -26,5 +30,8 @@ private:
 	size_t mSpawnCount;
 	int mMainArea;
 };
+
+void spawnPointsPrepare() VISIBLE;
+int zoneFromCoords(int map, float x, float y) VISIBLE;
 
 #endif	//SPAWN_POINTS_H

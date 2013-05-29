@@ -26,7 +26,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 		mTabs.push_back(getQuestRelations("Ends quest", gCreatureQuestFinishers, id));
 		mTabs.push_back(getComments("npc", id));
 
-		mSpawnPointsChtml.mSpawns = gCreatureSpawns.findId(id);
+		mSpawnPointsChtml.addSpawns(gCreatureSpawns.findId(id));
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;

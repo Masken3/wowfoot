@@ -372,7 +372,8 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 end
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
-TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest'])
+TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
+	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize'])
 
 PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
@@ -386,7 +387,8 @@ PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitle
 PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
-PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize'])
+PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
+	'db_questrelation'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest',
 	'dbcCharTitles', 'dbcItemSet', 'dbcFaction'])

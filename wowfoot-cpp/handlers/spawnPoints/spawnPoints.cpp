@@ -5,17 +5,25 @@
 #include "dbcArea.h"
 #include "dbcWorldMapArea.h"
 
-static int zoneFromCoords(int map, float x, float y);
 static Coord2D percentagesInZone(int zone, float x, float y);
 
-void spawnPointsChtml::prepare() {
+spawnPointsChtml::spawnPointsChtml() {
+}
+
+void spawnPointsPrepare() {
 	gAreaMap.load();
 	gWorldMapAreas.load();
 	gAreaTable.load();
+}
 
+void spawnPointsChtml::prepare() {
+	spawnPointsPrepare();
 	mSpawnCount = 0;
-	for(; mSpawns.first != mSpawns.second; ++mSpawns.first) {
-		const Spawn& s(*mSpawns.first->second);
+}
+
+void spawnPointsChtml::addSpawns(Spawns::IdPair spawns) {
+	for(; spawns.first != spawns.second; ++spawns.first) {
+		const Spawn& s(*spawns.first->second);
 		mSpawnCount++;
 		int zoneId = zoneFromCoords(s.map, s.position_x, s.position_y);
 		//printf("zone %i, map %i, %f, %f\n", zoneId, s.map, s.position_x, s.position_y);
@@ -41,7 +49,7 @@ void spawnPointsChtml::prepare() {
 	}
 }
 
-static int zoneFromCoords(int map, float x, float y) {
+int zoneFromCoords(int map, float x, float y) {
 	// find areaId
 
 	// compute grid and cell coordinates
