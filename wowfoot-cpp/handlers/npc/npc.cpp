@@ -16,6 +16,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gCreatureSpawns.load();
 	gFactions.load();
 	gFactionTemplates.load();
+	spawnPointsPrepare();
 
 	int id = toInt(urlPart);
 	a = gNpcs.find(id);

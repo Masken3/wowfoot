@@ -26,6 +26,27 @@ Warning: invalid icon id (<%=a->activeIconID%>)
 <p>Rank: <%=a->rank%></p>
 <p>Tooltip: <%ESCAPE(a->toolTip);%></p>
 
+<p>Mechanic:
+% if(a->Mechanic) {
+<%=gSpellMechanics[a->Mechanic].name%>
+% }
+(<%=a->Mechanic%>)</p>
+
+% auto slas = SkillLineAbilityIndex::findSpell(a->id);
+% for(; slas.first != slas.second; ++slas.first) {
+% const SkillLineAbility* sla = slas.first->second;
+<p>SkillLineAbility: skill <%=sla->skill%>, req <%=sla->reqSkillValue%>, min <%=sla->minValue%>, max <%=sla->maxValue%>.<br>
+<span class="skillRed"><%=sla->minValue - (sla->maxValue - sla->minValue)%></span>
+<span class="skillYellow"><%=sla->minValue%></span>
+<span class="skillGreen"><%=sla->maxValue - (sla->maxValue - sla->minValue) / 2%></span>
+<span class="skillGray"><%=sla->maxValue%></span>
+</p>
+% }
+
+% streamPlainMembers(stream);
+
+% streamEffects(stream);
+
 % returnCode = tabsChtml::run(stream);
 
 % }	//if(a)

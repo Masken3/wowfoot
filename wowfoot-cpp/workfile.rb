@@ -350,6 +350,9 @@ DbcWork.new('dbcTotemCategory')
 DbcWork.new('dbcItemExtendedCost', ['db_npc_vendor', 'db_creature_template', 'db_item'])
 DbcWork.new('dbcChrClasses')
 DbcWork.new('dbcChrRaces')
+#DbcWork.new('dbcSpellEffectNames')	# missing from mpqSet. TODO: investigate.
+DbcWork.new('dbcSpellMechanic')
+DbcWork.new('dbcSkillLineAbility')
 
 HandlerWork.new('pageContext')
 HandlerWork.new('tabs')
@@ -408,7 +411,11 @@ PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
 	'db_loot_template', 'db_item', 'db_questrelation'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
-	'db_creature_template', 'dbcSpellIcon', 'icon'])
+	'db_creature_template', 'dbcSpellIcon', 'icon',
+	#'dbcSpellEffectNames',
+	'dbcSpellMechanic',
+	'dbcSkillLineAbility',
+	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcSpellIcon', 'icon'],
 	{:constructor => true})

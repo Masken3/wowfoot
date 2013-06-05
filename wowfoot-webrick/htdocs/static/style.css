@@ -40,6 +40,11 @@ A:hover { text-decoration:underline; cursor:pointer; }
 .itemDescription { color:#ffC040 }
 .underlined { text-decoration:underline; }
 
+.skillRed { color:#ff4040; }
+.skillYellow { color:yellow; }
+.skillGreen { color:#1eff00; }
+.skillGray { color:#808080; }
+
 .small { font-size:x-small; }
 
 .quote { background-color:#202020; padding:6px 6px 6px 6px; }

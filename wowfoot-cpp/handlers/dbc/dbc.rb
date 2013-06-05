@@ -52,7 +52,7 @@ void <%=@plural%>::load() {
 	printf("Opening <%=@dbcName%>.dbc...\n");
 	bool res = sDbc.open();
 	assert(res);
-	printf("Extracting %" PRIuPTR " <%=@plural.downcase%>...\n", sDbc.getRecordCount());
+	printf("Extracting %" PRIuPTR " <%=@plural%>...\n", sDbc.getRecordCount());
 	for(DBCFile::Iterator itr = sDbc.begin(); itr != sDbc.end(); ++itr) {
 		<%=@preRow%>
 		const DBCFile::Record& r(*itr);
@@ -127,6 +127,7 @@ public:
 
 extern <%=@plural%> g<%=@plural%> VISIBLE;
 
+<%=@endOfHeader%>
 #endif	//<%=@upperCase%>_H
 
 )

@@ -22,6 +22,7 @@ static Tab* contains(int entry);
 void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gObjects.load();
 	gGameobjectSpawns.load();
+	spawnPointsPrepare();
 
 	int id = toInt(urlPart);
 	a = gObjects.find(id);
