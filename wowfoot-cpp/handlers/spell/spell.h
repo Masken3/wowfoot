@@ -7,6 +7,7 @@
 #include "dbcSpellMechanic.h"
 #include "icon.h"
 #include "SkillLineAbility.index.h"
+#include "spellStrings.h"
 
 class spellChtml : public tabsChtml, public PageContext {
 public:

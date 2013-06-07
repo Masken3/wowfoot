@@ -92,8 +92,10 @@ void spellChtml::streamEffects(ostream& stream) {
 				stream << "<p>Effects:</p>\n";
 			}
 			stream << "<p>";
-			//stream << "Name: \"" << gSpellEffectNames[e.id].name << "\"";
-#define STREAM_EFFECT_MEMBER(name) stream << " " #name ": "<<e.name;
+			const char* name = spellEffectName(e.id);
+			if(name)
+				stream << "<span class=\"itemDescription\">" << name << "</span>: ";
+#define STREAM_EFFECT_MEMBER(m) stream << " " #m ": "<<e.m;
 			SPELL_EFFECT_MEMBERS(STREAM_EFFECT_MEMBER);
 			stream << "</p>\n";
 		}
