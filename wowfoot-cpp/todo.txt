@@ -169,6 +169,9 @@ Feature list, per page, with YES/NO for "implemented?":
 ** source	YES
 ** comments	YES
 
+* skills
+** sort by any column NO
+
 * main page	NO
 
 * link to source code and license on every page (required by AGPL)	YES

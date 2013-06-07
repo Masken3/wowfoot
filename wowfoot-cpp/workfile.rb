@@ -353,6 +353,8 @@ DbcWork.new('dbcChrRaces')
 #DbcWork.new('dbcSpellEffectNames')	# missing from mpqSet. TODO: investigate.
 DbcWork.new('dbcSpellMechanic')
 DbcWork.new('dbcSkillLineAbility')
+DbcWork.new('dbcSkillLine')
+DbcWork.new('dbcSkillLineCategory')
 
 HandlerWork.new('pageContext')
 HandlerWork.new('tabs')
@@ -421,6 +423,8 @@ PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	{:constructor => true})
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
 	{:constructor => true})
+PageWork.new('skills', ['tabs', 'tabTable', 'dbcSkillLine', 'dbcSkillLineCategory',
+	'dbcSpellIcon', 'icon'])
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
