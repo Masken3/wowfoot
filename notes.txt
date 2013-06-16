@@ -22,3 +22,17 @@
 * A data extractor is written in C++.
 * The extractor will be run on interface-server startup if the extractor itself or any of its data files have changed.
 * The extractor will only extract changed or un-extracted parts, for improved startup speed.
+
+* Mining and herbalism skill requirements, among others, are determined by the target entity's lock type. See Lock.dbc and LockType.dbc.
+* Objects and items both have lockId.
+
+* Skinning is handled separately. CreatureTemplate has RequiredLootSkill (type of skill: skinning, engineering, herbalism). Required skill LEVEL is based on the creature's level.
+* You can't skin objects.
+
+* Finding the required skill level for learning spells depends on how the spell is learned.
+* For trainers, it's in the trainer table.
+* For items, it's the RequiredSkillRank column. This column actually determines the level required to USE THE ITEM, not specifically to learn the spell.
+* RequiredSkillRank is also used for prospecting and milling.
+* Disenchanting uses RequiredDisenchantSkill, a separate column.
+* Obvious when you think about it, because a magic item with a built-in spell may have skill requirements.
+* Engineering trinkets are probably the most common such things.

@@ -37,6 +37,12 @@ Equip: <%= ITEM_EQUIP(a->inventoryType) %><!--(<%= a->inventoryType %>)--><br>
 % }
 Material: <%= ITEM_MATERIAL(a->material) %><!--(<%= a->material %>)--><br>
 Item level <%= a->itemLevel %><br>
+% if(a->requiredLevel != 0) {
+Requires character level <%= a->requiredLevel %><br>
+% }
+% if(a->requiredSkill != 0) {
+Requires skill <%NAMELINK(gSkillLines, a->requiredSkill);%> (<%= a->requiredSkillRank %>)<br>
+% }
 
 %// todo: skill, honorrank, cityrank
 % string classes = chrClasses(a->allowableClass);

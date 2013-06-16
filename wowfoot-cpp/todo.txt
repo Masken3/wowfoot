@@ -82,6 +82,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** skinned from	NO
 ** reference loot	PARTIAL
 ** comments	YES
+** created by (spell) NO
 
 * itemset
 ** DBC items?	YES
@@ -171,6 +172,9 @@ Feature list, per page, with YES/NO for "implemented?":
 
 * skills
 ** sort by any column NO
+
+* skill NO
+** comments NO
 
 * main page	NO
 

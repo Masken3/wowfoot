@@ -401,6 +401,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'commen
 	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo',
+	'dbcSkillLine',
 	'db_questrelation', 'db_quest'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
@@ -419,7 +420,9 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'dbcSkillLineAbility',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
-	'dbcSpellIcon', 'icon'],
+	'dbcItemDisplayInfo', 'db_item',
+	'dbcSpellIcon', 'icon',
+	'dbcSkillLineAbility', 'dbcSkillLine'],
 	{:constructor => true})
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
 	{:constructor => true})

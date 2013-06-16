@@ -11,6 +11,7 @@
 #include "item_shared.h"
 #include "icon.h"
 #include "chtmlUtil.h"
+#include "dbcSkillLine.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:
