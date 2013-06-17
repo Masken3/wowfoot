@@ -183,6 +183,7 @@ ResponseData* StaticHandler::handleRequest2(const char* filename, MHD_Connection
 	} else {
 		static const char sTextDate[] = "304 Not Modified\n";
 		resp = MHD_create_response_from_data(sizeof(sTextDate)-1, (void*)sTextDate, 0, 0);
+		puts(sTextDate);
 	}
 	assert(resp);
 	if(code == 200) {

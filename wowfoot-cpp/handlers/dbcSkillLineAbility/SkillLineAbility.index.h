@@ -14,6 +14,8 @@ namespace SkillLineAbilityIndex {
 	typedef SpellMap::const_iterator SpellItr;
 	typedef pair<SpellItr, SpellItr> SpellPair;
 	SpellPair findSpell(int id) VISIBLE;
+
+	SpellPair findSkill(int id) VISIBLE;
 };
 
 #endif	//SKILL_LINE_ABILITY_INDEX_H

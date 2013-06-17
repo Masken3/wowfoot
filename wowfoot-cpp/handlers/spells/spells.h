@@ -3,6 +3,11 @@
 #include "dbcSpell.h"
 #include "dbcSpellIcon.h"
 #include "itrPair.h"
+#include "icon.h"
+#include "util/arraySize.h"
+#include "db_item.h"
+#include "dbcItemDisplayInfo.h"
+#include "SkillLineAbility.index.h"
 
 class spellsChtml : public PageContext {
 public:
@@ -14,4 +19,7 @@ public:
 	virtual ~spellsChtml();
 private:
 	ItrPair<Spell>* mPair;
+	string mTitle;
+
+	void streamMultiItem(ostream& stream, int id, int count);
 };

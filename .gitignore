@@ -11,6 +11,8 @@ Release
 *.user
 ipch
 .gdbinit
+log.txt
+log.*.txt
 
 wowhead-downloader/curl-config.txt
 

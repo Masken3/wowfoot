@@ -1,12 +1,20 @@
 
 <p>List skills:</p>
 
-<table class="tab" summary="skills">
+<table id="tab" class="sortable" summary="skills">
 <!-- Title row -->
-<tr><td>ID</td><td>Name</td><td>skillCost</td><td>description</td>
-<td>spellIcon</td><td>alternateVerb</td><td>canLink</td>
-<td>categoryId</td><td>categoryName</td>
+<thead>
+<tr><td>ID</td>
+<td>↑↓↕ spellIcon</td>
+<td>Name</td>
+<td>skillCost</td>
+<td>alternateVerb</td>
+<td>description</td>
+<td>canLink</td>
+<td>categoryName</td>
 </tr>
+</thead>
+<tbody>
 % int count = 0;
 % for(auto itr=gSkillLines.begin(); itr != gSkillLines.end(); ++itr) {
 %  count++;
@@ -14,9 +22,6 @@
 %  const SkillLineCategory* c(gSkillLineCategories.find(s.category));
 <tr>
 <td><%=itr->first%></td>
-<td><a href="spells=<%=s.category%>.<%=itr->first%>"><%=s.name%></a></td>
-<td><%=s.skillCost%></td>
-<td><%=s.description%></td>
 <td>
 % const SpellIcon* si = gSpellIcons.find(s.spellIcon);
 % if(si) {
@@ -25,15 +30,36 @@
 Warning: invalid icon id (<%=s.spellIcon%>)
 % }
 </td>
+<td><a href="spells=<%=s.category%>.<%=itr->first%>"><%=s.name%></a></td>
+<td><%=s.skillCost%></td>
 <td><%=s.alternateVerb%></td>
+<td><%=s.description%></td>
 <td><%=s.canLink%></td>
-<td><%=s.category%></td>
-<td>
+<td><a href="skills=<%=s.category%>">
 % if(c) {
 <%=c->name%>
+% } else {
+<%=s.category%>
 % }
-</td>
+</a></td>
 </tr>
 % }
+</tbody>
 </table>
 <p><%=count%> skills.</p>
+
+<script type="text/javascript" src="static/sorter.js"></script>
+<script type="text/javascript">
+var sorter = new TINY.table.sorter("sorter");
+sorter.head = "head";
+sorter.asc = "asc";
+sorter.desc = "desc";
+//sorter.even = "evenrow";
+//sorter.odd = "oddrow";
+//sorter.evensel = "evenselected";
+//sorter.oddsel = "oddselected";
+sorter.paginate = false;
+//sorter.currentid = "currentpage";
+//sorter.limitid = "pagelimit";
+sorter.init("tab",1);
+</script>

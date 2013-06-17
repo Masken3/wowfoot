@@ -153,6 +153,7 @@ void mountIdPage(const char* name) {
 void mountFormPage(const char* name) {
 	IdHandler* h = new IdHandler(name);
 	insertPattern(PatternPair(string("/")+string(name)+"?", h));
+	insertPattern(PatternPair(string("/")+string(name)+"=", h));
 	insertExactPattern(PatternPair(string("/")+string(name), h));
 }
 

@@ -104,3 +104,6 @@ void spellChtml::streamEffects(ostream& stream) {
 		stream << "<p>No known effects.</p>\n";
 	}
 }
+
+// the two Learning spells have different data.
+//    uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->Effects[effIndex].TriggerSpell;

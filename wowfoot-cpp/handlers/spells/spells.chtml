@@ -1,19 +1,97 @@
+% if(!mPair) {
+Not found.
+% return 404; }
 
 <p>List spells:</p>
 
 % if(mPair) {
-<table class="tab" summary="spells">
+<table id="tab" class="sortable" summary="spells">
 <!-- Title row -->
-<tr><td>ID</td><td>Name</td></tr>
+<thead><tr>
+<td>ID</td>
+<td>Icon/item</td>
+<td>Name</td>
+<td>Reagents</td>
+<td>Source</td>
+<td>Skill</td>
+</tr></thead>
+
+<tbody>
 %  int count = 0;
-%  while(mPair->hasNext() && count < 100) {
+%  while(mPair->hasNext() && count < 1000) {
 %   const Spell& s(mPair->next());
+%   int effectItemId = s.effect[0].itemType;
 <tr>
 <td><%=s.id%></td>
-<td><a href="spell=<%=s.id%>"><%=s.name%></a></td>
+<td>
+% if(effectItemId) {
+<a href="item=<%=effectItemId%>">
+% const Item* item = gItems.find(effectItemId);
+% if(item) {
+% const ItemDisplayInfo* di = gItemDisplayInfos.find(item->displayId);
+% if(di) {
+<img src="<%ESCAPE_URL(getIcon(di->icon));%>" alt="<%=item->name%>">
+% } else {
+Warning: invalid display id (<%=item->displayId%>)
+% }
+% } else {
+Warning: invalid item id (<%=effectItemId%>)
+% }
+</a>
+% } else {
+% const SpellIcon* si = gSpellIcons.find(s.spellIconID);
+% if(si) {
+<img src="<%ESCAPE_URL(getIconRaw(si->icon));%>" alt="<%ESCAPE(si->icon);%>">
+% } else if(s.spellIconID != 0) {
+Warning: invalid icon id (<%=s.spellIconID%>)
+% }
+% }
+</td>
+<td><a href="spell=<%=s.id%>"><%=s.name%>
+% if(s.rank) if(s.rank[0]) {
+(<%=s.rank%>)
+% }
+</a></td>
+<td class="reagents">
+% for(size_t i=0; i<ARRAY_SIZE(s.reagent); i++) { const Spell::Reagent& r(s.reagent[i]);
+% streamMultiItem(stream, r.id, r.count);
+% }
+</td>
+<td class="source">
+</td>
+<td class="skill">
+% auto slas = SkillLineAbilityIndex::findSpell(s.id);
+% for(; slas.first != slas.second; ++slas.first) {
+% const SkillLineAbility* sla = slas.first->second;
+<%=sla->reqSkillValue%>
+<span class="skillRed"><%=sla->minValue - (sla->maxValue - sla->minValue)%></span>
+<span class="skillYellow"><%=sla->minValue%></span>
+<span class="skillGreen"><%=sla->maxValue - (sla->maxValue - sla->minValue) / 2%></span>
+<span class="skillGray"><%=sla->maxValue%></span>
+% }
+</td>
 </tr>
 %   count++;
 %  }
+</tbody>
 </table>
 <p><%=count%> spells.</p>
+
+
+<script type="text/javascript" src="static/sorter.js"></script>
+<script type="text/javascript">
+var sorter = new TINY.table.sorter("sorter");
+sorter.head = "head";
+sorter.asc = "asc";
+sorter.desc = "desc";
+//sorter.even = "evenrow";
+//sorter.odd = "oddrow";
+//sorter.evensel = "evenselected";
+//sorter.oddsel = "oddselected";
+sorter.paginate = false;
+//sorter.currentid = "currentpage";
+//sorter.limitid = "pagelimit";
+sorter.init("tab",1);
+</script>
+
 % }
