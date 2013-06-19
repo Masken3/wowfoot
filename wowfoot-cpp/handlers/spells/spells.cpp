@@ -1,5 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include "spells.h"
+#include "Spell.index.h"
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
@@ -66,6 +67,7 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	SkillLineAbilityIndex::load();
 	gItems.load();
 	gItemDisplayInfos.load();
+	SpellIndex::load();
 
 	printf("urlPart: %s\n", urlPart);
 	getArguments(drd);
@@ -128,6 +130,35 @@ void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 		stream << count;
 		stream << "</a>\n";
 	}
+}
+
+static void streamItemSource(ostream& stream, const Item& item) {
+	stream << "<a href=\"item="<<item.entry<<"\">";
+	streamName(stream, item);
+	stream << "</a>\n";
+	// todo: determine if the thing is sold or dropped, and if so, by how many.
+}
+
+int spellsChtml::streamSource(ostream& stream, int id) {
+	// Find spells that teach this spell, and items that use the teacher spell.
+	for(auto p = SpellIndex::findLearnSpell(id); p.first != p.second; ++p.first) {
+		const Spell& s(*p.first->second);
+		for(auto r = gItems.findSpellId(s.id); r.first != r.second; ++r.first) {
+			const Item& item(*r.first->second);
+			streamItemSource(stream, item);
+		}
+	}
+	// Find items that teach this spell directly (SPELLTRIGGER 6).
+	for(auto r = gItems.findSpellId(id); r.first != r.second; ++r.first) {
+		const Item& item(*r.first->second);
+		for(uint i=0; i<ARRAY_SIZE(item.spellTrigger); i++) {
+			if(item.spellTrigger[i] == 6)
+				streamItemSource(stream, item);
+		}
+	}
+
+	// todo: Find trainers.
+	return -1;
 }
 
 #if 0

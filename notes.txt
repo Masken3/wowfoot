@@ -26,7 +26,7 @@
 * Mining and herbalism skill requirements, among others, are determined by the target entity's lock type. See Lock.dbc and LockType.dbc.
 * Objects and items both have lockId.
 
-* Skinning is handled separately. CreatureTemplate has RequiredLootSkill (type of skill: skinning, engineering, herbalism). Required skill LEVEL is based on the creature's level.
+* Skinning is handled separately. CreatureTemplate has RequiredLootSkill (type of skill: skinning, engineering, mining, herbalism). Required skill LEVEL is based on the creature's level.
 * You can't skin objects.
 
 * Finding the required skill level for learning spells depends on how the spell is learned.
@@ -35,4 +35,10 @@
 * RequiredSkillRank is also used for prospecting and milling.
 * Disenchanting uses RequiredDisenchantSkill, a separate column.
 * Obvious when you think about it, because a magic item with a built-in spell may have skill requirements.
-* Engineering trinkets are probably the most common such things.
+* Engineering trinkets and helmets are probably the most common such things.
+
+* To find which item(s) can teach a spell, find the item(s) that use the spell that teaches the target spell.
+* Spell effect 36 (Learn Spell), target id in column depending on source spell:
+uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->Effects[effIndex].TriggerSpell;
+* Irrelevant; 483 and 55884 are never used directly.
+* More commonly, look for item's spelltrigger 6.

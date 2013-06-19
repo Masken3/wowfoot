@@ -5,7 +5,7 @@ Not found.
 <p>List spells:</p>
 
 % if(mPair) {
-<table id="tab" class="sortable" summary="spells">
+<table class="tab" summary="spells">
 <!-- Title row -->
 <thead><tr>
 <td>ID</td>
@@ -58,6 +58,7 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 % }
 </td>
 <td class="source">
+% streamSource(stream, s.id);
 </td>
 <td class="skill">
 % auto slas = SkillLineAbilityIndex::findSpell(s.id);
@@ -78,7 +79,7 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 <p><%=count%> spells.</p>
 
 
-<script type="text/javascript" src="static/sorter.js"></script>
+<!--<script type="text/javascript" src="static/sorter.js"></script>
 <script type="text/javascript">
 var sorter = new TINY.table.sorter("sorter");
 sorter.head = "head";
@@ -92,6 +93,6 @@ sorter.paginate = false;
 //sorter.currentid = "currentpage";
 //sorter.limitid = "pagelimit";
 sorter.init("tab",1);
-</script>
+</script>-->
 
 % }

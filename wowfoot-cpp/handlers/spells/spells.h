@@ -22,4 +22,7 @@ private:
 	string mTitle;
 
 	void streamMultiItem(ostream& stream, int id, int count);
+
+	// returns RequiredSkillLevel, if found, -1 otherwise.
+	int streamSource(ostream& stream, int id);
 };
