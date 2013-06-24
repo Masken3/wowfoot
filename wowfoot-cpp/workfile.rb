@@ -330,6 +330,7 @@ TdbWork.new('db_quest')
 TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
 TdbWork.new('db_npc_vendor')
+TdbWork.new('db_npc_trainer')
 TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
@@ -422,8 +423,9 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcItemDisplayInfo', 'db_item',
 	'dbcSpellIcon', 'icon',
-	'dbcSkillLineAbility', 'dbcSkillLine'],
-	{:constructor => true})
+	'dbcSkillLineAbility', 'dbcSkillLine',
+	'db_npc_trainer', 'db_creature_template',
+	], {:constructor => true})
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
 	{:constructor => true})
 PageWork.new('skills', ['tabs', 'tabTable', 'dbcSkillLine', 'dbcSkillLineCategory',

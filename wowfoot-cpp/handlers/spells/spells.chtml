@@ -20,24 +20,12 @@ Not found.
 %  int count = 0;
 %  while(mPair->hasNext() && count < 1000) {
 %   const Spell& s(mPair->next());
-%   int effectItemId = s.effect[0].itemType;
+%   const Spell::Effect& e(s.effect[0]);
 <tr>
 <td><%=s.id%></td>
-<td>
-% if(effectItemId) {
-<a href="item=<%=effectItemId%>">
-% const Item* item = gItems.find(effectItemId);
-% if(item) {
-% const ItemDisplayInfo* di = gItemDisplayInfos.find(item->displayId);
-% if(di) {
-<img src="<%ESCAPE_URL(getIcon(di->icon));%>" alt="<%=item->name%>">
-% } else {
-Warning: invalid display id (<%=item->displayId%>)
-% }
-% } else {
-Warning: invalid item id (<%=effectItemId%>)
-% }
-</a>
+<td class="effect">
+% if(e.itemType) {
+% streamMultiItem(stream, e.itemType, e.basePoints + e.dieSides);
 % } else {
 % const SpellIcon* si = gSpellIcons.find(s.spellIconID);
 % if(si) {
@@ -47,7 +35,7 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 % }
 % }
 </td>
-<td><a href="spell=<%=s.id%>"><%=s.name%>
+<td class="name"><a href="spell=<%=s.id%>"><%=s.name%>
 % if(s.rank) if(s.rank[0]) {
 (<%=s.rank%>)
 % }
@@ -58,14 +46,16 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 % }
 </td>
 <td class="source">
-% streamSource(stream, s.id);
+% int requiredSkillLevel = streamSource(stream, s.id);
 </td>
 <td class="skill">
 % auto slas = SkillLineAbilityIndex::findSpell(s.id);
 % for(; slas.first != slas.second; ++slas.first) {
 % const SkillLineAbility* sla = slas.first->second;
 <%=sla->reqSkillValue%>
-<span class="skillRed"><%=sla->minValue - (sla->maxValue - sla->minValue)%></span>
+% if(requiredSkillLevel >= 0) {
+<span class="skillRed"><%=requiredSkillLevel%></span>
+% }
 <span class="skillYellow"><%=sla->minValue%></span>
 <span class="skillGreen"><%=sla->maxValue - (sla->maxValue - sla->minValue) / 2%></span>
 <span class="skillGray"><%=sla->maxValue%></span>

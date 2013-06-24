@@ -2,6 +2,10 @@
 TABLE.tabs { border-collapse: collapse; display: none; }
 td { border-spacing: 1px; border: solid; border-color: gray; }
 
+td.effect { white-space: nowrap; }
+td.reagents { white-space: nowrap; }
+td.skill { white-space: nowrap; }
+
 TABLE.tab { border-collapse: collapse; }
 div.tab { display: none; }
 

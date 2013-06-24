@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
-#include <dbcSkillLine.h>
+#include "dbcSkillLine.h"
+#include "db_npc_trainer.h"
+#include "db_creature_template.h"
 
 void spellsChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
@@ -61,6 +63,7 @@ public:
 };
 
 void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gNpcTrainers.load();
 	gSpells.load();
 	gSkillLines.load();
 	gSpellIcons.load();
@@ -68,6 +71,7 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	gItems.load();
 	gItemDisplayInfos.load();
 	SpellIndex::load();
+	gNpcs.load();
 
 	printf("urlPart: %s\n", urlPart);
 	getArguments(drd);
@@ -140,25 +144,58 @@ static void streamItemSource(ostream& stream, const Item& item) {
 }
 
 int spellsChtml::streamSource(ostream& stream, int id) {
+	int requiredSkillLevel = -1;
 	// Find spells that teach this spell, and items that use the teacher spell.
 	for(auto p = SpellIndex::findLearnSpell(id); p.first != p.second; ++p.first) {
 		const Spell& s(*p.first->second);
 		for(auto r = gItems.findSpellId(s.id); r.first != r.second; ++r.first) {
 			const Item& item(*r.first->second);
 			streamItemSource(stream, item);
+			if(item.requiredSkill) {
+				requiredSkillLevel = item.requiredSkillRank;
+			}
 		}
 	}
 	// Find items that teach this spell directly (SPELLTRIGGER 6).
 	for(auto r = gItems.findSpellId(id); r.first != r.second; ++r.first) {
 		const Item& item(*r.first->second);
 		for(uint i=0; i<ARRAY_SIZE(item.spellTrigger); i++) {
-			if(item.spellTrigger[i] == 6)
+			if(item.spellTrigger[i] == 6) {
 				streamItemSource(stream, item);
+				if(item.requiredSkill) {
+					requiredSkillLevel = item.requiredSkillRank;
+				}
+			}
 		}
 	}
 
 	// todo: Find trainers.
-	return -1;
+	int trainerCount = 0;
+	for(auto t = gNpcTrainers.findSpell(id); t.first != t.second; ++t.first) {
+		const NpcTrainer& nt(*t.first->second);
+		if(nt.reqSkill) {
+			requiredSkillLevel = nt.reqSkillValue;
+		}
+		if(!gNpcs.find(nt.entry)) {
+			int count = 0;
+			for(auto n = gNpcTrainers.findSpell(-nt.entry); n.first != n.second; ++n.first) {
+				const NpcTrainer& nn(*n.first->second);
+				count++;
+				NAMELINK(gNpcs, nn.entry);
+				stream << "\n";
+			}
+			EASSERT(count > 0);
+			trainerCount += count;
+		} else {
+			trainerCount++;
+			NAMELINK(gNpcs, nt.entry);
+			stream << "\n";
+		}
+	}
+	if(trainerCount > 0) {
+		stream << "("<<trainerCount<<" trainers)\n";
+	}
+	return requiredSkillLevel;
 }
 
 #if 0
