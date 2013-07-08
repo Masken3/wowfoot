@@ -313,10 +313,12 @@ end
 
 HandlerWork.new('dbc').instance_eval do
 	@SOURCES << '../wowfoot-ex/src/libs'
+	@EXTRA_SOURCEFILES << '../wowfoot-ex/src/dbcList.cpp'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
 	@SPECIFIC_CFLAGS = {
 		'loadlib.cpp' => ' -Wno-multichar',
+		'dbcList.cpp' => " -DCONFIG_WOW_VERSION=#{CONFIG_WOW_VERSION}",
 	}
 	set_defaults
 	@EXTRA_OBJECTS = [CopyFileTask.new(self, @BUILDDIR + File.basename(LIBMPQ.target.to_s),

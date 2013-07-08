@@ -111,7 +111,7 @@ Feature list, per page, with YES/NO for "implemented?":
 * spells
 ** two icons	HARD-CODED
 ** input form	NO
-** professions	NO
+** professions	PARTIAL
 ** player classes	NO
 ** more?	NO
 
@@ -175,6 +175,9 @@ Feature list, per page, with YES/NO for "implemented?":
 
 * skill NO
 ** comments NO
+** For lock-opening skills, display objects, creatures and items that can be opened, and the skill levels required.
+*** This includes Mining, Herbalism & Lockpicking.
+*** Skinning operates strictly on the level of the target, and so has nothing special to list.
 
 * main page	NO
 

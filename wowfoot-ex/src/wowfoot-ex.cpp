@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include "libs/blp/MemImage.h"
 #include "util.h"
+#include "dbcList.h"
 #include "libs/map/wdt.h"
 #include "libs/map/adt.h"
 #include <unordered_map>
@@ -44,34 +45,6 @@ static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o);
 static void extractImage(const char* blpName, const char* pngName);
 
-static const char *CONF_mpq_list[]={
-	"common.MPQ",
-	"common-2.MPQ",
-#if WOW_VERSION >= 30000
-	"lichking.MPQ",
-#endif
-#if WOW_VERSION >= 20000
-	"expansion.MPQ",
-#endif
-#if WOW_VERSION < 20000
-	"base.MPQ",
-	"dbc.MPQ",
-	"fonts.MPQ",
-	"interface.MPQ",
-	"misc.MPQ",
-	//"model.MPQ",
-	"terrain.MPQ",
-	"texture.MPQ",
-	"wmo.MPQ",
-#endif
-	"patch.MPQ",
-	"patch-2.MPQ",
-	"patch-3.MPQ",
-	"patch-4.MPQ",
-	"patch-5.MPQ",
-};
-
-
 #if defined( __GNUC__ )
 #define _open   open
 #define _close close
@@ -87,30 +60,6 @@ static const char *CONF_mpq_list[]={
 #else
 #define OPEN_FLAGS (O_RDONLY | O_BINARY)
 #endif
-
-static bool FileExists( const char* FileName )
-{
-	int fp = _open(FileName, OPEN_FLAGS);
-	if(fp != -1)
-	{
-		_close(fp);
-		return true;
-	}
-
-	return false;
-}
-
-static void LoadCommonMPQFiles()
-{
-	char filename[512];
-	int count = sizeof(CONF_mpq_list)/sizeof(char*);
-	for(int i = 0; i < count; ++i)
-	{
-		sprintf(filename, WOW_INSTALL_DIR "Data/%s", CONF_mpq_list[i]);
-		if(FileExists(filename))
-			new MPQArchive(filename);
-	}
-}
 
 struct InsensitiveComparator {
 	// return true if a is less than b, that is, if it goes first in order.
@@ -346,13 +295,7 @@ int main() {
 	FILE* out2;
 
 	printf("Opening MPQ files:\n");
-#if WOW_VERSION >= 20000
-	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
-	MPQArchive patch(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ");
-	MPQArchive patch2(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ");
-	MPQArchive patch3(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ");
-#endif
-	LoadCommonMPQFiles();
+	loadMpqFiles();
 
 	mkdir("output");
 
@@ -388,7 +331,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
-#if WOW_VERSION >= 30000
+#if CONFIG_WOW_VERSION >= 30000
 	printf("Opening CharTitles.dbc...\n");
 	DBCFile ct("DBFilesClient\\CharTitles.dbc");
 	res = ct.open();
@@ -519,7 +462,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
-#if WOW_VERSION >= 30000
+#if CONFIG_WOW_VERSION >= 30000
 	printf("Opening Achievement.dbc...\n");
 	DBCFile ach("DBFilesClient\\Achievement.dbc");
 	res = ach.open();
@@ -562,7 +505,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
-#if WOW_VERSION >= 30000
+#if CONFIG_WOW_VERSION >= 30000
 	printf("Opening QuestFactionReward.dbc...\n");
 	DBCFile qfr("DBFilesClient\\QuestFactionReward.dbc");
 	res = qfr.open();
