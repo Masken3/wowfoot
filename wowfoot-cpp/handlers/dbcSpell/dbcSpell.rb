@@ -2,133 +2,217 @@
 @plural = 'Spells'
 @upperCase = 'SPELLS'
 
-effectMembers = [
-	m(:int, 'id', 71),
-	m(:int, 'dieSides', 74),
-	m(:int, 'realPointsPerLevel', 77),
-	m(:int, 'basePoints', 80),
-	m(:int, 'mechanic', 83),
-	m(:int, 'implicitTargetA', 86),
-	m(:int, 'implicitTargetB', 89),
-	m(:int, 'radiusIndex', 92),
-	m(:int, 'applyAuraName', 95),
-	m(:int, 'amplitude', 98),
-	m(:int, 'multipleValue', 101),
-	m(:int, 'chainTarget', 104),
-	m(:int, 'itemType', 107),
-	m(:int, 'miscValue', 110),
-	m(:int, 'miscValueB', 113),
-	m(:int, 'triggerSpell', 116),
-	m(:int, 'pointsPerComboPoint', 119),
-	m(:int, 'spellClassMaskA', 122),
-	m(:int, 'spellClassMaskB', 125),
-	m(:int, 'spellClassMaskC', 128),
-]
+def size(type)
+	case type
+		when :int; return 1;
+		when :string; return @stringSize;
+		when :float; return 1;
+		else; raise "Don't know size for type: #{type}"
+	end
+end
 
-plainMembers = [
-	m(:int, 'Category', 1),
-	m(:int, 'Dispel', 2),
-	m(:int, 'Mechanic', 3),
-	m(:int, 'Attributes', 4),
-	m(:int, 'AttributesEx', 5),
-	m(:int, 'AttributesEx2', 6),
-	m(:int, 'AttributesEx3', 7),
-	m(:int, 'AttributesEx4', 8),
-	m(:int, 'AttributesEx5', 9),
-	m(:int, 'AttributesEx6', 10),
-	m(:int, 'AttributesEx7', 11),
-	m(:int, 'Stances', 12),
-	m(:int, 'unk_320_2', 13),
-	m(:int, 'StancesNot', 14),
-	m(:int, 'unk_320_3', 15),
-	m(:int, 'Targets', 16),
-	m(:int, 'TargetCreatureType', 17),
-	m(:int, 'RequiresSpellFocus', 18),
-	m(:int, 'FacingCasterFlags', 19),
-	m(:int, 'CasterAuraState', 20),
-	m(:int, 'TargetAuraState', 21),
-	m(:int, 'CasterAuraStateNot', 22),
-	m(:int, 'TargetAuraStateNot', 23),
-	m(:int, 'casterAuraSpell', 24),
-	m(:int, 'targetAuraSpell', 25),
-	m(:int, 'excludeCasterAuraSpell', 26),
-	m(:int, 'excludeTargetAuraSpell', 27),
-	m(:int, 'CastingTimeIndex', 28),
-	m(:int, 'RecoveryTime', 29),
-	m(:int, 'CategoryRecoveryTime', 30),
-	m(:int, 'InterruptFlags', 31),
-	m(:int, 'AuraInterruptFlags', 32),
-	m(:int, 'ChannelInterruptFlags', 33),
-	m(:int, 'procFlags', 34),
-	m(:int, 'procChance', 35),
-	m(:int, 'procCharges', 36),
-	m(:int, 'maxLevel', 37),
-	m(:int, 'baseLevel', 38),
-	m(:int, 'spellLevel', 39),
-	m(:int, 'DurationIndex', 40),
-	m(:int, 'powerType', 41),
-	m(:int, 'manaCost', 42),
-	m(:int, 'manaCostPerlevel', 43),
-	m(:int, 'manaPerSecond', 44),
-	m(:int, 'manaPerSecondPerLevel', 45),
-	m(:int, 'rangeIndex', 46),
-	m(:float, 'speed', 47),
-	m(:int, 'modalNextSpell', 48),
-	m(:int, 'StackAmount', 49),
-	#m(:int, 'Totem[2]', 50),
-	m(:int , 'EquippedItemClass', 68),
-	m(:int , 'EquippedItemSubClassMask', 69),
-	m(:int , 'EquippedItemInventoryTypeMask', 70),
-	#m(:int, 'SpellVisual[2]', 131),
-	#m(:int, 'SpellIconID', 133),
-	#m(:int, 'activeIconID', 134),
-	m(:int, 'spellPriority', 135),
-	#m(:string, 'SpellName[16]', 136),
-	m(:int, 'SpellNameFlag', 152),
-	#m(:string, 'Rank[16]', 153),
-	m(:int, 'RankFlags', 169),
-	#m(:string, 'Description[16]', 170),
-	m(:int, 'DescriptionFlags', 186),
-	#m(:string, 'ToolTip[16]', 187),
-	m(:int, 'ToolTipFlags', 203),
-	m(:int, 'ManaCostPercentage', 204),
-	m(:int, 'StartRecoveryCategory', 205),
-	m(:int, 'StartRecoveryTime', 206),
-	m(:int, 'MaxTargetLevel', 207),
-	m(:int, 'SpellFamilyName', 208),
-	#m(:uint64, 'SpellFamilyFlags', 209),
-	m(:int, 'SpellFamilyFlags2', 211),
-	m(:int, 'MaxAffectedTargets', 212),
-	m(:int, 'DmgClass', 213),
-	m(:int, 'PreventionType', 214),
-	m(:int, 'StanceBarOrder', 215),
-	#m(:float, 'DmgMultiplier[3]', 216),
-	m(:int, 'MinFactionId', 219),
-	m(:int, 'MinReputation', 220),
-	m(:int, 'RequiredAuraVision', 221),
-	#m(:int, 'TotemCategory[2]', 222),
-	m(:int , 'AreaGroupId', 224),
-	m(:int, 'SchoolMask', 225),
-	m(:int, 'runeCostID', 226),
-	m(:int, 'spellMissileID', 227),
-	m(:int, 'PowerDisplayId', 228),
-	#m(:float, 'unk_320_4[3]', 229),
-	m(:int, 'spellDescriptionVariableID', 232),
-	m(:int, 'SpellDifficultyId', 233),
+EFFECT_COUNT = 3
+
+EffectMember = Struct.new(:type, :name)
+def e(type, name); EffectMember.new(type, name); end
+def convertEffectMember(c)
+	pos = @memberPos
+	@memberPos += EFFECT_COUNT * size(c.type)
+	return m(c.type, c.name, pos)
+end
+def f(type, name)
+	pos = @memberPos
+	@memberPos += size(type)
+	return m(type, name, pos)
+end
+def fa(type, name, count)
+	pos = @memberPos
+	@memberPos += count * size(type)
+	return ar(type, name, pos, count)
+end
+
+
+if(CONFIG_WOW_VERSION > 20000)
+	@basePos = 40
+	@memberPos = 71
+	@stringSize = 16
+	effectMembersA = []
+	effectMembersB = [
+		e(:int, 'miscValueB'),
+	]
+	effectMembersC = [
+		e(:int, 'spellClassMaskA'),
+		e(:int, 'spellClassMaskB'),
+		e(:int, 'spellClassMaskC'),
+	]
+else
+	@basePos = 30
+	@memberPos = 61
+	@stringSize = 8
+	effectMembersA = [
+		e(:int, 'baseDice'),
+		e(:int, 'dicePerLevel'),
+	]
+	effectMembersB = []
+	effectMembersC = []
+end
+
+effectMembers = [
+	e(:int, 'id'),
+	e(:int, 'dieSides'),
+] + effectMembersA + [
+	e(:int, 'realPointsPerLevel'),
+	e(:int, 'basePoints'),
+	e(:int, 'mechanic'),
+	e(:int, 'implicitTargetA'),
+	e(:int, 'implicitTargetB'),
+	e(:int, 'radiusIndex'),
+	e(:int, 'applyAuraName'),
+	e(:int, 'amplitude'),
+	e(:int, 'multipleValue'),
+	e(:int, 'chainTarget'),
+	e(:int, 'itemType'),
+	e(:int, 'miscValue'),
+] + effectMembersB + [
+	e(:int, 'triggerSpell'),
+	e(:int, 'pointsPerComboPoint'),
+] + effectMembersC
+
+effectMembers = effectMembers.collect do |c|
+	convertEffectMember(c)
+end
+
+plainMembers = []
+@memberPos = 1
+if(CONFIG_WOW_VERSION < 20000)
+	plainMembers << f(:int, 'School')
+end
+plainMembers << f(:int, 'Category')
+if(CONFIG_WOW_VERSION < 20000)
+	plainMembers << f(:int, 'castUI')
+end
+plainMembers += [
+	f(:int, 'Dispel'),
+	f(:int, 'Mechanic'),
+	f(:int, 'Attributes'),
+	f(:int, 'AttributesEx'),
+	f(:int, 'AttributesEx2'),
+	f(:int, 'AttributesEx3'),
+	f(:int, 'AttributesEx4'),
 ]
+if(CONFIG_WOW_VERSION > 20000)
+	plainMembers += [
+	f(:int, 'AttributesEx5'),
+	f(:int, 'AttributesEx6'),
+	f(:int, 'AttributesEx7'),
+	]
+end
+plainMembers << f(:int, 'Stances')
+plainMembers << f(:int, 'unk_320_2') if(CONFIG_WOW_VERSION > 32000)
+plainMembers << f(:int, 'StancesNot')
+plainMembers << f(:int, 'unk_320_3') if(CONFIG_WOW_VERSION > 32000)
+plainMembers += [
+	f(:int, 'Targets'),
+	f(:int, 'TargetCreatureType'),
+	f(:int, 'RequiresSpellFocus'),
+	f(:int, 'FacingCasterFlags'),
+	f(:int, 'CasterAuraState'),
+	f(:int, 'TargetAuraState'),
+]
+if(CONFIG_WOW_VERSION > 20000)
+	plainMembers += [
+	f(:int, 'CasterAuraStateNot'),
+	f(:int, 'TargetAuraStateNot'),
+	f(:int, 'casterAuraSpell'),
+	f(:int, 'targetAuraSpell'),
+	f(:int, 'excludeCasterAuraSpell'),
+	f(:int, 'excludeTargetAuraSpell'),
+	]
+end
+plainMembers += [
+	f(:int, 'CastingTimeIndex'),
+	f(:int, 'RecoveryTime'),
+	f(:int, 'CategoryRecoveryTime'),
+	f(:int, 'InterruptFlags'),
+	f(:int, 'AuraInterruptFlags'),
+	f(:int, 'ChannelInterruptFlags'),
+	f(:int, 'procFlags'),
+	f(:int, 'procChance'),
+	f(:int, 'procCharges'),
+	f(:int, 'maxLevel'),
+	f(:int, 'baseLevel'),
+	f(:int, 'spellLevel'),
+	f(:int, 'DurationIndex'),
+	f(:int, 'powerType'),
+	f(:int, 'manaCost'),
+	f(:int, 'manaCostPerlevel'),
+	f(:int, 'manaPerSecond'),
+	f(:int, 'manaPerSecondPerLevel'),
+	f(:int, 'rangeIndex'),
+	f(:float, 'speed'),
+	f(:int, 'modalNextSpell'),
+	f(:int, 'StackAmount'),
+	fa(:int, 'Totem', 2),
+]
+@memberPos += 16
+plainMembers += [
+	f(:int , 'EquippedItemClass'),
+	f(:int , 'EquippedItemSubClassMask'),
+	f(:int , 'EquippedItemInventoryTypeMask'),
+]
+if(CONFIG_WOW_VERSION > 20000)
+	@memberPos = 131
+else
+	@memberPos = 115
+end
+plainMembers += [
+	fa(:int, 'spellVisual', 2),
+	f(:int, 'spellIconID'),
+	f(:int, 'activeIconID'),
+	f(:int, 'spellPriority'),
+	f(:string, 'name'),
+	f(:int, 'SpellNameFlag'),
+	f(:string, 'rank'),
+	f(:int, 'RankFlags'),
+	f(:string, 'description'),
+	f(:int, 'DescriptionFlags'),
+	f(:string, 'toolTip'),
+	f(:int, 'ToolTipFlags'),
+	f(:int, 'ManaCostPercentage'),
+	f(:int, 'StartRecoveryCategory'),
+	f(:int, 'StartRecoveryTime'),
+	f(:int, 'MaxTargetLevel'),
+	f(:int, 'SpellFamilyName'),
+	f(:int, 'SpellFamilyFlags'),
+	f(:int, 'SpellFamilyFlags2'),
+	f(:int, 'MaxAffectedTargets'),
+	f(:int, 'DmgClass'),
+	f(:int, 'PreventionType'),
+	f(:int, 'StanceBarOrder'),
+	fa(:float, 'DmgMultiplier', 3),	# TODO: move to effect
+	f(:int, 'MinFactionId'),
+	f(:int, 'MinReputation'),
+	f(:int, 'RequiredAuraVision'),
+]
+if(CONFIG_WOW_VERSION > 20000)
+	plainMembers += [
+	fa(:int, 'TotemCategory', 2),
+	f(:int , 'AreaGroupId'),
+	f(:int, 'SchoolMask'),
+	f(:int, 'runeCostID'),
+	f(:int, 'spellMissileID'),
+	f(:int, 'PowerDisplayId'),
+	fa(:float, 'unk_320_4', 3),	# probably effect-related.
+	f(:int, 'spellDescriptionVariableID'),
+	f(:int, 'SpellDifficultyId'),
+	]
+end
 
 @id = 0
 @struct = [
 m(:int, 'id', 0),
-ar(:int, 'totem', 50, 2),
-as('Reagent', 'reagent', [m(:int, 'id', 52), m(:int, 'count', 60)], 8),
+as('Reagent', 'reagent', [m(:int, 'id', @basePos + 12), m(:int, 'count', @basePos + 20)], 8),
 as('Effect', 'effect', effectMembers, 3),
-m(:int, 'spellIconID', 133),
-m(:int, 'activeIconID', 134),
-m(:string, 'name', 136),
-m(:string, 'rank', 153),
-m(:string, 'description', 170),
-m(:string, 'toolTip', 187),
 ] + plainMembers
 
 @endOfHeader = "#define SPELL_EFFECT_MEMBERS(m)\\\n"

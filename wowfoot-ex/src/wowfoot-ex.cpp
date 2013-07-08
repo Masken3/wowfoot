@@ -47,8 +47,23 @@ static void extractImage(const char* blpName, const char* pngName);
 static const char *CONF_mpq_list[]={
 	"common.MPQ",
 	"common-2.MPQ",
+#if WOW_VERSION >= 30000
 	"lichking.MPQ",
+#endif
+#if WOW_VERSION >= 20000
 	"expansion.MPQ",
+#endif
+#if WOW_VERSION < 20000
+	"base.MPQ",
+	"dbc.MPQ",
+	"fonts.MPQ",
+	"interface.MPQ",
+	"misc.MPQ",
+	//"model.MPQ",
+	"terrain.MPQ",
+	"texture.MPQ",
+	"wmo.MPQ",
+#endif
 	"patch.MPQ",
 	"patch-2.MPQ",
 	"patch-3.MPQ",
@@ -244,8 +259,10 @@ static void dumpAreaMap(bool dumpArea) {
 	printf("Opening Map.dbc...\n");
 	DBCFile mapDbc("DBFilesClient\\Map.dbc");
 	res = mapDbc.open();
-	if(!res)
+	if(!res) {
+		printf("Failed to open Map.dbc.\n");
 		exit(1);
+	}
 	printf("Extracting %" PRIuPTR " maps...\n", mapDbc.getRecordCount());
 	if(dumpArea) {
 		out = fopen("output/AreaMap.bin", "wb");
@@ -329,10 +346,12 @@ int main() {
 	FILE* out2;
 
 	printf("Opening MPQ files:\n");
+#if WOW_VERSION >= 20000
 	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
 	MPQArchive patch(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ");
 	MPQArchive patch2(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ");
 	MPQArchive patch3(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ");
+#endif
 	LoadCommonMPQFiles();
 
 	mkdir("output");
@@ -369,6 +388,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
+#if WOW_VERSION >= 30000
 	printf("Opening CharTitles.dbc...\n");
 	DBCFile ct("DBFilesClient\\CharTitles.dbc");
 	res = ct.open();
@@ -449,6 +469,7 @@ int main() {
 	fprintf(out, "}\n");
 	fprintf(out2, "};\n");
 	fprintf(out2, "const size_t gnTotemCategory = sizeof(gTotemCategory) / sizeof(TotemCategoryi);\n");
+#endif
 
 	printf("Opening Spell.dbc...\n");
 	DBCFile spell("DBFilesClient\\Spell.dbc");
@@ -498,6 +519,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
+#if WOW_VERSION >= 30000
 	printf("Opening Achievement.dbc...\n");
 	DBCFile ach("DBFilesClient\\Achievement.dbc");
 	res = ach.open();
@@ -520,6 +542,7 @@ int main() {
 			escapeQuotes(desc).c_str());
 	}
 	fprintf(out, "}\n");
+#endif
 
 	printf("Opening Faction.dbc...\n");
 	DBCFile fac("DBFilesClient\\Faction.dbc");
@@ -539,6 +562,7 @@ int main() {
 	}
 	fprintf(out, "}\n");
 
+#if WOW_VERSION >= 30000
 	printf("Opening QuestFactionReward.dbc...\n");
 	DBCFile qfr("DBFilesClient\\QuestFactionReward.dbc");
 	res = qfr.open();
@@ -557,6 +581,7 @@ int main() {
 		fprintf(out, "],\n");
 	}
 	fprintf(out, "}\n");
+#endif
 
 	printf("Opening ItemSet.dbc...\n");
 	DBCFile is("DBFilesClient\\ItemSet.dbc");

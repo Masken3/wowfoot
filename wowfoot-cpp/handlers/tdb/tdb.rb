@@ -11,8 +11,8 @@ end
 def mc(type, array, count, postfix = '')
 	return c(type, nil, array, count, postfix)
 end
-def renamed(type, dbName, cName, array = nil)
-	col = c(type, dbName, array)
+def renamed(type, dbName, cName, array = nil, count = nil, postfix = '')
+	col = c(type, dbName, array, count, postfix)
 	col.cName = cName
 	return col
 end
@@ -67,6 +67,26 @@ class TdbGenTask < MemoryGeneratedFileTask
 			else
 				col.array.each do |n|
 					@names[n] = col
+				end
+			end
+		end
+
+		# make sure indexes are valid.
+		if(@index)
+			@index.each do |i|
+				i.each do |iPart|
+					valid = false
+					@names.each do |colName, col|
+						#puts "#{colName.inspect} - #{iPart.inspect}"
+						if(colName == iPart)
+							valid = true
+							#puts "Found!"
+							break
+						end
+					end
+					if(!valid)
+						raise "#{name}: index part #{iPart} not found in struct!"
+					end
 				end
 			end
 		end
@@ -237,7 +257,7 @@ void <%=@structName%>s::load() {
 	for(<%=@structName%>s::citr itr = begin(); itr != end(); ++itr) {
 		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
 		col = @names[args[0]]; isArray = (args.size == 1 && !col.cName); if(isArray) %>
-		for(int i=0; i<<%=col.count%>; i++) { if(_ref.<%=col.array[0]%>[i] != 0) {<%end%>
+		for(int i=0; i<<%=col.count%>; i++) { if(_ref.<%=cEscape(col.array[0])%>[i] != 0) {<%end%>
 		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
 			<%if(i!=0)%>,<%end%>_ref.<%=cEscape(arg)%><%if(isArray)%>[i]<%end;end%>
 		};

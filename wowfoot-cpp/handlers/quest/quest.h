@@ -1,3 +1,4 @@
+#include "wowVersion.h"
 #include "pageContext.h"
 #include "chtmlUtil.h"
 #include "tabTable.h"

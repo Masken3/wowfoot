@@ -1,4 +1,5 @@
 #define __STDC_FORMAT_MACROS
+#include "wowVersion.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,16 @@ void ItemSubClasses::load() {
 		ItemSubClass s;
 		s.hands = r.getInt(9);
 		s.name = r.getString(10);
-		s.plural = r.getString(27);
+#if CONFIG_WOW_VERSION > 20000
+#define STRING_SIZE 16
+#else
+#define STRING_SIZE 8
+#endif
+#if CONFIG_WOW_VERSION > 30000
+		s.plural = r.getString(11 + STRING_SIZE);
+#else
+		s.plural = "";
+#endif
 //		printf("subClass %i/%i: %i %s %s\n",
 //			itemClass, subClass, s.hands, s.name, s.plural);
 
@@ -37,6 +47,8 @@ void ItemSubClasses::load() {
 			i++;
 			m.push_back(vector<ItemSubClass>());
 		}
+		if(i < 0)
+			continue;
 		assert(itemClass == i);
 		if(subClass >= (int)m[i].size())
 			m[i].resize(subClass+1);

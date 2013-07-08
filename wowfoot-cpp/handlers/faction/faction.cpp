@@ -1,4 +1,5 @@
 #define __STDC_FORMAT_MACROS
+#include "wowVersion.h"
 #include "faction.chtml.h"
 #include "comments.h"
 #include "db_creature_template.h"
@@ -81,7 +82,11 @@ static Tab* quests(int factionId) {
 	t.id = "quests";
 	t.title = "Quests";
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+#if (CONFIG_WOW_VERSION > 30000)
 	Quests::RewardFactionIdPair p = gQuests.findRewardFactionId(factionId);
+#else
+	auto p = gQuests.findRewRepFaction(factionId);
+#endif
 	for(; p.first != p.second; ++p.first) {
 		const Quest& q(*p.first->second);
 		Row r;

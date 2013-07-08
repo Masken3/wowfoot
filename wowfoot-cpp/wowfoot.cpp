@@ -7,6 +7,7 @@
 #include "dllInterface.h"
 
 #include "config.h"
+#include "wowVersion.h"
 #include <string>
 #include "wowfoot.h"
 #include "util/minmax.h"
@@ -54,12 +55,14 @@ int main(int argc, const char** argv) {
 	mountIdPage("spell");
 	mountFormPage("spells");
 	mountIdPage("npc");
+#if (CONFIG_WOW_VERSION > 30000)
 	mountIdPage("achievement");
+	mountIdPage("title");
+#endif
 	mountIdPage("object");
 	mountIdPage("quest");
 	mountFormPage("quests");
 	mountIdPage("faction");
-	mountIdPage("title");
 	mountIdPage("comment");
 	mountFormPage("skills");
 

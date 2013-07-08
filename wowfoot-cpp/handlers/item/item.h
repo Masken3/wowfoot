@@ -1,8 +1,16 @@
+#include "wowVersion.h"
 #include "db_quest.h"
 #include "pageContext.h"
 #include "tabTable.h"
 #include "db_item.h"
+#if (CONFIG_WOW_VERSION > 30000)
 #include "dbcTotemCategory.h"
+#define HAVE_EXTENDED_COST 1
+#define HAVE_TOTEM_CATEGORY 1
+#else
+#define HAVE_EXTENDED_COST 0
+#define HAVE_TOTEM_CATEGORY 0
+#endif
 #include "dbcSpell.h"
 #include "chrClasses.h"
 #include "chrRaces.h"
@@ -12,6 +20,7 @@
 #include "icon.h"
 #include "chtmlUtil.h"
 #include "dbcSkillLine.h"
+#include "util/arraySize.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:

@@ -1,11 +1,14 @@
 #define __STDC_FORMAT_MACROS
+#include "wowVersion.h"
 #include "quest.chtml.h"
 #include "comments.h"
 #include "db_creature_template.h"
 #include "money.h"
 #include "dbcSpell.h"
 #include "db_item.h"
+#if CONFIG_WOW_VERSION > 30000
 #include "dbcQuestFactionReward.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,7 +22,9 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gObjectQuestFinishers.load();
 	printf("Finishers loaded.\n");
 	gFactions.load();
+#if CONFIG_WOW_VERSION > 30000
 	gQuestFactionRewards.load();
+#endif
 	gNpcs.load();
 	gItems.load();
 	gSpells.load();
@@ -51,6 +56,7 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	}
 }
 
+#if CONFIG_WOW_VERSION > 30000
 int questChtml::rewRepValue(int index) {
 	if(a->rewardFactionValueIdOverride[index] == 0) {
 		int id = a->rewardFactionValueId[index];
@@ -63,6 +69,7 @@ int questChtml::rewRepValue(int index) {
 		return a->rewardFactionValueIdOverride[index] / 100;
 	}
 }
+#endif
 
 void questChtml::title(ostream& stream) {
 	ESCAPE(mTitle);

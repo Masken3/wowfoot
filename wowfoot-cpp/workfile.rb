@@ -4,18 +4,20 @@ require File.expand_path '../rules/host.rb'
 require File.expand_path '../rules/exe.rb'
 require File.expand_path '../rules/dll.rb'
 
+require './config.rb'
 require './chtmlCompiler.rb'
 require './ex_template.rb'
 require 'erb'
 require './handlers/tdb/tdb.rb'
 require './handlers/dbc/dbc.rb'
-require './config.rb'
 require 'net/http'
+require 'stringio'
 
 CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
 WORKS = []
 WORK_MAP = {}
+PAGEWORKS = []
 
 # setup LIBMPQ. invoke later.
 include FileUtils::Verbose
@@ -159,6 +161,19 @@ class DllTask
 end
 end	# WIN32
 
+wowVersion = MemoryGeneratedFileTask.new(nil, 'build/wowVersion.h')
+wowVersion.instance_eval do
+	io = StringIO.new
+	io.puts "#ifndef WOWVERSION_H"
+	io.puts "#define WOWVERSION_H"
+	io.puts
+	io.puts "#define CONFIG_WOW_VERSION #{CONFIG_WOW_VERSION}"
+	io.puts
+	io.puts "#endif\t//WOWVERSION_H"
+	@buf = io.string
+end
+wowVersion.invoke
+
 common = NativeLibWork.new
 common.instance_eval do
 	@SOURCES = ['handlers', 'util']
@@ -204,6 +219,7 @@ class HandlerWork < DllWork
 			'.', CHTML_BUILDDIR,
 			TDB_BUILDDIR,
 			'win32',
+			'build',
 		] + CONFIG_LOCAL_INCLUDES
 		handlerDeps.each do |dll|
 			@EXTRA_INCLUDES << "handlers/#{dll}"
@@ -257,6 +273,7 @@ class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [], options = {})
 		super(name, ['pageContext'] + handlerDeps, true, options)
 		@EXTRA_LINKFLAGS = ' -u cleanup'
+		PAGEWORKS << self
 	end
 end
 
@@ -325,7 +342,9 @@ HandlerWork.new('icon', ['dbc']).instance_eval do
 	@LIBRARIES += ['png', 'jpeg']
 end
 
+if(CONFIG_WOW_VERSION > 30000)
 TdbWork.new('db_achievement_reward')
+end
 TdbWork.new('db_quest')
 TdbWork.new('db_loot_template')
 TdbWork.new('db_item')
@@ -340,15 +359,28 @@ DbcWork.new('dbcFactionTemplate')
 DbcWork.new('dbcSpellIcon')
 DbcWork.new('dbcItemDisplayInfo')
 DbcWork.new('dbcItemSet')
-DbcWork.new('dbcCharTitles')
-DbcWork.new('dbcQuestFactionReward')
 DbcWork.new('dbcFaction')
-DbcWork.new('dbcAchievement')
 DbcWork.new('dbcArea')
 DbcWork.new('dbcSpell')
 DbcWork.new('dbcWorldMapArea')
+if(CONFIG_WOW_VERSION > 30000)
+DbcWork.new('dbcQuestFactionReward')
+DbcWork.new('dbcCharTitles')
 DbcWork.new('dbcTotemCategory')
+DbcWork.new('dbcAchievement')
 DbcWork.new('dbcItemExtendedCost', ['db_npc_vendor', 'db_creature_template', 'db_item'])
+DBC_ACHIEVEMENT_COND = ['dbcAchievement']
+DBC_QFR_COND = ['dbcQuestFactionReward']
+DBC_TOTEM_CATEGORY_COND = ['dbcTotemCategory']
+DBC_CHAR_TITLES_COND = ['dbcCharTitles']
+DBC_ITEM_EXTENDED_COST_COND = ['dbcItemExtendedCost']
+else
+DBC_ACHIEVEMENT_COND = []
+DBC_QFR_COND = []
+DBC_TOTEM_CATEGORY_COND = []
+DBC_CHAR_TITLES_COND = []
+DBC_ITEM_EXTENDED_COST_COND = []
+end
 DbcWork.new('dbcChrClasses')
 DbcWork.new('dbcChrRaces')
 #DbcWork.new('dbcSpellEffectNames')	# missing from mpqSet. TODO: investigate.
@@ -361,10 +393,12 @@ HandlerWork.new('pageContext')
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
-HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
-	'dbcAchievement', 'db_quest', 'db_creature_template',
+
+commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
+	'db_quest', 'db_creature_template',
 	'db_gameobject_template', 'dbcFaction',
-]).instance_eval do
+] + DBC_ACHIEVEMENT_COND
+HandlerWork.new('comments', commentDeps).instance_eval do
 	@LIBRARIES << 'sqlite3'
 	patch = FileTask.new(self, 'build/patch.cpp')
 	patch.instance_eval do
@@ -376,6 +410,7 @@ HandlerWork.new('comments', ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	end
 	@EXTRA_SOURCETASKS << patch
 end
+
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
 
 TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
@@ -384,33 +419,36 @@ TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
 PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
+PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
+	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND)
+if(CONFIG_WOW_VERSION > 30000)
 PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCharTitles',
 	'db_achievement_reward'])
-PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
-	'db_item', 'dbcFaction', 'dbcQuestFactionReward', 'db_questrelation', 'db_gameobject_template'])
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
 	'db_item', 'db_creature_template', 'db_achievement_reward'])
+end
 PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
 	'db_questrelation'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
-	'db_creature_template', 'dbcAchievement', 'db_gameobject_template', 'db_quest',
-	'dbcCharTitles', 'dbcItemSet', 'dbcFaction'])
-PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
+	'db_creature_template', 'db_gameobject_template', 'db_quest',
+	'dbcItemSet', 'dbcFaction'] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND)
+PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
+	'db_npc_vendor', 'db_creature_template', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo',
 	'dbcSkillLine',
-	'db_questrelation', 'db_quest'])
+	'db_questrelation', 'db_quest'] + DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
 	'db_creature_onkill_reputation'])
-PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'dbcTotemCategory', 'comments',
-	'db_npc_vendor', 'db_creature_template', 'dbcItemExtendedCost', 'dbcSpell',
+PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'comments',
+	'db_npc_vendor', 'db_creature_template', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
-	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'item'])
+	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'item'] +
+	DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
 PageWork.new('object', ['db_gameobject_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
 	'db_loot_template', 'db_item', 'db_questrelation'])
@@ -435,7 +473,7 @@ WFC = @wfc = ExeWork.new
 @wfc.instance_eval do
 	@SOURCES = ['.']
 	@LIBRARIES = ['microhttpd']
-	@EXTRA_INCLUDES = ['win32', '.']#'src', 'src/libs/libmpq']
+	@EXTRA_INCLUDES = ['win32', '.', 'build']#'src', 'src/libs/libmpq']
 	#@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
 	@LOCAL_LIBS = ['common']
 	@LOCAL_DLLS = []
@@ -473,12 +511,10 @@ TEST.instance_eval do
 		'db_creature_template',
 		'db_gameobject_template',
 		'dbcItemSet',
-		'dbcCharTitles',
 		'dbcFaction',
-		'dbcAchievement',
 		'dbcWorldMapArea',
 		'dbcSpell',
-	]
+	] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND
 	@EXTRA_CPPFLAGS = ' -fopenmp'
 	@EXTRA_LINKFLAGS = ' -fopenmp -Wl,-rpath,.' + CONFIG_LOCAL_LIBDIRS
 
@@ -488,17 +524,24 @@ end
 
 def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
 
-target :default do
+target :base do
 	common.invoke
 	win32.invoke if(HOST == :win32)
 	# required for unload to function properly
 	@wfc.invoke
-	WORKS.each do |w|
+end
+
+def doWorks(works)
+	works.each do |w|
 		w.setup
 	end
-	WORKS.each do |w|
+	works.each do |w|
 		w.invoke
 	end
+end
+
+target :default => :base do
+	doWorks(WORKS)
 end
 
 target :run => :default do
@@ -507,7 +550,8 @@ target :run => :default do
 	sh cmd
 end
 
-target :test => :default do
+target :test => :base do
+	doWorks(WORKS - PAGEWORKS)
 	TEST.invoke
 	TEST.run
 end

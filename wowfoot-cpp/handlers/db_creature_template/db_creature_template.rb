@@ -5,10 +5,13 @@
 c(:int, :entry),
 c(:string, :name),
 c(:string, :subName),
-c(:string, :iconName),
+]
+@struct << c(:string, :iconName) if(CONFIG_WOW_VERSION > 30000)
+# expansion
+@struct << c(:int, :exp) if(CONFIG_WOW_VERSION > 20000)
+@struct += [
 c(:int, :minLevel),
 c(:int, :maxLevel),
-c(:int, :exp),	# expansion
 renamed(:int, :faction_a, :faction),
 #c(:int, :faction_h),
 c(:int, :npcflag),
@@ -36,9 +39,11 @@ c(:int, :lootId),
 c(:int, :pickpocketLoot),
 c(:int, :skinLoot),
 mc(:int, [:resistance], 6),
-mc(:int, [:spell], 8),
 c(:int, :petSpellDataId),
-c(:int, :vehicleId),
+]
+@struct << mc(:int, [:spell], 8) if(CONFIG_WOW_VERSION > 30000)
+@struct << c(:int, :vehicleId) if(CONFIG_WOW_VERSION > 30000)
+@struct += [
 c(:int, :minGold),
 c(:int, :maxGold),
 c(:string, :aiName),

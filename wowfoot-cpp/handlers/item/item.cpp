@@ -6,12 +6,14 @@
 #include "db_gameobject_template.h"
 #include "db_loot_template.h"
 #include "db_creature_template.h"
-#include "dbcItemExtendedCost.h"
 #include "dbcItemSubClass.h"
 #include "dbcItemClass.h"
 #include "chrClasses.h"
 #include "chrRaces.h"
+#if HAVE_EXTENDED_COST
+#include "dbcItemExtendedCost.h"
 #include "ItemExtendedCost.index.h"
+#endif
 #include "money.h"
 #include "util/exception.h"
 
@@ -29,7 +31,9 @@ static const int ITEM_FLAG_HEROIC = 8;
 
 static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* soldBy(const Item& a);
+#if HAVE_EXTENDED_COST
 static Tab* currencyFor(const Item& a);
+#endif
 static Tab* sharesModel(const Item& a);
 static Tab* droppedBy(const Item& a);
 static Tab* pickpocketedFrom(const Item& a);
@@ -48,6 +52,9 @@ void fini() {
 }
 
 void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gItemSets.load();
+	gQuests.load();
+	gSkillLines.load();
 	gItemDisplayInfos.load();
 	gReferenceLoots.load();
 	gCreatureLoots.load();
@@ -56,15 +63,16 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
+#if HAVE_TOTEM_CATEGORY
 	gTotemCategories.load();
+#endif
+#if HAVE_EXTENDED_COST
 	gItemExtendedCosts.load();
 	ItemExtendedCostIndex::load();
+#endif
 	gSpells.load();
 	gObjects.load();
 	gGameobjectLoots.load();
-	gItemSets.load();
-	gQuests.load();
-	gSkillLines.load();
 
 	string buffer;
 
@@ -99,8 +107,10 @@ void itemChtml::title(ostream& stream) {
 static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Sold by (npc)
 	tabs.push_back(soldBy(a));
+#if HAVE_EXTENDED_COST
 	// Currency for (item)
 	tabs.push_back(currencyFor(a));
+#endif
 	// Same model as (item)
 	tabs.push_back(sharesModel(a));
 	// Disenchants to (item)
@@ -151,17 +161,22 @@ public:
 } costSep(", ");
 
 static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
+#if HAVE_EXTENDED_COST
 	gItemExtendedCosts.load();
+#endif
 	costSep.reset();
 	if(a.buyPrice == 0 && extendedCostId <= 0) {
 		html << "No cost";
 		return;
 	}
+#if HAVE_EXTENDED_COST
 	if(a.buyPrice != 0 && (extendedCostId <= 0 || a.flagsExtra == 3))
+#endif
 		moneyHtml(html, a.buyPrice);
 	if(extendedCostId <= 0)
 		return;
 
+#if HAVE_EXTENDED_COST
 	const ItemExtendedCost* ecp = gItemExtendedCosts.find(extendedCostId);
 	if(!ecp) {
 		html << "Extended cost not found (id "<<extendedCostId<<")";
@@ -189,6 +204,7 @@ static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
 			streamNameLinkById(html, gItems, item.id);
 		}
 	}
+#endif
 }
 
 void npcColumns(tabTableChtml& t) {
@@ -221,7 +237,13 @@ static Tab* soldBy(const Item& a) {
 		else
 			r[STOCK] = toString(nv.maxcount);
 		ostringstream oss;
-		streamCostHtml(oss, a, nv.extendedCost);
+		streamCostHtml(oss, a,
+#if HAVE_EXTENDED_COST
+			nv.extendedCost
+#else
+			-1
+#endif
+		);
 		r[COST] = oss.str();
 		t.array.push_back(r);
 	}
@@ -351,11 +373,13 @@ void streamAllCostHtml(std::ostream& o, const Item& i) {
 	bool hasVendor = false;
 	for(; nip.first != nip.second; ++nip.first) {
 		hasVendor = true;
+#if HAVE_EXTENDED_COST
 		const NpcVendor& nv(*nip.first->second);
 		if(ec == -1)
 			ec = nv.extendedCost;
 		else if(ec != nv.extendedCost)
 			identicalCost = false;
+#endif
 	}
 	if(hasVendor) {
 		if(identicalCost) {
@@ -428,6 +452,7 @@ void itemRow(Row& r, const Item& i) {
 	r[COST] = oss.str();
 }
 
+#if HAVE_EXTENDED_COST
 static Tab* currencyFor(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = "currencyFor";
@@ -441,6 +466,7 @@ static Tab* currencyFor(const Item& a) {
 	t.count = t.array.size();
 	return &t;
 }
+#endif
 
 static Tab* sharesModel(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();

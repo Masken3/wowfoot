@@ -8,9 +8,11 @@
 <td>↑↓↕ spellIcon</td>
 <td>Name</td>
 <td>skillCost</td>
-<td>alternateVerb</td>
 <td>description</td>
+%#if CONFIG_WOW_VERSION > 20000
+<td>alternateVerb</td>
 <td>canLink</td>
+%#endif
 <td>categoryName</td>
 </tr>
 </thead>
@@ -32,9 +34,11 @@ Warning: invalid icon id (<%=s.spellIcon%>)
 </td>
 <td><a href="spells=<%=s.category%>.<%=itr->first%>"><%=s.name%></a></td>
 <td><%=s.skillCost%></td>
-<td><%=s.alternateVerb%></td>
 <td><%=s.description%></td>
+%#if CONFIG_WOW_VERSION > 20000
+<td><%=s.alternateVerb%></td>
 <td><%=s.canLink%></td>
+%#endif
 <td><a href="skills=<%=s.category%>">
 % if(c) {
 <%=c->name%>

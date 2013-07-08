@@ -11,7 +11,9 @@ Quest <%ESCAPE(mTitle);%> does not exist.
 <p>
 MinLevel: <%=a->minLevel%><br>
 QuestLevel: <%=a->level%><br>
+%#if CONFIG_WOW_VERSION > 30000
 MaxLevel: <%=a->maxLevel%><br>
+%#endif
 </p>
 
 <p>
@@ -26,12 +28,18 @@ Experience:
 % }
 <br>
 
+%#if (CONFIG_WOW_VERSION > 30000)
 % for(size_t i=0; i<5; i++) { int id = a->rewardFactionId[i]; if(id != 0) {
 Reputation: <%NAMELINK(gFactions, id);%> <%= rewRepValue(i) %><br>
 % } }
+%#else
+% for(size_t i=0; i<5; i++) { int id = a->rewardRepFaction[i]; if(id != 0) {
+Reputation: <%NAMELINK(gFactions, id);%> <%= a->rewardRepValue[i] %><br>
+% } }
+%#endif
 
 % if(a->rewardMailTemplateId != 0) {
-Mail: <%= a->rewardMailTemplateId %> after <%= a->rewardMailDelay %> seconds.<br>
+Mail: <%= a->rewardMailTemplateId %> after <%= a->rewardMailDelaySecs %> seconds.<br>
 % }
 
 % for(size_t i=0; i<4; i++) { int id = a->rewardItemId[i]; if(id != 0) {
@@ -56,15 +64,15 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 <p>Giver:
 % for(auto pair = gCreatureQuestGivers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
 % const QuestRelation& qr(*pair.first->second);
-<a href="npc=<%=qr.id%>"><%NAMELINK(gNpcs, qr.id);%></a><br>
+<%NAMELINK(gNpcs, qr.id);%><br>
 % }
 % for(auto pair = gObjectQuestGivers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
 % const QuestRelation& qr(*pair.first->second);
-<a href="object=<%=qr.id%>"><%NAMELINK(gObjects, qr.id);%></a><br>
+<%NAMELINK(gObjects, qr.id);%><br>
 % }
 % for(auto pair = gItems.findStartQuest(a->id); pair.first != pair.second; ++pair.first) {
 % const Item& i(*pair.first->second);
-<a href="item=<%=i.entry%>"><%NAMELINK(gItems, i.entry);%></a><br>
+><%NAMELINK(gItems, i.entry);%><br>
 % }
 </p>
 
@@ -72,16 +80,12 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 % for(auto pair = gCreatureQuestFinishers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
 % const QuestRelation& qr(*pair.first->second);
 % printf("cqf: %i\n", qr.id);
-<a href="npc=<%=qr.id%>"><%NAMELINK(gNpcs, qr.id);%></a><br>
+<%NAMELINK(gNpcs, qr.id);%><br>
 % }
 % for(auto pair = gObjectQuestFinishers.findQuest(a->id); pair.first != pair.second; ++pair.first) {
 % const QuestRelation& qr(*pair.first->second);
-<a href="object=<%=qr.id%>"><%NAMELINK(gObjects, qr.id);%></a><br>
+<%NAMELINK(gObjects, qr.id);%><br>
 % }
-</p>
-
-<p>
-% //streamQuestFinishers(stream, a);
 </p>
 
 
@@ -101,9 +105,11 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 <p>endText:<br>
 % streamWowFormattedText(stream, a->endText);
 </p>
+%#if CONFIG_WOW_VERSION > 30000
 <p>completedText:<br>
 % streamWowFormattedText(stream, a->completedText);
 </p>
+%#endif
 
 % returnCode = tabsChtml::run(stream);
 

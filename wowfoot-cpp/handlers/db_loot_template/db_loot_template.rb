@@ -20,7 +20,6 @@
 c(:int, :entry, :key),
 c(:int, :item, :key),
 renamed(:float, :chanceOrQuestChance, :chance),
-c(:int, :lootMode),
 c(:int, :groupId),
 c(:int, :minCountOrRef),
 c(:int, :maxCount),

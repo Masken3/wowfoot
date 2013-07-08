@@ -14,12 +14,15 @@
 
 #include "util/numof.h"
 
+#include "build/wowVersion.h"
 #include "build/tdb/db_creature_template.h"
 #include "build/tdb/db_gameobject_template.h"
 #include "build/tdb/db_item.h"
 #include "build/tdb/db_quest.h"
+#if CONFIG_WOW_VERSION > 30000
 #include "build/dbcAchievement/dbcAchievement.h"
 #include "build/dbcCharTitles/dbcCharTitles.h"
+#endif
 #include "build/dbcFaction/dbcFaction.h"
 #include "build/dbcItemSet/dbcItemSet.h"
 #include "build/dbcSpell/dbcSpell.h"
@@ -33,7 +36,7 @@ using namespace std;
 
 static void fatalError() __attribute((noreturn));
 static void testUrl(const string& url, ostream& tu);
-static void parse(const char* html, size_t size);
+static void parse(const char* html, size_t size, const char* url);
 static void generateUrls(vector<string>& urls);
 
 #define TCM(func) do { CURLMcode _res = (func); if(_res != CURLM_OK) { IN_FILE_ON_LINE;\
@@ -126,16 +129,18 @@ static void generateUrls(vector<string>& urls) {
 		urls.push_back(base_url+"search="+searches[i]);
 	}
 
+	PURLS("quest", gQuests);
+	PURLS("item", gItems);
+#if CONFIG_WOW_VERSION > 30000
 	PURLS("title", gTitles);
 	PURLS("achievement", gAchievements);
+#endif
 	PURLS("faction", gFactions);
 	PURLS("itemset", gItemSets);
 	PURLS("spell", gSpells);
 	PURLS("zone", gWorldMapAreas);
 	PURLS("npc", gNpcs);
 	PURLS("object", gObjects);
-	PURLS("quest", gQuests);
-	PURLS("item", gItems);
 
 	// write to disk
 	ofstream urlFile("urlsToTest.txt");
@@ -200,7 +205,7 @@ static void testUrl(const string& url, ostream& tu) {
 		exit(1);
 	}
 
-	parse(mem, memSize);
+	parse(mem, memSize, url.c_str());
 
 	// todo: SGML validation.
 	// todo: link validation.
@@ -220,7 +225,7 @@ static void fatalError() {
 	exit(1);
 }
 
-static void parse(const char* html, size_t size) {
+static void parse(const char* html, size_t size, const char* url) {
 	const char* input = html;
 	//TidyBuffer output;
 	TidyBuffer errbuf;
@@ -250,7 +255,9 @@ static void parse(const char* html, size_t size) {
 	if ( rc >= 0 )
 	{
 		if ( rc > 0 ) {
-			printf( "\nDiagnostics:\n\%s", errbuf.bp );
+			printf("\n");
+			printf("Error found in %s\n", url);
+			printf( "Diagnostics:\n\%s", errbuf.bp );
 #if 1
 			FILE* f = fopen("dump.html", "wb");
 			fwrite(html, size, 1, f);

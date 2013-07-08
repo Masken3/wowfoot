@@ -3,6 +3,12 @@ Point2D = Struct.new(:x, :y)
 AS = Struct.new(:name, :members, :count)
 ARRAY = Struct.new(:type, :offset, :count)
 
+if(CONFIG_WOW_VERSION < 20000)
+	STRING_LENGTH = 8
+else
+	STRING_LENGTH = 16
+end
+
 # member.
 def m(a,b,c)
 	DbcColumn.new(a,b,c)

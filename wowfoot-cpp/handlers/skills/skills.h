@@ -5,6 +5,7 @@
 #include "icon.h"
 #include "dbcSpellIcon.h"
 #include "itrPair.h"
+#include "wowVersion.h"
 
 class skillsChtml : public PageContext {
 public:

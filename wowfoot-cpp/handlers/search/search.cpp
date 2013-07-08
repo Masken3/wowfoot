@@ -1,15 +1,19 @@
+#include "wowVersion.h"
 #include "search.chtml.h"
 #include "dllInterface.h"
 #include "tabTable.h"
 #include "dbcSpell.h"
-#include "dbcAchievement.h"
 #include "db_item.h"
 #include "db_creature_template.h"
 #include "db_gameobject_template.h"
 #include "db_quest.h"
-#include "dbcCharTitles.h"
 #include "dbcItemSet.h"
 #include "dbcFaction.h"
+
+#if CONFIG_WOW_VERSION > 30000
+#include "dbcAchievement.h"
+#include "dbcCharTitles.h"
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -64,10 +68,12 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	gSpells.load();
 	gItems.load();
 	gNpcs.load();
+#if CONFIG_WOW_VERSION > 30000
 	gAchievements.load();
+	gTitles.load();
+#endif
 	gObjects.load();
 	gQuests.load();
-	gTitles.load();
 	gItemSets.load();
 	gFactions.load();
 
@@ -101,8 +107,10 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 	mTabs.push_back(standardSearch(gItemSets, urlPart, "Item Sets"));
 	mTabs.push_back(standardSearch(gNpcs, urlPart, "NPCs"));
 	mTabs.push_back(standardSearch(gObjects, urlPart, "Objects"));
+#if CONFIG_WOW_VERSION > 30000
 	mTabs.push_back(standardSearch(gAchievements, urlPart, "Achievements"));
 	mTabs.push_back(standardSearch(gTitles, urlPart, "Titles"));
+#endif
 	mTabs.push_back(standardSearch2(gQuests, urlPart, "Quests", &Quest::title));
 	mTabs.push_back(standardSearch(gFactions, urlPart, "Factions"));
 }

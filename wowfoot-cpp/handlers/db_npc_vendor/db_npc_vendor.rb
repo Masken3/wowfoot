@@ -4,13 +4,15 @@
 
 @struct = [
 c(:int, :entry, :key),
-c(:int, :slot),
 c(:int, :item, :key),
 c(:int, :maxcount),
-c(:int, :extendedCost, :key),
 ]
 
 @index = [
 	[:item],
-	[:extendedCost],
 ]
+
+if(CONFIG_WOW_VERSION > 20000)
+	@struct << c(:int, :extendedCost, :key)
+	@index << :extendedCost
+end

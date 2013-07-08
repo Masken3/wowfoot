@@ -2,18 +2,57 @@
 @structName = 'Quest'
 @containerType = :map
 
-@struct = [
-c(:int, :id, :key),
+def cReward(subName); ('reward' + subName).to_sym; end
+
+if(CONFIG_WOW_VERSION > 30000)
+	@struct = [
+		c(:int, :id, :key),
+		c(:int, :maxLevel),
+		c(:int, :level),	# quest level
+		c(:int, :requiredSkillId),
+		c(:int, :requiredSkillPoints),
+		c(:string, :completedText),
+		c(:int, :rewardOrRequiredMoney),
+		renamed(:int, :rewardMailDelay, :rewardMailDelaySecs),
+	]
+	def reward(subName); cReward(subName); end
+else
+	@struct = [
+		renamed(:int, :entry, :id, :key),
+		renamed(:int, :questLevel, :level),
+		renamed(:int, :requiredSkill, :requiredSkillId),
+		renamed(:int, :requiredSkillValue, :requiredSkillPoints),
+		renamed(:int, :rewOrReqMoney, :rewardOrRequiredMoney),
+		renamed(:int, :rewMailDelaySecs, :rewardMailDelaySecs),
+	]
+	def reward(subName); ('rew' + subName).to_sym; end
+
+	alias :oldEscape :cEscape
+	def cEscape(name)
+		ns = name.to_s
+		if(ns.start_with?('rew') && !ns.start_with?('reward'))
+			return ('reward' + ns[3..-1]).to_sym
+		else
+			return oldEscape(name)
+		end
+	end
+end
+def r(subName); renamed(:int, reward(subName), cReward(subName)); end
+def mr(subNames, count)
+	mc(:int, (subNames.collect do |sn | reward(sn); end), count)
+end
+
+@struct += [
 c(:int, :method),
 c(:int, :zoneOrSort),
 c(:int, :minLevel),
-c(:int, :maxLevel),
-c(:int, :level),	# quest level
+]
+@struct += [
 c(:int, :type),
 c(:int, :requiredRaces),
 c(:int, :requiredClasses),
-c(:int, :requiredSkillId),
-c(:int, :requiredSkillPoints),
+c(:int, :repObjectiveFaction),
+c(:int, :repObjectiveValue),
 c(:int, :requiredMinRepFaction),
 c(:int, :requiredMinRepValue),
 c(:int, :requiredMaxRepFaction),
@@ -25,18 +64,22 @@ c(:string, :objectives),
 c(:string, :offerRewardText),
 c(:string, :requestItemsText),
 c(:string, :endText),
-c(:string, :completedText),
-c(:int, :rewardOrRequiredMoney),
-c(:int, :rewardMoneyMaxLevel),
-c(:int, :rewardMailTemplateId),
-c(:int, :rewardMailDelay),
-mc(:int, [:rewardItemId, :rewardItemCount], 4),
-mc(:int, [:rewardChoiceItemId, :rewardChoiceItemCount], 6),
-mc(:int, [:rewardFactionId, :rewardFactionValueId, :rewardFactionValueIdOverride], 5),
-c(:int, :rewardSpell),
-c(:int, :rewardSpellCast),
+r('MoneyMaxLevel'),
+r('MailTemplateId'),
+mr(['ItemId', 'ItemCount'], 4),
+mr(['ChoiceItemId', 'ChoiceItemCount'], 6),
+r('Spell'),
+r('SpellCast'),
 ]
 
-@index = [
-	[:rewardFactionId],
-]
+if(CONFIG_WOW_VERSION > 30000)
+	@struct << mc(:int, [:rewardFactionId, :rewardFactionValueId, :rewardFactionValueIdOverride], 5)
+	@index = [
+		[:rewardFactionId],
+	]
+else
+	@struct << mc(:int, [:rewRepFaction, :rewRepValue], 5)
+	@index = [
+		[:rewRepFaction],
+	]
+end

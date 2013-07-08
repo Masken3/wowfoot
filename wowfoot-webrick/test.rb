@@ -42,16 +42,19 @@ URLS_TO_TEST = {
 
 
 puts "Reading previous results..."
-successFile = open('testedUrls.txt', 'rb+')
-RESULT_CODES[200] = 0
-successFile.each do |url|
-	TESTED_URLS[url] = 200
-	RESULT_CODES[200] += 1
+if(File.exist?('testedUrls.txt'))
+	successFile = open('testedUrls.txt', 'rb+')
+	RESULT_CODES[200] = 0
+	successFile.each do |url|
+		TESTED_URLS[url] = 200
+		RESULT_CODES[200] += 1
+	end
+	puts "#{RESULT_CODES[200]} results read."
+	# successFile writes will append now.
+	successFile.sync = true
+else
+	successFile = open('testedUrls.txt', 'wb')
 end
-puts "#{RESULT_CODES[200]} results read."
-# successFile writes will append now.
-successFile.sync = true
-
 
 # populate test list
 SEARCHES.each do |s|

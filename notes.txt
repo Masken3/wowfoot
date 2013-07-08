@@ -42,3 +42,8 @@
 uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->Effects[effIndex].TriggerSpell;
 * Irrelevant; 483 and 55884 are never used directly.
 * More commonly, look for item's spelltrigger 6.
+
+* mangos-zero uses db table "conditions". See ObjectMgr.h for enum definitions.
+* See DBCStructure.h and DBCEnums.h for DBC information.
+
+* All uses of CONFIG_WOW_VERSION are subject to correction.

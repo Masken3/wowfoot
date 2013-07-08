@@ -35,7 +35,7 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 % }
 % }
 </td>
-<td class="name"><a href="spell=<%=s.id%>"><%=s.name%>
+<td class="name"><a href="spell=<%=s.id%>"><%ESCAPE(s.name);%>
 % if(s.rank) if(s.rank[0]) {
 (<%=s.rank%>)
 % }
