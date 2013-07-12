@@ -4,6 +4,7 @@
 
 @id = 0
 @struct = [
+	m(:int, 'id', 0),
 	m(:int, 'category', 1),	# id into SkillLineCategory
 	m(:int, 'skillCost', 2),
 	m(:string, 'name', 3),

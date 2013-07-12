@@ -390,15 +390,19 @@ DbcWork.new('dbcSpellMechanic')
 DbcWork.new('dbcSkillLineAbility')
 DbcWork.new('dbcSkillLine')
 DbcWork.new('dbcSkillLineCategory')
+DbcWork.new('dbcLock', ['db_creature_template', 'db_gameobject_template', 'db_item'])
 
 HandlerWork.new('pageContext')
 HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
+HandlerWork.new('skillShared', ['dbcLock', 'dbcSkillLine'])
+HandlerWork.new('questShared')
 
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	'db_quest', 'db_creature_template',
 	'db_gameobject_template', 'dbcFaction',
+	'questShared',
 ] + DBC_ACHIEVEMENT_COND
 HandlerWork.new('comments', commentDeps).instance_eval do
 	@LIBRARIES << 'sqlite3'
@@ -441,7 +445,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo',
-	'dbcSkillLine',
+	'dbcSkillLine', 'questShared',
 	'db_questrelation', 'db_quest'] + DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
@@ -465,11 +469,16 @@ PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcSpellIcon', 'icon',
 	'dbcSkillLineAbility', 'dbcSkillLine',
 	'db_npc_trainer', 'db_creature_template',
+	'skillShared',
 	], {:constructor => true})
 PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
 	{:constructor => true})
 PageWork.new('skills', ['tabs', 'tabTable', 'dbcSkillLine', 'dbcSkillLineCategory',
 	'dbcSpellIcon', 'icon'])
+PageWork.new('skill', ['tabTable', 'tabs', 'comments', 'dbcLock', 'dbcSpell', 'icon',
+	'dbcItemDisplayInfo', 'dbcSkillLineAbility', 'dbcSkillLine', 'skillShared',
+	'db_gameobject_template'],
+	{:constructor => true})
 
 WFC = @wfc = ExeWork.new
 @wfc.instance_eval do

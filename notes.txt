@@ -45,5 +45,6 @@ uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? dam
 
 * mangos-zero uses db table "conditions". See ObjectMgr.h for enum definitions.
 * See DBCStructure.h and DBCEnums.h for DBC information.
+* See individual files for sql database structure.
 
 * All uses of CONFIG_WOW_VERSION are subject to correction.

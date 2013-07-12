@@ -1,0 +1,44 @@
+% if(!mPair) {
+Not found.
+% return 404; }
+
+<p>List locks:</p>
+
+% if(mPair) {
+<table class="tab" summary="spells">
+<!-- Title row -->
+<thead><tr>
+<td>ID</td>
+<td>Icon/item</td>
+<td>Name</td>
+<td>Source</td>
+<td>Skill</td>
+</tr></thead>
+
+<tbody>
+%#if 0
+<tr>
+<td><%=lock.id%></td>
+<td class="name"></td>
+<td class="source">
+% int requiredSkillLevel = streamSource(stream, s.id);
+</td>
+<td class="skill">
+% auto slas = SkillLineAbilityIndex::findSpell(s.id);
+% for(; slas.first != slas.second; ++slas.first) {
+% const SkillLineAbility* sla = slas.first->second;
+<%=sla->reqSkillValue%>
+% if(requiredSkillLevel >= 0) {
+<span class="skillRed"><%=requiredSkillLevel%></span>
+% }
+<span class="skillYellow"><%=sla->minValue%></span>
+<span class="skillGreen"><%=sla->maxValue - (sla->maxValue - sla->minValue) / 2%></span>
+<span class="skillGray"><%=sla->maxValue%></span>
+% }
+</td>
+</tr>
+%#endif
+</tbody>
+</table>
+
+% }

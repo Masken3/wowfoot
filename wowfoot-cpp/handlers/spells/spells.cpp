@@ -7,6 +7,7 @@
 #include "dbcSkillLine.h"
 #include "db_npc_trainer.h"
 #include "db_creature_template.h"
+#include "skillShared.h"
 
 void spellsChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
@@ -81,26 +82,14 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 		mPair = new SimpleItrPair<Spells, SpellActiveIconTest>(gSpells.begin(), gSpells.end());
 	} else {
 		// otherwise: list category spells.
-		// format: <category>.<skill>
-		int categoryId, skillId;
-		uint len;
-		int res = sscanf(urlPart, "%i.%i%n", &categoryId, &skillId, &len);
-		EASSERT(res == 2);
-		printf("category: %i. skill: %i. len: %i\n", categoryId, skillId, len);
-		EASSERT(len == strlen(urlPart));
-		const SkillLine* sl = gSkillLines.find(skillId);
+		const SkillLine* sl = parseSkillId(os, urlPart);
 		if(!sl) {
 			mTitle = urlPart;
-			os << "Skill not found.\n";
-			return;
-		}
-		if(sl->category != categoryId) {
-			mTitle = urlPart;
-			os << "Skill not found in category.\n";
+			drd->code = 404;
 			return;
 		}
 		mTitle = sl->name;
-		mPair = new SkillLinePair(skillId);
+		mPair = new SkillLinePair(sl->id);
 	}
 }
 
