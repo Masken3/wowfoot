@@ -556,7 +556,8 @@ bool MemImage::LoadFromBLP(const char* filename, FORMATID* blpTypeRet)
 	DWORD dwFileBytes = ::ftell(fileInput);
 	BYTE* fileBuffer = new BYTE[dwFileBytes];
 	::fseek(fileInput, 0, SEEK_SET);
-	::fread(fileBuffer, dwFileBytes, 1, fileInput);
+	if(::fread(fileBuffer, dwFileBytes, 1, fileInput) != 1)
+		abort();
 	::fclose(fileInput);
 
 	bool res = LoadFromBLP(fileBuffer, dwFileBytes);

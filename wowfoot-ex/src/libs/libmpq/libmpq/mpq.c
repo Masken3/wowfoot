@@ -868,6 +868,7 @@ int32_t libmpq__block_read(mpq_archive_s *mpq_archive, uint32_t file_number, uin
 	libmpq__off_t block_offset  = 0;
 	off_t in_size       = 0;
 	libmpq__off_t unpacked_size = 0;
+	int res;
 
 	/* check if given file number is not out of range. */
 	CHECK_FILE_NUM(file_number, mpq_archive)
@@ -912,7 +913,8 @@ int32_t libmpq__block_read(mpq_archive_s *mpq_archive, uint32_t file_number, uin
 	}
 
 	/* read block from file. */
-	if (fread(in_buf, 1, in_size, mpq_archive->fp) < 0) {
+	res = fread(in_buf, 1, in_size, mpq_archive->fp);
+	if (res < 0) {
 
 		/* free buffers. */
 		free(in_buf);

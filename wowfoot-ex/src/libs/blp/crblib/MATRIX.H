@@ -4,7 +4,7 @@
 #include <crblib/inc.h>
 #include <stdio.h>
 
-#include "vector.h"
+#include "VECTOR.H"
 
 typedef struct
 {

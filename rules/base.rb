@@ -6,7 +6,7 @@ require 'thread'
 # puts is not atomic; its newline can be written after another thread has written more stuff.
 # write seems safer.
 # update: not even write() was thread-safe. time for a mutex.
-class IO
+module Kernel
 	@@mutex = Mutex.new
 	def puts(str)
 		@@mutex.synchronize do
@@ -87,8 +87,8 @@ class Task
 			p self.class, o.class if(log)
 			return false
 		end
-		a = self.instance_variables - uncomparedVariables
-		b = o.instance_variables - uncomparedVariables
+		a = self.instance_variables.reject do |iv| uncomparedVariables.include?(iv.to_sym) end
+		b = o.instance_variables.reject do |iv| uncomparedVariables.include?(iv.to_sym) end
 		if(a != b)
 			p a, b if(log)
 			return false
@@ -136,6 +136,7 @@ class Works
 	# Run all scheduled tasks. Don't stop until they're all done, or one fails.
 	# If one fails, let the other running ones complete before returning.
 	def self.run
+		return if(@@error)
 		return if(@@tasks.empty?)
 
 		puts "starting multi-processing..."
@@ -155,6 +156,7 @@ class Works
 					@@mutex.synchronize do
 						prettyPrintException(e, 0, WorkError)
 						@@abort = true
+						@@error = true
 						# @@threadNames.size needs to be up-to-date.
 						@@threadNames.delete(Thread.current.object_id)
 					end
@@ -265,6 +267,7 @@ class Works
 	@@goals = []
 	@@mutex = Mutex.new	# protects access to @@abort, @@waitingThreads, @@tasks and @@nextTask.
 	@@cond = ConditionVariable.new	# signaled when @@tasks or @@abort changes.
+	@@error = false
 
 	def self.reset
 		# used to deduplicate identical tasks,

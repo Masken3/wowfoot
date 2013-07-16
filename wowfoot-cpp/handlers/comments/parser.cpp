@@ -60,7 +60,7 @@ static const char* fixTag(const char* ptr, const char* endPtr) {
 void Parser::parse(const char* src) {
 	const char* ptr = src;
 	mNodeStart = ptr;
-	mbtowc(NULL, NULL, 0);	// reset shift state.
+	ERRNO(mbtowc(NULL, NULL, 0));	// reset shift state.
 	while(*ptr) {
 		// skip invalid utf-8 sequences.
 		wchar_t w;

@@ -141,7 +141,7 @@ class DllWork
 			#p proc
 			# Can be optimized by caching the exe search result.
 			# Seems fast enough for now.
-			if(File.exists?(proc+'/exe')); if(File.readlink(proc+'/exe') == WFC.target.to_s)
+			if(File.exists?(proc+'/exe')); if(File.readlink(proc+'/exe') == WFC.to_s)
 				#puts "Found #{proc}"
 				open(proc+'/maps', 'r').each do |line|
 					if(line.index(@NAME))
@@ -199,6 +199,7 @@ COMMON = LibWork.new do
 	WORKS << self
 end
 
+if(HOST == :win32)
 WIN32 = DllWork.new do
 	@SOURCES = ['win32']
 	@EXTRA_INCLUDES = ['win32']
@@ -206,6 +207,7 @@ WIN32 = DllWork.new do
 		'win32.cpp' => ' -Wno-missing-format-attribute',
 	}
 	@NAME = 'win32'
+end
 end
 
 class CCompileWork
@@ -554,7 +556,7 @@ TEST = ExeWork.new do
 	def run; sh @TARGET; end
 end
 
-def cmd; "#{@wfc.target} #{@wfc.buildDir}"; end
+def cmd; "#{@wfc} #{@wfc.buildDir}"; end
 
 target :base do
 	common.invoke

@@ -1,6 +1,6 @@
 //-{-------
 
-#include "matrix.h"
+#include "MATRIX.H"
 
 #define EPSILON	(0.0001f)
 
@@ -10,12 +10,12 @@ Matrix * Matrix_Create(uint dim)
 {
 Matrix * m;
 uint r;
-	
-	m = new(Matrix);
+
+	m = new Matrix;
 	assert(m);
 
 	m->dimension = dim;
-	m->rows = malloc(sizeofpointer*dim);
+	m->rows = (Vector**)malloc(sizeofpointer*dim);
 
 	assert(m->rows);
 	for(r=0;r<m->dimension;r++)
@@ -56,7 +56,7 @@ uint r;
 return ret;
 }
 
-void Matrix_SetIdentity(Matrix * m)
+static void Matrix_SetIdentity(Matrix * m)
 {
 uint r,dim;
 	dim = m->dimension;
@@ -99,10 +99,11 @@ Matrix * Matrix_CreateFromFile(FILE *fp)
 Matrix * m;
 uint dim;
 	assert(fp);
-	fscanf(fp,"%d",&dim);
+	if(fscanf(fp,"%d",&dim) < 0)
+		return NULL;
 	if ( dim == 0 )
 		return NULL;
-	
+
 	m = Matrix_Create(dim);
 
 	Matrix_SetFromFile(m,fp);
@@ -113,7 +114,7 @@ void Matrix_SetFromFile(Matrix *m,FILE *fp)
 {
 uint r;
 	assert(m && fp);
-	
+
 	for(r=0;r<m->dimension;r++)
 	{
 		Vector_SetFromFile(m->rows[r],fp);
@@ -128,10 +129,10 @@ double * row;
 	assert( to && by );
 	assert( to != by );
 	assert( to->dimension == by->dimension );
-	
+
 	dim = to->dimension;
 
-	row = malloc(sizeof(double)*dim);
+	row = (double*)malloc(sizeof(double)*dim);
 
 	for(r=0;r<dim;r++)
 	{
@@ -143,7 +144,7 @@ double * row;
 			// row r of m1 & column c of m2
 			for(i=0;i<dim;i++)
 			{
-				val += row[i] * by->rows[i]->element[c];	
+				val += row[i] * by->rows[i]->element[c];
 			}
 			to->rows[r]->element[c] = val;
 		}
@@ -159,7 +160,7 @@ uint r,c,i,dim;
 	assert( to && m1 && m2 );
 	assert( to != m1 && to != m2 );
 	assert( to->dimension == m1->dimension && m1->dimension == m2->dimension );
-	
+
 	dim = to->dimension;
 
 	for(r=0;r<dim;r++)
@@ -171,7 +172,7 @@ uint r,c,i,dim;
 			// row r of m1 & column c of m2
 			for(i=0;i<dim;i++)
 			{
-				val += m1->rows[r]->element[i] * m2->rows[i]->element[c];	
+				val += m1->rows[r]->element[i] * m2->rows[i]->element[c];
 			}
 			to->rows[r]->element[c] = val;
 		}
@@ -258,7 +259,7 @@ Matrix * m;
 
 			if ( r == c )
 				continue;
-				
+
 			cur = m->rows[r]->element[c];
 			if ( ABS(cur) < EPSILON )
 			{
@@ -267,7 +268,7 @@ Matrix * m;
 			else
 			{
 				cur = - cur/val; // the scale to make the rows[r]->column[c] zero
-					
+
 				Vector_AddScaled(inv->rows[r],inv->rows[r], cur, inv->rows[c]);
 
 				// all the elements before c should be 0 or 1 already

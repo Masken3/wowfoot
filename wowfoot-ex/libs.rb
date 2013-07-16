@@ -21,6 +21,9 @@ CRBLIB = LibWork.new do
 	@EXTRA_INCLUDES = ['src/libs/blp']
 	@EXTRA_CFLAGS = commonFlags + ' -Wno-error'
 	#@EXTRA_LINKFLAGS = ' -symbolic'
+	@SPECIFIC_CFLAGS = {
+		'MATRIX.C' => ' -Wno-uninitialized',
+	}
 	@LIBRARIES = []
 	@NAME = 'crblib'
 end
@@ -31,6 +34,9 @@ PALBMP = LibWork.new do
 	@EXTRA_INCLUDES = ['src/libs/blp']
 	@EXTRA_CFLAGS = commonFlags
 	#@EXTRA_LINKFLAGS = ' -symbolic'
+	@SPECIFIC_CFLAGS = {
+		'palettize.c' => ' -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast',
+	}
 	@LIBRARIES = []
 	@NAME = 'palbmp'
 end

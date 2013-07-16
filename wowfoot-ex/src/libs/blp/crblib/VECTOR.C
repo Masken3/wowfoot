@@ -1,6 +1,6 @@
 //-{----------
 
-#include "vector.h"
+#include "VECTOR.H"
 #include <math.h> // for sqrt()
 
 //-}{----------- create/destroy stuff ------------------------------------------
@@ -9,10 +9,10 @@ Vector * Vector_Create(uint length)
 {
 Vector * v;
 	assert( length > 0 );
-	v = new(Vector);
+	v = new Vector;
 	assert(v);
 	v->length = length;
-	v->element = malloc(sizeof(v->element[0])*length);
+	v->element = (double*)malloc(sizeof(v->element[0])*length);
 	assert(v->element);
 return v;
 }
@@ -44,10 +44,11 @@ Vector * Vector_CreateFromFile(FILE *fp)
 Vector * v;
 uint dim;
 	assert(fp);
-	fscanf(fp,"%d",&dim);
+	if(fscanf(fp,"%d",&dim) < 0)
+		return NULL;
 	if ( dim == 0 )
 		return NULL;
-	
+
 	v = Vector_Create(dim);
 
 	Vector_SetFromFile(v,fp);
@@ -61,7 +62,8 @@ uint c;
 	for(c=0;c<v->length;c++)
 	{
 	double val;
-		fscanf(fp,"%f",&val);
+		if(fscanf(fp,"%lf",&val) < 0)
+			abort();
 		v->element[c] = val;
 	}
 }
