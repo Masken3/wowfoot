@@ -1,30 +1,24 @@
 #!/usr/bin/ruby
 
-require File.expand_path '../rules/exe.rb'
-require File.expand_path '../rules/targets.rb'
+require File.expand_path '../rules/cExe.rb'
 
-work = ExeWork.new
-work.instance_eval do
+work = ExeWork.new do
 	@SOURCES = ['src']
 	@EXTRA_INCLUDES = ['src']
 	@LIBRARIES = ['sqlite3']
 	@NAME = 'import'
 end
 
-target :default do
-	work.invoke
+target :run do
+	sh "#{work}"
 end
 
-target :run => :default do
-	sh "#{work.target}"
+target :gdb do
+	sh "gdb --args #{work}"
 end
 
-target :gdb => :default do
-	sh "gdb --args #{work.target}"
+target :mc do
+	sh "valgrind --leak-check=full #{work}"
 end
 
-target :mc => :default do
-	sh "valgrind --leak-check=full #{work.target}"
-end
-
-Targets.invoke
+Works.run

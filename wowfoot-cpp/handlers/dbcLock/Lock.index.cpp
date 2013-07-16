@@ -11,6 +11,7 @@
 #include "util/arraySize.h"
 #include "util/stl_map_insert.h"
 #include "lockEnums.h"
+#include "win32.h"
 
 using namespace std;
 using namespace LockIndex;

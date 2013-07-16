@@ -1,7 +1,7 @@
-require File.expand_path '../rules/task.rb'
+require File.expand_path '../rules/work.rb'
 
 class ChtmlCompileTask < MultiFileTask
-	def initialize(work, builddir, name, src, isPage, options)
+	def initialize(builddir, name, src, isPage, options)
 		@name = name
 		@cpp = "#{builddir}/#{name}.chtml.cpp"
 		@header = "#{builddir}/#{name}.chtml.h"
@@ -10,12 +10,13 @@ class ChtmlCompileTask < MultiFileTask
 		@isPage = isPage
 		@options = options
 
-		super(work, @cpp, @header)
-		@prerequisites << DirTask.new(work, builddir)
-		@prerequisites << FileTask.new(work, @src)
-		@prerequisites << FileTask.new(work, __FILE__)
+		@prerequisites ||= []
+		@prerequisites << DirTask.new(builddir)
+		@prerequisites << FileTask.new(@src)
+		@prerequisites << FileTask.new(__FILE__)
+		super(@cpp, [@header])
 	end
-	def execute
+	def fileExecute
 		src = File.new(@src, 'r')
 		cpp = File.new(@cpp, 'w')
 		header = File.new(@header, 'w')

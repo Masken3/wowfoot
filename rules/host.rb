@@ -15,40 +15,25 @@
 # 02111-1307, USA.
 
 # This file defines a few constants that describe the host environment.
-# HOST, Symbol. Either :linux or :win32.
-# DLL_FILE_ENDING, String. The file ending of DLL files.
-# EXE_FILE_ENDING, String. The file ending of executable files.
+# HOST, Symbol. Either :linux, :darwin or :win32.
+# HOST_DLL_FILE_ENDING, String. The file ending of DLL files.
+# HOST_EXE_FILE_ENDING, String. The file ending of executable files.
 
 # On Linux only:
-# SDL_SOUND, boolean. True if SDL_Sound is available.
-# BLUETOOTH, boolean. True if Bluez is available.
+# HOST_HAS_SDL_SOUND, boolean. True if SDL_Sound is available.
+# HOST_HAS_BLUETOOTH, boolean. True if Bluez is available.
 
-require "#{File.dirname(__FILE__)}/error.rb"
 
-begin
-	UNAME = open("|uname").readline().strip()
-rescue SystemCallError
-	UNAME = "windows32"
-end
-
-if(UNAME == "Linux")
+if(RUBY_PLATFORM =~ /linux/)
 	HOST = :linux
-elsif(UNAME == "MINGW32_NT-5.1")
+elsif(RUBY_PLATFORM =~ /win32/)
 	HOST = :win32
-elsif(UNAME == "MINGW32_NT-6.0")
+elsif(RUBY_PLATFORM =~ /mingw32/)
 	HOST = :win32
-elsif(UNAME == "MINGW32_NT-6.1")
-	HOST = :win32
-elsif(UNAME == "windows32")
-	HOST = :win32
-elsif(UNAME == "CYGWIN_NT-5.1")
-	HOST = :win32
-elsif(UNAME == "CYGWIN_NT-6.1-WOW64")
-	HOST = :win32
-elsif(UNAME == "Darwin")
+elsif(RUBY_PLATFORM =~ /darwin/)
 	HOST = :darwin
 else
-	error("Unknown platform: #{UNAME}")
+	raise "Unknown platform: #{RUBY_PLATFORM}"
 end
 
 if(HOST == :linux)
@@ -70,7 +55,6 @@ if(HOST == :linux)
 	elsif ( File.exist?( "/etc/slackware_version" ) )
 		HOST_PLATFORM = :slackware
 	elsif ( File.exist?( "/etc/debian-release" ) )
-
 		HOST_PLATFORM = :debian
 	elsif ( File.exist?( "/etc/debian_version" ) )
 		HOST_PLATFORM = :debian
@@ -78,28 +62,32 @@ if(HOST == :linux)
 		HOST_PLATFORM = :mandrake
 	elsif ( File.exist?( "/etc/gentoo-release" ) )
 		HOST_PLATFORM = :gentoo
+	elsif ( File.exist?( "/etc/arch-release" ) )
+		HOST_PLATFORM = :arch
+	else
+		raise 'Unknown Linux platform'
 	end
 
-	SDL_SOUND = File.exist?( "/usr/include/SDL/SDL_sound.h" )
-	BLUETOOTH = File.exist?( "/usr/include/bluetooth/bluetooth.h" )
+	HOST_HAS_SDL_SOUND = File.exist?( "/usr/include/SDL/SDL_sound.h" )
+	HOST_HAS_BLUETOOTH = File.exist?( "/usr/include/bluetooth/bluetooth.h" )
 end
 
 #warning("Platform: #{HOST}")
 
 if(HOST == :win32) then
-	DLL_FILE_ENDING = '.dll'
-	EXE_FILE_ENDING = '.exe'
-	FOLDER_SEPARATOR = '\\'
+	HOST_DLL_FILE_ENDING = '.dll'
+	HOST_EXE_FILE_ENDING = '.exe'
+	HOST_FOLDER_SEPARATOR = '\\'
 elsif(HOST == :darwin)
-	DLL_FILE_ENDING = '.dylib'
-	EXE_FILE_ENDING = ''
-	FOLDER_SEPARATOR = '/'
+	HOST_DLL_FILE_ENDING = '.dylib'
+	HOST_EXE_FILE_ENDING = ''
+	HOST_FOLDER_SEPARATOR = '/'
 else
-	DLL_FILE_ENDING = '.so'
-	EXE_FILE_ENDING = ''
-	FOLDER_SEPARATOR = '/'
+	HOST_DLL_FILE_ENDING = '.so'
+	HOST_EXE_FILE_ENDING = ''
+	HOST_FOLDER_SEPARATOR = '/'
 end
-NATIVE_LIB_FILE_ENDING = '.a'
+HOST_LIB_FILE_ENDING = '.a'
 
 # Compares two filenames, taking host-dependent case sensitivity into account.
 def filenamesEqual(a, b)

@@ -8,6 +8,7 @@
 #include "db_npc_trainer.h"
 #include "db_creature_template.h"
 #include "skillShared.h"
+#include "win32.h"
 
 void spellsChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)

@@ -23,6 +23,12 @@ class ERB
 	end
 end
 
+class String
+	def tdbCapitalize
+		return self[0,1].capitalize + self[1..-1]
+	end
+end
+
 # escape C++ keywords
 def cEscape(name)
 	return 'class_' if(name.to_s == 'class')
@@ -37,27 +43,27 @@ class TdbGenTask < MemoryGeneratedFileTask
 		:string => 'CDT_STRING',
 		:float => 'CDT_FLOAT',
 	}
-	def load(work, name, dstName)
+	def load(name, dstName)
 		return if(@loaded)
 		src = "handlers/#{name}/#{name}.rb"
-		@prerequisites = [DirTask.new(self, TDB_BUILDDIR)]
+		@builddir = DirTask.new(TDB_BUILDDIR + '/' + name)
+		@prerequisites = [@builddir]
 		instance_eval(open(src).read, src)
 		@loaded = true
 		if(!@tables)
 			if(@prefixes)
 				@tables = []
 				@prefixes.each do |pre|
-					@tables << Table.new("#{pre}#{@mysql_db_name}", "#{pre.capitalize}#{@structName}s")
+					@tables << Table.new("#{pre}#{@mysql_db_name}", "#{pre.tdbCapitalize}#{@structName}s")
 				end
 			else
 				@tables = [Table.new(@mysql_db_name, "#{@structName}s")]
 			end
 		end
 	end
-	def initialize(work, name, template, dstName)
-		load(work, name, dstName)
-		dst = "#{TDB_BUILDDIR}/#{dstName}"
-		super(work, dst)
+	def initialize(name, template, dstName)
+		load(name, dstName)
+		dst = "#{@builddir}/#{dstName}"
 		upName = name.upcase
 
 		@names = {}	# members by name. includes sub-members of arrays.
@@ -96,12 +102,13 @@ class TdbGenTask < MemoryGeneratedFileTask
 		#p self.class.to_s
 		#puts template
 		@buf = ERB.new(template).result(binding)
+		super(dst)
 	end
 end
 
 IF_INDEX = %q{
 <% if(@index) then @index.each do |args|
-capArgs = args.collect {|arg| arg.to_s.capitalize; }.join
+capArgs = args.collect {|arg| arg.to_s.tdbCapitalize; }.join
 iitr = capArgs + 'Itr'
 imap = capArgs + 'Map'
 istruct = capArgs + 'Struct'
@@ -110,7 +117,7 @@ ipair = capArgs + 'Pair'
 }
 
 class TdbStructHeaderTask < TdbGenTask
-	def initialize(work, name)
+	def initialize(name)
 		template = %q(
 #ifndef <%=upName%>_STRUCT_H
 #define <%=upName%>_STRUCT_H
@@ -136,12 +143,12 @@ struct <%=@structName%> {<% @struct.each do |col|
 
 #endif	//<%= upName %>_STRUCT_H
 )
-		super(work, name, template, "#{name}.struct.h")
+		super(name, template, "#{name}.struct.h")
 	end
 end
 
 class TdbFormatHeaderTask < TdbGenTask
-	def initialize(work, name)
+	def initialize(name)
 		template = %q{
 #ifndef <%=upName%>_FORMAT_H
 #define <%=upName%>_FORMAT_H
@@ -157,14 +164,14 @@ static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
 
 #endif	//<%= upName %>_FORMAT_H
 }
-		super(work, name, template, "#{name}.format.h")
+		super(name, template, "#{name}.format.h")
 	end
 end
 
 class TdbExtHeaderTask < TdbGenTask
-	def initialize(work, name)
+	def initialize(name)
 		dstName = "#{name}.h"
-		load(work, name, dstName)
+		load(name, dstName)
 		@cppContainerName = 'ConstMap'
 		@cppContainer = "ConstMap<int, #{@structName}>"
 		if(@containerType == :set)
@@ -224,12 +231,12 @@ extern <%=@structName%>s g<%=t.structName%> VISIBLE;<% end %>
 
 #endif	//<%=upName%>_H
 )
-		super(work, name, template, dstName)
+		super(name, template, dstName)
 	end
 end
 
 class TdbCppTask < TdbGenTask
-	def initialize(work, name)
+	def initialize(name)
 		template = %q(
 #define __STDC_FORMAT_MACROS
 #include "<%=name%>.h"
@@ -286,6 +293,6 @@ static CriticalSectionLoadGuard sCS<%=t.structName%>;
 }
 <%end; end%>
 )
-		super(work, name, template, "#{name}.cpp")
+		super(name, template, "#{name}.cpp")
 	end
 end

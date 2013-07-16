@@ -14,21 +14,11 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
+require "#{File.dirname(__FILE__)}/config.rb"
 
 # This module contains functions for saving and comparing compile or link flags.
 # execFlags and flagsNeeded require the function "cFlags".
 module FlagsChanged
-	# Call from initialize.
-	def initFlags
-		# save cflags to disk, for use as dependency.
-		# but first read it back from disk, if existing.
-		@FLAGSFILE = @NAME + ".flags"
-		if(File.exists?(@FLAGSFILE)) then
-			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read }
-		end
-		#puts "Oldflags: #{@OLDFLAGS.inspect}"
-	end
-
 	# Call from execute.
 	def execFlags
 		if(@OLDFLAGS != cFlags) then
@@ -37,14 +27,22 @@ module FlagsChanged
 		end
 	end
 
-	# Call from needed?.
-	def flagsNeeded?(log=true)
-		if(@OLDFLAGS != cFlags)
-			puts "Because the flags have changed:" if(log)
-			puts "Old: #{@OLDFLAGS}" if(log)
-			puts "New: #{cFlags}" if(log)
-			return true
+	def setNeeded
+		@FLAGSFILE = @NAME + ".flags"
+		super
+		if(File.exists?(@FLAGSFILE)) then
+			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read }
+		else
+			@needed = "Because the flags file is missing:"
+			return
 		end
-		return false
+		if(!@needed && @OLDFLAGS != cFlags)
+			@needed = "Because the flags have changed:"
+			@needed << "\nOld: #{@OLDFLAGS}" if(PRINT_FLAG_CHANGES)
+			@needed << "\nNew: #{cFlags}\n" if(PRINT_FLAG_CHANGES)
+			#p @OLDFLAGS, cFlags
+			#p (@OLDFLAGS == cFlags)
+			#raise hell
+		end
 	end
 end

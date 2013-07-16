@@ -87,7 +87,8 @@ template<class Base, size_t MaxSize> template<class T>
 T& varray<Base, MaxSize>::add_copy(const T& t) {
 	char buf[MaxSize];
 	memcpy(buf, &t, MaxSize);
-	return add(*(T*)buf);
+	T* ptr((T*)buf);
+	return add(*ptr);
 }
 
 template<class Base, size_t MaxSize>

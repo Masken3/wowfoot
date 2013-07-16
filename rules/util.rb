@@ -14,10 +14,6 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-require "#{File.dirname(__FILE__)}/error.rb"
-require "#{File.dirname(__FILE__)}/host.rb"
-require 'singleton'
-
 $stdout.sync = true
 $stderr.sync = true
 
@@ -44,25 +40,28 @@ def get_class_var(c, sym)
 	c.send(:class_variable_get, sym)
 end
 
+require "#{File.dirname(__FILE__)}/error.rb"
+require "#{File.dirname(__FILE__)}/host.rb"
+require 'singleton'
+
 class String
 	def ext(newEnd)
 		doti = rindex('.')
 		slashi = rindex('/')
-		if(doti && slashi) then if(slashi > doti) then
+		if((doti && slashi && slashi > doti) || !doti)
 			return self + newEnd
-		end end
+		end
 		return self[0, doti] + newEnd
 	end
 
 	def getExt
 		doti = rindex('.')
 		slashi = rindex('/')
-		if(doti && slashi) then
-			if(slashi > doti) then
-				return nil
-			end
+		if(doti)
+			return nil if(slashi && slashi > doti)
+			return self[doti..self.length]
 		end
-		return self[doti..self.length]
+		return nil
 	end
 
 	def noExt
@@ -80,44 +79,47 @@ class String
 		return false if(self.length < with.length)
 		return self[-with.length, with.length] == with
 	end
-
-	def capitalize
-		return self[0,1].upcase + self[1..-1]
-	end
 end
 
 def sh(cmd)
 	# Print the command to stdout.
 	puts cmd
-	if(!system(cmd)) then
-		error "Command failed: '#{$?}'"
-	end
-	return
-	# Open a process.
-	IO::popen(cmd, :err=>[:child, :out]) do |io|
-		# Pipe the process's output to our stdout.
-		while !io.eof?
-			line = io.gets
-			puts line
-		end
-		# Check the return code
-		exitCode = Process::waitpid2(io.pid)[1].exitstatus
-		if(exitCode != 0) then
-			error "Command failed, code #{exitCode}"
+	if(false)#HOST == :win32)
+		success = system(cmd)
+		error "Command failed" unless(success)
+	else
+		# Open a process.
+		#IO::popen(cmd + " 2>&1") do |io|
+		IO::popen(cmd) do |io|
+			# Pipe the process's output to our stdout.
+			while !io.eof?
+				line = io.gets
+				puts line
+			end
+			# Check the return code
+			exitCode = Process::waitpid2(io.pid)[1].exitstatus
+			if(exitCode != 0)
+				error "Command failed, code #{exitCode}"
+			end
 		end
 	end
 end
 
 class Object
 	def need(*args)
-		vars = instance_variables.inject({}) { |h,var| h[var.to_sym] = true; h }
-		#puts instance_variables
-		#puts vars.inspect
 		args.each do |var|
-			var = var.to_sym
-			#puts "#{var}: #{vars[var].inspect}"
-			if(!vars[var])
-				error "Undefined variable: #{var}"
+			if(instance_variable_get(var) == nil)
+				raise "Undefined variable: #{var}"
+			end
+		end
+	end
+end
+
+class Hash
+	def need(*keys)
+		keys.each do |key|
+			if(!self[key])
+				raise "Undefined key: #{key}"
 			end
 		end
 	end
@@ -139,17 +141,21 @@ HashMergeAdd = Proc.new {|key, old, new| old + new }
 
 # returns a command-line string with the correct invocation of sed for all platforms
 def sed(script)
-	file = open("|sed --version 2>&1")
-	if((file.gets.beginsWith('GNU sed') && HOST != :win32) ||
-		HOST == :darwin)
+	if(@@sedIsGnu == nil)
+		open("|sed --version 2>&1") do |file|
+			@@sedIsGnu = file.gets.beginsWith('GNU sed')
+		end
+	end
+	if((@@sedIsGnu && HOST != :win32) || HOST == :darwin)
 		return "sed '#{script}'"
 	else
 		return "sed #{script}"
 	end
 end
 
-# EarlyTime is a fake timestamp that occurs _before_ any other time value.
+# EarlyTime is a fake time that occurs _before_ any other time value.
 # Its instance is called EARLY.
+# Equivalent to a file not existing.
 class EarlyTime
 	include Comparable
 	include Singleton
@@ -165,7 +171,7 @@ class EarlyTime
 end
 EARLY = EarlyTime.instance
 
-# LateTime is a fake timestamp that occurs _after_ any other time value.
+# LateTime is a fake time that occurs _after_ any other time value.
 # Its instance is called LATE.
 class LateTime
 	include Comparable
@@ -182,15 +188,12 @@ class LateTime
 end
 LATE = LateTime.instance
 
-# Extension to the standard Time class to allow comparison with EarlyTime and LateTime.
 class Time
-	alias work_original_compare :<=>
+	alias_method(:old_comp, :<=>)
 	def <=>(other)
-		if(other.instance_of?(EarlyTime) || other.instance_of?(LateTime))
-			return - other.<=>(self)
-		else
-			return work_original_compare(other)
-		end
+		return 1 if(other.instance_of?(EarlyTime))
+		return -1 if(other.instance_of?(LateTime))
+		return old_comp(other)
 	end
 end
 
@@ -221,4 +224,34 @@ end
 
 def max(a, b)
 	return (a > b) ? a : b
+end
+
+def aprint(a)
+	print "["
+	first = true
+	a.each do |item|
+		if(first) then
+			first = false
+		else
+			print ", "
+		end
+		print item
+	end
+	print "]\n"
+end
+
+def number_of_processors
+  if HOST == :linux
+    return `cat /proc/cpuinfo | grep processor | wc -l`.to_i
+  elsif HOST == :darwin
+    return `sysctl -n hw.logicalcpu`.to_i
+  elsif HOST == :win32
+    # this works for windows 2000 or greater
+    require 'win32ole'
+    wmi = WIN32OLE.connect("winmgmts://")
+    wmi.ExecQuery("select * from Win32_ComputerSystem").each do |system|
+      return system.NumberOfLogicalProcessors
+    end
+  end
+  raise "can't determine 'number_of_processors' for '#{HOST}'"
 end

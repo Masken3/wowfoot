@@ -1,8 +1,9 @@
 #!/usr/bin/ruby
 
 require File.expand_path '../rules/host.rb'
-require File.expand_path '../rules/exe.rb'
-require File.expand_path '../rules/dll.rb'
+require File.expand_path '../rules/cExe.rb'
+require File.expand_path '../rules/cDll.rb'
+require File.expand_path '../rules/cLib.rb'
 
 require './config.rb'
 require './chtmlCompiler.rb'
@@ -12,6 +13,8 @@ require './handlers/tdb/tdb.rb'
 require './handlers/dbc/dbc.rb'
 require 'net/http'
 require 'stringio'
+
+#sh 'rm -rf build'
 
 CHTML_BUILDDIR = 'build/chtml'
 TDB_BUILDDIR = 'build/tdb'
@@ -24,11 +27,12 @@ include FileUtils::Verbose
 HOME_DIR = pwd
 FileUtils.cd '../wowfoot-ex'
 require './libs.rb'
-LIBMPQ.setup
-BLP.setup
-SQUISH.setup
-PALBMP.setup
-CRBLIB.setup
+LIBMPQ
+BLP
+SQUISH
+PALBMP
+CRBLIB
+Works.run
 FileUtils.cd HOME_DIR
 
 if(true)#HOST == :win32)
@@ -59,9 +63,7 @@ end
 
 # force server to unload DLLs,
 # to remove the write protection.
-class DllTask
-	alias_method :old_execute, :execute
-
+class DllWork
 	def sendSignal
 		if(HOST != :win32)
 			#setNewName	# causes crash
@@ -127,7 +129,7 @@ class DllTask
 		FileUtils.rm_f(@NAME)
 		return File.exist?(@NAME)
 	else	# unix-type systems
-		if(@work.is_a?(PageWork))
+		if(self.is_a?(PageWork))
 			#puts "#{@NAME} is a PageWork."
 			return false
 		end
@@ -151,7 +153,9 @@ class DllTask
 		end
 		return false
 	end;end
-	def execute
+
+	alias_method :old_execute, :fileExecute
+	def fileExecute
 		sendSignal if(isLoaded)
 		FileUtils.rm_f(@NAME)
 		raise "Loaded file was not deleted!" if(File.exist?(@NAME))
@@ -161,8 +165,8 @@ class DllTask
 end
 end	# WIN32
 
-wowVersion = MemoryGeneratedFileTask.new(nil, 'build/wowVersion.h')
-wowVersion.instance_eval do
+MemoryGeneratedFileTask.new('build/wowVersion.h') do
+	@prerequisites = [DirTask.new('build')]
 	io = StringIO.new
 	io.puts "#ifndef WOWVERSION_H"
 	io.puts "#define WOWVERSION_H"
@@ -172,10 +176,12 @@ wowVersion.instance_eval do
 	io.puts "#endif\t//WOWVERSION_H"
 	@buf = io.string
 end
-wowVersion.invoke
 
-common = NativeLibWork.new
-common.instance_eval do
+# need to run wowVersion before anything else,
+# but can't have it be a prerequisite of *everything*.
+Works.run
+
+COMMON = LibWork.new do
 	@SOURCES = ['handlers', 'util']
 	if(HOST == :win32)
 		@SOURCES << 'util/win32'
@@ -193,8 +199,7 @@ common.instance_eval do
 	WORKS << self
 end
 
-win32 = DllWork.new
-win32.instance_eval do
+WIN32 = DllWork.new do
 	@SOURCES = ['win32']
 	@EXTRA_INCLUDES = ['win32']
 	@SPECIFIC_CFLAGS = {
@@ -203,47 +208,58 @@ win32.instance_eval do
 	@NAME = 'win32'
 end
 
+class CCompileWork
+	def convertHandlerDeps(deps)
+		@LOCAL_DLLS ||= []
+		@REQUIREMENTS ||= []
+		deps.each do |dll|
+			raise "Unknown work #{dll}" if(!WORK_MAP[dll])
+			w = WORK_MAP[dll]
+			raise "Work #{dll} doesn't exist yet!" if(!w)
+			@EXTRA_INCLUDES << "handlers/#{dll}"
+			f ="build/#{dll}"
+			@EXTRA_INCLUDES << f if(w.is_a?(DbcWork))
+			f ="#{TDB_BUILDDIR}/#{dll}"
+			@EXTRA_INCLUDES << f if(w.is_a?(TdbWork))
+			@LOCAL_DLLS << w
+			@REQUIREMENTS << w
+		end
+	end
+end
+
 class HandlerWork < DllWork
-	def initialize(name, handlerDeps = [], isPage = false, options = {})
-		super()
+	def initialize(name, handlerDeps = [], isPage = false, options = {}, &block)
 		hasChtml = false
-		@EXTRA_SOURCETASKS = Dir["handlers/#{name}/*.chtml"].collect do |chtml|
+		@SOURCE_TASKS = Dir["handlers/#{name}/*.chtml"].collect do |chtml|
 			hasChtml = true
 			bn = File.basename(chtml, '.chtml')
-			ChtmlCompileTask.new(self, CHTML_BUILDDIR, bn, chtml, isPage, options)
+			ChtmlCompileTask.new(CHTML_BUILDDIR, bn, chtml, isPage, options)
 		end
 		@SOURCES = ["handlers/#{name}"]
-		@EXTRA_SOURCEFILES = []
+		@SOURCE_FILES = []
 		@EXTRA_INCLUDES = [
-			'handlers', "handlers/#{name}", '../wowfoot-ex/output',
+			'handlers', "handlers/#{name}",
 			'.', CHTML_BUILDDIR,
-			TDB_BUILDDIR,
 			'win32',
 			'build',
 		] + CONFIG_LOCAL_INCLUDES
-		handlerDeps.each do |dll|
-			@EXTRA_INCLUDES << "handlers/#{dll}"
-			f ="build/#{dll}"
-			@EXTRA_INCLUDES << f if(File.exist?(f))
-		end
-		@PREREQUISITES = [
-			DirTask.new(self, CHTML_BUILDDIR),
-			DirTask.new(self, TDB_BUILDDIR),
-		]
-		@LOCAL_DLLS = handlerDeps
-		@LOCAL_LIBS = ['common']
+		@EXTRA_INCLUDES << "#{TDB_BUILDDIR}/#{name}" if(self.is_a?(TdbWork))
+		convertHandlerDeps(handlerDeps)
+		@LOCAL_LIBS = [COMMON]
 		@LIBRARIES = []
 		@LIBRARIES << 'imagehlp' if(HOST == :win32)
 		@LIBRARIES << 'dl' if(HOST != :win32)
-		@LOCAL_DLLS << 'win32' if(HOST == :win32)
+		@LOCAL_DLLS << WIN32 if(HOST == :win32)
 		@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIBDIRS
 		@NAME = name
 		WORKS << self
 		WORK_MAP[name] = self
+		super(&block)
 	end
-	def name; File.basename(@TARGET.to_s, '.so'); end
+	#def name; File.basename(@TARGET.to_s, '.so'); end
 	def baseName; "#{@BUILDDIR}#{@NAME}"; end
 	if(HOST != :win32) then def setup
+		# TODO: fix this function, which is never called anymore
 		@LOCAL_DLLS = @LOCAL_DLLS.collect do |dll|
 			w = WORK_MAP[dll]
 			if(w)
@@ -257,63 +273,70 @@ class HandlerWork < DllWork
 end
 
 class TdbWork < HandlerWork
-	def initialize(name, handlerDeps = [])
-		super(name, ['tdb'] + handlerDeps)
-		@EXTRA_SOURCETASKS << TdbCppTask.new(self, name)
-		@EXTRA_CPPFLAGS = ' -Wno-invalid-offsetof'
-		@PREREQUISITES = [
-			TdbStructHeaderTask.new(self, name),
-			TdbFormatHeaderTask.new(self, name),
-			TdbExtHeaderTask.new(self, name),
-		]
+	def initialize(name, handlerDeps = [], &block)
+		super(name, ['tdb'] + handlerDeps) do
+			@SOURCE_TASKS << TdbCppTask.new(name)
+			@EXTRA_CPPFLAGS = ' -Wno-invalid-offsetof'
+			@REQUIREMENTS = [
+				TdbStructHeaderTask.new(name),
+				TdbFormatHeaderTask.new(name),
+				TdbExtHeaderTask.new(name),
+			]
+			instance_eval(&block) if(block)
+		end
 	end
 end
 
 class PageWork < HandlerWork
-	def initialize(name, handlerDeps = [], options = {})
-		super(name, ['pageContext'] + handlerDeps, true, options)
+	def initialize(name, handlerDeps = [], options = {}, &block)
 		@EXTRA_LINKFLAGS = ' -u cleanup'
 		PAGEWORKS << self
+		super(name, ['pageContext'] + handlerDeps, true, options, &block)
 	end
 end
 
 class ExTemplateWork < HandlerWork
-	def initialize(name, singular, plural, upperCase, handlerDeps = [])
-		super(name, handlerDeps)
-		@EXTRA_INCLUDES << "build/#{name}"
-		@EXTRA_SOURCETASKS << ExTemplateCpp.new(self, name, singular, plural, upperCase)
-		@EXTRA_SOURCEFILES << "../wowfoot-ex/output/#{name}.data.cpp"
+	def initialize(name, singular, plural, upperCase, handlerDeps = [], &block)
+		super(name, handlerDeps) do
+			@EXTRA_INCLUDES << "build/#{name}"
+			@SOURCE_TASKS << ExTemplateCpp.new(name, singular, plural, upperCase)
+			@SOURCE_FILES << "../wowfoot-ex/output/#{name}.data.cpp"
+			instance_eval(&block) if(block)
+		end
 	end
 end
 
 class DbcWork < HandlerWork
-	def initialize(name, handlerDeps = [])
+	def initialize(name, handlerDeps = [], &block)
 		handlerDeps << 'dbc'
-		super
-		@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
-		@EXTRA_INCLUDES << "build/#{name}"
-		@EXTRA_SOURCETASKS << DbcCppTask.new(self, name)
+		super(name, handlerDeps) do
+			@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
+			@EXTRA_INCLUDES << "build/#{name}"
+			@SOURCE_TASKS ||= []
+			@SOURCE_TASKS << DbcCppTask.new(name)
+			instance_eval(&block) if(block)
+		end
 	end
 end
 
 # HandlerWorks
 HandlerWork.new('areaMap')
 
-HandlerWork.new('tdb').instance_eval do
+TDB = HandlerWork.new('tdb') do
 	@EXTRA_CPPFLAGS = ' -Wno-shadow -Wno-attributes'	# mysql++ header bugs
 	@LIBRARIES << 'mysqlclient'
 	if(HOST == :win32)
 		@EXTRA_INCLUDES += CONFIG_MYSQL_INCLUDES
-		@EXTRA_LINKFLAGS << CONFIG_MYSQL_LIBDIRS
+		@EXTRA_LINKFLAGS += CONFIG_MYSQL_LIBDIRS
 		@LIBRARIES << 'ws2_32'
 	else
 		@EXTRA_INCLUDES << '/usr/include/mysql'
 	end
 end
 
-HandlerWork.new('dbc').instance_eval do
+DBC = HandlerWork.new('dbc') do
 	@SOURCES << '../wowfoot-ex/src/libs'
-	@EXTRA_SOURCEFILES << '../wowfoot-ex/src/dbcList.cpp'
+	@SOURCE_FILES << '../wowfoot-ex/src/dbcList.cpp'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
 	@SPECIFIC_CFLAGS = {
@@ -321,26 +344,21 @@ HandlerWork.new('dbc').instance_eval do
 		'dbcList.cpp' => " -DCONFIG_WOW_VERSION=#{CONFIG_WOW_VERSION}",
 	}
 	set_defaults
-	@EXTRA_OBJECTS = [CopyFileTask.new(self, @BUILDDIR + File.basename(LIBMPQ.target.to_s),
-		FileTask.new(self, LIBMPQ.target.to_s))]
+	@EXTRA_OBJECTS = [LIBMPQ]
 end
 
-HandlerWork.new('dbcItemSubClass', ['dbc']).instance_eval do
+HandlerWork.new('dbcItemSubClass', ['dbc']) do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
 end
-HandlerWork.new('dbcItemClass', ['dbc']).instance_eval do
+HandlerWork.new('dbcItemClass', ['dbc']) do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
 end
-HandlerWork.new('icon', ['dbc']).instance_eval do
+HandlerWork.new('icon', ['dbc']) do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
-	@prerequisites << DirTask.new(self, 'build/icon')
-	set_defaults
-	def copy(work)
-		CopyFileTask.new(self, @BUILDDIR + File.basename(work.target.to_s),
-			FileTask.new(self, work.target.to_s))
-	end
-	@EXTRA_OBJECTS = [copy(LIBMPQ), copy(BLP), copy(SQUISH), copy(PALBMP), copy(CRBLIB)]
+	@prerequisites ||= []
+	@prerequisites << DirTask.new('build/icon')
+	@EXTRA_OBJECTS = [(LIBMPQ), (BLP), (SQUISH), (PALBMP), (CRBLIB)]
 	@LIBRARIES += ['png', 'jpeg']
 end
 
@@ -397,27 +415,30 @@ HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
 HandlerWork.new('skillShared', ['dbcLock', 'dbcSkillLine'])
-HandlerWork.new('questShared')
+HandlerWork.new('questShared', ['db_quest'])
+
+class PatchTask < FileTask
+	def initialize
+		@src = 'handlers/comments/patch.rb'
+		@prerequisites = [FileTask.new(@src)]
+		super('build/patch.cpp')
+	end
+	def fileExecute
+		sh "ruby #{@src} #{@NAME}"
+	end
+end
 
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	'db_quest', 'db_creature_template',
 	'db_gameobject_template', 'dbcFaction',
 	'questShared',
 ] + DBC_ACHIEVEMENT_COND
-HandlerWork.new('comments', commentDeps).instance_eval do
+HandlerWork.new('comments', commentDeps) do
 	@LIBRARIES << 'sqlite3'
-	patch = FileTask.new(self, 'build/patch.cpp')
-	patch.instance_eval do
-		@src = 'handlers/comments/patch.rb'
-		@prerequisites = [FileTask.new(@work, @src)]
-		def execute
-			sh "ruby #{@src} #{@NAME}"
-		end
-	end
-	@EXTRA_SOURCETASKS << patch
+	@SOURCE_TASKS << PatchTask.new
 end
 
-HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap'])
+HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap', 'db_spawn'])
 
 TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
 	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize'])
@@ -426,7 +447,9 @@ PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
-	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND)
+	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND) do
+	@EXTRA_CPPFLAGS = ' -save-temps=obj'
+end
 if(CONFIG_WOW_VERSION > 30000)
 PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCharTitles',
 	'db_achievement_reward'])
@@ -437,7 +460,7 @@ PageWork.new('npc', ['db_creature_template',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
-	'db_questrelation'])
+	'db_questrelation', 'db_spawn'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'db_gameobject_template', 'db_quest',
 	'dbcItemSet', 'dbcFaction'] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND)
@@ -477,25 +500,24 @@ PageWork.new('skills', ['tabs', 'tabTable', 'dbcSkillLine', 'dbcSkillLineCategor
 	'dbcSpellIcon', 'icon'])
 PageWork.new('skill', ['tabTable', 'tabs', 'comments', 'dbcLock', 'dbcSpell', 'icon',
 	'dbcItemDisplayInfo', 'dbcSkillLineAbility', 'dbcSkillLine', 'skillShared',
-	'db_gameobject_template'],
+	'db_gameobject_template', 'db_item', 'db_creature_template'],
 	{:constructor => true})
 
-WFC = @wfc = ExeWork.new
-@wfc.instance_eval do
+WFC = @wfc = ExeWork.new do
 	@SOURCES = ['.']
 	@LIBRARIES = ['microhttpd']
 	@EXTRA_INCLUDES = ['win32', '.', 'build']#'src', 'src/libs/libmpq']
 	#@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
-	@LOCAL_LIBS = ['common']
+	@LOCAL_LIBS = [COMMON]
 	@LOCAL_DLLS = []
 
 	if(HOST == :win32)
-		@EXTRA_SOURCEFILES = ["dll/dll-win32.cpp"]
+		@SOURCE_FILES = ["dll/dll-win32.cpp"]
 		@LIBRARIES << 'wsock32'
 		@LIBRARIES << 'imagehlp'
-		@LOCAL_DLLS << 'win32'
+		@LOCAL_DLLS << WIN32
 	elsif(HOST == :linux || HOST == :darwin)
-		@EXTRA_SOURCEFILES = ["dll/dll-unix.cpp"]
+		@SOURCE_FILES = ["dll/dll-unix.cpp"]
 		@LIBRARIES << 'dl'
 	else
 		error "Unsupported platform"
@@ -506,8 +528,7 @@ WFC = @wfc = ExeWork.new
 	def buildDir; @BUILDDIR; end
 end
 
-TEST = ExeWork.new
-TEST.instance_eval do
+TEST = ExeWork.new do
 	@SOURCES = ['test']
 	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
 	@LIBRARIES = ['tidy']
@@ -516,7 +537,7 @@ TEST.instance_eval do
 	else
 		@LIBRARIES << 'curl'
 	end
-	@LOCAL_DLLS = [
+	convertHandlerDeps([
 		'db_quest',
 		'db_item',
 		'db_creature_template',
@@ -525,7 +546,7 @@ TEST.instance_eval do
 		'dbcFaction',
 		'dbcWorldMapArea',
 		'dbcSpell',
-	] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND
+	] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND)
 	@EXTRA_CPPFLAGS = ' -fopenmp'
 	@EXTRA_LINKFLAGS = ' -fopenmp -Wl,-rpath,.' + CONFIG_LOCAL_LIBDIRS
 
@@ -582,7 +603,7 @@ end
 # compile wowfoot-ex libs
 include FileUtils::Verbose
 FileUtils.cd '../wowfoot-ex'
-LIBMPQ.invoke
+LIBMPQ#.invoke
 FileUtils.cd HOME_DIR
 
-Targets.invoke
+Works.run

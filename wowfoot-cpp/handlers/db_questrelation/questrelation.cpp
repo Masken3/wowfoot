@@ -6,6 +6,7 @@
 #include "db_spawn.h"
 #include "spawnPoints.h"
 #include "util/stl_map_insert.h"
+#include <stdio.h>
 
 enum QrRowId {
 	NAME = ENTRY+1,

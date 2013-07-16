@@ -15,18 +15,18 @@
 #include "util/numof.h"
 
 #include "build/wowVersion.h"
-#include "build/tdb/db_creature_template.h"
-#include "build/tdb/db_gameobject_template.h"
-#include "build/tdb/db_item.h"
-#include "build/tdb/db_quest.h"
+#include "db_creature_template.h"
+#include "db_gameobject_template.h"
+#include "db_item.h"
+#include "db_quest.h"
 #if CONFIG_WOW_VERSION > 30000
-#include "build/dbcAchievement/dbcAchievement.h"
-#include "build/dbcCharTitles/dbcCharTitles.h"
+#include "dbcAchievement.h"
+#include "dbcCharTitles.h"
 #endif
-#include "build/dbcFaction/dbcFaction.h"
-#include "build/dbcItemSet/dbcItemSet.h"
-#include "build/dbcSpell/dbcSpell.h"
-#include "build/dbcWorldMapArea/dbcWorldMapArea.h"
+#include "dbcFaction.h"
+#include "dbcItemSet.h"
+#include "dbcSpell.h"
+#include "dbcWorldMapArea.h"
 #include "config.h"
 
 using namespace std;

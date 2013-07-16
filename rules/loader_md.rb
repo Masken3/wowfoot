@@ -14,14 +14,14 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-require "#{File.dirname(__FILE__)}/host.rb"
+require "#{File.dirname(__FILE__)}/work.rb"
 
 # A dummy FileTask which allows header files to be removed without
 # causing errors in the Work system.
 # Removing header files without modifying the source files that include them
 # will still cause compile errors.
 class HeaderFileTask < FileTask
-	def invoke
+	def fileExecute
 	end
 end
 
@@ -65,12 +65,7 @@ class MakeDependLoader
 		return [] if args.nil?
 		depNames = args.split.map { |a| respace(a) }
 		depTasks = depNames.collect { |d|
-			HeaderFileTask.new(@work, d)
-			#if(File.exists?(d) then
-			#	FileTask.new(@work, d)
-			#else
-			#	MissingFileTask.new(@work, d)
-			#end
+			HeaderFileTask.new(d)
 		}
 		return depTasks
 	end

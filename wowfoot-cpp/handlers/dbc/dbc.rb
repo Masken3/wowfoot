@@ -26,14 +26,14 @@ def ar(type, name, offset, count)
 end
 
 class DbcCppTask < MemoryGeneratedFileTask
-	def initialize(work, name)
+	def initialize(name)
 		dir = "build/#{name}"
 		@NAME = "#{dir}/#{name}.cpp"
-		super(work, @NAME)
 		src = "handlers/#{name}/#{name}.rb"
 		instance_eval(open(src).read, src)
-		@prerequisites << DirTask.new(work, dir)
-		@prerequisites << DbcHeaderTask.new(work, name)
+		@prerequisites ||= []
+		@prerequisites << DirTask.new(dir)
+		@prerequisites << DbcHeaderTask.new(name)
 
 		template = %q(
 #define __STDC_FORMAT_MACROS
@@ -80,6 +80,7 @@ void <%=@plural%>::load() {
 }
 )
 		@buf = ERB.new(template).result(binding)
+		super(@NAME)
 	end
 end
 
@@ -90,13 +91,13 @@ class DbcHeaderTask < MemoryGeneratedFileTask
 		:float => 'float',
 		:f2 => 'Coord2D',
 	}
-	def initialize(work, name)
+	def initialize(name)
 		dir = "build/#{name}"
 		@NAME = "#{dir}/#{name}.h"
-		super(work, @NAME)
 		src = "handlers/#{name}/#{name}.rb"
 		instance_eval(open(src).read, src)
-		@prerequisites << DirTask.new(work, dir)
+		@prerequisites ||= []
+		@prerequisites << DirTask.new(dir)
 
 		hasCoord2D = false
 		@struct.each do |col|
@@ -138,5 +139,6 @@ extern <%=@plural%> g<%=@plural%> VISIBLE;
 
 )
 		@buf = ERB.new(template).result(binding)
+		super(@NAME)
 	end
 end

@@ -109,7 +109,7 @@ typedef void (*voidCBvoidp) (void *);
 #define CLAMP16(x)									CLAMP(x,0,65536)
 #define BOOLSAME(x,y)								( ( (x) && (y) ) || ( !(x) && !(y) ) )
 
-#ifndef isneg	
+#ifndef isneg
 // #define isneg(x) (((long)(x))>>31)	<- slower
 #define isneg(x)	(x<0)	// the optimizer knows the tricks (like setge)
 #endif
@@ -164,7 +164,7 @@ extern void dbf(void); //global debug func
 // other compilers ?
 // gcc uses 'inline', but I don't know how to detect gcc
 
-#define INLINE
+//#define INLINE
 #define REGCALL
 
 #endif			//}

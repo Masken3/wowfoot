@@ -21,6 +21,7 @@
 #include "chtmlUtil.h"
 #include "dbcSkillLine.h"
 #include "util/arraySize.h"
+#include "win32.h"
 
 class itemChtml : public tabsChtml, public PageContext {
 public:

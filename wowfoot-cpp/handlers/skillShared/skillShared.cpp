@@ -1,6 +1,8 @@
 #include "skillShared.h"
 #include "lockEnums.h"
 #include <string.h>
+#include <stdio.h>
+#include "win32.h"
 
 // returns NULL on parse error.
 const SkillLine* parseSkillId(ostream& os, const char* urlPart) {

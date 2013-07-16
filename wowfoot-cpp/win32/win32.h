@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 
+typedef unsigned int uint;
+
 #ifdef WIN32
 int asprintf( char **, const char *, ... ) __attribute((format(ms_printf, 2, 3)));
 int vasprintf( char **, const char *, va_list );

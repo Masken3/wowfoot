@@ -14,26 +14,16 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
+#require "#{File.dirname(__FILE__)}/config.rb"
+
+class WorkError < Exception
+end
+
 def error(msg)
-	puts "Error: #{msg}"
-	#raise msg
-	exit(1)
+	raise WorkError.new(msg) if(EXIT_ON_ERROR)
+	raise msg
 end
 
 def warning(msg)
 	puts "#{msg}"
-end
-
-def aprint(a)
-	print "["
-	first = true
-	a.each do |item|
-		if(first) then
-			first = false
-		else
-			print ", "
-		end
-		print item
-	end
-	print "]\n"
 end
