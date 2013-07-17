@@ -32,7 +32,7 @@ BLP
 SQUISH
 PALBMP
 CRBLIB
-Works.run
+Works.run(false)
 FileUtils.cd HOME_DIR
 
 if(true)#HOST == :win32)
@@ -179,7 +179,7 @@ end
 
 # need to run wowVersion before anything else,
 # but can't have it be a prerequisite of *everything*.
-Works.run
+Works.run(false)
 
 COMMON = LibWork.new do
 	@SOURCES = ['handlers', 'util']
@@ -252,7 +252,8 @@ class HandlerWork < DllWork
 		@LIBRARIES << 'imagehlp' if(HOST == :win32)
 		@LIBRARIES << 'dl' if(HOST != :win32)
 		@LOCAL_DLLS << WIN32 if(HOST == :win32)
-		@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIBDIRS
+		@EXTRA_LINKFLAGS ||= ''
+		@EXTRA_LINKFLAGS += CONFIG_LOCAL_LIBDIRS
 		@NAME = name
 		WORKS << self
 		WORK_MAP[name] = self
@@ -558,24 +559,7 @@ end
 
 def cmd; "#{@wfc} #{@wfc.buildDir}"; end
 
-target :base do
-	common.invoke
-	win32.invoke if(HOST == :win32)
-	# required for unload to function properly
-	@wfc.invoke
-end
-
-def doWorks(works)
-	works.each do |w|
-		w.setup
-	end
-	works.each do |w|
-		w.invoke
-	end
-end
-
-target :default => :base do
-	doWorks(WORKS)
+target :default do
 end
 
 target :run => :default do
@@ -584,8 +568,7 @@ target :run => :default do
 	sh cmd
 end
 
-target :test => :base do
-	doWorks(WORKS - PAGEWORKS)
+target :test do
 	TEST.invoke
 	TEST.run
 end
@@ -601,11 +584,5 @@ end
 target :callgrind => :default do
 	sh "valgrind --tool=callgrind #{cmd}"
 end
-
-# compile wowfoot-ex libs
-include FileUtils::Verbose
-FileUtils.cd '../wowfoot-ex'
-LIBMPQ#.invoke
-FileUtils.cd HOME_DIR
 
 Works.run

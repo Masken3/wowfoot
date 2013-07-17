@@ -10,13 +10,17 @@ module Kernel
 	@@mutex = Mutex.new
 	def puts(str)
 		@@mutex.synchronize do
-			$stdout.write("#{Works.threadName}#{str}\n")
+			$stdout.write("#{Works.threadName}#{str.strip}\n")
+			$stdout.flush
 		end
 	end
 end
 
 # We want exceptions to have better backtrace...
 class Exception
+	# Works with Ruby 1.9.3.
+	# Called by Ruby 1.8.7, but it still doesn't work.
+	if(RUBY_VERSION >= '1.9')
 	def message
 		# If there's no backtrace, we're inside the default exception handler?
 		s = Thread.current.backtrace.size
@@ -27,6 +31,7 @@ class Exception
 		else
 			return to_s
 		end
+	end
 	end
 end
 
@@ -135,7 +140,20 @@ class Works
 
 	# Run all scheduled tasks. Don't stop until they're all done, or one fails.
 	# If one fails, let the other running ones complete before returning.
-	def self.run
+	def self.run(doGoals = true)
+		raise "Multiple runs are not allowed!" if(doGoals && @@goalsDone)
+		run2
+		return if(!doGoals)
+		@@goalsDone = true
+		parseArgs(ARGV)
+		@@goals.each do |g|
+			puts "Goal #{g}:"
+			@@targets[g].execute
+		end
+	end
+
+	private
+	def self.run2()
 		return if(@@error)
 		return if(@@tasks.empty?)
 
@@ -223,7 +241,7 @@ class Works
 	end
 
 	def self.parseArgs(args)
-		#puts args.inspect
+		#p args
 		raise hell if(@@args_handled)
 		args.each do |a| handle_arg(a) end
 		@@args_handled = true
@@ -233,11 +251,47 @@ class Works
 		return @@threadNames[Thread.current.object_id]
 	end
 
-	def self.addTarget(a)
-		# todo: fix
+	def self.addTarget(args, &block)
+		case args
+		when Hash
+			fail "Too Many Task Names: #{args.keys.join(' ')}" if args.size > 1
+			fail "No Task Name Given" if args.size < 1
+			name = args.keys[0]
+			preqs = args[name]
+			preqs = [preqs] if !preqs.respond_to?(:collect)
+			preqs = preqs.collect do |p|
+				#puts "testing: #{p.inspect}"
+				if(p.respond_to?(:execute))
+					p
+				else
+					if(@@targets[p] == nil)
+						error "Target #{p.inspect} does not exist."
+					end
+					@@targets[p]
+				end
+			end
+		else
+			name = args
+			preqs = []
+		end
+		#puts "Target add '#{name}'"
+		@@targets.store(name, Target.new(name, preqs, &block))
 	end
 
 	private
+
+	class Target
+		def initialize(name, preqs, &block)
+			@name = name
+			@preqs = preqs
+			@block = block
+		end
+
+		def execute
+			@preqs.each do |p| p.execute end
+			@block.call if(@block)
+		end
+	end
 
 	# returns count
 	def self.handleRequirements(array, task)
@@ -265,6 +319,8 @@ class Works
 	end
 
 	@@goals = []
+	@@targets =  {}
+	@@goalsDone = false
 	@@mutex = Mutex.new	# protects access to @@abort, @@waitingThreads, @@tasks and @@nextTask.
 	@@cond = ConditionVariable.new	# signaled when @@tasks or @@abort changes.
 	@@error = false
@@ -332,7 +388,10 @@ class Works
 				raise "Unhandled argument #{a}"
 			end
 		else
-			@@goals << a.to_sym
+			g = a.to_sym
+			raise "Goal #{g} is not a target in the current workfile!" if(!@@targets[g])
+			#puts "Goal add #{g}"
+			@@goals << g
 		end
 	end
 
@@ -341,7 +400,6 @@ class Works
 		puts "#{thread.id}: #{task.needed}"
 	end
 end
-
 
 def target(args, &block)
 	Works.addTarget(args, &block)

@@ -20,6 +20,7 @@ class WorkError < Exception
 end
 
 def error(msg)
+	puts msg
 	raise WorkError.new(msg) if(EXIT_ON_ERROR)
 	raise msg
 end
