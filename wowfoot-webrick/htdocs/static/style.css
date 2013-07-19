@@ -2,6 +2,8 @@
 TABLE.tabs { border-collapse: collapse; display: none; }
 td { border-spacing: 1px; border: solid; border-color: gray; }
 
+.hidden { display: none; }
+
 td.effect { white-space: nowrap; }
 td.reagents { white-space: nowrap; }
 td.skill { white-space: nowrap; }
@@ -27,7 +29,8 @@ div.coord { position:absolute; }
 
 /*img.oiDefault { position:absolute; width:auto; height:auto; clip:rect(32px,32px,64px,0px); top:-48px; left:-16px; }*/
 /* half size */
-img.oiDefault { position:absolute; width:128px; height:32px; clip:rect(16px,16px,32px,0px); top:-24px; left:-8px; }
+/*img.oiDefault { position:absolute; width:128px; height:32px; clip:rect(16px,16px,32px,0px); top:-24px; left:-8px; }*/
+img.oiDefault { position:absolute; width:64px; height:64px; clip:rect(0px,16px,16px,0px); /*top:0px; left:0px;*/ }
 
 /* item */
 BODY {

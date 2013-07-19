@@ -27,7 +27,7 @@ zones[<%= id %>] = {name:'<%= jsEscape(a->name) %>',
 displayName:'<%= jsEscape(z.name) %>',
 coords:[<% VECTOR_EACH(z.coords, j) {
 const Coord2D& c(z.coords[j]); %>
-{y:<%=c.x%>,x:<%=c.y%>},<% } %>
+{y:<%=c.x*100%>,x:<%=c.y*100%>},<% } %>
 ]};
 % } else {
 // unknown zone: <%=id%>
@@ -46,10 +46,10 @@ function setMap(zoneId) {
 		c = coords[i];
 		div = document.createElement("div");
 		div.className = "coord";
-		div.style.setProperty("left", c.x*100+"%", "important");
-		div.style.setProperty("top", c.y*100+"%", "important");
+		div.style.setProperty("left", c.x+"%", "important");
+		div.style.setProperty("top", c.y+"%", "important");
 		img = document.createElement("img");
-		img.src = "output/Interface/Minimap/OBJECTICONS.png";
+		img.src = "output/Interface/Minimap/ObjectIcons.png";
 		img.className = "oiDefault";
 		div.appendChild(img);
 		map.appendChild(div);

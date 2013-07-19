@@ -7,6 +7,12 @@
 #include "db_item.h"
 #include "dbcItemDisplayInfo.h"
 #include "SkillLineAbility.index.h"
+#include "dbcSkillLine.h"
+#include "skillShared.h"
+#include "Lock.index.h"
+#include "db_gameobject_template.h"
+#include <map>
+#include "util/stl_map_insert.h"
 
 class skillChtml : public PageContext {
 public:
@@ -17,6 +23,6 @@ public:
 	void httpArgument(const char* key, const char* value);
 	virtual ~skillChtml();
 private:
-	ItrPair<Spell>* mPair;
+	const SkillLine* mSL;
 	string mTitle;
 };

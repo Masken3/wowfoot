@@ -1,21 +1,57 @@
-% if(!mPair) {
+% if(!mSL) {
 Not found.
 % return 404; }
 
 <p>List locks:</p>
 
-% if(mPair) {
-<table class="tab" summary="spells">
+<table class="tab" id="uses" summary="uses of skill">
 <!-- Title row -->
 <thead><tr>
-<td>ID</td>
-<td>Icon/item</td>
+<td>Lock ID</td>
 <td>Name</td>
 <td>Source</td>
 <td>Skill</td>
 </tr></thead>
 
-<tbody>
+<tbody id="usesBody">
+</tbody>
+</table>
+
+<table class="hidden">
+%	int lockType = lockTypeFromSkill(mSL->id);
+%	int count = 0, lockCount = 0;
+% multimap<int, int> skillOrder;	// value, countId
+%	for(auto p = LockIndex::findLock(lockType); p.first != p.second; ++p.first) {
+%		const Lock& l(*p.first->second);
+%//		printf("%i: level %i\n", l.id, l.e[0].skill);
+%		lockCount++;
+%		for(auto op = gObjects.findLock(l.id); op.first != op.second; ++op.first) {
+%			count++;
+%			const Object& o(*op.first->second);
+%			insert(skillOrder, l.e[0].skill, count);
+%//			printf("object %i\n", o.entry);
+<tr id="obj<%=count%>">
+<td><%=l.id%></td>
+<td class="name"><a href="object=<%=o.entry%>"><%=o.name%></a></td>
+<td class="source"><%/*streamSource(stream, o);*/%></td>
+<td class="skill">
+<span class="skillRed"><%=l.e[0].skill%></span>
+<span class="skillYellow"><%=l.e[0].skill + 25%></span>
+<span class="skillGreen"><%=l.e[0].skill + 50%></span>
+<span class="skillGray"><%=l.e[0].skill + 75%></span>
+</td>
+</tr>
+%		}
+%	}
+<p>Found <%=lockCount%> locks used by <%=count%> objects.</p>
+<script type="text/javascript">
+skillOrder = [
+% for(auto itr = skillOrder.begin(); itr != skillOrder.end(); ++itr) {
+'obj<%=itr->second%>',
+% }
+]
+</script>
+
 %#if 0
 <tr>
 <td><%=lock.id%></td>
@@ -41,4 +77,24 @@ Not found.
 </tbody>
 </table>
 
-% }
+<script type="text/javascript">
+%#if 0
+tr = document.createElement('tr');
+lock = document.createElement('td');
+tr.appendChild(lock);
+n = document.createElement('td');
+tr.appendChild(n);
+source = document.createElement('td');
+tr.appendChild(source);
+skill = document.createElement('td');
+tr.appendChild(skill);
+
+t = document.getElementById("uses");
+t.appendChild(tr);
+%#endif
+//alert(skillOrder.length);
+t = document.getElementById("usesBody");
+for(var i=0; i<skillOrder.length; i++) {
+	t.appendChild(document.getElementById(skillOrder[i]));
+}
+</script>

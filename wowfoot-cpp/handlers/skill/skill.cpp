@@ -4,12 +4,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
-#include "dbcSkillLine.h"
 #include "dbcLock.h"
 #include "lockEnums.h"
-#include "skillShared.h"
-#include "Lock.index.h"
-#include "db_gameobject_template.h"
 
 void skillChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
@@ -42,36 +38,20 @@ void skillChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	}
 #endif
 
-	const SkillLine* sl = parseSkillId(os, urlPart);
-	if(!sl) {
+	mSL = parseSkillId(os, urlPart);
+	if(!mSL) {
 		mTitle = urlPart;
 		drd->code = 404;
 		return;
 	}
-	mTitle = sl->name;
-
-	printf("Skill %s\n", sl->name);
-	int lockType = lockTypeFromSkill(sl->id);
-	int count = 0;
-	for(auto p = LockIndex::findLock(lockType); p.first != p.second; ++p.first) {
-		const Lock& l(*p.first->second);
-		printf("%i: level %i\n", l.id, l.e[0].skill);
-		count++;
-		for(auto op = gObjects.findLock(l.id); op.first != op.second; ++op.first) {
-			const Object& o(*op.first->second);
-			printf("object %i\n", o.entry);
-		}
-	}
-	printf("Found %i locks.\n", count);
+	mTitle = mSL->name;
 }
 
 void skillChtml::title(ostream& stream) {
 	stream << mTitle;
 }
 
-skillChtml::skillChtml() : PageContext("Skill"), mPair(NULL) {}
+skillChtml::skillChtml() : PageContext("Skill") {}
 
 skillChtml::~skillChtml() {
-	if(mPair)
-		delete mPair;
 }
