@@ -8,6 +8,7 @@
 static Coord2D percentagesInZone(int zone, float x, float y);
 
 spawnPointsChtml::spawnPointsChtml() {
+	mSpawnCount = 0;
 }
 
 void spawnPointsPrepare() {

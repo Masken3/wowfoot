@@ -13,6 +13,7 @@
 #include "db_gameobject_template.h"
 #include <map>
 #include "util/stl_map_insert.h"
+#include "lockEnums.h"
 
 class skillChtml : public PageContext {
 public:

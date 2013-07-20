@@ -23,22 +23,31 @@ Not found.
 % multimap<int, int> skillOrder;	// value, countId
 %	for(auto p = LockIndex::findLock(lockType); p.first != p.second; ++p.first) {
 %		const Lock& l(*p.first->second);
-%//		printf("%i: level %i\n", l.id, l.e[0].skill);
+% 	int level = -1;
+% 	for(uint i=0; i<ARRAY_SIZE(l.e); i++) {
+% 		const Lock::Entry& e(l.e[i]);
+% 		if(e.type == LOCK_KEY_SKILL && e.index == lockTypeFromSkill(mSL->id)) {
+% 			// locks never have two entries on the same type.
+% 			assert(level == -1);
+% 			level = e.skill;
+% 		}
+% 	}
+%//		printf("%i: level %i\n", l.id, level);
 %		lockCount++;
 %		for(auto op = gObjects.findLock(l.id); op.first != op.second; ++op.first) {
 %			count++;
 %			const Object& o(*op.first->second);
-%			insert(skillOrder, l.e[0].skill, count);
+%			insert(skillOrder, level, count);
 %//			printf("object %i\n", o.entry);
 <tr id="obj<%=count%>">
 <td><%=l.id%></td>
 <td class="name"><a href="object=<%=o.entry%>"><%=o.name%></a></td>
-<td class="source"><%/*streamSource(stream, o);*/%></td>
+<td class="source"><%=o.spawnCount%> spawn points<%/*streamSource(stream, o);*/%></td>
 <td class="skill">
-<span class="skillRed"><%=l.e[0].skill%></span>
-<span class="skillYellow"><%=l.e[0].skill + 25%></span>
-<span class="skillGreen"><%=l.e[0].skill + 50%></span>
-<span class="skillGray"><%=l.e[0].skill + 75%></span>
+<span class="skillRed"><%=level%></span>
+<span class="skillYellow"><%=level + 25%></span>
+<span class="skillGreen"><%=level + 50%></span>
+<span class="skillGray"><%=level + 100%></span>
 </td>
 </tr>
 %		}
@@ -78,20 +87,6 @@ skillOrder = [
 </table>
 
 <script type="text/javascript">
-%#if 0
-tr = document.createElement('tr');
-lock = document.createElement('td');
-tr.appendChild(lock);
-n = document.createElement('td');
-tr.appendChild(n);
-source = document.createElement('td');
-tr.appendChild(source);
-skill = document.createElement('td');
-tr.appendChild(skill);
-
-t = document.getElementById("uses");
-t.appendChild(tr);
-%#endif
 //alert(skillOrder.length);
 t = document.getElementById("usesBody");
 for(var i=0; i<skillOrder.length; i++) {

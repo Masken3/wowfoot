@@ -26,7 +26,7 @@ void SpellIndex::load() {
 		for(uint i=0; i<ARRAY_SIZE(s.effect); i++) {
 			const Spell::Effect& e(s.effect[i]);
 			if(e.id == 36) {	// Learn Spell
-				printf("learn: %i teaches %i\n", s.id, e.triggerSpell);
+				//printf("learn: %i teaches %i\n", s.id, e.triggerSpell);
 				insert(sLearnSpellMap, e.triggerSpell, &s);
 			}
 		}

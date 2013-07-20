@@ -46,5 +46,8 @@ uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? dam
 * mangos-zero uses db table "conditions". See ObjectMgr.h for enum definitions.
 * See DBCStructure.h and DBCEnums.h for DBC information.
 * See individual files for sql database structure.
+* See Player.cpp, UpdateCraftSkill and UpdateGatherSkill, for how yellow/green/gray is calculated.
+* Craft skills have max(gray) & min(yellow). Green is (max+min) / 2. Red is still determined by teacher.
+* Gather skills have red, determined by lock. yellow, green & gray are all +25, +50 and +100, respectively.
 
 * All uses of CONFIG_WOW_VERSION are subject to correction.

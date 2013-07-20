@@ -5,7 +5,6 @@
 #include <inttypes.h>
 #include <string.h>
 #include "dbcLock.h"
-#include "lockEnums.h"
 
 void skillChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
@@ -22,7 +21,7 @@ void skillChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	printf("urlPart: %s\n", urlPart);
 	getArguments(drd);
 
-#if 0
+#if 1
 	// dump locks
 	//printf("%" PRIuPTR " locks:\n", gLocks.size());
 	for(auto itr = gLocks.begin(); itr != gLocks.end(); ++itr) {
