@@ -30,8 +30,9 @@ module FlagsChanged
 	def setNeeded
 		@FLAGSFILE = @NAME + ".flags"
 		super
+		return if(@needed)
 		if(File.exists?(@FLAGSFILE)) then
-			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read }
+			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read.strip }
 		else
 			@needed = "Because the flags file is missing:"
 			return

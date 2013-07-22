@@ -14,6 +14,7 @@
 #include <map>
 #include "util/stl_map_insert.h"
 #include "lockEnums.h"
+#include "win32.h"
 
 class skillChtml : public PageContext {
 public:

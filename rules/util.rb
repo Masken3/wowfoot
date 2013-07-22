@@ -255,3 +255,14 @@ def number_of_processors
   end
   raise "can't determine 'number_of_processors' for '#{HOST}'"
 end
+
+def startWebBrowser(url)
+	if(RUBY_PLATFORM =~ /mingw32/)
+		system "start #{url}"
+	elsif(RUBY_PLATFORM =~ /linux/)
+		system "x-www-browser #{url}"
+	else
+		puts url
+		puts "Unsupported platform; start the browser yourself."
+	end
+end

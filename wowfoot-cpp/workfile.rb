@@ -294,7 +294,7 @@ end
 
 class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [], options = {}, &block)
-		@EXTRA_LINKFLAGS = ' -u cleanup'
+		@EXTRA_LINKFLAGS = ' -u _cleanup'
 		PAGEWORKS << self
 		super(name, ['pageContext'] + handlerDeps, true, options, &block)
 	end
@@ -567,6 +567,7 @@ end
 target :run => :default do
 	rm_f 'build/count'
 	rm_f Dir.glob('build/*/*.count')
+	#startWebBrowser("http://localhost:#{3002}/#{CONFIG_AUTOSTART_PATH}")
 	sh cmd
 end
 

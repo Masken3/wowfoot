@@ -147,7 +147,7 @@ class Works
 		@@goalsDone = true
 		parseArgs(ARGV)
 		@@goals.each do |g|
-			puts "Goal #{g}:"
+			puts "Goal '#{g}':"
 			@@targets[g].execute
 		end
 	end
