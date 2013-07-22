@@ -1,4 +1,5 @@
 require File.expand_path '../rules/work.rb'
+require 'timeout'
 
 class ChtmlCompileTask < MultiFileTask
 	def initialize(builddir, name, src, isPage, options)
@@ -17,6 +18,12 @@ class ChtmlCompileTask < MultiFileTask
 		super(@cpp, [@header])
 	end
 	def fileExecute
+		Timeout::timeout(5) do
+			compile
+		end
+	end
+	private
+	def compile
 		src = File.new(@src, 'r')
 		cpp = File.new(@cpp, 'w')
 		header = File.new(@header, 'w')

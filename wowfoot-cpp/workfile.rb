@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+CONFIG_CCOMPILE_DEFAULT = 'debug'
+
 require File.expand_path '../rules/host.rb'
 require File.expand_path '../rules/cExe.rb'
 require File.expand_path '../rules/cDll.rb'

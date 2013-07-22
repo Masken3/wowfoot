@@ -128,7 +128,7 @@ class CCompileWork < FileTask
 		default(:COLLECT_S_FILES, true)
 
 		# String. 'release' or 'debug'.
-		default(:CONFIG, 'release')
+		default(:CONFIG, CONFIG_CCOMPILE_DEFAULT)
 
 		# String, name of the base build directory.
 		default(:BUILDDIR_BASE, 'build/')

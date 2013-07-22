@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include "util/minmax.h"
 
 void questsChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
@@ -16,6 +17,84 @@ struct QuestMaxRepTest {
 	}
 };
 
+struct QuestInfo {
+	int visitCount;
+	int childChainLength;
+};
+
+// analyze quest dependency graph
+class Analyzer {
+private:
+	QuestInfo mMax;
+	// qid, count; number of times a quest has been seen by the analyzer.
+	unordered_map<int, QuestInfo> mInfo;
+	int mostPopular;
+	int longestChain;
+
+public:
+	void analyze() {
+		mMax = QuestInfo();
+		// visit each quest:
+		// if it has been visited, don't visit it again.
+		// visit all related quests (required, opened, following)
+		// if a quest has no requirements, it is a root. count descendants.
+		// table "conditions" is required for a few special cases.
+		int distinct = 0;
+		int count = 0;
+		for(auto itr = gQuests.begin(); itr != gQuests.end(); ++itr) {
+			const Quest& q(itr->second);
+			count++;
+			if(!preVisit(q.id))
+				continue;
+			distinct++;
+			process(q);
+		}
+		printf("Looked at %i distinct chains out of %i quests.\n", distinct, count);
+		printf("Max visitCount: %i (quest=%i)\n", mMax.visitCount, mostPopular);
+		printf("Max chainLength: %i (quest=%i)\n", mMax.childChainLength, longestChain);
+	}
+private:
+	// returns max child chain length, including self.
+	int process(const Quest& q) {
+		QuestInfo& info(mInfo[q.id]);
+		int res;
+
+		visit(q.prevQuestId);
+		res = visit(q.nextQuestId);
+		info.childChainLength = MAX(info.childChainLength, res);
+		res = visit(q.nextQuestInChain);
+		info.childChainLength = MAX(info.childChainLength, res);
+		if(info.childChainLength > mMax.childChainLength) {
+			longestChain = q.id;
+			mMax.childChainLength = info.childChainLength;
+		}
+		return info.childChainLength+1;
+	}
+	bool preVisit(int id) {
+		QuestInfo& info(mInfo[id]);
+		info.visitCount++;
+		if(info.visitCount > mMax.visitCount) {
+			mostPopular = id;
+			mMax.visitCount = info.visitCount;
+		}
+		return info.visitCount == 1;
+	}
+	int visit(int id) {
+		if(id == 0)
+			return 0;
+		if(id < 0)
+			id *= -1;
+		if(!preVisit(id))
+			return 0;
+		const Quest* qp = gQuests.find(id);
+		if(!qp) {
+			printf("Quest %i not found!\n", id);
+			return 0;
+		}
+		return process(*qp);
+	}
+};
+
 void questsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gQuests.load();
 	gFactions.load();
@@ -23,6 +102,9 @@ void questsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	getArguments(drd);
 
 	mPair = new SimpleItrPair<Quests, QuestMaxRepTest>(gQuests.begin(), gQuests.end());
+
+	Analyzer a;
+	a.analyze();
 }
 
 void questsChtml::title(std::ostream& os) {

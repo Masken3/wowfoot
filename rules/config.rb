@@ -11,6 +11,7 @@ default_const(:PRINT_FLAG_CHANGES, true)
 default_const(:USE_COMPILER_VERSION_IN_BUILDDIR_NAME, true)
 default_const(:EXIT_ON_ERROR, true)
 default_const(:PRINT_WORKING_DIRECTORY, false)
+default_const(:CONFIG_CCOMPILE_DEFAULT, 'release')
 
 require "#{File.dirname(__FILE__)}/gccModule.rb"
 default_const(:DefaultCCompilerModule, GccCompilerModule)

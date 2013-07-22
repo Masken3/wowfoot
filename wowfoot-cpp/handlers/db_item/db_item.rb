@@ -80,4 +80,5 @@ mc(:float, [:spellPpmRate], 5, '_'),
 [:class, :subclass],
 [:itemset],
 [:startQuest],
+[:lockId],
 ]

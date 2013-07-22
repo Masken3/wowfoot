@@ -39,10 +39,26 @@ Not found.
 %			const Object& o(*op.first->second);
 %			insert(skillOrder, level, count);
 %//			printf("object %i\n", o.entry);
-<tr id="obj<%=count%>">
+<tr id="row<%=count%>">
 <td><%=l.id%></td>
 <td class="name"><a href="object=<%=o.entry%>"><%=o.name%></a></td>
 <td class="source"><%=o.spawnCount%> spawn points<%/*streamSource(stream, o);*/%></td>
+<td class="skill">
+<span class="skillRed"><%=level%></span>
+<span class="skillYellow"><%=level + 25%></span>
+<span class="skillGreen"><%=level + 50%></span>
+<span class="skillGray"><%=level + 100%></span>
+</td>
+</tr>
+%		}
+%		for(auto op = gItems.findLockId(l.id); op.first != op.second; ++op.first) {
+%			count++;
+%			const Item& i(*op.first->second);
+%			insert(skillOrder, level, count);
+<tr id="row<%=count%>">
+<td><%=l.id%></td>
+<td class="name"><a href="item=<%=i.entry%>"><%=i.name%></a></td>
+<td class="source"<%/*streamSource(stream, i);*/%></td>
 <td class="skill">
 <span class="skillRed"><%=level%></span>
 <span class="skillYellow"><%=level + 25%></span>
@@ -56,7 +72,7 @@ Not found.
 <script type="text/javascript">
 skillOrder = [
 % for(auto itr = skillOrder.begin(); itr != skillOrder.end(); ++itr) {
-'obj<%=itr->second%>',
+'row<%=itr->second%>',
 % }
 ]
 </script>
