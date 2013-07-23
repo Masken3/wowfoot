@@ -30,9 +30,14 @@ private:
 	unordered_map<int, QuestInfo> mInfo;
 	int mostPopular;
 	int longestChain;
+	FILE* mFile;
 
 public:
 	void analyze() {
+		mFile = fopen("build/quests.dot", "w");
+		if(!mFile)
+			throwERRNO();
+		fprintf(mFile, "strict digraph quests {\n");
 		mMax = QuestInfo();
 		// visit each quest:
 		// if it has been visited, don't visit it again.
@@ -49,19 +54,39 @@ public:
 			distinct++;
 			process(q);
 		}
+		fprintf(mFile, "}\n");
+		fclose(mFile);
 		printf("Looked at %i distinct chains out of %i quests.\n", distinct, count);
 		printf("Max visitCount: %i (quest=%i)\n", mMax.visitCount, mostPopular);
 		printf("Max chainLength: %i (quest=%i)\n", mMax.childChainLength, longestChain);
 	}
 private:
+	void parent(int cid, int oid) {
+		if(oid == 0)
+			return;
+		if(oid < 0)
+			oid *= -1;
+		fprintf(mFile, "n%i -> n%i;\n", oid, cid);
+	}
+	void child(int cid, int oid) {
+		if(oid == 0)
+			return;
+		if(oid < 0)
+			oid *= -1;
+		fprintf(mFile, "n%i -> n%i;\n", cid, oid);
+	}
 	// returns max child chain length, including self.
 	int process(const Quest& q) {
 		QuestInfo& info(mInfo[q.id]);
 		int res;
 
+		parent(q.id, q.prevQuestId);
 		visit(q.prevQuestId);
+		child(q.id, q.nextQuestId);
 		res = visit(q.nextQuestId);
 		info.childChainLength = MAX(info.childChainLength, res);
+		if(q.nextQuestInChain != q.nextQuestId)
+			child(q.id, q.nextQuestInChain);
 		res = visit(q.nextQuestInChain);
 		info.childChainLength = MAX(info.childChainLength, res);
 		if(info.childChainLength > mMax.childChainLength) {

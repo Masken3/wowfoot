@@ -24,7 +24,7 @@ WORKS = []
 WORK_MAP = {}
 PAGEWORKS = []
 
-# setup LIBMPQ. invoke later.
+# run LIBMPQ.
 include FileUtils::Verbose
 HOME_DIR = pwd
 FileUtils.cd '../wowfoot-ex'
@@ -294,7 +294,8 @@ end
 
 class PageWork < HandlerWork
 	def initialize(name, handlerDeps = [], options = {}, &block)
-		@EXTRA_LINKFLAGS = ' -u _cleanup'
+		@EXTRA_LINKFLAGS = ' -u _cleanup' if(HOST == :win32)
+		@EXTRA_LINKFLAGS = ' -u cleanup' if(HOST != :win32)
 		PAGEWORKS << self
 		super(name, ['pageContext'] + handlerDeps, true, options, &block)
 	end
