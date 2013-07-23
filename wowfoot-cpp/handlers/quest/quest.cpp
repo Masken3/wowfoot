@@ -29,12 +29,14 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gItems.load();
 	gSpells.load();
 	gQuests.load();
+	gObjects.load();
 
 	int id = toInt(urlPart);
 	a = gQuests.find(id);
 	if(a) {
 		mTitle = a->title;
 
+		// todo: fix this for version 1.12.
 		int rewMoney = a->rewardMoneyMaxLevel;
 		if(a->level >= 65)
 			mRewXp = rewMoney / 6;

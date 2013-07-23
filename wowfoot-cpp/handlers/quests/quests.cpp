@@ -49,6 +49,7 @@ public:
 		for(auto itr = gQuests.begin(); itr != gQuests.end(); ++itr) {
 			const Quest& q(itr->second);
 			count++;
+			fprintf(mFile, "n%i [label=\"%s\"];\n", q.id, q.title.c_str());
 			if(!preVisit(q.id))
 				continue;
 			distinct++;
