@@ -534,6 +534,17 @@ WFC = @wfc = ExeWork.new do
 	def buildDir; @BUILDDIR; end
 end
 
+TestHandlerDeps = [
+	'db_quest',
+	'db_item',
+	'db_creature_template',
+	'db_gameobject_template',
+	'dbcItemSet',
+	'dbcFaction',
+	'dbcWorldMapArea',
+	'dbcSpell',
+] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND
+
 TEST = ExeWork.new do
 	@SOURCES = ['test']
 	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
@@ -543,21 +554,19 @@ TEST = ExeWork.new do
 	else
 		@LIBRARIES << 'curl'
 	end
-	convertHandlerDeps([
-		'db_quest',
-		'db_item',
-		'db_creature_template',
-		'db_gameobject_template',
-		'dbcItemSet',
-		'dbcFaction',
-		'dbcWorldMapArea',
-		'dbcSpell',
-	] + DBC_ACHIEVEMENT_COND + DBC_CHAR_TITLES_COND)
+	convertHandlerDeps(TestHandlerDeps)
 	@EXTRA_CPPFLAGS = ' -fopenmp'
 	@EXTRA_LINKFLAGS = ' -fopenmp -Wl,-rpath,.' + CONFIG_LOCAL_LIBDIRS
 
 	@NAME = 'wowfoot-test'
 	def run; sh @TARGET; end
+end
+
+QUEST_ANALYZER = ExeWork.new do
+	@SOURCE_FILES = ['tools/questAnalyzer.cpp']
+	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
+	convertHandlerDeps(TestHandlerDeps)
+	@NAME = 'quest-analyzer'
 end
 
 def cmd; "#{@wfc} #{@wfc.buildDir}"; end
@@ -573,8 +582,11 @@ target :run => :default do
 end
 
 target :test do
-	TEST.invoke
 	TEST.run
+end
+
+target :qa do
+	sh QUEST_ANALYZER.to_s
 end
 
 target :gdb => :default do

@@ -680,6 +680,10 @@ int main() {
 		extractWorldMap(itr->second);
 	}
 
+	WorldMapArea world;
+	world.name = "World";
+	extractWorldMap(world);
+
 	return 0;
 }
 
