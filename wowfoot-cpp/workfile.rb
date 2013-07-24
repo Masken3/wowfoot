@@ -565,7 +565,15 @@ end
 QUEST_ANALYZER = ExeWork.new do
 	@SOURCE_FILES = ['tools/questAnalyzer.cpp']
 	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
-	convertHandlerDeps(TestHandlerDeps)
+	convertHandlerDeps(TestHandlerDeps + [
+		'db_questrelation',
+		'db_spawn',
+	])
+	@LOCAL_DLLS << COMMON
+	if(HOST == :win32)
+		@LIBRARIES = ['imagehlp']
+		@LOCAL_DLLS << WIN32
+	end
 	@NAME = 'quest-analyzer'
 end
 
@@ -587,6 +595,8 @@ end
 
 target :qa do
 	sh QUEST_ANALYZER.to_s
+	cd 'build'
+	sh 'dot -Tsvg quests.dot > quests.svg'
 end
 
 target :gdb => :default do
