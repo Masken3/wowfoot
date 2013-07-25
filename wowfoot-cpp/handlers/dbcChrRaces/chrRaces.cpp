@@ -1,6 +1,7 @@
 #include "dbcChrRaces.h"
 #include "chrRaces.h"
 #include "chtmlUtil.h"
+#include "wowVersion.h"
 
 #define DEBUG_DATA 0
 
@@ -28,7 +29,11 @@ string chrRaces(int mask) {
 	if(s.empty())
 		s = "Unknown race mask: " + toString(mask);
 	else {
+#if CONFIG_WOW_VERSION < 20000
+#define ALL_RACES 0x0ff
+#else
 #define ALL_RACES 0x6ff
+#endif
 		if(full || (mask & ALL_RACES) == ALL_RACES)
 			s.clear();
 #if DEBUG_DATA
