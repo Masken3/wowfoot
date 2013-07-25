@@ -37,12 +37,25 @@ module FlagsChanged
 			@needed = "Because the flags file is missing:"
 			return
 		end
-		if(!@needed && @OLDFLAGS != cFlags)
+		f = cFlags
+		if(!@needed && @OLDFLAGS != f)
 			@needed = "Because the flags have changed:"
-			@needed << "\nOld: #{@OLDFLAGS}" if(PRINT_FLAG_CHANGES)
-			@needed << "\nNew: #{cFlags}\n" if(PRINT_FLAG_CHANGES)
-			#p @OLDFLAGS, cFlags
-			#p (@OLDFLAGS == cFlags)
+			if(PRINT_FLAG_CHANGES)
+				@needed << "\nOld: #{@OLDFLAGS}"
+				@needed << "\nNew: #{f}\n"
+				#p @OLDFLAGS, f
+				#p @OLDFLAGS.length, f.length
+				#p @OLDFLAGS.class, f.class
+				#p (@OLDFLAGS == f)
+				#p (@OLDFLAGS.eql?(f))
+				for i in (0 .. f.length) do
+					if(f[i] != @OLDFLAGS[i])
+						#puts "Diff at pos #{i}"
+						@needed << "Diff at pos #{i}\n"
+						break
+					end
+				end
+			end
 			#raise hell
 		end
 	end

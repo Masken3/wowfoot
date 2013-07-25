@@ -172,12 +172,15 @@ class CCompileWork < FileTask
 
 		all_sourcefiles = cfiles + @cppfiles + sfiles
 
+		# avoid rebuilds due to random file order
+		all_sourcefiles.sort! do |a,b| a.to_s <=> b.to_s; end
+
 		loadCommonFlags
 
 		@object_tasks = collect_objects(all_sourcefiles) + @EXTRA_OBJECTS + @LOCAL_LIBS + @LOCAL_DLLS
 		@prerequisites += @object_tasks
 
-		super(File.expand_path(targetName()))
+		super(File.expand_path_fix(targetName()))
 	end
 
 	def cFlags
