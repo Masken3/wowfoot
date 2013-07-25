@@ -13,6 +13,10 @@ static void moneyIcon(ostream& stream, const char* name, const char* alt, int le
 }
 
 ostream& moneyHtml(ostream& stream, int total) {
+	if(total < 0) {
+		stream << "-";
+		total *= -1;
+	}
 	int copper = total % 100;
 	total /= 100;
 	int silver = total % 100;
@@ -34,7 +38,7 @@ ostream& moneyHtml(ostream& stream, int total) {
 		stream << copper;
 		moneyIcon(stream, "Copper", "copper", -32);
 	}
-	else
-		stream << copper;
+	else if(total == 0)
+		stream << "0";
 	return stream;
 }
