@@ -14,6 +14,7 @@ int toInt(const char*) VISIBLE;
 string toupper(string s) VISIBLE;
 
 string htmlEscape(const string& src) VISIBLE;
+string htmlIdEscape(const string& src) VISIBLE;
 string jsEscape(const string& src) VISIBLE;
 
 typedef void (*Escapist)(ostream&, char);

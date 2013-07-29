@@ -14,12 +14,12 @@ enum QrRowId {
 
 static CriticalSectionLoadGuard sCS;
 
-Tab* getQuestRelations(const char* title, QuestRelations& set, int id) {
+Tab* getQuestRelations(const char* tabId, const char* title, QuestRelations& set, int id) {
 	set.load();
 	gQuests.load();
 
 	tabTableChtml& t = *new tabTableChtml();
-	t.id = title;
+	t.id = tabId;
 	t.title = title;
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
 	auto p = set.findId(id);

@@ -38,6 +38,15 @@ string htmlEscape(const string& src) {
 	return dst;
 }
 
+string htmlIdEscape(const string& src) {
+	string dst = src;
+	for(size_t i=0; i<dst.size(); i++) {
+		if(isspace(dst[i]))
+			dst[i] = '_';
+	}
+	return dst;
+}
+
 void streamEscape(Escapist e, ostream& os, const string& src) {
 	streamEscape(e, os, src.c_str(), src.size());
 }

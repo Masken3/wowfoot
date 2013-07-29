@@ -23,8 +23,8 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	if(a) {
 		mTitle = a->name.c_str();
 
-		mTabs.push_back(getQuestRelations("Starts quest", gCreatureQuestGivers, id));
-		mTabs.push_back(getQuestRelations("Ends quest", gCreatureQuestFinishers, id));
+		mTabs.push_back(getQuestRelations("startQuest", "Starts quest", gCreatureQuestGivers, id));
+		mTabs.push_back(getQuestRelations("endQuest", "Ends quest", gCreatureQuestFinishers, id));
 		mTabs.push_back(getComments("npc", id));
 
 		mSpawnPointsChtml.addSpawns(gCreatureSpawns.findId(id));

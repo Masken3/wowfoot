@@ -28,8 +28,8 @@ void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 	a = gObjects.find(id);
 	if(a) {
 		mTitle = a->name.c_str();
-		mTabs.push_back(getQuestRelations("Starts quest", gObjectQuestGivers, id));
-		mTabs.push_back(getQuestRelations("Ends quest", gObjectQuestFinishers, id));
+		mTabs.push_back(getQuestRelations("startQuest", "Starts quest", gObjectQuestGivers, id));
+		mTabs.push_back(getQuestRelations("endQuest", "Ends quest", gObjectQuestFinishers, id));
 
 		if(a->type == GAMEOBJECT_TYPE_CHEST ||
 			a->type == GAMEOBJECT_TYPE_FISHINGHOLE)
