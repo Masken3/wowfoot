@@ -590,7 +590,7 @@ target :run => :default do
 end
 
 target :test do
-	TEST.run
+	sh TEST.to_s
 end
 
 target :qa do
