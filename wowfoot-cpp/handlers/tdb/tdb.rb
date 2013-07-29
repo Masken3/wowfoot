@@ -2,6 +2,8 @@
 # otherwise it's an array.
 # array may be nil or :key if single.
 # :key means it's an SQL primary key column.
+# if type == :struct, then dbName is the cName of the struct, array is SqlColumns.
+# count is > 1, postfix and cName are ignored.
 SqlColumn = Struct.new(:type, :dbName, :array, :count, :postfix, :cName)
 def c(type, dbName, array = nil, count = nil, postfix = '')
 	col = SqlColumn.new(type, dbName, array, count, postfix)
@@ -123,7 +125,11 @@ class TdbStructHeaderTask < TdbGenTask
 #define <%=upName%>_STRUCT_H
 
 struct <%=@structName%> {<% @struct.each do |col|
-	if(col.cName) %>
+	if(col.type == :struct) %>
+	struct <%=col.dbName%> {<%col.array.each do |m| %>
+		<%=m.type%> <%=cEscape(m.cName)%>;<%end%>
+	} <%=col.cName%>[<%=col.count%>];<%
+	elsif(col.cName) %>
 	<%=col.type%> <%=cEscape(col.cName)%>;<%else
 	col.array.each do |name| %>
 	<%=col.type%> <%=cEscape(name)%>[<%=col.count%>];<%end; end; end; if(@containerType == :set)%>
@@ -158,8 +164,20 @@ class TdbFormatHeaderTask < TdbGenTask
 static const ColumnFormat s<%=@structName%>Formats[] = {<% @struct.each do |col|
 	if(!col.array || col.array == :key) %>
 {<%=FORMATS[col.type]%>, "<%=col.dbName%>", offsetof(<%=@structName%>, <%=cEscape(col.cName)%>)},<% else
-	(1..col.count).each do |i| col.array.each do |name| %>
-{<%=FORMATS[col.type]%>, "<%=name%><%=col.postfix%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(name)%>[<%=i-1%>])},<%end; end; end; end%>
+	(1..col.count).each do |i| col.array.each do |name|
+	if(col.type == :struct)
+		type = name.type
+		dbName = name.dbName
+		cName = col.cName
+		namePostfix = ".#{name.cName}"
+	else
+		type = col.type
+		dbName = name
+		cName = name
+		namePostfix = ''
+	end
+%>
+{<%=FORMATS[type]%>, "<%=dbName%><%=col.postfix%><%=i%>", offsetof(<%=@structName%>, <%=cEscape(cName)%>[<%=i-1%>]<%=namePostfix%>)},<%end; end; end; end%>
 };
 
 #endif	//<%= upName %>_FORMAT_H

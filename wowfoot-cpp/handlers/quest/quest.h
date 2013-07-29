@@ -10,6 +10,7 @@
 #include "dbcSpell.h"
 #include "dbcFaction.h"
 #include "money.h"
+#include "util/arraySize.h"
 #include <stdio.h>
 
 class questChtml : public tabsChtml, public PageContext {
