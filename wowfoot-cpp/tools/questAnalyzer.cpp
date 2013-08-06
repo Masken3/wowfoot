@@ -3,11 +3,14 @@
 #include "db_quest.h"
 #include "db_gameobject_template.h"
 #include "db_creature_template.h"
+#include "db_loot_template.h"
 #include "db_item.h"
 #include "db_questrelation.h"
 #include "db_spawn.h"
+#include "dbcSpell.h"
 #include "util/exception.h"
 #include "util/minmax.h"
+#include "util/arraySize.h"
 
 using namespace std;
 
@@ -85,6 +88,25 @@ private:
 		}
 		return count;
 	}
+	int dumpCreatureLocations(int id) {
+		return dumpQuestLocationPair(gCreatureSpawns.findId(id));
+	}
+	int dumpObjectLocations(int id) {
+		return dumpQuestLocationPair(gGameobjectSpawns.findId(id));
+	}
+	int dumpItemLocations(int id) {
+		int count = 0;
+		for(auto p = gCreatureLoots.findItem(id); p.first != p.second; ++p.first) {
+			count += dumpCreatureLocations(p.first->second->entry);
+		}
+		for(auto p = gPickpocketingLoots.findItem(id); p.first != p.second; ++p.first) {
+			count += dumpCreatureLocations(p.first->second->entry);
+		}
+		for(auto p = gGameobjectLoots.findItem(id); p.first != p.second; ++p.first) {
+			count += dumpObjectLocations(p.first->second->entry);
+		}
+		return count;
+	}
 	void dumpQuestLocations(const Quest& q) {
 		fprintf(mMapFile, "%i (%s) giver", q.id, q.title.c_str());
 		int gc = 0;
@@ -97,9 +119,28 @@ private:
 		fprintf(mMapFile, " finisher");
 		fc += dumpQuestLocationByRelation(q, gCreatureQuestFinishers, gCreatureSpawns);
 		fc += dumpQuestLocationByRelation(q, gObjectQuestFinishers, gGameobjectSpawns);
-		fprintf(mMapFile, "\ng%i f%i\n", gc, fc);
+		fprintf(mMapFile, "\ng%i f%i", gc, fc);
 
-		// todo: spawn points of quest objectives.
+		// spawn points of quest objectives.
+		for(uint i=0; i<ARRAY_SIZE(q.objective); i++) {
+			const Quest::Objective& o(q.objective[i]);
+			if(o.reqSourceId) {
+				dumpItemLocations(o.reqSourceId);
+			} else if(o.reqItemId) {
+				dumpItemLocations(o.reqItemId);
+			} else if(o.reqCreatureOrGOId) {
+				if(o.reqCreatureOrGOId > 0)
+					dumpCreatureLocations(o.reqCreatureOrGOId);
+				else
+					dumpObjectLocations(-o.reqCreatureOrGOId);
+			} else if(o.reqSpellCast) {
+				// if spell requires a focus object, find that object.
+				const Spell& s(gSpells[o.reqSpellCast]);
+				if(s.RequiresSpellFocus)
+					dumpObjectLocations(s.RequiresSpellFocus);
+			}
+		}
+		fprintf(mMapFile, "\n");
 
 		// skip "CLUCK!"
 		if(mMaxGivers < gc && q.id != 3861) {
@@ -181,8 +222,13 @@ int main() {
 	gCreatureQuestFinishers.load();
 	gObjectQuestGivers.load();
 	gObjectQuestFinishers.load();
+	gCreatureLoots.load();
+	gPickpocketingLoots.load();
+	gGameobjectLoots.load();
 #endif
 
 	Analyzer a;
+	printf("Analyzer start...\n");
 	a.analyze();
+	printf("Analyzer done.\n");
 }

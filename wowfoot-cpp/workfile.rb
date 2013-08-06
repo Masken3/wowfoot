@@ -568,6 +568,7 @@ QUEST_ANALYZER = ExeWork.new do
 	convertHandlerDeps(TestHandlerDeps + [
 		'db_questrelation',
 		'db_spawn',
+		'db_loot_template',
 	])
 	@LOCAL_DLLS << COMMON
 	if(HOST == :win32)
