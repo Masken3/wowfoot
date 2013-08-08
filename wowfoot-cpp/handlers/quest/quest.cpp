@@ -1,6 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include "wowVersion.h"
-#include "quest.chtml.h"
+#include "quest.h"
 #include "comments.h"
 #include "db_creature_template.h"
 #include "money.h"
@@ -15,6 +15,9 @@
 using namespace std;
 
 void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gMaps.load();
+	gAreaQuestObjectives.load();
+	gAreaTriggers.load();
 	gCreatureQuestGivers.load();
 	gObjectQuestGivers.load();
 	printf("Loading finishers...\n");

@@ -582,12 +582,13 @@ int main() {
 		F2 fa = { r.getFloat(6), r.getFloat(4) };
 		F2 fb = { r.getFloat(7), r.getFloat(5) };
 #if 1
-		if(a.area != 0) {
+		//if(a.area != 0)
+		{
 			fprintf(out, "\t%i => { :map => %i, :name => \"%s\", :a => {:x => %.0f, :y => %.0f},"
 				" :b => {:x => %.0f, :y => %.0f} },\n",
 				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
-			fprintf(out2, "{ %i, { %i, \"%s\", {%.0f, %.0f},{%.0f, %.0f} } },\n",
-				a.area, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
+			fprintf(out2, "{ %i, { %i %i, \"%s\", {%.0f, %.0f},{%.0f, %.0f} } },\n",
+				a.area, a.id, a.map, a.name, fa.x, fa.y, fb.x, fb.y);
 		}
 #endif
 		if(a.id != 0) {	//top-level zone (Azeroth, Kalimdor, Outland, Northrend)

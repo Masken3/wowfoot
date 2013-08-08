@@ -127,6 +127,12 @@ object <%NAMELINK(gObjects, -o.reqCreatureOrGOId);%> <%=o.reqCreatureOrGOCount%>
 <br>
 % }
 % }
+%// todo: spawnPoints.
+% for(auto p = gAreaQuestObjectives.findQuest(a->id); p.first != p.second; ++p.first) {
+% const AreaTrigger& at(gAreaTriggers[p.first->second->id]);
+% const Map& map(gMaps[at.map]);
+Visit POI <%=at.id%>: <%=at.map%> (<%=map.name%>), <%=at.x%> <%=at.y%> <%=at.z%>, radius <%=at.radius%>
+% }
 </p>
 
 <p>Details:<br>

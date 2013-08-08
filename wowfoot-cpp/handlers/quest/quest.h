@@ -8,6 +8,8 @@
 #include "db_creature_template.h"
 #include "db_gameobject_template.h"
 #include "dbcSpell.h"
+#include "dbcAreaTrigger.h"
+#include "dbcMap.h"
 #include "dbcFaction.h"
 #include "money.h"
 #include "util/arraySize.h"

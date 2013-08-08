@@ -381,6 +381,8 @@ TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 TdbWork.new('db_creature_onkill_reputation')
 
+DbcWork.new('dbcMap')
+DbcWork.new('dbcAreaTrigger')
 DbcWork.new('dbcFactionTemplate')
 DbcWork.new('dbcSpellIcon')
 DbcWork.new('dbcItemDisplayInfo')
@@ -453,6 +455,7 @@ PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
+	'dbcAreaTrigger', 'dbcMap',
 	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND) do
 	@EXTRA_CPPFLAGS = ' -save-temps=obj'
 end
