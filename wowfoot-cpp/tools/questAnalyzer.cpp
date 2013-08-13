@@ -92,6 +92,10 @@ private:
 		}
 		mObjectiveCount += dumpQuestLocationPair(sp);
 	}
+	void questAreaObjective(const AreaTrigger& at) {
+		questObjectives(Spawns::IdPair());
+		fprintf(mMapFile, " at %i (map %i, %f,%f,%f, r%f)", at.id, at.map, at.x, at.y, at.z, at.radius);
+	}
 	// returns count
 	int dumpQuestLocationPair(Spawns::IdPair sp) {
 		int count = 0;

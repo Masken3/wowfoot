@@ -445,6 +445,7 @@ HandlerWork.new('questShared', ['db_quest',
 	'db_spawn',
 	'db_loot_template',
 	'dbcSpell',
+	'dbcAreaTrigger',
 ])
 
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',

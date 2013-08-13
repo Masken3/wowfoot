@@ -63,4 +63,8 @@ void getQuestLocations(const Quest& q, QuestPointListener& l) {
 				getObjectLocations(s.RequiresSpellFocus, l, &QuestPointListener::questObjectives);
 		}
 	}
+	for(auto p = gAreaQuestObjectives.findQuest(q.id); p.first != p.second; ++p.first) {
+		const AreaTrigger& at(gAreaTriggers[p.first->second->id]);
+		l.questAreaObjective(at);
+	}
 }
