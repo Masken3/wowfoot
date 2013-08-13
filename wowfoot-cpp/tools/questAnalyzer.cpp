@@ -8,6 +8,9 @@
 #include "db_questrelation.h"
 #include "db_spawn.h"
 #include "dbcSpell.h"
+#include "dbcMap.h"
+#include "dbcAreaTrigger.h"
+#include "questPoints.h"
 #include "util/exception.h"
 #include "util/minmax.h"
 #include "util/arraySize.h"
@@ -20,7 +23,7 @@ struct QuestInfo {
 };
 
 // analyze quest dependency graph
-class Analyzer {
+class Analyzer : QuestPointListener {
 private:
 	QuestInfo mMax;
 	// qid, count; number of times a quest has been seen by the analyzer.
@@ -53,7 +56,8 @@ public:
 		for(auto itr = gQuests.begin(); itr != gQuests.end(); ++itr) {
 			const Quest& q(itr->second);
 			count++;
-			fprintf(mDotFile, "n%i [label=\"%s\" URL=\"http://localhost:3002/quest=%i\" target=\"_blank\"];\n", q.id, q.title.c_str(), q.id);
+			fprintf(mDotFile, "n%i [label=\"%s\" URL=\"http://localhost:3002/quest=%i\" target=\"_blank\"];\n",
+				q.id, q.title.c_str(), q.id);
 			dumpQuestLocations(q);
 			if(!preVisit(q.id))
 				continue;
@@ -70,6 +74,24 @@ public:
 		printf("Max finishers: %i (quest=%i)\n", mMaxFinishers, mMF);
 	}
 private:
+	int mGiverCount, mFinisherCount, mObjectiveCount;
+	virtual void questGivers(Spawns::IdPair sp) {
+		mGiverCount += dumpQuestLocationPair(sp);
+	}
+	virtual void questFinishers(Spawns::IdPair sp) {
+		if(mFinisherCount == -1) {
+			fprintf(mMapFile, " finisher");
+			mFinisherCount = 0;
+		}
+		mFinisherCount += dumpQuestLocationPair(sp);
+	}
+	virtual void questObjectives(Spawns::IdPair sp) {
+		if(mObjectiveCount == -1) {
+			fprintf(mMapFile, "\ng%i f%i", mGiverCount, mFinisherCount);
+			mObjectiveCount = 0;
+		}
+		mObjectiveCount += dumpQuestLocationPair(sp);
+	}
 	// returns count
 	int dumpQuestLocationPair(Spawns::IdPair sp) {
 		int count = 0;
@@ -80,75 +102,21 @@ private:
 		}
 		return count;
 	}
-	int dumpQuestLocationByRelation(const Quest& q, const QuestRelations& qrs, const Spawns& spawns) {
-		int count = 0;
-		for(auto pair = qrs.findQuest(q.id); pair.first != pair.second; ++pair.first) {
-			const QuestRelation& qr(*pair.first->second);
-			count += dumpQuestLocationPair(spawns.findId(qr.id));
-		}
-		return count;
-	}
-	int dumpCreatureLocations(int id) {
-		return dumpQuestLocationPair(gCreatureSpawns.findId(id));
-	}
-	int dumpObjectLocations(int id) {
-		return dumpQuestLocationPair(gGameobjectSpawns.findId(id));
-	}
-	int dumpItemLocations(int id) {
-		int count = 0;
-		for(auto p = gCreatureLoots.findItem(id); p.first != p.second; ++p.first) {
-			count += dumpCreatureLocations(p.first->second->entry);
-		}
-		for(auto p = gPickpocketingLoots.findItem(id); p.first != p.second; ++p.first) {
-			count += dumpCreatureLocations(p.first->second->entry);
-		}
-		for(auto p = gGameobjectLoots.findItem(id); p.first != p.second; ++p.first) {
-			count += dumpObjectLocations(p.first->second->entry);
-		}
-		return count;
-	}
 	void dumpQuestLocations(const Quest& q) {
 		fprintf(mMapFile, "%i (%s) giver", q.id, q.title.c_str());
-		int gc = 0;
-		int fc = 0;
-		gc += dumpQuestLocationByRelation(q, gCreatureQuestGivers, gCreatureSpawns);
-		gc += dumpQuestLocationByRelation(q, gObjectQuestGivers, gGameobjectSpawns);
-
-		// todo: spawn points of sources of items that start quests.
-
-		fprintf(mMapFile, " finisher");
-		fc += dumpQuestLocationByRelation(q, gCreatureQuestFinishers, gCreatureSpawns);
-		fc += dumpQuestLocationByRelation(q, gObjectQuestFinishers, gGameobjectSpawns);
-		fprintf(mMapFile, "\ng%i f%i", gc, fc);
-
-		// spawn points of quest objectives.
-		for(uint i=0; i<ARRAY_SIZE(q.objective); i++) {
-			const Quest::Objective& o(q.objective[i]);
-			if(o.reqSourceId) {
-				dumpItemLocations(o.reqSourceId);
-			} else if(o.reqItemId) {
-				dumpItemLocations(o.reqItemId);
-			} else if(o.reqCreatureOrGOId) {
-				if(o.reqCreatureOrGOId > 0)
-					dumpCreatureLocations(o.reqCreatureOrGOId);
-				else
-					dumpObjectLocations(-o.reqCreatureOrGOId);
-			} else if(o.reqSpellCast) {
-				// if spell requires a focus object, find that object.
-				const Spell& s(gSpells[o.reqSpellCast]);
-				if(s.RequiresSpellFocus)
-					dumpObjectLocations(s.RequiresSpellFocus);
-			}
-		}
+		mGiverCount = 0;
+		mFinisherCount = -1;
+		mObjectiveCount = -1;
+		getQuestLocations(q, *this);
 		fprintf(mMapFile, "\n");
 
 		// skip "CLUCK!"
-		if(mMaxGivers < gc && q.id != 3861) {
-			mMaxGivers = gc;
+		if(mMaxGivers < mGiverCount && q.id != 3861) {
+			mMaxGivers = mGiverCount;
 			mMG = q.id;
 		}
-		if(mMaxFinishers < fc && q.id != 3861) {
-			mMaxFinishers = fc;
+		if(mMaxFinishers < mFinisherCount && q.id != 3861) {
+			mMaxFinishers = mFinisherCount;
 			mMF = q.id;
 		}
 	}
@@ -214,7 +182,6 @@ private:
 
 int main() {
 	gQuests.load();
-#if 1
 	gObjects.load();
 	gNpcs.load();
 	gItems.load();
@@ -225,7 +192,11 @@ int main() {
 	gCreatureLoots.load();
 	gPickpocketingLoots.load();
 	gGameobjectLoots.load();
-#endif
+	gMaps.load();
+	gAreaQuestObjectives.load();
+	gAreaTriggers.load();
+	gCreatureSpawns.load();
+	gGameobjectSpawns.load();
 
 	Analyzer a;
 	printf("Analyzer start...\n");

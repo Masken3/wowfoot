@@ -423,7 +423,6 @@ HandlerWork.new('tabs')
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
 HandlerWork.new('skillShared', ['dbcLock', 'dbcSkillLine'])
-HandlerWork.new('questShared', ['db_quest'])
 
 class PatchTask < FileTask
 	def initialize
@@ -436,6 +435,18 @@ class PatchTask < FileTask
 	end
 end
 
+HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap', 'db_spawn'])
+
+TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
+	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize'])
+
+HandlerWork.new('questShared', ['db_quest',
+	'db_questrelation',
+	'db_spawn',
+	'db_loot_template',
+	'dbcSpell',
+])
+
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	'db_quest', 'db_creature_template',
 	'db_gameobject_template', 'dbcFaction',
@@ -446,16 +457,11 @@ HandlerWork.new('comments', commentDeps) do
 	@SOURCE_TASKS << PatchTask.new
 end
 
-HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap', 'db_spawn'])
-
-TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
-	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize'])
-
 PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
-	'dbcAreaTrigger', 'dbcMap',
+	'dbcAreaTrigger', 'dbcMap', 'db_spawn', 'db_loot_template',
 	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND) do
 	@EXTRA_CPPFLAGS = ' -save-temps=obj'
 end
@@ -567,11 +573,16 @@ end
 
 QUEST_ANALYZER = ExeWork.new do
 	@SOURCE_FILES = ['tools/questAnalyzer.cpp']
-	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES
+	@EXTRA_INCLUDES = ['.', 'handlers'] + CONFIG_LOCAL_INCLUDES + [
+		'handlers/quest',
+	]
 	convertHandlerDeps(TestHandlerDeps + [
 		'db_questrelation',
 		'db_spawn',
 		'db_loot_template',
+		'questShared',
+		'dbcMap',
+		'dbcAreaTrigger',
 	])
 	@LOCAL_DLLS << COMMON
 	if(HOST == :win32)
