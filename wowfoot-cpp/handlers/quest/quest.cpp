@@ -6,6 +6,7 @@
 #include "money.h"
 #include "dbcSpell.h"
 #include "db_item.h"
+#include "db_loot_template.h"
 #if CONFIG_WOW_VERSION > 30000
 #include "dbcQuestFactionReward.h"
 #endif
@@ -33,6 +34,10 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gSpells.load();
 	gQuests.load();
 	gObjects.load();
+	spawnPointsPrepare();
+	gCreatureLoots.load();
+	gPickpocketingLoots.load();
+	gGameobjectLoots.load();
 
 	int id = toInt(urlPart);
 	a = gQuests.find(id);
@@ -78,4 +83,75 @@ int questChtml::rewRepValue(int index) {
 
 void questChtml::title(ostream& stream) {
 	ESCAPE(mTitle);
+}
+
+void questChtml::streamEncodedObjectives(ostream& stream) {
+	for(uint i=0; i<ARRAY_SIZE(a->objective); i++) {
+		const Quest::Objective& o(a->objective[i]);
+		bool empty = true;
+		// objective.text is optional, used only for scripted objectives.
+		if(!o.text.empty()) {
+			empty = false;
+			streamWowFormattedText(stream, o.text);
+		}
+		if(o.reqSourceCount != 0) {
+			empty = false;
+			stream << "Source item: ";
+			NAMELINK(gItems, o.reqSourceId);
+			stream << " x"<<o.reqSourceCount;
+		}
+		if(o.reqItemCount != 0) {
+			empty = false;
+			stream << "Item: ";
+			NAMELINK(gItems, o.reqItemId);
+			stream << " x"<<o.reqItemCount;
+		}
+		if(o.reqSpellCast) {
+			empty = false;
+			stream << "Cast ";
+			NAMELINK(gSpells, o.reqSpellCast);
+			if(o.reqCreatureOrGOCount != 0) {
+				stream << "on ";
+			}
+		} else if(o.reqCreatureOrGOCount > 0) {
+			empty = false;
+			stream << "Kill ";
+		} else if(o.reqCreatureOrGOCount < 0) {
+			empty = false;
+			stream << "Use ";
+		}
+		if(o.reqCreatureOrGOCount > 0) {
+			stream << "creature ";
+			NAMELINK(gNpcs, o.reqCreatureOrGOId);
+			stream << " "<<o.reqCreatureOrGOCount<<" times.";
+		} else if(o.reqCreatureOrGOCount < 0) {
+			stream << "object ";
+			NAMELINK(gObjects, -o.reqCreatureOrGOId);
+			stream << " "<<o.reqCreatureOrGOCount<<" times.";
+		}
+		if(!empty) {
+			stream << "<br>\n";
+		}
+	}
+	// todo: spawnPoints.
+	for(auto p = gAreaQuestObjectives.findQuest(a->id); p.first != p.second; ++p.first) {
+		const AreaTrigger& at(gAreaTriggers[p.first->second->id]);
+		const Map& map(gMaps[at.map]);
+		stream << "Visit POI "<<at.id<<": map "<<at.map<<" ("<<map.name<<"), "<<at.x<<" "<<at.y<<" "<<at.z<<", radius "<<at.radius<<"<br>\n";
+	}
+
+	getQuestLocations(*a, *this);
+}
+
+void questChtml::questGivers(Spawns::IdPair sp) {
+	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eBlue);
+}
+void questChtml::questFinishers(Spawns::IdPair sp) {
+	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eYellow);
+}
+void questChtml::questObjectives(Spawns::IdPair sp) {
+	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eRed);
+}
+void questChtml::questAreaObjective(const AreaTrigger& at) {
+	mSpawnPoints.addSpawn(at.map, at.x, at.y, spawnPointsChtml::eGreen);
 }

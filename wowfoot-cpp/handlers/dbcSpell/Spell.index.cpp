@@ -37,5 +37,6 @@ void SpellIndex::load() {
 }
 
 SpellPair SpellIndex::findLearnSpell(int entry) {
+	EASSERT(!sLearnSpellMap.empty());
 	return sLearnSpellMap.equal_range(entry);
 }

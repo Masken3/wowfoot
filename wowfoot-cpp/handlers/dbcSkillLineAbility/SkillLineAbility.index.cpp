@@ -30,9 +30,11 @@ void SkillLineAbilityIndex::load() {
 }
 
 SpellPair SkillLineAbilityIndex::findSpell(int id) {
+	EASSERT(!sSpellMap.empty());
 	return sSpellMap.equal_range(id);
 }
 
 SpellPair SkillLineAbilityIndex::findSkill(int id) {
+	EASSERT(!sSkillMap.empty());
 	return sSkillMap.equal_range(id);
 }

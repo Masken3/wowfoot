@@ -22,31 +22,45 @@ void spawnPointsChtml::prepare() {
 	mSpawnCount = 0;
 }
 
-void spawnPointsChtml::addSpawns(Spawns::IdPair spawns) {
+const char* spawnPointsChtml::typeString(Type t) {
+	switch(t) {
+	case eYellow: return "Yellow";
+	case eRed: return "Red";
+	case eBlue: return "Blue";
+	case eGreen: return "Green";
+	default: assert(false);
+	}
+}
+
+void spawnPointsChtml::addSpawn(int map, float x, float y, Type t) {
+	mSpawnCount++;
+	int zoneId = zoneFromCoords(map, x, y);
+	//printf("zone %i, map %i, %f, %f\n", zoneId, map, x, y);
+	SpawnCoord c = { percentagesInZone(zoneId, x, y), t};
+	unordered_map<int, Zone>::iterator itr = mZones.find(zoneId);
+	Zone* zone = NULL;
+	if(itr == mZones.end()) {	// first point in this zone
+		const Area* a = gAreaTable.find(zoneId);
+		if(a) {
+			zone = &mZones[zoneId];
+			zone->name = a->name;
+		} else {
+			printf("spawnPoint in unknown zone %i (map %i, %f, %f)\n",
+				zoneId, map, x, y);
+		}
+	} else {
+		zone = &itr->second;
+	}
+	if(zone != NULL) {
+		zone->coords.push_back(c);
+		mMainArea = zoneId;
+	}
+}
+
+void spawnPointsChtml::addSpawns(Spawns::IdPair spawns, Type t) {
 	for(; spawns.first != spawns.second; ++spawns.first) {
 		const Spawn& s(*spawns.first->second);
-		mSpawnCount++;
-		int zoneId = zoneFromCoords(s.map, s.position_x, s.position_y);
-		//printf("zone %i, map %i, %f, %f\n", zoneId, s.map, s.position_x, s.position_y);
-		Coord2D c = percentagesInZone(zoneId, s.position_x, s.position_y);
-		unordered_map<int, Zone>::iterator itr = mZones.find(zoneId);
-		Zone* zone = NULL;
-		if(itr == mZones.end()) {	// first point in this zone
-			const Area* a = gAreaTable.find(zoneId);
-			if(a) {
-				zone = &mZones[zoneId];
-				zone->name = a->name;
-			} else {
-				printf("spawnPoint in unknown zone %i (map %i, %f, %f)\n",
-					zoneId, s.map, s.position_x, s.position_y);
-			}
-		} else {
-			zone = &itr->second;
-		}
-		if(zone != NULL) {
-			zone->coords.push_back(c);
-			mMainArea = zoneId;
-		}
+		addSpawn(s.map, s.position_x, s.position_y, t);
 	}
 }
 

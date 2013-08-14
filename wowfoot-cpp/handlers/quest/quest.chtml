@@ -89,50 +89,7 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 </p>
 
 <p>Encoded objectives:<br>
-% for(uint i=0; i<ARRAY_SIZE(a->objective); i++) {
-% const Quest::Objective& o(a->objective[i]);
-% bool empty = true;
-%// objective.text is optional, used only for scripted objectives.
-% if(!o.text.empty()) {
-% empty = false;
-% streamWowFormattedText(stream, o.text);
-% }
-% if(o.reqSourceCount != 0) {
-% empty = false;
-Source item: <%NAMELINK(gItems, o.reqSourceId);%> x<%=o.reqSourceCount%>
-% }
-% if(o.reqItemCount != 0) {
-% empty = false;
-Item: <%NAMELINK(gItems, o.reqItemId);%> x<%=o.reqItemCount%>
-% }
-% if(o.reqSpellCast) {
-% empty = false;
-Cast <%NAMELINK(gSpells, o.reqSpellCast);%>
-% if(o.reqCreatureOrGOCount != 0) {
-on
-% }
-% } else if(o.reqCreatureOrGOCount > 0) {
-% empty = false;
-Kill
-% } else if(o.reqCreatureOrGOCount < 0) {
-% empty = false;
-Use
-% }
-% if(o.reqCreatureOrGOCount > 0) {
-creature <%NAMELINK(gNpcs, o.reqCreatureOrGOId);%> <%=o.reqCreatureOrGOCount%> times.
-% } else if(o.reqCreatureOrGOCount < 0) {
-object <%NAMELINK(gObjects, -o.reqCreatureOrGOId);%> <%=o.reqCreatureOrGOCount%> times.
-% }
-% if(!empty) {
-<br>
-% }
-% }
-%// todo: spawnPoints.
-% for(auto p = gAreaQuestObjectives.findQuest(a->id); p.first != p.second; ++p.first) {
-% const AreaTrigger& at(gAreaTriggers[p.first->second->id]);
-% const Map& map(gMaps[at.map]);
-Visit POI <%=at.id%>: <%=at.map%> (<%=map.name%>), <%=at.x%> <%=at.y%> <%=at.z%>, radius <%=at.radius%>
-% }
+% streamEncodedObjectives(stream);
 </p>
 
 <p>Details:<br>
@@ -156,6 +113,8 @@ Visit POI <%=at.id%>: <%=at.map%> (<%=map.name%>), <%=at.x%> <%=at.y%> <%=at.z%>
 % streamWowFormattedText(stream, a->completedText);
 </p>
 %#endif
+
+% mSpawnPoints.run(stream);
 
 % returnCode = tabsChtml::run(stream);
 

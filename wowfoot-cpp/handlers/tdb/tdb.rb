@@ -304,6 +304,7 @@ static CriticalSectionLoadGuard sCS<%=t.structName%>;
 	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 	) const
 {
+	EASSERT(!m<%=imap%>.empty());
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=cEscape(arg)%><%end%>
 	};

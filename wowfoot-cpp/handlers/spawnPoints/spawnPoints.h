@@ -14,16 +14,31 @@ class spawnPointsChtml : public mapSizeChtml {
 public:
 	spawnPointsChtml() VISIBLE;
 
+	enum Type {
+		eYellow,
+		eRed,
+		eBlue,
+		eGreen,
+	};
+
 	// call this before calling run().
-	void addSpawns(Spawns::IdPair) VISIBLE;
+	void addSpawns(Spawns::IdPair, Type t=eYellow) VISIBLE;
+
+	void addSpawn(int map, float x, float y, Type t=eYellow) VISIBLE;
 
 	int run(ostream& stream) VISIBLE;
 private:
 	void prepare();
+	const char* typeString(Type t);
+
+	struct SpawnCoord {
+		Coord2D c;
+		Type t;
+	};
 
 	struct Zone {
 		const char* name;
-		vector<Coord2D> coords;
+		vector<SpawnCoord> coords;
 	};
 	// key is zone id
 	unordered_map<int, Zone> mZones;

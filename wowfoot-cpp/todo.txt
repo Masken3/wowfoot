@@ -52,6 +52,10 @@ the more advanced problems.
 * Entities (npcs and objects) can be summoned by spells or scripts.
 We should endeavour to display the points where this might happen on the map.
 
+* quest=8995, among others, does not show objectives or finisher on map, because they're both summoned.
+** We should have a creatureId->spell map of summoning. We can then analyze the spell to find out where it may be cast.
+** There are also some Summon Object spells. They should be handled in the same way.
+
 Feature list, per page, with YES/NO for "implemented?":
 * zone
 ** Map	YES
@@ -122,7 +126,9 @@ Feature list, per page, with YES/NO for "implemented?":
 *** out-of-map points	NO
 *** conjured-by-others points NO
 ** comments	YES
-** quests	NO
+** quests PARTIAL
+*** giver/finisher YES
+*** objective NO
 ** drops	NO
 ** tameable	NO
 
@@ -145,9 +151,10 @@ Feature list, per page, with YES/NO for "implemented?":
 ** texts	YES
 ** requirements	NO
 ** comments	YES
-** givers	NO
-** points-of-interest	NO
-*** givers, targets
+** givers	YES
+** points-of-interest	YES
+*** givers, targets YES, MOSTLY.
+**** summoned objects and creatures.
 ** isDaily	NO
 
 * quests

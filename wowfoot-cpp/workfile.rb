@@ -462,7 +462,7 @@ PageWork.new('comment', ['tabTable', 'tabs', 'comments'])
 PageWork.new('quests', ['tabTable', 'tabs', 'db_quest', 'dbcFaction'],
 	{:constructor => true})
 PageWork.new('quest', ['tabTable', 'tabs', 'comments', 'db_quest', 'dbcSpell', 'db_creature_template',
-	'dbcAreaTrigger', 'dbcMap', 'db_spawn', 'db_loot_template',
+	'dbcAreaTrigger', 'dbcMap', 'db_spawn', 'db_loot_template', 'questShared', 'spawnPoints', 'mapSize',
 	'db_item', 'dbcFaction', 'db_questrelation', 'db_gameobject_template'] + DBC_QFR_COND) do
 	@EXTRA_CPPFLAGS = ' -save-temps=obj'
 end

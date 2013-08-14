@@ -80,5 +80,6 @@ void ItemExtendedCostIndex::load() {
 }
 
 ItemItemPair ItemExtendedCostIndex::findItemItem(int entry) {
+	EASSERT(!sItemItemMap.empty());
 	return sItemItemMap.equal_range(entry);
 }

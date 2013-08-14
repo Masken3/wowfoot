@@ -12,10 +12,12 @@
 #include "dbcMap.h"
 #include "dbcFaction.h"
 #include "money.h"
+#include "questPoints.h"
+#include "spawnPoints.h"
 #include "util/arraySize.h"
 #include <stdio.h>
 
-class questChtml : public tabsChtml, public PageContext {
+class questChtml : public tabsChtml, public PageContext, QuestPointListener {
 public:
 	questChtml();
 	void title(ostream&);
@@ -25,6 +27,14 @@ private:
 	string mTitle;
 	const Quest* a;
 	int mRewXp;
+	spawnPointsChtml mSpawnPoints;
 
 	int rewRepValue(int index);
+	void streamEncodedObjectives(ostream&);
+
+	//QuestPointListener
+	void questGivers(Spawns::IdPair);
+	void questFinishers(Spawns::IdPair);
+	void questObjectives(Spawns::IdPair);
+	void questAreaObjective(const AreaTrigger&);
 };

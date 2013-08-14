@@ -30,7 +30,12 @@ div.coord { position:absolute; }
 /*img.oiDefault { position:absolute; width:auto; height:auto; clip:rect(32px,32px,64px,0px); top:-48px; left:-16px; }*/
 /* half size */
 /*img.oiDefault { position:absolute; width:128px; height:32px; clip:rect(16px,16px,32px,0px); top:-24px; left:-8px; }*/
+/* spawn points */
 img.oiDefault { position:absolute; width:64px; height:64px; clip:rect(0px,16px,16px,0px); /*top:0px; left:0px;*/ }
+img.oiRed { position:absolute; width:64px; height:64px; clip:rect(0px,32px,16px,16px); top:0px; left:-16px; }
+img.oiYellow { position:absolute; width:64px; height:64px; clip:rect(0px,16px,16px,0px); top:0px; left:0px; }
+img.oiBlue { position:absolute; width:64px; height:64px; clip:rect(16px,16px,32px,0px); top:-16px; left:0px; }
+img.oiGreen { position:absolute; width:64px; height:64px; clip:rect(0px,48px,16px,32px); top:0px; left:-32px; }
 
 /* item */
 BODY {

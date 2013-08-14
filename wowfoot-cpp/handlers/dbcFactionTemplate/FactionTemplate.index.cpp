@@ -28,5 +28,6 @@ void FactionTemplateIndex::load() {
 }
 
 FactionPair FactionTemplateIndex::findFaction(int entry) {
+	EASSERT(!sFactionMap.empty());
 	return sFactionMap.equal_range(entry);
 }

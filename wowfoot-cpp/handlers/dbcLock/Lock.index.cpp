@@ -51,9 +51,11 @@ void LockIndex::load() {
 }
 
 LockPair LockIndex::findLock(int type) {
+	EASSERT(!sLockMap.empty());
 	return sLockMap.equal_range(type);
 }
 
 NpcPair LockIndex::findNpc(int type) {
+	EASSERT(!sNpcMap.empty());
 	return sNpcMap.equal_range(type);
 }
