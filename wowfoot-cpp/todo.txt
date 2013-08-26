@@ -126,9 +126,9 @@ Feature list, per page, with YES/NO for "implemented?":
 *** out-of-map points	NO
 *** conjured-by-others points NO
 ** comments	YES
-** quests PARTIAL
-*** giver/finisher YES
-*** objective NO
+** quests	PARTIAL
+*** gives/finishes YES
+*** is-objective-of NO
 ** drops	NO
 ** tameable	NO
 
