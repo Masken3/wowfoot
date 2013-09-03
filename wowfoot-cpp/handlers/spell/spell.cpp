@@ -96,7 +96,7 @@ static void streamEscape(ostream& s, const char* t) {
 
 void spellChtml::streamPlainMembers(ostream& stream) {
 	stream << "<p>";
-#define STREAM_PLAIN_MEMBER(name) stream << " " #name ": ";
+#define STREAM_PLAIN_MEMBER(name) stream << " " #name ": ";\
 	streamEscape(stream, a->name);
 	SPELL_PLAIN_MEMBERS(STREAM_PLAIN_MEMBER);
 	stream << "</p>\n";

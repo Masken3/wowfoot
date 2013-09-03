@@ -115,7 +115,9 @@ plainMembers += [
 	f(:int, 'Targets'),
 	f(:int, 'TargetCreatureType'),
 	f(:int, 'RequiresSpellFocus'),
-	f(:int, 'FacingCasterFlags'),
+]
+f(:int, 'FacingCasterFlags') if(CONFIG_WOW_VERSION > 20000)
+plainMembers += [
 	f(:int, 'CasterAuraState'),
 	f(:int, 'TargetAuraState'),
 ]
