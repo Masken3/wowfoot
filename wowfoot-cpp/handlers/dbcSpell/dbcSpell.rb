@@ -145,7 +145,7 @@ plainMembers += [
 	f(:int, 'DurationIndex'),
 	f(:int, 'powerType'),
 	f(:int, 'manaCost'),
-	f(:int, 'manaCostPerlevel'),
+	f(:int, 'manaCostPerLevel'),
 	f(:int, 'manaPerSecond'),
 	f(:int, 'manaPerSecondPerLevel'),
 	f(:int, 'rangeIndex'),

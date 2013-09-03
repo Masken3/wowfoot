@@ -54,6 +54,10 @@ static void LoadCommonMPQFiles() {
 }
 
 void loadMpqFiles() {
+	static bool loaded = false;
+	if(loaded)
+		return;
+	loaded = true;
 	printf("Opening MPQ files:\n");
 #if CONFIG_WOW_VERSION >= 20000
 	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
