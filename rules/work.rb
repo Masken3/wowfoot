@@ -1,12 +1,11 @@
 require "#{File.dirname(__FILE__)}/base.rb"
-require "#{File.dirname(__FILE__)}/util.rb"
-require 'fileutils'
 
 # A Task representing a file.
 # @NAME is the name of the file.
 class FileTask < Task
 	def initialize(n)
 		#puts "FileTask(#{n})"
+		@backtrace = Thread.current.backtrace if(CONFIG_PRINT_FILETASK_BACKTRACE)
 		setName(n)
 		super()
 	end
@@ -53,12 +52,18 @@ class FileTask < Task
 		rescue => e
 			# In case the output file is created in error
 			FileUtils.rm_f(@NAME)
+			puts "Task creation backtrace:\n" + @backtrace.join("\n") if(CONFIG_PRINT_FILETASK_BACKTRACE)
 			raise
 		end
 	end
 
+	def fileExecute
+		raise "File #{@NAME} does not exist!"
+	end
+
 private
 
+	# Must be called before setNeeded().
 	def setName(n)
 		@NAME = n.to_s
 		# names may not contain '~', the unix home directory hack, because Ruby doesn't parse it.
@@ -173,24 +178,30 @@ end
 
 # Copies a directory, its contents and subdirectories.
 class CopyDirTask < Task
-	def initialize(dstRoot, name, srcName = name, copySubdirs = true)
+	def initialize(dstRoot, name, srcName = name, copySubdirs = true, pattern = '*', ignoredFiles = [])
 		@NAME = name
 		@dstRoot = dstRoot
 		@srcName = srcName
 		@copySubdirs = copySubdirs
+		@pattern = pattern
+		@ignoredFiles = ignoredFiles
 		@prerequisites = []
 		glob("#{@dstRoot}/#{@NAME}", @srcName)
+		@needed = false
 		super()
+	end
+	def execute
 	end
 private
 	def glob(dst, src)
-		@prerequisites << DirTask.new(dst)
-		sources = Dir.glob("#{src}/*", File::FNM_DOTMATCH) - ["#{src}/.", "#{src}/.."]
+		d = DirTask.new(dst)
+		sources = Dir.glob("#{src}/#{@pattern}", File::FNM_DOTMATCH) - ["#{src}/.", "#{src}/.."]
+		sources -= @ignoredFiles.collect do |i| "#{src}/#{i}"; end
 		sources.each do |s|
 			if(File.directory?(s))
 				glob("#{dst}/#{File.basename(s)}", s) if(@copySubdirs)
 			else
-				@prerequisites << CopyFileTask.new("#{dst}/#{File.basename(s)}", FileTask.new(s))
+				@prerequisites << CopyFileTask.new("#{dst}/#{File.basename(s)}", FileTask.new(s), [d])
 			end
 		end
 	end
@@ -235,3 +246,6 @@ class MultiFileTask < FileTask
 		return d
 	end
 end
+
+require "#{File.dirname(__FILE__)}/util.rb"
+require 'fileutils'

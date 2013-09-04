@@ -32,7 +32,7 @@ module FlagsChanged
 		super
 		return if(@needed)
 		if(File.exists?(@FLAGSFILE)) then
-			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read.strip }
+			@OLDFLAGS = open(@FLAGSFILE) { |f| f.read.rstrip }
 		else
 			@needed = "Because the flags file is missing:"
 			return

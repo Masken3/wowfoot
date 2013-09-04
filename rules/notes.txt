@@ -27,3 +27,8 @@ The old system of using "needed?" to check that a task was successfully executed
 
 Also, it has a bug; if the prerequisites change, like C header files, the new headers will not be checked, and the old ones will.
 If some of the old headers have been deleted, there will be a false negative.
+
+12:39 2013-09-04
+Todo: option to redo set_needed on all tasks, to make sure they don't still need to be rebuilt.
+This also needs to recalculate prerequisites, in case of changed header files...
+probably easiest to create a new workfile process with a special option.

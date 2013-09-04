@@ -1,6 +1,7 @@
-#require "#{File.dirname(__FILE__)}/config.rb"
+require "#{File.dirname(__FILE__)}/config.rb"
 require "#{File.dirname(__FILE__)}/util.rb"
 require "#{File.dirname(__FILE__)}/error.rb"
+require "#{File.dirname(__FILE__)}/arg_handler.rb"
 require 'thread'
 
 # puts is not atomic; its newline can be written after another thread has written more stuff.
@@ -101,9 +102,28 @@ class Task
 		a.each do |iv|
 			av = self.instance_variable_get(iv)
 			bv = o.instance_variable_get(iv)
-			if(av != bv)
+
+			# complicated comparisons
+			if(av.is_a?(Task))
+				equal = av.compareWithLogging(bv, log)
+			elsif(av.is_a?(Array) && bv.is_a?(Array))
+				equal = true
+				if(av.size != bv.size)
+					[0 .. av.size].each do |i|
+						if(av[i] != bv[i])
+							equal = false
+							break
+						end
+					end
+				end
+			else
+				equal = (av == bv)
+			end
+
+			if(!equal)
 				p iv if(log)
 				p av, bv if(log)
+				p av.class, bv.class if(log)
 				return false
 			end
 		end
@@ -111,7 +131,7 @@ class Task
 	end
 
 	def uncomparedVariables
-		return [:@needies, :@neededCount]
+		return [:@needies, :@neededCount, :@backtrace]
 	end
 
 	# These must not be used by any class other than Works.
@@ -131,31 +151,64 @@ end
 # Responsible for scheduling and running tasks.
 class Works
 	def self.prettyPrintException(e, offset, c = nil)
-		msg = "Unhandled exception: #{e.to_s} (#{e.class})"
+		msg = "Unhandled exception: #{e.to_s} (#{e.class})\n"
 		if(c == nil || e.class != c)
-			msg << "\n#{e.backtrace[offset..-1].join("\n")}"
+			msg << "#{e.backtrace[offset..-1].join("\n")}\n"
 		end
-		puts msg
+		$stdout.write(msg)
+		$stdout.flush
 	end
 
 	# Run all scheduled tasks. Don't stop until they're all done, or one fails.
 	# If one fails, let the other running ones complete before returning.
 	def self.run(doGoals = true)
 		raise "Multiple runs are not allowed!" if(doGoals && @@goalsDone)
+		parseArgs(doGoals) if(!@@args_handled)
 		run2
 		return if(!doGoals)
-		@@goalsDone = true
-		parseArgs(ARGV)
-		@@goals.each do |g|
+		# copy to local, in case a goal calls invoke_subdir.
+		goals = @@goals
+		targets = @@default_targets.merge(@@targets)
+		d = targets[:default]
+		goals.each do |g|
+			raise "Goal #{g} is not a target in the current workfile!" if(!targets[g])
 			puts "Goal '#{g}':"
-			@@targets[g].execute
+			@@goalsDone = true
+			targets[g].execute
 		end
+		# why copy again?
+		d = targets[:default]
+		if(goals.empty? && d)
+			@@goalsDone = true
+			d.execute
+		end
+		@@goalsDone = true
 	end
 
 	private
+
+	@@args = ARGV
+	@@goals = []
+	@@targets = {}
+	@@default_targets = {}
+	@@goalsDone = false
+
+	def self.resetTargets(args)
+		@@goals = []
+		@@targets = {}
+		@@default_targets = {}
+		@@goalsDone = false
+		@@args = args
+		@@handlers = {}
+		@@args_handled = false
+		@@args_default = {}
+		reset
+	end
+
 	def self.run2()
-		return if(@@error)
-		return if(@@tasks.empty?)
+		#puts "run2: #{@@tasks.inspect}"
+		return false if(@@error)
+		return false if(@@tasks.empty?)
 
 		puts "starting multi-processing..."
 
@@ -169,7 +222,7 @@ class Works
 				#puts "Start thread #{i}"
 				begin
 					runThread(i)
-				rescue Object => e
+				rescue Exception => e
 					# stop the other threads from starting new tasks, but let them finish their current ones.
 					@@mutex.synchronize do
 						prettyPrintException(e, 0, WorkError)
@@ -177,6 +230,7 @@ class Works
 						@@error = true
 						# @@threadNames.size needs to be up-to-date.
 						@@threadNames.delete(Thread.current.object_id)
+						@@cond.broadcast
 					end
 				end
 				#puts "End thread #{i}"
@@ -188,6 +242,7 @@ class Works
 		end
 
 		puts "multi-processing complete."
+		exit(1) if(@@error)
 		reset
 	end
 
@@ -210,6 +265,12 @@ class Works
 		else
 			key = task
 		end
+
+		#puts "Works.add(#{key}): #{task.needed}"
+		#task.prerequisites.each do |pre|
+		#	puts "#{pre.name}: #{pre.needed}"
+		#end
+
 		t = @@taskSet[key]
 		if(t == nil)
 			@@taskSet[key] = task
@@ -217,6 +278,7 @@ class Works
 			e = t.compareWithLogging(task)
 			if(!e)
 				#p task.respond_to?(:name), key, t.name, task.name
+				p key
 				raise "Duplicate variant task detected!"
 			end
 			# duplicate task detected.
@@ -238,13 +300,17 @@ class Works
 		else
 			task.neededCount = count
 		end
+		#p @@tasks
 	end
 
-	def self.parseArgs(args)
+	def self.parseArgs(doGoals = false)
 		#p args
 		raise hell if(@@args_handled)
-		args.each do |a| handle_arg(a) end
-		@@args_handled = true
+		@@args_handled = {}
+		@@args.each do |a| handle_arg(a, doGoals) end
+		@@args_default.each do |sym, val|
+			default_const(sym, val)
+		end
 	end
 
 	def self.threadName
@@ -276,6 +342,10 @@ class Works
 		end
 		#puts "Target add '#{name}'"
 		@@targets.store(name, Target.new(name, preqs, &block))
+	end
+
+	def self.setDefaultTarget(name, &block)
+		@@default_targets.store(name, Target.new(name, [], &block))
 	end
 
 	private
@@ -318,9 +388,6 @@ class Works
 		end
 	end
 
-	@@goals = []
-	@@targets =  {}
-	@@goalsDone = false
 	@@mutex = Mutex.new	# protects access to @@abort, @@waitingThreads, @@tasks and @@nextTask.
 	@@cond = ConditionVariable.new	# signaled when @@tasks or @@abort changes.
 	@@error = false
@@ -357,6 +424,7 @@ class Works
 			end
 			puts "#{task.needed} #{task}"
 			task.execute
+			task.instance_variable_set(:@needed, false)	# I hope this works
 			#puts "done"
 			@@mutex.synchronize do
 				if(task.needies)
@@ -364,7 +432,7 @@ class Works
 						n.neededCount -= 1
 						@@tasks << n if(n.neededCount == 0)
 						raise hell if(n.neededCount < 0)
-						@@cond.signal
+						@@cond.broadcast
 					end
 				end
 				# if there are no more tasks, and all other threads are waiting, we're done.
@@ -376,20 +444,21 @@ class Works
 		end
 	end
 
-	def self.handle_arg(a)
+	def self.handle_arg(a, doGoals)
 		i = a.index('=')
 		if(i) then
+			name = a[0, i]
 			if(@@handlers[name])
-				puts "Handler #{name}"
-				@@handlers[name].each do |block|
-					block.call(value)
-				end
+				#puts "Handler #{name}"
+				value = a[i+1 .. -1]
+				@@args_handled[name] = value
+				@@handlers[name].call(value)
 			else
-				raise "Unhandled argument #{a}"
+				raise "Unhandled argument #{a}" unless(defined?(@@ignore_unhandled_args))
 			end
 		else
 			g = a.to_sym
-			raise "Goal #{g} is not a target in the current workfile!" if(!@@targets[g])
+			raise "Goal #{g} is not a target in the current workfile!" if(!@@targets[g] && doGoals)
 			#puts "Goal add #{g}"
 			@@goals << g
 		end

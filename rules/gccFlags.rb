@@ -20,7 +20,7 @@ require "#{File.dirname(__FILE__)}/util.rb"
 
 module GccFlags
 def define_cflags
-
+super if(defined?(super))
 
 # Valid in GCC 4.3 and later.
 gcc43_warnings = ' -Wvla -Wlogical-op'
@@ -132,7 +132,7 @@ elsif(@TARGET_PLATFORM == :darwin)
 	target_cppflags = ''
 else
 	if(respond_to?(:customTargetSetFlags))
-		customTargetSetFlags
+		target_flags, target_cppflags = customTargetSetFlags
 	else
 		error "Unsupported target platform: #{@TARGET_PLATFORM}"
 	end

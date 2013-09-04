@@ -22,6 +22,7 @@ def default(constant, value)
 	eval(s)
 end
 
+# Unlike Module.const_set, this sets a global constant.
 def set_const(name, value)
 	s = "#{name.to_s} = #{value.inspect}"
 	eval(s)
@@ -83,8 +84,12 @@ end
 
 def sh(cmd)
 	# Print the command to stdout.
-	puts cmd
-	if(true)#HOST == :win32)
+	if(cmd.is_a?(Array))
+		p cmd
+	else
+		puts cmd
+	end
+	if(false)#HOST == :win32)
 		success = system(cmd)
 		error "Command failed" unless(success)
 	else
@@ -141,7 +146,7 @@ HashMergeAdd = Proc.new {|key, old, new| old + new }
 
 # returns a command-line string with the correct invocation of sed for all platforms
 def sed(script)
-	if(@@sedIsGnu == nil)
+	if(!self.class.class_variable_defined?(:@@sedIsGnu))
 		open("|sed --version 2>&1") do |file|
 			@@sedIsGnu = file.gets.beginsWith('GNU sed')
 		end

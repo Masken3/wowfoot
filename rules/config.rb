@@ -13,5 +13,5 @@ default_const(:EXIT_ON_ERROR, true)
 default_const(:PRINT_WORKING_DIRECTORY, false)
 default_const(:CONFIG_CCOMPILE_DEFAULT, 'release')
 
-require "#{File.dirname(__FILE__)}/gccModule.rb"
+module GccCompilerModule; end
 default_const(:DefaultCCompilerModule, GccCompilerModule)

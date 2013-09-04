@@ -67,7 +67,9 @@ private
 		return @@gcc_info[gcc]
 	end
 
-	def setGccVersion
+public
+
+	def setCompilerVersion
 		info = gccVersionInfo
 
 		@GCC_IS_V4 = info[:ver][0] == "4"[0]
@@ -81,14 +83,19 @@ private
 			@GCC_IS_V4 = true
 			@GCC_V4_SUB = 2
 		end
-	end
 
-public
+		@GCC_WNO_UNUSED_BUT_SET_VARIABLE = ''
+		@GCC_WNO_POINTER_SIGN = ''
+		if(@GCC_IS_V4 && @GCC_V4_SUB >= 6)
+			@GCC_WNO_UNUSED_BUT_SET_VARIABLE = ' -Wno-unused-but-set-variable'
+			@GCC_WNO_POINTER_SIGN = ' -Wno-pointer-sign'
+		end
+		default(:TARGET_PLATFORM, HOST)
+	end
 
 	# used only by CCompileWork.
 	def loadCommonFlags
-		setGccVersion
-		@TARGET_PLATFORM = HOST
+		setCompilerVersion
 
 		define_cflags
 
@@ -107,10 +114,19 @@ public
 		@TEMPDEPFILE = @DEPFILE + 't'
 		flags += " -MMD -MF \"#{@TEMPDEPFILE}\""
 
+		if(HOST == :win32)
+			raise hell if(@NAME[1,1] != ':')
+		end
+
 		return "#{gcc} -o \"#{@NAME}\"#{flags} -c \"#{@SOURCE}\""
 	end
 
 	def postCompile
+		if(!File.exist?(@TEMPDEPFILE) && @SOURCE.to_s.getExt == '.s')
+			# Some .s files generate no dependency file when compiled.
+			FileUtils.touch(@DEPFILE)
+			return
+		end
 		# In certain rare cases (error during preprocess caused by a header file)
 		# gcc may output an empty dependency file, resulting in an empty dependency list for
 		# the object file, which means it will not be recompiled, even though it should be.
@@ -118,15 +134,32 @@ public
 		FileUtils.mv(@TEMPDEPFILE, @DEPFILE)
 	end
 
+	private
+	def objectFlags
+		"\"#{@object_tasks.join("\"\n\"")}\""
+	end
+	def objectsFileName
+		CCompileTask.genFilename(@BUILDDIR, @NAME, '.objects')
+	end
+	def linkerName
+		@cppfiles.empty? ? 'gcc' : 'g++'
+	end
+
+	public
+	def preLink
+		file = open(objectsFileName, 'w')
+		file.puts objectFlags
+		file.close
+	end
+
 	def linkCmd
-		linkerName = @cppfiles.empty? ? 'gcc' : 'g++'
-		flags = @EXTRA_LINKFLAGS
+		flags = "#{@FLAGS}#{@EXTRA_LINKFLAGS}"
 		@LIBRARIES.each do |lib|
 			flags += " -l#{lib}"
 		end
 		raise hell if(@LIBRARIES.uniq.length != @LIBRARIES.length)
 		raise hell if(@object_tasks.uniq.length != @object_tasks.length)
-		return "#{linkerName} -o \"#{@NAME}\"#{@FLAGS} \"#{@object_tasks.join("\" \"")}\"#{flags}"
+		return "#{linkerName} -o \"#{@NAME}\" @#{objectsFileName}#{flags}"
 	end
 
 	def dllCmd
@@ -139,13 +172,14 @@ public
 	end
 
 	def preLib
+		preLink
 		# ar does not remove out-of-date archive members.
 		# The file must be deleted if we are to get a clean build.
 		FileUtils.rm_f(@NAME)
 	end
 
 	def libCmd
-		return "ar rcs #{@NAME} #{@FLAGS} \"#{@object_tasks.join("\" \"")}\""
+		return "ar rcs #{@NAME}#{@FLAGS} @#{objectsFileName}"
 	end
 
 	def postLib
