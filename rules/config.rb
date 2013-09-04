@@ -11,7 +11,7 @@ default_const(:PRINT_FLAG_CHANGES, true)
 default_const(:USE_COMPILER_VERSION_IN_BUILDDIR_NAME, true)
 default_const(:EXIT_ON_ERROR, true)
 default_const(:PRINT_WORKING_DIRECTORY, false)
-default_const(:CONFIG_PRINT_FILETASK_BACKTRACE, false)
+default_const(:CONFIG_PRINT_FILETASK_BACKTRACE, true)
 default_const(:CONFIG_CCOMPILE_DEFAULT, 'release')
 default_const(:CONFIG_HAVE_COMMON_BUILDDIR, false)
 

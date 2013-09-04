@@ -54,6 +54,33 @@ class Task
 		raise "@needed not set!" if(@needed == nil)
 		@needed.freeze
 		Works.add(self) if(@needed)
+
+		# detect duplicates
+		if(self.respond_to?(:name))
+			key = self.name
+		else
+			key = self
+		end
+
+		t = @@taskSet[key]
+		if(t == nil)
+			@@taskSet[key] = self
+		else
+			e = t.compareWithLogging(self)
+			if(!e)
+				#p self.respond_to?(:name), key, t.name, self.name
+				p key
+				puts "self.backtrace: #{@backtrace.join("\n")}"
+				puts "t.backtrace: #{t.instance_variable_get(:@backtrace).join("\n")}"
+				raise "Duplicate variant task detected!"
+			end
+		end
+	end
+
+	@@taskSet = {}
+
+	def self.getTaskFromSet(key)
+		return @@taskSet[key]
 	end
 
 	def setNeeded

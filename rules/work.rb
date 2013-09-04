@@ -234,6 +234,22 @@ class MultiFileTask < FileTask
 			fn
 		end
 		super(name)
+		# Ensure that any tasks, that depend on secondary files, are rebuilt.
+		# Trouble: relies on duplicate task replacement in Works.add,
+		# but since the header FileTasks isn't needed, it's never added and thus is never replaced.
+		# Fixed by having class Task keep a set of all names Tasks, and MakeDependLoader querying that set.
+		files.each do |f|
+			MultiFileSubTask.new(f, [self])
+		end
+	end
+
+	class MultiFileSubTask < FileTask
+		def initialize(name, prerequsites)
+			@prerequisites = prerequsites
+			super(name)
+		end
+		def execute
+		end
 	end
 
 	# Returns the date of the newest file.

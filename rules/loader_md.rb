@@ -31,8 +31,9 @@ class MakeDependLoader
 
 	# Load makefile dependencies in +fn+.
 	# Return an array of Tasks.
-	def MakeDependLoader.load(fn, target)
+	def MakeDependLoader.load(fn, target, skip = 0)
 		res = nil
+		count = 0
 		target = target.gsub(' ', SPACE_MARK)
 		open(fn) do |mf|
 			lines = mf.read
@@ -43,7 +44,7 @@ class MakeDependLoader
 				if(res) then
 					error "MD: too many logical lines in file '#{fn}'"
 				end
-				res = process_line(fn, line, target)
+				res, count = process_line(fn, line, target, count, skip)
 			end
 		end
 		if(res == nil)
@@ -55,7 +56,7 @@ class MakeDependLoader
 	private
 
 	# Process one logical line of makefile data.
-	def MakeDependLoader.process_line(fn, line, target)
+	def MakeDependLoader.process_line(fn, line, target, count, skip)
 		index = line.index(': ')
 		md = line[0, index].strip
 		if(!filenamesEqual(target, md)) then
@@ -64,10 +65,19 @@ class MakeDependLoader
 		args = line[index+1, line.length]
 		return [] if args.nil?
 		depNames = args.split.map { |a| respace(a) }
-		depTasks = depNames.collect { |d|
-			HeaderFileTask.new(d)
-		}
-		return depTasks
+		depTasks = []
+		depNames.each do |d|
+			count = count + 1
+			if(count > skip)
+				tfs = Task.getTaskFromSet(File.expand_path_fix(d))
+				if(tfs)
+					depTasks << tfs
+				else
+					depTasks << HeaderFileTask.new(d)
+				end
+			end
+		end
+		return depTasks, count
 	end
 
 	def MakeDependLoader.respace(str)

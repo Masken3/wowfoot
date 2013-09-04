@@ -55,7 +55,9 @@ module GccCompilerModule
 			@needed = "Because the dependency file is missing:"
 			return []
 		end
-		MakeDependLoader.load(@DEPFILE, @NAME)
+		# The first file in a GCC-generated MF file is the C/CPP file itself.
+		# Gotta skip it, or we'll have a Task type collision.
+		MakeDependLoader.load(@DEPFILE, @NAME, 1)
 	end
 
 private
