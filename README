@@ -1,13 +1,12 @@
-wowfoot is intended to be an open-source database explorer for the World of Warcraft.
+wowfoot is an open-source database explorer for the World of Warcraft.
 
 It can currently display information and maps on zones, npcs, items, quests and objects.
 A free-text search function is available.
 
-Pages that remain todo:
-Item sets, factions and achievements.
-
 It should serve as a replacement for wowhead.
+
 It should support any game version, not just the latest official patch.
+Currently, there's support for 1.12 and 3.3.5.
 
 It should have some improvements, for example:
 * Accurate quest dependencies, read directly from the database.
@@ -20,11 +19,11 @@ Components:
 * wowfoot-ex: Extracts data, including zone map images, from WoW MPQ files.
 * wowfoot-downloader: Downloads pages from wowhead.
 * wowfoot-import: Extracts comments from wowfoot-downloader and stores them in an sqlite3 database.
-* wowfoot-webrick: A web server.
+* wowfoot-cpp: A web server, written in C++.
   Uses the data provided by wowfoot-ex and wowfoot-import.
-  Connects to a TrinityCore world database.
-* wowfoot-cpp: A web server, much like wowfoot-webrick, except written in C++.
-  Has superior performance, but not yet all the features of wowfoot-webrick.
+  Connects to a TrinityCore or mangos world database.
+* wowfoot-webrick: A web server, like wowfoot-cpp, written in Ruby.
+  Deprecated due to instability and inferior performance.
 
 
 wowfoot-downloader takes a very long time to run, so its output has been collected and is available
@@ -32,17 +31,13 @@ in the download section of this github page.
 
 
 It is tested on these platforms:
-* Ubuntu GNU/Linux, version 10.10.
-  Works fine with Ruby 1.8.
-  Ruby 1.9 causes database queries to return bad data.
+* Ubuntu GNU/Linux, versions 12.04 and 12.10.
 
-* Windows 7 with Ruby 1.9 and Visual Studio 2010.
-  Most parts work, but the Ruby interpreter crashes when processing some pages.
-  Probable cause is a bug in the MySQL client library.
+* Windows 7 with Ruby 1.9 and mingw.
 
 
 Licencing:
-wowfoot itself is licensed under the terms of the GNU Affero Public License, version 3.
+wowfoot itself is licensed under the terms of the GNU Affero General Public License, version 3.
 See COPYING for the full text of the license.
 
 wowfoot incorporates some third-party libraries. They have their own licenses.
