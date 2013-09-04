@@ -180,7 +180,7 @@ class CCompileWork < FileTask
 		@object_tasks = collect_objects(all_sourcefiles) + @EXTRA_OBJECTS + @LOCAL_LIBS + @LOCAL_DLLS
 		@prerequisites += @object_tasks
 
-		super(File.expand_path_fix(targetName()))
+		super(targetName())
 	end
 
 	def cFlags

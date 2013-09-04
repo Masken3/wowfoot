@@ -107,7 +107,7 @@ public
 		@TEMPDEPFILE = @DEPFILE + 't'
 		flags += " -MMD -MF \"#{@TEMPDEPFILE}\""
 
-		return "#{gcc} -o \"#{@NAME}\"#{flags} -c \"#{File.expand_path_fix(@SOURCE)}\""
+		return "#{gcc} -o \"#{@NAME}\"#{flags} -c \"#{@SOURCE}\""
 	end
 
 	def postCompile

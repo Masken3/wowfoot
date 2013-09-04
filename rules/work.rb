@@ -65,6 +65,7 @@ private
 		if(@NAME.start_with?('~'))
 			raise "Bad filename: #{@NAME}"
 		end
+		@NAME = File.expand_path_fix(@NAME)
 	end
 end
 
