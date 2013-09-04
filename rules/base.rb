@@ -1,7 +1,10 @@
+require "#{File.dirname(__FILE__)}/arg_handler.rb"
+
+Works.registerConstArg(:TASK_TEST_RUN, false)
+
 require "#{File.dirname(__FILE__)}/config.rb"
 require "#{File.dirname(__FILE__)}/util.rb"
 require "#{File.dirname(__FILE__)}/error.rb"
-require "#{File.dirname(__FILE__)}/arg_handler.rb"
 require 'thread'
 
 # puts is not atomic; its newline can be written after another thread has written more stuff.
@@ -164,6 +167,15 @@ class Works
 	def self.run(doGoals = true)
 		raise "Multiple runs are not allowed!" if(doGoals && @@goalsDone)
 		parseArgs(doGoals) if(!@@args_handled)
+		if(TASK_TEST_RUN)
+			return if(@@tasks.empty?)
+			puts "#{@@tasks.size} tasks are undone!"
+			# dump tasks
+			@@tasks.each do |task|
+				puts "#{task.needed} #{task}"
+			end
+			raise
+		end
 		run2
 		return if(!doGoals)
 		# copy to local, in case a goal calls invoke_subdir.
@@ -181,6 +193,9 @@ class Works
 		if(goals.empty? && d)
 			@@goalsDone = true
 			d.execute
+			if(CONFIG_CHECK_TASK_INTEGRITY)
+				sh "ruby workfile.rb TASK_TEST_RUN="
+			end
 		end
 		@@goalsDone = true
 	end

@@ -14,6 +14,8 @@ ipch
 log.txt
 log.*.txt
 
+rules/local_config.rb
+
 wowhead-downloader/curl-config.txt
 
 wowfoot-import/*.db

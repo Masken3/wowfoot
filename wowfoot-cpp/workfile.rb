@@ -214,7 +214,7 @@ end
 
 class CCompileWork
 	def convertHandlerDeps(deps)
-		@LOCAL_DLLS ||= []
+		@EXTRA_OBJECTS ||= []
 		@REQUIREMENTS ||= []
 		deps.each do |dll|
 			raise "Unknown work #{dll}" if(!WORK_MAP[dll])
@@ -225,7 +225,7 @@ class CCompileWork
 			@EXTRA_INCLUDES << f if(w.is_a?(DbcWork))
 			f ="#{TDB_BUILDDIR}/#{dll}"
 			@EXTRA_INCLUDES << f if(w.is_a?(TdbWork))
-			@LOCAL_DLLS << w
+			@EXTRA_OBJECTS << w
 			@REQUIREMENTS << w
 		end
 	end
@@ -239,8 +239,8 @@ class HandlerWork < DllWork
 			bn = File.basename(chtml, '.chtml')
 			ChtmlCompileTask.new(CHTML_BUILDDIR, bn, chtml, isPage, options)
 		end
+		remove_instance_variable(:@SOURCE_TASKS) if(!hasChtml)
 		@SOURCES = ["handlers/#{name}"]
-		@SOURCE_FILES = []
 		@EXTRA_INCLUDES = [
 			'handlers', "handlers/#{name}",
 			'.', CHTML_BUILDDIR,
@@ -248,12 +248,12 @@ class HandlerWork < DllWork
 			'build',
 		] + CONFIG_LOCAL_INCLUDES
 		@EXTRA_INCLUDES << "#{TDB_BUILDDIR}/#{name}" if(self.is_a?(TdbWork))
+		@EXTRA_OBJECTS = [COMMON]
 		convertHandlerDeps(handlerDeps)
-		@LOCAL_LIBS = [COMMON]
 		@LIBRARIES = []
 		@LIBRARIES << 'imagehlp' if(HOST == :win32)
 		@LIBRARIES << 'dl' if(HOST != :win32)
-		@LOCAL_DLLS << WIN32 if(HOST == :win32)
+		@EXTRA_OBJECTS << WIN32 if(HOST == :win32)
 		@EXTRA_LINKFLAGS ||= ''
 		@EXTRA_LINKFLAGS += CONFIG_LOCAL_LIBDIRS
 		@NAME = name
@@ -263,23 +263,12 @@ class HandlerWork < DllWork
 	end
 	#def name; File.basename(@TARGET.to_s, '.so'); end
 	def baseName; "#{@BUILDDIR}#{@NAME}"; end
-	if(HOST != :win32) then def setup
-		# TODO: fix this function, which is never called anymore
-		@LOCAL_DLLS = @LOCAL_DLLS.collect do |dll|
-			w = WORK_MAP[dll]
-			if(w)
-				dll = w.name
-			end
-			dll
-		end
-		super
-		@TARGET.setNewName
-	end end
 end
 
 class TdbWork < HandlerWork
 	def initialize(name, handlerDeps = [], &block)
 		super(name, ['tdb'] + handlerDeps) do
+			@SOURCE_TASKS ||= []
 			@SOURCE_TASKS << TdbCppTask.new(name)
 			@EXTRA_CPPFLAGS = ' -Wno-invalid-offsetof'
 			@REQUIREMENTS = [
@@ -306,7 +295,7 @@ class ExTemplateWork < HandlerWork
 		super(name, handlerDeps) do
 			@EXTRA_INCLUDES << "build/#{name}"
 			@SOURCE_TASKS << ExTemplateCpp.new(name, singular, plural, upperCase)
-			@SOURCE_FILES << "../wowfoot-ex/output/#{name}.data.cpp"
+			@SOURCE_FILES = ["../wowfoot-ex/output/#{name}.data.cpp"]
 			instance_eval(&block) if(block)
 		end
 	end
@@ -342,15 +331,14 @@ end
 
 DBC = HandlerWork.new('dbc') do
 	@SOURCES << '../wowfoot-ex/src/libs'
-	@SOURCE_FILES << '../wowfoot-ex/src/dbcList.cpp'
+	@SOURCE_FILES = ['../wowfoot-ex/src/dbcList.cpp']
 	@EXTRA_INCLUDES << '../wowfoot-ex/src'
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
 	@SPECIFIC_CFLAGS = {
 		'loadlib.cpp' => ' -Wno-multichar',
 		'dbcList.cpp' => " -DCONFIG_WOW_VERSION=#{CONFIG_WOW_VERSION}",
 	}
-	set_defaults
-	@EXTRA_OBJECTS = [LIBMPQ]
+	@EXTRA_OBJECTS << LIBMPQ
 end
 
 HandlerWork.new('dbcItemSubClass', ['dbc']) do
@@ -364,7 +352,7 @@ HandlerWork.new('icon', ['dbc']) do
 	@EXTRA_INCLUDES << '../wowfoot-ex/src/libs/libmpq'
 	@prerequisites ||= []
 	@prerequisites << DirTask.new('build/icon')
-	@EXTRA_OBJECTS = [(LIBMPQ), (BLP), (SQUISH), (PALBMP), (CRBLIB)]
+	@EXTRA_OBJECTS += [(LIBMPQ), (BLP), (SQUISH), (PALBMP), (CRBLIB)]
 	@LIBRARIES += ['png', 'jpeg']
 end
 
@@ -524,14 +512,13 @@ WFC = @wfc = ExeWork.new do
 	@LIBRARIES = ['microhttpd']
 	@EXTRA_INCLUDES = ['win32', '.', 'build']#'src', 'src/libs/libmpq']
 	#@EXTRA_CFLAGS = ' -D_POSIX_SOURCE'	#avoid silly bsd functions
-	@LOCAL_LIBS = [COMMON]
-	@LOCAL_DLLS = []
+	@EXTRA_OBJECTS = [COMMON]
 
 	if(HOST == :win32)
 		@SOURCE_FILES = ["dll/dll-win32.cpp"]
 		@LIBRARIES << 'wsock32'
 		@LIBRARIES << 'imagehlp'
-		@LOCAL_DLLS << WIN32
+		@EXTRA_OBJECTS << WIN32
 	elsif(HOST == :linux || HOST == :darwin)
 		@SOURCE_FILES = ["dll/dll-unix.cpp"]
 		@LIBRARIES << 'dl'
@@ -585,10 +572,10 @@ QUEST_ANALYZER = ExeWork.new do
 		'dbcMap',
 		'dbcAreaTrigger',
 	])
-	@LOCAL_DLLS << COMMON
+	@EXTRA_OBJECTS << COMMON
 	if(HOST == :win32)
 		@LIBRARIES = ['imagehlp']
-		@LOCAL_DLLS << WIN32
+		@EXTRA_OBJECTS << WIN32
 	end
 	@NAME = 'quest-analyzer'
 end

@@ -12,6 +12,7 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include "win32.h"
 
 using namespace std;
 

@@ -125,9 +125,9 @@ class CCompileWork < FileTask
 		default(:EXTRA_LINKFLAGS, '')
 
 		# Array of FileTasks, static libraries to link with.
-		default(:LOCAL_LIBS, [])
+		default(:LOCAL_LIBS, nil)
 		# Array of FileTasks, shared libraries to link with.
-		default(:LOCAL_DLLS, [])
+		default(:LOCAL_DLLS, nil)
 		# Array of Strings, names of libraries to link with.
 		default(:LIBRARIES, [])
 

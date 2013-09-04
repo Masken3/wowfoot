@@ -3,6 +3,7 @@
 #include "db_loot_template.h"
 #include "dbcSpell.h"
 #include "util/arraySize.h"
+#include "win32.h"
 
 typedef void (QuestPointListener::*QplFunc)(Spawns::IdPair);
 
