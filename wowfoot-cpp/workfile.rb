@@ -401,6 +401,8 @@ DbcWork.new('dbcChrClasses')
 DbcWork.new('dbcChrRaces')
 #DbcWork.new('dbcSpellEffectNames')	# missing from mpqSet. TODO: investigate.
 DbcWork.new('dbcSpellMechanic')
+DbcWork.new('dbcSpellDuration')
+DbcWork.new('dbcSpellRange')
 DbcWork.new('dbcSkillLineAbility')
 DbcWork.new('dbcSkillLine')
 DbcWork.new('dbcSkillLineCategory')
@@ -490,6 +492,8 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	#'dbcSpellEffectNames',
 	'dbcSpellMechanic',
 	'dbcSkillLineAbility',
+	'dbcSpellDuration',
+	'dbcSpellRange',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcItemDisplayInfo', 'db_item',

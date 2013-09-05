@@ -31,6 +31,8 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gSpells.load();
 	//gSpellEffectNames.load();
 	gSpellMechanics.load();
+	gSpellDurations.load();
+	gSpellRanges.load();
 	SkillLineAbilityIndex::load();
 
 #if 0
@@ -100,6 +102,18 @@ void spellChtml::streamPlainMembers(ostream& stream) {
 	streamEscape(stream, a->name);
 	SPELL_PLAIN_MEMBERS(STREAM_PLAIN_MEMBER);
 	stream << "</p>\n";
+}
+
+void spellChtml::streamPowerName(ostream& stream, int type) {
+	switch(type) {
+	case 0: stream << "Mana"; break;
+	case 1: stream << "Rage"; break;
+	case 2: stream << "Focus"; break;
+	case 3: stream << "Energy"; break;
+	case 4: stream << "Happiness"; break;
+	case -2: stream << "Health"; break;
+	default: stream << "Unknown power type ("<<type<<")";
+	}
 }
 
 void spellChtml::streamEffects(ostream& stream) {

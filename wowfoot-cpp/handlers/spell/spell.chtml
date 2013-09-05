@@ -45,6 +45,51 @@ Warning: invalid icon id (<%=a->activeIconID%>)
 
 % streamPlainMembers(stream);
 
+<p>
+Level:
+% const Spell& s(*a);
+% int maxLevel = s.maxLevel - s.spellLevel;
+% int minLevel = s.baseLevel - s.spellLevel;
+<%=minLevel%> - <%=maxLevel%>
+</p>
+
+<p>
+Duration:
+% const SpellDuration* sd = gSpellDurations.find(a->DurationIndex);
+% if(sd) {
+<%=sd->base%>
+% //if(maxLevel && sd->perLevel) {
++ <%=sd->perLevel%> * level
+% //}
+% } else {
+0
+% }
+</p>
+
+<p>Cost:
+<%=s.manaCost%> + <%=s.manaCostPerLevel%>*level + (<%=s.manaPerSecond%> + <%=s.manaPerSecondPerLevel%>*level) / second
+% if(s.ManaCostPercentage != 0) {
++ <%=s.ManaCostPercentage%>% of base <%streamPowerName(stream, s.powerType);%>.
+% }
+</p>
+
+<p>Range:
+% switch(s.rangeIndex) {
+% case SPELL_RANGE_IDX_SELF_ONLY:
+Self
+% break; case SPELL_RANGE_IDX_COMBAT:
+Combat
+% break; case SPELL_RANGE_IDX_ANYWHERE:
+Anywhere
+% break; default: {
+% const SpellRange* sr(gSpellRanges.find(s.rangeIndex));
+% if(sr) {
+<%=sr->min%> to <%=sr->max%> yards
+% } else {
+Unknown
+% }}}
+</p>
+
 % streamEffects(stream);
 
 % returnCode = tabsChtml::run(stream);

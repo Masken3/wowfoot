@@ -8,6 +8,8 @@
 #include "icon.h"
 #include "SkillLineAbility.index.h"
 #include "spellStrings.h"
+#include "dbcSpellDuration.h"
+#include "dbcSpellRange.h"
 
 class spellChtml : public tabsChtml, public PageContext {
 public:
@@ -18,7 +20,14 @@ public:
 
 	void streamPlainMembers(ostream&);
 	void streamEffects(ostream&);
+	void streamPowerName(ostream&, int type);
 
 	const char* mTitle;
 	const Spell* a;
+};
+
+enum SpellRangeEnum {
+	SPELL_RANGE_IDX_SELF_ONLY = 1,
+	SPELL_RANGE_IDX_COMBAT = 2,
+	SPELL_RANGE_IDX_ANYWHERE = 13,
 };

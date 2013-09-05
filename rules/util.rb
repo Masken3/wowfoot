@@ -271,3 +271,15 @@ def startWebBrowser(url)
 		puts "Unsupported platform; start the browser yourself."
 	end
 end
+
+module Kernel
+if(RUBY_VERSION < "1.9")
+	def backtrace
+		begin
+			raise
+		rescue => e
+			return e.backtrace
+		end
+	end
+end
+end

@@ -166,7 +166,7 @@ public
 
 	def dllCmd
 		raise hell if(@FLAGS)
-		@FLAGS = ' -shared'
+		@FLAGS = ' -shared -Wl,--no-undefined'
 		return linkCmd
 	end
 

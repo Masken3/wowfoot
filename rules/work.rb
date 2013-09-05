@@ -248,7 +248,7 @@ class MultiFileTask < FileTask
 			@prerequisites = prerequsites
 			super(name)
 		end
-		def execute
+		def fileExecute
 		end
 	end
 

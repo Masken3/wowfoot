@@ -17,6 +17,9 @@ Dll::~Dll() {
 
 bool Dll::open(const char* fileName) {
 	mHandle = dlopen(fileName, RTLD_LOCAL | RTLD_NOW);
+	if(!mHandle) {
+		printf("dlerror \"%s\"\n", dlerror());
+	}
 	return mHandle != NULL;
 }
 
