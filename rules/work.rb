@@ -210,6 +210,8 @@ end
 # A Task representing multiple files.
 # If any of the files are out-of-date, the Task will be executed.
 # The first file is designated primary, and acts as the single file in the parent class, FileTask.
+# The primary file must be touched last,
+# or there'll be a broken recursive dependency from the secondaries.
 class MultiFileTask < FileTask
 	# name -> string
 	# files -> array of strings

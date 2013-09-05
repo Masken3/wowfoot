@@ -17,6 +17,7 @@ log.*.txt
 rules/local_config.rb
 
 wowhead-downloader/curl-config.txt
+wowhead-downloader/config.rb
 
 wowfoot-import/*.db
 wowfoot-import/query.sql
