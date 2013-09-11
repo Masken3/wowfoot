@@ -89,7 +89,7 @@ def sh(cmd)
 	else
 		puts cmd
 	end
-	if(false)#HOST == :win32)
+	if(HOST == :win32)
 		success = system(cmd)
 		error "Command failed" unless(success)
 	else
