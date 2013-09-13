@@ -601,9 +601,13 @@ target :test do
 end
 
 target :qa do
+	puts "timing start..."
+	start = Time.now.to_f
 	sh QUEST_ANALYZER.to_s
-	cd 'build'
-	sh 'dot -Tsvg quests.dot > quests.svg'
+	e = Time.now.to_f
+	puts "took #{((e - start)*1000).to_i} ms."
+	#cd 'build'
+	#sh 'dot -Tsvg quests.dot > quests.svg'
 end
 
 target :gdb => :default do

@@ -20,6 +20,8 @@ public:
 	citr begin() const { return this->super::begin(); }
 	citr end() const { return this->super::end(); }
 
+	size_t size() const { return this->super::size(); }
+
 	// returns NULL if key is not found.
 	ptr find(const Key&) const;
 
