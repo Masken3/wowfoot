@@ -9,12 +9,16 @@
 using namespace std;
 using namespace SkillLineAbilityIndex;
 
+#ifndef WOWBOT
 static CriticalSectionLoadGuard sCS;
+#endif
 static SpellMap sSpellMap;
 static SpellMap sSkillMap;
 
 void SkillLineAbilityIndex::load() {
+#ifndef WOWBOT
 	LOCK_AND_LOAD;
+#endif
 
 	gSkillLineAbilities.load();
 
