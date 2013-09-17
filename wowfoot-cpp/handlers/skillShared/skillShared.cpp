@@ -10,7 +10,11 @@ const SkillLine* parseSkillId(ostream& os, const char* urlPart) {
 	int categoryId, skillId;
 	uint len;
 	int res = sscanf(urlPart, "%i.%i%n", &categoryId, &skillId, &len);
-	EASSERT(res == 2);
+	if(res != 2) {
+		res = sscanf(urlPart, "%i%n", &skillId, &len);
+		EASSERT(res == 1);
+		categoryId = -1;
+	}
 	//printf("category: %i. skill: %i. len: %i\n", categoryId, skillId, len);
 	EASSERT(len == strlen(urlPart));
 	const SkillLine* sl = gSkillLines.find(skillId);
@@ -18,7 +22,7 @@ const SkillLine* parseSkillId(ostream& os, const char* urlPart) {
 		os << "Skill not found.\n";
 		return NULL;
 	}
-	if(sl->category != categoryId) {
+	if(sl->category != categoryId && categoryId != -1) {
 		os << "Skill not found in category.\n";
 		return NULL;
 	}
