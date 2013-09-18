@@ -484,7 +484,7 @@ PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'item'] +
 	DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
-PageWork.new('object', ['db_gameobject_template',
+PageWork.new('object', ['db_gameobject_template', 'dbcLock',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
 	'db_loot_template', 'db_item', 'db_questrelation'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',

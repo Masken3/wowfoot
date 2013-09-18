@@ -40,8 +40,8 @@ void ItemSubClasses::load() {
 #else
 		s.plural = "";
 #endif
-//		printf("subClass %i/%i: %i %s %s\n",
-//			itemClass, subClass, s.hands, s.name, s.plural);
+		printf("subClass %i/%i: %i %s %s\n",
+			itemClass, subClass, s.hands, s.name, s.plural);
 
 		if(itemClass == i+1) {
 			i++;

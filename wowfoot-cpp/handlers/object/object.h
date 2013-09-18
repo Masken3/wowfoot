@@ -3,6 +3,10 @@
 #include "tabs.h"
 #include "db_gameobject_template.h"
 #include "spawnPoints.h"
+#include "lockStrings.h"
+#include "util/arraySize.h"
+#include "dbcLock.h"
+#include "db_item.h"
 
 class objectChtml : public tabsChtml, public PageContext {
 public:

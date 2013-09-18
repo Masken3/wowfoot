@@ -2,6 +2,18 @@
 
 <p>Type: <% type(stream); %></p>
 
+% int lockId = 0;
+% if(a->type == 3) lockId = a->data0;
+% if(a->type == 25) lockId = a->data4;
+% if(lockId) { const Lock& l(gLocks[lockId]);
+<p>Lock:
+% for(size_t i=0; i<ARRAY_SIZE(l.e); i++) { const Lock::Entry& e(l.e[i]);
+% if(e.type == LOCK_KEY_ITEM) {
+Item <%NAMELINK(gItems, e.index);%>
+% } else if(e.type == LOCK_KEY_SKILL) {
+<%=lockSkillType(e.index)%> <%=e.skill%>
+% } } }
+
 % if(a) {
 % mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);

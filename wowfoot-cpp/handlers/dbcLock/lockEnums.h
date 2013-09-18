@@ -1,3 +1,5 @@
+#ifndef LOCKENUMS_H
+#define LOCKENUMS_H
 
 enum LockKeyType
 {
@@ -28,3 +30,5 @@ enum LockType
     LOCKTYPE_SLOW_CLOSE            = 18,
     LOCKTYPE_FISHING               = 19
 };
+
+#endif	//LOCKENUMS_H
