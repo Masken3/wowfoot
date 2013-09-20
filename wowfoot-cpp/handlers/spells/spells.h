@@ -8,6 +8,8 @@
 #include "db_item.h"
 #include "dbcItemDisplayInfo.h"
 #include "SkillLineAbility.index.h"
+#include "util/stl_map_insert.h"
+#include <map>
 
 class spellsChtml : public PageContext {
 public:
@@ -25,4 +27,7 @@ private:
 
 	// returns RequiredSkillLevel, if found, -1 otherwise.
 	int streamSource(ostream& stream, int id);
+
+	// returns spell's SkillLineAbility.minValue.
+	int slaYellow(int id);
 };

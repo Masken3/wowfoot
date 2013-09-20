@@ -17,7 +17,7 @@ Not found.
 </tbody>
 </table>
 
-<table class="hidden">
+<table class="hidden" summary="hidden">
 %	int lockType = lockTypeFromSkill(mSL->id);
 %	int count = 0, lockCount = 0;
 % multimap<int, int> skillOrder;	// value, countId

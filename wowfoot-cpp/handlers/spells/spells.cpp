@@ -116,10 +116,10 @@ void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 				ESCAPE_URL(getIcon(di->icon));
 				stream << "\" alt=\""<<item->name<<"\">";
 			} else {
-				stream << "Warning: invalid display id ("<<item->displayId<<")";
+				stream << "displayId ("<<item->displayId<<")";
 			}
 		} else {
-			stream << "Warning: invalid item id ("<<id<<")";
+			stream << "item ("<<id<<")";
 		}
 		stream << count;
 		stream << "</a>\n";
@@ -186,6 +186,15 @@ int spellsChtml::streamSource(ostream& stream, int id) {
 		stream << "("<<trainerCount<<" trainers)\n";
 	}
 	return requiredSkillLevel;
+}
+
+int spellsChtml::slaYellow(int id) {
+	auto slas = SkillLineAbilityIndex::findSpell(id);
+	for(; slas.first != slas.second; ++slas.first) {
+		const SkillLineAbility* sla = slas.first->second;
+		return sla->minValue;
+	}
+	return -1;
 }
 
 #if 0
