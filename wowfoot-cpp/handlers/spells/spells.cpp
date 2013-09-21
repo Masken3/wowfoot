@@ -110,6 +110,8 @@ void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 		stream << "<a href=\"item="<<id<<"\">";
 		const Item* item = gItems.find(id);
 		if(item) {
+			mItemQuality = &ITEM_QUALITY(item->quality);
+			stream << "<span style=\"color:#"<<mItemQuality->color<<";\">";
 			const ItemDisplayInfo* di = gItemDisplayInfos.find(item->displayId);
 			if(di) {
 				stream << "<img src=\"";
@@ -122,13 +124,17 @@ void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 			stream << "item ("<<id<<")";
 		}
 		stream << count;
+		if(item)
+			stream << "</span>";
 		stream << "</a>\n";
 	}
 }
 
 static void streamItemSource(ostream& stream, const Item& item) {
 	stream << "<a href=\"item="<<item.entry<<"\">";
+	stream << "<span style=\"color:#"<<ITEM_QUALITY(item.quality).color<<";\">";
 	streamName(stream, item);
+	stream << "</span>";
 	stream << "</a>\n";
 	// todo: determine if the thing is sold or dropped, and if so, by how many.
 }

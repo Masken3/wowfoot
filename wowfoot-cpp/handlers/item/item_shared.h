@@ -10,11 +10,18 @@ class Row;
 class Loot;
 class Npc;
 
+struct Quality {
+	const char* color;
+	const char* name;
+};
+
 void streamAllCostHtml(std::ostream&, const Item&) VISIBLE;
 void streamItemClassHtml(std::ostream&, const Item&) VISIBLE;
 
 // has "Heroic" prefix.
 template<> void streamName(ostream& os, const Item& t) VISIBLE;
+
+const Quality& ITEM_QUALITY(int id) VISIBLE;
 
 void addItem(tabTableChtml& t, const Item& i) VISIBLE;
 void itemColumns(tabTableChtml& t) VISIBLE;

@@ -24,6 +24,7 @@ Not found.
 %  int count = 0;
 %  multimap<int, int> spellOrder;	// value, countId
 %  while(mPair->hasNext() && count < 1000) {
+%   mItemQuality = NULL;
 %   const Spell& s(mPair->next());
 %   const Spell::Effect& e(s.effect[0]);
 %		insert(spellOrder, slaYellow(s.id), count);
@@ -41,9 +42,16 @@ Warning: invalid icon id (<%=s.spellIconID%>)
 % }
 % }
 </td>
-<td class="name"><a href="spell=<%=s.id%>"><%ESCAPE(s.name);%>
+<td class="name"><a href="spell=<%=s.id%>">
+% if(mItemQuality) {
+<span style="color:#<%=mItemQuality->color%>;">
+% }
+<%ESCAPE(s.name);%>
 % if(s.rank) if(s.rank[0]) {
 (<%=s.rank%>)
+% }
+% if(mItemQuality) {
+</span>
 % }
 </a></td>
 <td class="reagents">

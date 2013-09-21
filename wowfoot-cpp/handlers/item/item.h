@@ -41,12 +41,6 @@ public:
 	static const Resistance mResistances[];
 	static const int mnResistances;
 
-	struct Quality {
-		const char* color;
-		const char* name;
-	};
-
-	static const Quality& ITEM_QUALITY(int id);
 	static const char* ITEM_EQUIP(int id);
 	static const char* ITEM_BONDING(int id);
 	static const char* ITEM_MATERIAL(int id);

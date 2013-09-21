@@ -683,7 +683,7 @@ const itemChtml::Flag itemChtml::ITEM_BAG_FAMILY[] = {
 };
 const int itemChtml::nITEM_BAG_FAMILY = sizeof(ITEM_BAG_FAMILY) / sizeof(itemChtml::Flag);
 
-const itemChtml::Quality& itemChtml::ITEM_QUALITY(int id) {
+const Quality& ITEM_QUALITY(int id) {
 	switch(id) {
 	case 0: { static const Quality q = { "9d9d9d", "Poor" }; return q; }
 	case 1: { static const Quality q = { "ffffff", "Common" }; return q; }

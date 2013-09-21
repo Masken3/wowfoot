@@ -496,7 +496,7 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'dbcSpellRange',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
-	'dbcItemDisplayInfo', 'db_item',
+	'dbcItemDisplayInfo', 'db_item', 'item',
 	'dbcSpellIcon', 'icon',
 	'dbcSkillLineAbility', 'dbcSkillLine',
 	'db_npc_trainer', 'db_creature_template',

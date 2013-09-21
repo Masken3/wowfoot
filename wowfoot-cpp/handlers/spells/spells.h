@@ -6,6 +6,7 @@
 #include "icon.h"
 #include "util/arraySize.h"
 #include "db_item.h"
+#include "item_shared.h"
 #include "dbcItemDisplayInfo.h"
 #include "SkillLineAbility.index.h"
 #include "util/stl_map_insert.h"
@@ -22,6 +23,7 @@ public:
 private:
 	ItrPair<Spell>* mPair;
 	string mTitle;
+	const Quality* mItemQuality;
 
 	void streamMultiItem(ostream& stream, int id, int count);
 
