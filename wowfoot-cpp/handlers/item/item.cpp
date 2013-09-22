@@ -215,6 +215,8 @@ void npcColumns(tabTableChtml& t) {
 void npcRow(Row& r, const Npc& npc) {
 	r[ENTRY] = toString(npc.entry);
 	r[NAME] = npc.name;
+	if(npc.subName.size() > 0)
+		r[NAME] += " <"+npc.subName+">";
 	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
 	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
 }

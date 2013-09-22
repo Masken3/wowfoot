@@ -3,6 +3,17 @@
 
 #include "chtmlUtil.h"
 #include "tabTable.h"
+
+#include "wowVersion.h"
+#if (CONFIG_WOW_VERSION > 30000)
+#include "dbcTotemCategory.h"
+#define HAVE_EXTENDED_COST 1
+#define HAVE_TOTEM_CATEGORY 1
+#else
+#define HAVE_EXTENDED_COST 0
+#define HAVE_TOTEM_CATEGORY 0
+#endif
+
 #include <ostream>
 
 class Item;

@@ -462,9 +462,6 @@ PageWork.new('title', ['dbcAchievement', 'tabTable', 'tabs', 'comments', 'dbcCha
 PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitles',
 	'db_item', 'db_creature_template', 'db_achievement_reward'])
 end
-PageWork.new('npc', ['db_creature_template',
-	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
-	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
 	'db_questrelation', 'db_spawn'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
@@ -476,6 +473,10 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo',
 	'dbcSkillLine', 'questShared',
 	'db_questrelation', 'db_quest'] + DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
+PageWork.new('npc', ['db_creature_template', 'item', 'db_item', 'tabTable',
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
+	'db_npc_vendor', 'db_npc_trainer',
+	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
 	'db_creature_onkill_reputation'])

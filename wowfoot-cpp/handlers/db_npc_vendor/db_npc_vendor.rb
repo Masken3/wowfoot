@@ -10,6 +10,7 @@ c(:int, :maxcount),
 
 @index = [
 	[:item],
+	[:entry],
 ]
 
 if(CONFIG_WOW_VERSION > 20000)
