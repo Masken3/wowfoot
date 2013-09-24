@@ -125,7 +125,7 @@ void spellChtml::streamEffects(ostream& stream) {
 				hasEffect = true;
 				stream << "<p>Effects:</p>\n";
 			}
-			stream << "<p>";
+			stream << "<p>"<<i<<": ";
 			const char* name = spellEffectName(e.id);
 			if(name)
 				stream << "<span class=\"itemDescription\">" << name << "</span>: ";

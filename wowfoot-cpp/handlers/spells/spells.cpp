@@ -116,7 +116,7 @@ void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 			if(di) {
 				stream << "<img src=\"";
 				ESCAPE_URL(getIcon(di->icon));
-				stream << "\" alt=\""<<item->name<<"\">";
+				stream << "\" alt=\""<<item->name<<"\" title=\""<<item->name<<"\">";
 			} else {
 				stream << "displayId ("<<item->displayId<<")";
 			}

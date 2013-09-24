@@ -475,7 +475,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_questrelation', 'db_quest'] + DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
 PageWork.new('npc', ['db_creature_template', 'item', 'db_item', 'tabTable',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
-	'db_npc_vendor', 'db_npc_trainer',
+	'db_npc_vendor', 'db_npc_trainer', 'dbcSpell', 'dbcSkillLine',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',

@@ -18,10 +18,10 @@ ostream& moneyHtml(ostream& stream, int total) {
 		total *= -1;
 	}
 	int copper = total % 100;
-	total /= 100;
-	int silver = total % 100;
-	total /= 100;
-	int gold = total;
+	int remain = total / 100;
+	int silver = remain % 100;
+	remain /= 100;
+	int gold = remain;
 	if(gold > 0) {
 		stream << gold;
 		moneyIcon(stream, "Gold", "gold", 0);
