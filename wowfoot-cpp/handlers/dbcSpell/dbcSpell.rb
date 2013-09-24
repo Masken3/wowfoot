@@ -51,7 +51,7 @@ else
 	@stringSize = 8
 	effectMembersA = [
 		e(:int, 'baseDice'),
-		e(:int, 'dicePerLevel'),
+		e(:float, 'dicePerLevel'),
 	]
 	effectMembersB = []
 	effectMembersC = []
@@ -61,7 +61,7 @@ effectMembers = [
 	e(:int, 'id'),
 	e(:int, 'dieSides'),
 ] + effectMembersA + [
-	e(:int, 'realPointsPerLevel'),
+	e(:float, 'realPointsPerLevel'),
 	e(:int, 'basePoints'),
 	e(:int, 'mechanic'),
 	e(:int, 'implicitTargetA'),
@@ -69,13 +69,13 @@ effectMembers = [
 	e(:int, 'radiusIndex'),
 	e(:int, 'applyAuraName'),
 	e(:int, 'amplitude'),
-	e(:int, 'multipleValue'),
+	e(:float, 'multipleValue'),
 	e(:int, 'chainTarget'),
 	e(:int, 'itemType'),
 	e(:int, 'miscValue'),
 ] + effectMembersB + [
 	e(:int, 'triggerSpell'),
-	e(:int, 'pointsPerComboPoint'),
+	e(:float, 'pointsPerComboPoint'),
 ] + effectMembersC
 
 effectMembers = effectMembers.collect do |c|
