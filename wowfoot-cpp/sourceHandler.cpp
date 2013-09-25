@@ -31,7 +31,7 @@ ResponseData* SourceHandler::handleRequest(const char* urlPart, MHD_Connection* 
 	// call TAR
 	char* cwd = getcwd(NULL, 0);
 	ERRNO(chdir("../.."));
-	ERRNO(sh("tar -czf t.tgz -X wowfoot/.gitignore --exclude=.git wowfoot"));
+	ERRNO(sh("tar -czf t.tgz -X wowfoot/.gitignore -X wowfoot/.git/info/exclude --exclude=.git wowfoot"));
 	ERRNO(chdir(cwd));
 	free(cwd);
 
