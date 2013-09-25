@@ -13,6 +13,7 @@ using namespace SpellIndex;
 
 static CriticalSectionLoadGuard sCS;
 static SpellMap sLearnSpellMap;
+static SpellMap sSpawnCreatureSpellMap;
 
 void SpellIndex::load() {
 	LOCK_AND_LOAD;
@@ -29,14 +30,33 @@ void SpellIndex::load() {
 				//printf("learn: %i teaches %i\n", s.id, e.triggerSpell);
 				insert(sLearnSpellMap, e.triggerSpell, &s);
 			}
+			if(e.id == 28 || // Summon
+				e.id == 41 ||	// Summon Wild
+				e.id == 42 ||	// Summon Guardian
+				e.id == 56 ||	// Summon Pet
+				e.id == 73 ||	// Summon Possessed
+				e.id == 93 ||	// Summon Phantasm
+				e.id == 97 ||	// Summon Critter
+				e.id == 112 ||	// Summon Demon
+				false)
+			{
+				insert(sSpawnCreatureSpellMap, e.miscValue, &s);
+			}
 		}
 	}
 
 	printf("SpellIndex: Loaded %" PRIuPTR " rows into %s\n",
 		sLearnSpellMap.size(), "sLearnSpellMap");
+	printf("SpellIndex: Loaded %" PRIuPTR " rows into %s\n",
+		sSpawnCreatureSpellMap.size(), "sSpawnCreatureSpellMap");
 }
 
 SpellPair SpellIndex::findLearnSpell(int entry) {
 	EASSERT(!sLearnSpellMap.empty());
 	return sLearnSpellMap.equal_range(entry);
+}
+
+SpellPair SpellIndex::findSpawnCreature(int entry) {
+	EASSERT(!sSpawnCreatureSpellMap.empty());
+	return sSpawnCreatureSpellMap.equal_range(entry);
 }

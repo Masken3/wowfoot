@@ -15,6 +15,8 @@ namespace SpellIndex {
 	typedef SpellMap::const_iterator SpellItr;
 	typedef pair<SpellItr, SpellItr> SpellPair;
 	SpellPair findLearnSpell(int entry) VISIBLE;
+
+	SpellPair findSpawnCreature(int entry) VISIBLE;
 };
 
 #endif	//SPELL_INDEX_H

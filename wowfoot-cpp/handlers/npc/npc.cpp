@@ -8,6 +8,7 @@
 #include "db_npc_trainer.h"
 #include "db_item.h"
 #include "dbcSpell.h"
+#include "Spell.index.h"
 #include "money.h"
 #include "dbcSkillLine.h"
 
@@ -20,6 +21,7 @@ using namespace std;
 
 static Tab* sells(int npcId);
 static Tab* teaches(int npcId);
+static Tab* spawnedBy(int npcId);
 
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
@@ -30,6 +32,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gNpcTrainers.load();
 	gItems.load();
 	gSpells.load();
+	SpellIndex::load();
 	gSkillLines.load();
 	spawnPointsPrepare();
 
@@ -38,6 +41,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	if(a) {
 		mTitle = a->name.c_str();
 
+		mTabs.push_back(spawnedBy(id));
 		mTabs.push_back(getQuestRelations("startQuest", "Starts quest", gCreatureQuestGivers, id));
 		mTabs.push_back(getQuestRelations("endQuest", "Ends quest", gCreatureQuestFinishers, id));
 		mTabs.push_back(sells(id));
@@ -124,6 +128,23 @@ static Tab* teaches(int npcId) {
 			}
 		}
 		r[CLEVEL] = toString(nt.reqLevel);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* spawnedBy(int npcId) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "spawnedBy";
+	t.title = "Spawned by";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "spell"));
+	auto res = SpellIndex::findSpawnCreature(npcId);
+	for(; res.first != res.second; ++res.first) {
+		const Spell& s(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(s.id);
+		setName(r, NAME, s.id);
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();

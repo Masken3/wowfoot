@@ -131,8 +131,9 @@ Feature list, per page, with YES/NO for "implemented?":
 *** is-objective-of NO
 ** drops	NO
 ** tameable	NO
-** sells  NO
-** teaches  NO
+** sells  YES
+** teaches  YES
+** spawned by (spell)  YES
 
 * achievement
 ** description	YES
