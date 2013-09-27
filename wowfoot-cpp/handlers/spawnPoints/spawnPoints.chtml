@@ -39,6 +39,9 @@ function setMap(zoneId) {
 	document.getElementById("mapImage").src = "output/"+zones[zoneId].name+".jpeg";
 	document.getElementById("mapImage").alt = zones[zoneId].name;
 
+	// todo: remove coordinate markers, change map image, and wait until it's loaded
+	// before adding the new markers.
+
 	//add new coordinate markers
 	map = document.getElementById("map");
 	coords = zones[zoneId].coords;

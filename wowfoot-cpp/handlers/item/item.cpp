@@ -312,7 +312,7 @@ static Tab* containedInObject(const Item& a) {
 	Loots::ItemPair res = gGameobjectLoots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
-		Objects::LootPair nres = gObjects.findLoot(loot.entry);
+		auto nres = gObjects.findLoot(loot.entry);
 		for(; nres.first != nres.second; ++nres.first) {
 			const Object& o(*nres.first->second);
 			Row r;

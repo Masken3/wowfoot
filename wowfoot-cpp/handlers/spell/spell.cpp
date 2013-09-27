@@ -2,6 +2,7 @@
 #include "spell.chtml.h"
 #include "comments.h"
 #include "db_creature_template.h"
+#include "db_gameobject_template.h"
 #include "money.h"
 #include "dbcSpell.h"
 //#include "dbcSpellEffectNames.h"
@@ -19,8 +20,12 @@
 
 using namespace std;
 
+static Tab* usedByItem(int id);
+static Tab* usedByGameobject(int id);
+
 enum TableRowId {
 	NAME = ENTRY+1,
+	SPAWN_COUNT = ENTRY+2,
 };
 #define MAX_COUNT 100
 
@@ -47,32 +52,55 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	if(a) {
 		mTitle = a->name;
 
-		// todo: Used by (item) (maybe gameobject too)
-		{
-			tabTableChtml* tp = new tabTableChtml;
-			tabTableChtml& t(*tp);
-			t.id = "item";
-			t.title = "Used by";
-			t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
-			Items::SpellIdPair p = gItems.findSpellId(id);
-			for(; p.first != p.second && t.array.size() < MAX_COUNT;
-				++p.first)
-			{
-				const Item& s(*p.first->second);
-				Row r;
-				r[ENTRY] = toString(s.entry);
-				r[NAME] = s.name;
-				t.array.push_back(r);
-			}
-			t.count = t.array.size();
-			mTabs.push_back(tp);
-		}
+		mTabs.push_back(usedByItem(id));
+		mTabs.push_back(usedByGameobject(id));
 
 		mTabs.push_back(getComments("spell", id));
 	} else {
 		mTitle = urlPart;
 		drd->code = 404;
 	}
+}
+
+static Tab* usedByItem(int id) {
+	tabTableChtml& t(*new tabTableChtml);
+	t.id = "item";
+	t.title = "Used by item";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	Items::SpellIdPair p = gItems.findSpellId(id);
+	for(; p.first != p.second && t.array.size() < MAX_COUNT;
+		++p.first)
+	{
+		const Item& s(*p.first->second);
+		Row r;
+		r[ENTRY] = toString(s.entry);
+		r[NAME] = s.name;
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* usedByGameobject(int id) {
+	tabTableChtml& t(*new tabTableChtml);
+	t.id = "object";
+	t.title = "Used by object";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	auto p = gObjects.findSpell(id);
+	for(; p.first != p.second && t.array.size() < MAX_COUNT;
+		++p.first)
+	{
+		const Object& o(*p.first->second);
+		Row r;
+		r[ENTRY] = toString(o.entry);
+		r[NAME] = o.name;
+		r[SPAWN_COUNT] = toString(o.spawnCount);
+		// todo: link "linkedTrapId", if any.
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
 }
 
 void spellChtml::title(ostream& stream) {
