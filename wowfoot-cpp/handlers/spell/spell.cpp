@@ -7,21 +7,13 @@
 #include "dbcSpell.h"
 //#include "dbcSpellEffectNames.h"
 #include "db_item.h"
-
-#if 0
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <sstream>
-#include <unordered_map>
-#include <inttypes.h>
-#endif
+#include "db_creature_template_spells.h"
 
 using namespace std;
 
 static Tab* usedByItem(int id);
 static Tab* usedByGameobject(int id);
+static Tab* usedByCreature(int id);
 
 enum TableRowId {
 	NAME = ENTRY+1,
@@ -39,6 +31,7 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gSpellDurations.load();
 	gSpellRanges.load();
 	SkillLineAbilityIndex::load();
+	gNpcSpells.load();
 
 #if 0
 	printf("SpellMechanics:\n");
@@ -54,6 +47,7 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 
 		mTabs.push_back(usedByItem(id));
 		mTabs.push_back(usedByGameobject(id));
+		mTabs.push_back(usedByCreature(id));
 
 		mTabs.push_back(getComments("spell", id));
 	} else {
@@ -92,6 +86,28 @@ static Tab* usedByGameobject(int id) {
 		++p.first)
 	{
 		const Object& o(*p.first->second);
+		Row r;
+		r[ENTRY] = toString(o.entry);
+		r[NAME] = o.name;
+		r[SPAWN_COUNT] = toString(o.spawnCount);
+		// todo: link "linkedTrapId", if any.
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* usedByCreature(int id) {
+	tabTableChtml& t(*new tabTableChtml);
+	t.id = "creature";
+	t.title = "Used by NPC";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	auto p = gNpcSpells.findSpell(id);
+	for(; p.first != p.second && t.array.size() < MAX_COUNT;
+		++p.first)
+	{
+		const Npc& o(gNpcs[p.first->second->entry]);
 		Row r;
 		r[ENTRY] = toString(o.entry);
 		r[NAME] = o.name;

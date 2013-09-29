@@ -1,5 +1,6 @@
 #include "npc.chtml.h"
 #include "db_creature_template.h"
+#include "db_creature_template_spells.h"
 #include "db_spawn.h"
 #include "questrelation.h"
 #include "comments.h"
@@ -11,6 +12,7 @@
 #include "Spell.index.h"
 #include "money.h"
 #include "dbcSkillLine.h"
+#include "util/arraySize.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -22,6 +24,7 @@ using namespace std;
 static Tab* sells(int npcId);
 static Tab* teaches(int npcId);
 static Tab* spawnedBy(int npcId);
+static Tab* usesSpells(int npcId);
 
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
@@ -30,6 +33,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gFactionTemplates.load();
 	gNpcVendors.load();
 	gNpcTrainers.load();
+	gNpcSpells.load();
 	gItems.load();
 	gSpells.load();
 	SpellIndex::load();
@@ -46,6 +50,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 		mTabs.push_back(getQuestRelations("endQuest", "Ends quest", gCreatureQuestFinishers, id));
 		mTabs.push_back(sells(id));
 		mTabs.push_back(teaches(id));
+		mTabs.push_back(usesSpells(id));
 		mTabs.push_back(getComments("npc", id));
 
 		mSpawnPointsChtml.addSpawns(gCreatureSpawns.findId(id));
@@ -146,6 +151,25 @@ static Tab* spawnedBy(int npcId) {
 		r[ENTRY] = toString(s.id);
 		setName(r, NAME, s.id);
 		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* usesSpells(int npcId) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "usesSpells";
+	t.title = "Uses spells";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "spell"));
+	const NpcSpell* ns = gNpcSpells.find(npcId);
+	if(ns) for(size_t i=0; i<ARRAY_SIZE(ns->spell); i++) {
+		int spellId = ns->spell[i];
+		if(spellId != 0) {
+			Row r;
+			r[ENTRY] = toString(spellId);
+			setName(r, NAME, spellId);
+			t.array.push_back(r);
+		}
 	}
 	t.count = t.array.size();
 	return &t;

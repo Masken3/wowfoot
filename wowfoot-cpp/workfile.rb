@@ -368,6 +368,7 @@ TdbWork.new('db_spawn')
 TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 TdbWork.new('db_creature_onkill_reputation')
+TdbWork.new('db_creature_template_spells')
 
 DbcWork.new('dbcMap')
 DbcWork.new('dbcAreaTrigger')
@@ -476,6 +477,7 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
 PageWork.new('npc', ['db_creature_template', 'item', 'db_item', 'tabTable',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'db_npc_vendor', 'db_npc_trainer', 'dbcSpell', 'dbcSkillLine',
+	'db_creature_template_spells',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
@@ -496,6 +498,7 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'dbcSpellDuration',
 	'dbcSpellRange',
 	'db_gameobject_template',
+	'db_creature_template_spells',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcItemDisplayInfo', 'db_item', 'item',

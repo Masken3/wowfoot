@@ -63,6 +63,7 @@ c(:string, :scriptName),
 	[:skinLoot],
 	[:faction],
 ]
+@index << [:spell] if(CONFIG_WOW_VERSION > 30000)
 
 require './handlers/db_spawn/spawnCount.rb'
 spawnCount('creature', 'Npc')
