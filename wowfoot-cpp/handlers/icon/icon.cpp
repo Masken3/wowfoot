@@ -8,7 +8,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+
+#ifdef WOWBOT
+#define EASSERT(test) assert(test)
+#define ERRNO(a) { if((a) < 0) { printf("On line %i in file %s:\n", __LINE__, __FILE__); abort(); } }
+#else
 #include "util/exception.h"
+#define ICONDIR_BASE ""
+#endif
+
 #include "util/fileExists.h"
 
 class FileDescriptor {
@@ -60,13 +68,16 @@ string getIcon(const char* name) {
 
 static string getIconBase(const char* name, const char* mpqName) {
 	string httpName = string("icon/") + name + ".png";
-	string localName = "build/" + httpName;
+	string localName = ICONDIR_BASE "build/" + httpName;
 	if(fileExists(localName.c_str()))
+#ifdef WOWBOT
+		return localName;
+#else
 		return httpName;
+#endif
 
 	printf("Extracting icon %s...\n", name);
 
-	DBC::load();
 	MPQFile file(mpqName);
 	//MemImage::s_bVerbose = true;
 
@@ -94,5 +105,9 @@ static string getIconBase(const char* name, const char* mpqName) {
 	} else {
 		printf("Warning: %s not found.\n", name);
 	}
+#ifdef WOWBOT
+	return localName;
+#else
 	return httpName;
+#endif
 }

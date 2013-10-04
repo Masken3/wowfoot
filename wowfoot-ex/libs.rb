@@ -1,12 +1,17 @@
-require File.expand_path '../rules/cDll.rb'
-require File.expand_path '../rules/cLib.rb'
-require './config.rb'
+if(defined?(CONFIG_LIBSRC))
+	ls = CONFIG_LIBSRC
+else
+	ls = 'src/libs'
+	require File.expand_path '../rules/cDll.rb'
+	require File.expand_path '../rules/cLib.rb'
+	require './config.rb'
+end
 
 commonFlags = ' -Wno-all -Wno-extra -Wno-c++-compat -Wno-missing-prototypes -Wno-missing-declarations -Wno-shadow'
 
 LIBMPQ = DllWork.new do
-	@SOURCES = ['src/libs/libmpq/libmpq']
-	@EXTRA_INCLUDES = ['src/libs/libmpq']
+	@SOURCES = ["#{ls}/libmpq/libmpq"]
+	@EXTRA_INCLUDES = ["#{ls}/libmpq"]
 	@EXTRA_CFLAGS = commonFlags
 	#@EXTRA_LINKFLAGS = ' -symbolic'
 	@LIBRARIES = ['bz2', 'z']
@@ -15,10 +20,10 @@ LIBMPQ = DllWork.new do
 end
 
 CRBLIB = LibWork.new do
-	@SOURCES = ['src/libs/blp/crblib']
+	@SOURCES = ["#{ls}/blp/crblib"]
 	@IGNORED_FILES = ['list.c', 'myassert.c', 'floatutil.c',
 		'crbeqlib.c', 'chshutil.c', 'spawnmutil.c']
-	@EXTRA_INCLUDES = ['src/libs/blp']
+	@EXTRA_INCLUDES = ["#{ls}/blp"]
 	@EXTRA_CFLAGS = commonFlags + ' -Wno-error'
 	#@EXTRA_LINKFLAGS = ' -symbolic'
 	@SPECIFIC_CFLAGS = {
@@ -29,9 +34,9 @@ CRBLIB = LibWork.new do
 end
 
 PALBMP = LibWork.new do
-	@SOURCES = ['src/libs/blp/palbmp']
+	@SOURCES = ["#{ls}/blp/palbmp"]
 	@IGNORED_FILES = []
-	@EXTRA_INCLUDES = ['src/libs/blp']
+	@EXTRA_INCLUDES = ["#{ls}/blp"]
 	@EXTRA_CFLAGS = commonFlags
 	#@EXTRA_LINKFLAGS = ' -symbolic'
 	@SPECIFIC_CFLAGS = {
@@ -42,15 +47,15 @@ PALBMP = LibWork.new do
 end
 
 SQUISH = LibWork.new do
-	@SOURCES = ['src/libs/blp/squish']
+	@SOURCES = ["#{ls}/blp/squish"]
 	@EXTRA_INCLUDES = @SOURCES
 	@EXTRA_CFLAGS = commonFlags
 	@NAME = 'squish'
 end
 
 BLP = LibWork.new do
-	@SOURCES = ['src/libs/blp']
-	@EXTRA_INCLUDES = ['src/libs/blp'] + CONFIG_BLP_INCLUDES
+	@SOURCES = ["#{ls}/blp"]
+	@EXTRA_INCLUDES = ["#{ls}/blp"] + CONFIG_BLP_INCLUDES
 	@EXTRA_CFLAGS = commonFlags
 	@SPECIFIC_CFLAGS = {
 		'MemImage.cpp' => ' -Wno-clobbered',

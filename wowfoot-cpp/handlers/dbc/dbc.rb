@@ -23,6 +23,7 @@ end
 def as(structName, arrayName, members, count)
 	DbcColumn.new(:as, arrayName, AS.new(structName, members, count))
 end
+# array
 def ar(type, name, offset, count)
 	DbcColumn.new(:ar, name, ARRAY.new(type, offset, count))
 end
@@ -75,9 +76,9 @@ void luaPush<%=@singular%>(lua_State* L, const <%=@singular%>& s) {
 	lua_pushstring(L, "<%=col.name%>");
 <%if(col.type == :ar); a = col.offset%>
 	lua_createtable(L, <%=a.count%>, 0);
-	for(int i=1; i<=<%=a.count%>; i++) {
+	for(int i=0; i<<%=a.count%>; i++) {
 		lua_push<%=luaType(a.type)%>(L, s.<%=col.name%>[i]);
-		lua_rawseti(L, -2, i);
+		lua_rawseti(L, -2, i+1);
 	}
 <%elsif(col.type == :as); s = col.offset%>
 	lua_createtable(L, <%=s.count%>, 0);
