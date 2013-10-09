@@ -4,7 +4,7 @@
 # :key means it's an SQL primary key column.
 # if type == :struct, then dbName is the cName of the struct, array is SqlColumns.
 # count is > 1, postfix and cName are ignored.
-SqlColumn = Struct.new(:type, :dbName, :array, :count, :postfix, :cName)
+SqlColumn = Struct.new(:type, :dbName, :array, :count, :postfix, :cName, :parentStruct)
 def c(type, dbName, array = nil, count = nil, postfix = '')
 	col = SqlColumn.new(type, dbName, array, count, postfix)
 	col.cName = dbName
@@ -71,7 +71,20 @@ class TdbGenTask < MemoryGeneratedFileTask
 		@names = {}	# members by name. includes sub-members of arrays.
 		@struct.each do |col|
 			if(col.cName)
-				@names[col.cName] = col
+				# if type == :struct, then dbName is the cName of the struct, array is SqlColumns.
+				# count is > 1, postfix and cName are ignored.
+				if(col.type == :struct)
+					raise if(col.count <= 1)
+					#puts "struct #{col.cName}"
+					col.array.each do |n|
+						#puts n.cName.to_s
+						n.postfix = ".#{col.cName}"
+						n.parentStruct = col
+						@names[n.cName] = n
+					end
+				else
+					@names[col.cName] = col
+				end
 			else
 				col.array.each do |n|
 					@names[n] = col
@@ -196,6 +209,7 @@ class TdbExtHeaderTask < TdbGenTask
 			@cppContainerName = 'ConstSet'
 			@cppContainer = "ConstSet<#{@structName}>"
 		end
+		# TODO: special case for single-integer index.
 		template = %q(
 #ifndef <%=upName%>_H
 #define <%=upName%>_H
@@ -240,6 +254,7 @@ public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 		) const VISIBLE;
+	const <%=imap%>& get<%=imap%>() const VISIBLE { return m<%=imap%>; }
 <%end; end%>
 <%=@extraClassDefinitionCode%>
 };
@@ -279,16 +294,36 @@ void <%=@structName%>s::load() {
 	TDB<<%=@structName%>>::fetchTable(mTableName, s<%=@structName%>Formats,
 		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);
 ) + IF_INDEX + %q(
-	for(<%=@structName%>s::citr itr = begin(); itr != end(); ++itr) {
+	for(<%=@structName%>s::citr itr = begin(); itr != end(); ++itr) {<%
+	col = @names[args[0]];
+	isArray = (args.size == 1 && !col.cName)
+	struct = col.parentStruct
+	if(struct)
+		prefix = ".#{struct.cName}[i]"
+		count = struct.count
+		primary = "#{prefix}.#{cEscape(col.cName)}"
+		postfix = ""
+	elsif(isArray)
+		primary = ".#{cEscape(col.array[0])}[i]"
+		count = col.count
+		postfix = "[i]"
+		prefix = ""
+	else
+		primary = ".#{cEscape(col.cName)}"
+		prefix = ""
+		count = nil
+		postfix = ""
+	end
+	%>
 		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
-		col = @names[args[0]]; isArray = (args.size == 1 && !col.cName); if(isArray) %>
-		for(int i=0; i<<%=col.count%>; i++) { if(_ref.<%=cEscape(col.array[0])%>[i] != 0) {<%end%>
+		if(count)%>
+		for(int i=0; i<<%=count%>; i++) {<%end%>
+		if(_ref<%=primary%> != 0) {
 		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-			<%if(i!=0)%>,<%end%>_ref.<%=cEscape(arg)%><%if(isArray)%>[i]<%end;end%>
+			<%="_ref#{prefix}.#{cEscape(arg)}#{postfix}"%>,<%end%>
 		};
-		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));<%
-		if(isArray) %>
-		}}<%end%>
+		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
+		}<%if(count)%>}<%end%>
 	}
 	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
 <%end; end%>
@@ -306,7 +341,7 @@ static CriticalSectionLoadGuard sCS<%=t.structName%>;
 {
 	EASSERT(!m<%=imap%>.empty());
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-		<%if(i!=0)%>,<%end%><%=cEscape(arg)%><%end%>
+		<%=cEscape(arg)%>,<%end%>
 	};
 	return m<%=imap%>.equal_range(key);
 }

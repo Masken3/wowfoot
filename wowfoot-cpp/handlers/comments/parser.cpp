@@ -235,6 +235,7 @@ static bool isUrlChar(char c) {
 }
 static bool isWowheadNonUrlChar(char c) {
 	return c == '/' || c == '?' || c == '.' || c == '-' || c == '&' ||
+		c == '(' || c == ')' ||
 		((unsigned int)c) > 127 || !isUrlChar(c);
 }
 

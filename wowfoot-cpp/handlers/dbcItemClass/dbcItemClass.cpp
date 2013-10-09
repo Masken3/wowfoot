@@ -28,8 +28,8 @@ void ItemClasses::load() {
 		int id = r.getInt(0);
 		ItemClass s;
 		s.name = r.getString(3);
-		printf("class %i: %s\n",
-			id, s.name);
+		//printf("class %i: %s\n",
+			//id, s.name);
 
 		assert(i == id);
 		m[i] = s;

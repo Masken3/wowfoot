@@ -81,16 +81,26 @@ mr(['ItemId', 'ItemCount'], 4),
 mr(['ChoiceItemId', 'ChoiceItemCount'], 6),
 r('Spell'),
 r('SpellCast'),
+c(:int, :srcItemId),
+c(:int, :srcSpell),
+]
+
+@index = [
+	[:srcItemId],	# given at start, auto-deleted at abandon.
+	[:srcSpell],	# cast on player at start.
+	[:reqSpellCast],	# objective: cast this spell.
+	[:reqItemId],	# objective: get Count of these items.
+	[:reqSourceId],	# quest item, not an objetive by itself, but is used to finish the objective.
+	[:rewItemId],	# reward: you will get Count of these items.
+	[:rewChoiceItemId],	# reward: choose one.
+	[:rewardSpell],
+	[:rewardSpellCast],
 ]
 
 if(CONFIG_WOW_VERSION > 30000)
 	@struct << mc(:int, [:rewardFactionId, :rewardFactionValueId, :rewardFactionValueIdOverride], 5)
-	@index = [
-		[:rewardFactionId],
-	]
+	@index << [:rewardFactionId]
 else
 	@struct << mc(:int, [:rewRepFaction, :rewRepValue], 5)
-	@index = [
-		[:rewRepFaction],
-	]
+	@index << [:rewRepFaction]
 end

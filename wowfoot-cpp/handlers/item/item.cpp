@@ -30,6 +30,8 @@ using namespace std;
 static const int ITEM_FLAG_HEROIC = 8;
 
 static void createTabs(vector<Tab*>& tabs, const Item& a);
+static Tab* questObjective(const Item& a);
+static Tab* questObjectiveSource(const Item& a);
 static Tab* soldBy(const Item& a);
 #if HAVE_EXTENDED_COST
 static Tab* currencyFor(const Item& a);
@@ -105,6 +107,8 @@ void itemChtml::title(ostream& stream) {
 }
 
 static void createTabs(vector<Tab*>& tabs, const Item& a) {
+	tabs.push_back(questObjective(a));
+	tabs.push_back(questObjectiveSource(a));
 	// Sold by (npc)
 	tabs.push_back(soldBy(a));
 #if HAVE_EXTENDED_COST
@@ -219,6 +223,49 @@ void npcRow(Row& r, const Npc& npc) {
 		r[NAME] += " <"+npc.subName+">";
 	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
 	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+}
+
+template<typename T>
+Tab* questObjectiveT(const Item& a, const char* id, const char* title,
+	T (Quests::*finder)(int)const, int Quest::Objective::*entryP, int Quest::Objective::*countP)
+{
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	t.columns.push_back(Column(MAX_COUNT, "Count"));
+	printf("Searching for entry %i:\n", a.entry);
+	auto res = (gQuests.*finder)(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Quest& q(*res.first->second);
+		printf("Found q %i\n", q.id);
+		Row r;
+		r[ENTRY] = toString(q.id);
+		r[NAME] = q.title;
+		for(size_t i=0; i<ARRAY_SIZE(q.objective); i++) {
+			const Quest::Objective& o(q.objective[i]);
+			if(o.*entryP == a.entry) {
+				r[MAX_COUNT] = toString(o.*countP);
+			}
+		}
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* questObjective(const Item& a) {
+	return questObjectiveT(a, "questObjective", "Quest objective",
+		&Quests::findReqItemId, &Quest::Objective::reqItemId, &Quest::Objective::reqItemCount);
+}
+
+static Tab* questObjectiveSource(const Item& a) {
+	auto map = gQuests.getReqSourceIdMap();
+	for(auto itr = map.begin(); itr != map.end(); ++itr) {
+		printf("%i: %i (%s)\n", itr->first.reqSourceId, itr->second->id, itr->second->title.c_str());
+	}
+	return questObjectiveT(a, "questObjectiveSource", "Quest objective source",
+		&Quests::findReqSourceId, &Quest::Objective::reqSourceId, &Quest::Objective::reqSourceCount);
 }
 
 static Tab* soldBy(const Item& a) {

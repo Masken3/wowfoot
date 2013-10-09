@@ -99,13 +99,13 @@ void questChtml::streamEncodedObjectives(ostream& stream) {
 			empty = false;
 			stream << "Source item: ";
 			NAMELINK(gItems, o.reqSourceId);
-			stream << " x"<<o.reqSourceCount;
+			stream << " x"<<o.reqSourceCount<<"\n";
 		}
 		if(o.reqItemCount != 0) {
 			empty = false;
 			stream << "Item: ";
 			NAMELINK(gItems, o.reqItemId);
-			stream << " x"<<o.reqItemCount;
+			stream << " x"<<o.reqItemCount<<"\n";
 		}
 		if(o.reqSpellCast) {
 			empty = false;
@@ -124,11 +124,11 @@ void questChtml::streamEncodedObjectives(ostream& stream) {
 		if(o.reqCreatureOrGOCount > 0) {
 			stream << "creature ";
 			NAMELINK(gNpcs, o.reqCreatureOrGOId);
-			stream << " "<<o.reqCreatureOrGOCount<<" times.";
+			stream << " "<<o.reqCreatureOrGOCount<<" times.\n";
 		} else if(o.reqCreatureOrGOCount < 0) {
 			stream << "object ";
 			NAMELINK(gObjects, -o.reqCreatureOrGOId);
-			stream << " "<<o.reqCreatureOrGOCount<<" times.";
+			stream << " "<<o.reqCreatureOrGOCount<<" times.\n";
 		}
 		if(!empty) {
 			stream << "<br>\n";
