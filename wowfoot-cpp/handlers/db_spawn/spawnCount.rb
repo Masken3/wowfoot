@@ -15,7 +15,7 @@ g#{s}Spawns.load();
 int totalSpawnCount = 0;
 for(#{templateStruct}s::iterator itr = super::begin(); itr != super::end(); ++itr) {
 	#{templateStruct}& t(itr->second);
-	Spawns::IdPair p = g#{s}Spawns.findId(t.entry);
+	Spawns::IntPair p = g#{s}Spawns.findId(t.entry);
 	t.spawnCount = 0;
 	for(; p.first != p.second; ++p.first) {
 		t.spawnCount++;

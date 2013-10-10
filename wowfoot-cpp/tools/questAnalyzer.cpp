@@ -82,17 +82,17 @@ public:
 	}
 private:
 	int mGiverCount, mFinisherCount, mObjectiveCount;
-	virtual void questGivers(Spawns::IdPair sp) {
+	virtual void questGivers(Spawns::IntPair sp) {
 		mGiverCount += dumpQuestLocationPair(sp);
 	}
-	virtual void questFinishers(Spawns::IdPair sp) {
+	virtual void questFinishers(Spawns::IntPair sp) {
 		if(mFinisherCount == -1) {
 			fprintf(mMapFile, " finisher");
 			mFinisherCount = 0;
 		}
 		mFinisherCount += dumpQuestLocationPair(sp);
 	}
-	virtual void questObjectives(Spawns::IdPair sp) {
+	virtual void questObjectives(Spawns::IntPair sp) {
 		if(mObjectiveCount == -1) {
 			fprintf(mMapFile, "\ng%i f%i", mGiverCount, mFinisherCount);
 			mObjectiveCount = 0;
@@ -100,11 +100,11 @@ private:
 		mObjectiveCount += dumpQuestLocationPair(sp);
 	}
 	virtual void questAreaObjective(const AreaTrigger& at) {
-		questObjectives(Spawns::IdPair());
+		questObjectives(Spawns::IntPair());
 		fprintf(mMapFile, " at %i (map %i, %f,%f,%f, r%f)", at.id, at.map, at.x, at.y, at.z, at.radius);
 	}
 	// returns count
-	int dumpQuestLocationPair(Spawns::IdPair sp) {
+	int dumpQuestLocationPair(Spawns::IntPair sp) {
 		int count = 0;
 		for(; sp.first != sp.second; ++sp.first) {
 			const Spawn& s(*sp.first->second);
@@ -222,19 +222,19 @@ struct QuestWithLocations : QuestPointListener {
 	explicit QuestWithLocations(int _id) : id(_id), quest(gQuests[_id]) {
 		getQuestLocations(quest, *this);
 	}
-	virtual void questGivers(Spawns::IdPair sp) {
+	virtual void questGivers(Spawns::IntPair sp) {
 		for(; sp.first != sp.second; ++sp.first) {
 			const Spawn& s(*sp.first->second);
 			givers.push_back(makeLocation(s));
 		}
 	}
-	virtual void questFinishers(Spawns::IdPair sp) {
+	virtual void questFinishers(Spawns::IntPair sp) {
 		for(; sp.first != sp.second; ++sp.first) {
 			const Spawn& s(*sp.first->second);
 			finishers.push_back(makeLocation(s));
 		}
 	}
-	virtual void questObjectives(Spawns::IdPair sp) {
+	virtual void questObjectives(Spawns::IntPair sp) {
 		vector<Location> o;
 		for(; sp.first != sp.second; ++sp.first) {
 			const Spawn& s(*sp.first->second);

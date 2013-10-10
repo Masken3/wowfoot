@@ -121,15 +121,47 @@ class TdbGenTask < MemoryGeneratedFileTask
 	end
 end
 
-IF_INDEX = %q{
-<% if(@index) then @index.each do |args|
+IF_INDEX = %q{<%
+if(@index) then @index.each do |args|
 capArgs = args.collect {|arg| arg.to_s.tdbCapitalize; }.join
-iitr = capArgs + 'Itr'
-imap = capArgs + 'Map'
-istruct = capArgs + 'Struct'
-ipair = capArgs + 'Pair'
-%>
-}
+if(args.size == 1 && @names[args[0]].type == :int)
+	iitr = 'IntItr'
+	imap = 'IntMap'
+	istruct = 'int'
+	ipair = 'IntPair'
+	isInt = true
+else
+	iitr = capArgs + 'Itr'
+	imap = capArgs + 'Map'
+	istruct = capArgs + 'Struct'
+	ipair = capArgs + 'Pair'
+	isInt = false
+end%>}
+IF_DEFINE = %q{<%
+if(isInt)
+if(!@intMapDefined)
+@intMapDefined = true%>
+	typedef unordered_multimap<int, const <%=@structName%>*> <%=imap%>;
+	typedef <%=imap%>::const_iterator <%=iitr%>;
+	typedef pair<<%=iitr%>, <%=iitr%>> <%=ipair%>;<%
+end
+else%>
+	struct <%=istruct%> {<%args.each do |arg|%>
+		<%=@names[arg].type%> <%=cEscape(arg)%>;<%end%>
+		bool operator==(const <%=istruct%>& o) const {
+			return<% args.each_with_index do |arg, i| %>
+				<%if(i!=0)%>&& <%end%>this-><%=cEscape(arg)%> == o.<%=cEscape(arg)%><%end%>;
+		}
+		size_t operator()(const <%=istruct%>& o) const {
+			return<% args.each do |arg| %>
+				hash<int>()(o.<%=cEscape(arg)%> + <%end%>0
+				<% args.each do |arg| %>)<%end%>;
+		}
+	};
+	typedef unordered_multimap<<%=istruct%>, const <%=@structName%>*, <%=istruct%>> <%=imap%>;
+	typedef <%=imap%>::const_iterator <%=iitr%>;
+	typedef pair<<%=iitr%>, <%=iitr%>> <%=ipair%>;
+<%end%>}
 
 class TdbStructHeaderTask < TdbGenTask
 	def initialize(name)
@@ -209,7 +241,6 @@ class TdbExtHeaderTask < TdbGenTask
 			@cppContainerName = 'ConstSet'
 			@cppContainer = "ConstSet<#{@structName}>"
 		end
-		# TODO: special case for single-integer index.
 		template = %q(
 #ifndef <%=upName%>_H
 #define <%=upName%>_H
@@ -232,29 +263,14 @@ public:
 
 	<%=@structName%>s(const char* tableName, CriticalSectionLoadGuard&);
 	void load() VISIBLE;
-) + IF_INDEX + %q(
-	struct <%=istruct%> {<%args.each do |arg|%>
-		<%=@names[arg].type%> <%=cEscape(arg)%>;<%end%>
-		bool operator==(const <%=istruct%>& o) const {
-			return<% args.each_with_index do |arg, i| %>
-				<%if(i!=0)%>&& <%end%>this-><%=cEscape(arg)%> == o.<%=cEscape(arg)%><%end%>;
-		}
-		size_t operator()(const <%=istruct%>& o) const {
-			return<% args.each do |arg| %>
-				hash<int>()(o.<%=cEscape(arg)%> + <%end%>0
-				<% args.each do |arg| %>)<%end%>;
-		}
-	};
-	typedef unordered_multimap<<%=istruct%>, const <%=@structName%>*, <%=istruct%>> <%=imap%>;
-	typedef <%=imap%>::const_iterator <%=iitr%>;
-	typedef pair<<%=iitr%>, <%=iitr%>> <%=ipair%>;
+) + IF_INDEX + IF_DEFINE + %q(
 private:
-	<%=imap%> m<%=imap%>;
+	<%=imap%> m<%=capArgs%>Map;
 public:
 	<%=ipair%> find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 		<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 		) const VISIBLE;
-	const <%=imap%>& get<%=imap%>() const VISIBLE { return m<%=imap%>; }
+	const <%=imap%>& get<%=capArgs%>Map() const VISIBLE { return m<%=capArgs%>Map; }
 <%end; end%>
 <%=@extraClassDefinitionCode%>
 };
@@ -318,14 +334,15 @@ void <%=@structName%>s::load() {
 		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
 		if(count)%>
 		for(int i=0; i<<%=count%>; i++) {<%end%>
-		if(_ref<%=primary%> != 0) {
-		<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
-			<%="_ref#{prefix}.#{cEscape(arg)}#{postfix}"%>,<%end%>
-		};
-		m<%=imap%>.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
+		if(_ref<%=primary%> != 0) {<%if(isInt)%>
+			int key = <%="_ref#{prefix}.#{cEscape(args[0])}#{postfix}"%>;<% else%>
+			<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
+				<%="_ref#{prefix}.#{cEscape(arg)}#{postfix}"%>,<%end%>
+			};<%end%>
+			m<%=capArgs%>Map.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
 		}<%if(count)%>}<%end%>
 	}
-	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=imap%>.size(), "m<%=imap%>");
+	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=capArgs%>Map.size(), "mm<%=capArgs%>Map");
 <%end; end%>
 <%=@extraInitCode%>
 }
@@ -339,11 +356,12 @@ static CriticalSectionLoadGuard sCS<%=t.structName%>;
 	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 	) const
 {
-	EASSERT(!m<%=imap%>.empty());
+	EASSERT(!m<%=capArgs%>Map.empty());<%if(isInt)
+	key = cEscape(args[0]) else key = 'key'%>
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
 		<%=cEscape(arg)%>,<%end%>
-	};
-	return m<%=imap%>.equal_range(key);
+	};<%end%>
+	return m<%=capArgs%>Map.equal_range(<%=key%>);
 }
 <%end; end%>
 )

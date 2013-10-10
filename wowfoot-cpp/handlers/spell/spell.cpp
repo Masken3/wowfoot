@@ -61,7 +61,7 @@ static Tab* usedByItem(int id) {
 	t.id = "item";
 	t.title = "Used by item";
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
-	Items::SpellIdPair p = gItems.findSpellId(id);
+	Items::IntPair p = gItems.findSpellId(id);
 	for(; p.first != p.second && t.array.size() < MAX_COUNT;
 		++p.first)
 	{

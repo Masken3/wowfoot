@@ -60,7 +60,7 @@ static Tab* contains(int entry) {
 	t.title = "Contains";
 	itemColumns(t);
 	lootColumns(t);
-	Loots::EntryPair res = gGameobjectLoots.findEntry(entry);
+	auto res = gGameobjectLoots.findEntry(entry);
 	for(; res.first != res.second; ++res.first) {
 		Row r;
 		const Loot& l(*res.first->second);

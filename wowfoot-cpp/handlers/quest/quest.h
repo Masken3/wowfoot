@@ -33,8 +33,8 @@ private:
 	void streamEncodedObjectives(ostream&);
 
 	//QuestPointListener
-	void questGivers(Spawns::IdPair);
-	void questFinishers(Spawns::IdPair);
-	void questObjectives(Spawns::IdPair);
+	void questGivers(Spawns::IntPair);
+	void questFinishers(Spawns::IntPair);
+	void questObjectives(Spawns::IntPair);
 	void questAreaObjective(const AreaTrigger&);
 };

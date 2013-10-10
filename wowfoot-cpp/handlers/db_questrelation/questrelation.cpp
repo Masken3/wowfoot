@@ -38,7 +38,7 @@ Tab* getQuestRelations(const char* tabId, const char* title, QuestRelations& set
 	return &t;
 }
 
-static void initZoneQuestGiverSpawns(Spawns::IdMap& zqgs, Spawns& spawns, QuestRelations& qgs) {
+static void initZoneQuestGiverSpawns(Spawns::IntMap& zqgs, Spawns& spawns, QuestRelations& qgs) {
 	spawnPointsPrepare();
 	spawns.load();
 	qgs.load();
@@ -50,13 +50,13 @@ static void initZoneQuestGiverSpawns(Spawns::IdMap& zqgs, Spawns& spawns, QuestR
 		for(auto sp = spawns.findId(qr.id); sp.first != sp.second; ++sp.first) {
 			const Spawn& s(*sp.first->second);
 			int zoneId = zoneFromCoords(s.map, s.position_x, s.position_y);
-			insert(zqgs, Spawns::IdStruct {zoneId}, &s);
+			insert(zqgs, zoneId, &s);
 		}
 	}
 }
 
-static Spawns::IdMap sCreatureZoneQuestGiverSpawns;
-static Spawns::IdMap sObjectZoneQuestGiverSpawns;
+static Spawns::IntMap sCreatureZoneQuestGiverSpawns;
+static Spawns::IntMap sObjectZoneQuestGiverSpawns;
 
 static void init() {
 	LOCK_AND_LOAD;
@@ -64,14 +64,12 @@ static void init() {
 	initZoneQuestGiverSpawns(sObjectZoneQuestGiverSpawns, gGameobjectSpawns, gObjectQuestGivers);
 }
 
-Spawns::IdPair creatureZoneQuestGiverSpawns(int zoneId) {
+Spawns::IntPair creatureZoneQuestGiverSpawns(int zoneId) {
 	init();
-	Spawns::IdStruct key = { zoneId };
-	return sCreatureZoneQuestGiverSpawns.equal_range(key);
+	return sCreatureZoneQuestGiverSpawns.equal_range(zoneId);
 }
 
-Spawns::IdPair objectZoneQuestGiverSpawns(int zoneId) {
+Spawns::IntPair objectZoneQuestGiverSpawns(int zoneId) {
 	init();
-	Spawns::IdStruct key = { zoneId };
-	return sObjectZoneQuestGiverSpawns.equal_range(key);
+	return sObjectZoneQuestGiverSpawns.equal_range(zoneId);
 }

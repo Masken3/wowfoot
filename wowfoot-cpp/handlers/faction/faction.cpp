@@ -64,7 +64,7 @@ static Tab* members(int factionId) {
 	for(; ftp.first != ftp.second; ++ftp.first) {
 		int f = ftp.first->second->first;
 		//printf("FactionTemplate %i\n", f);
-		Npcs::FactionPair p = gNpcs.findFaction(f);
+		auto p = gNpcs.findFaction(f);
 		for(; p.first != p.second; ++p.first) {
 			const Npc& npc(*p.first->second);
 			Row r;
@@ -105,7 +105,7 @@ static Tab* enemies(int factionId) {
 	npcColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
 	t.columns.push_back(Column(REP, "Reputation", Column::NoEscape));
-	NpcReps::RewOnKillRepFactionPair p = gNpcReps.findRewOnKillRepFaction(factionId);
+	auto p = gNpcReps.findRewOnKillRepFaction(factionId);
 	for(; p.first != p.second; ++p.first) {
 		const NpcRep& rep(*p.first->second);
 		const Npc* npc = gNpcs.find(rep.creature_id);

@@ -22,7 +22,7 @@ public:
 	};
 
 	// call this before calling run().
-	void addSpawns(Spawns::IdPair, Type t=eYellow) VISIBLE;
+	void addSpawns(Spawns::IntPair, Type t=eYellow) VISIBLE;
 
 	void addSpawn(int map, float x, float y, Type t=eYellow) VISIBLE;
 

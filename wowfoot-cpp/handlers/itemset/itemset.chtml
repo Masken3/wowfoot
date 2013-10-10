@@ -9,7 +9,7 @@
 </p>
 
 <p>TDB items:<br>
-% for(Items::ItemsetPair p = gItems.findItemset(a->id); p.first != p.second; ++p.first) {
+% for(auto p = gItems.findItemset(a->id); p.first != p.second; ++p.first) {
 % const Item& i(*p.first->second);
 <a href="item=<%=i.entry%>"><%NAME(i);%></a><br>
 % }

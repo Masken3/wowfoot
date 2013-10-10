@@ -57,7 +57,7 @@ void spawnPointsChtml::addSpawn(int map, float x, float y, Type t) {
 	}
 }
 
-void spawnPointsChtml::addSpawns(Spawns::IdPair spawns, Type t) {
+void spawnPointsChtml::addSpawns(Spawns::IntPair spawns, Type t) {
 	for(; spawns.first != spawns.second; ++spawns.first) {
 		const Spawn& s(*spawns.first->second);
 		addSpawn(s.map, s.position_x, s.position_y, t);

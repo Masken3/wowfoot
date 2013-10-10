@@ -262,7 +262,7 @@ static Tab* questObjective(const Item& a) {
 static Tab* questObjectiveSource(const Item& a) {
 	auto map = gQuests.getReqSourceIdMap();
 	for(auto itr = map.begin(); itr != map.end(); ++itr) {
-		printf("%i: %i (%s)\n", itr->first.reqSourceId, itr->second->id, itr->second->title.c_str());
+		printf("%i: %i (%s)\n", itr->first, itr->second->id, itr->second->title.c_str());
 	}
 	return questObjectiveT(a, "questObjectiveSource", "Quest objective source",
 		&Quests::findReqSourceId, &Quest::Objective::reqSourceId, &Quest::Objective::reqSourceCount);
@@ -275,7 +275,7 @@ static Tab* soldBy(const Item& a) {
 	npcColumns(t);
 	t.columns.push_back(Column(STOCK, "Stock"));
 	t.columns.push_back(Column(COST, "Cost", Column::NoEscape));
-	NpcVendors::ItemPair res = gNpcVendors.findItem(a.entry);
+	NpcVendors::IntPair res = gNpcVendors.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const NpcVendor& nv(*res.first->second);
 		Row r;
@@ -320,10 +320,10 @@ static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const cha
 	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
 	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
-	Loots::ItemPair res = loots.findItem(a.entry);
+	Loots::IntPair res = loots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
-		Npcs::LootIdPair nres = gNpcs.findLootId(loot.entry);
+		Npcs::IntPair nres = gNpcs.findLootId(loot.entry);
 		for(; nres.first != nres.second; ++nres.first) {
 			const Npc& npc(*nres.first->second);
 			Row r;
@@ -356,7 +356,7 @@ static Tab* containedInObject(const Item& a) {
 	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
 	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
-	Loots::ItemPair res = gGameobjectLoots.findItem(a.entry);
+	Loots::IntPair res = gGameobjectLoots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
 		auto nres = gObjects.findLoot(loot.entry);
@@ -381,14 +381,14 @@ static Tab* referenceLoot(const Item& a) {
 	t.title = "Reference loot";
 	lootColumns(t);
 	t.columns.push_back(Column(SPAWN_COUNT, "Other items count"));
-	Loots::ItemPair res = gReferenceLoots.findItem(a.entry);
+	Loots::IntPair res = gReferenceLoots.findItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Loot& loot(*res.first->second);
 		Row r;
 		r[ENTRY] = toString(loot.entry);
 		lootRow(r, loot);
 		size_t count = 0;
-		Loots::EntryPair ep = gReferenceLoots.findEntry(loot.entry);
+		Loots::IntPair ep = gReferenceLoots.findEntry(loot.entry);
 		for(; ep.first != ep.second; ++ep.first) {
 			count++;
 		}
@@ -416,7 +416,7 @@ void itemColumns(tabTableChtml& t) {
 void streamAllCostHtml(std::ostream& o, const Item& i) {
 	gNpcVendors.load();
 	// check every vendor selling this item, to make sure costs are identical.
-	NpcVendors::ItemPair nip = gNpcVendors.findItem(i.entry);
+	NpcVendors::IntPair nip = gNpcVendors.findItem(i.entry);
 	int ec = -1;
 	bool identicalCost = true;
 	bool hasVendor = false;
@@ -507,7 +507,7 @@ static Tab* currencyFor(const Item& a) {
 	t.id = "currencyFor";
 	t.title = "Currency for";
 	itemColumns(t);
-	ItemExtendedCostIndex::ItemItemPair res = ItemExtendedCostIndex::findItemItem(a.entry);
+	ItemExtendedCostIndex::IntPair res = ItemExtendedCostIndex::findItemItem(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Item& i(*res.first->second);
 		addItem(t, i);
@@ -524,7 +524,7 @@ static Tab* sharesModel(const Item& a) {
 	itemColumns(t);
 	// insufficient; displayId controls more than model.
 	t.title = "Same look as";
-	Items::DisplayIdPair res = gItems.findDisplayId(a.displayId);
+	Items::IntPair res = gItems.findDisplayId(a.displayId);
 	for(; res.first != res.second; ++res.first) {
 		const Item& i(*res.first->second);
 		if(i.entry == a.entry)

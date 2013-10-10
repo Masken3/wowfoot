@@ -144,13 +144,13 @@ void questChtml::streamEncodedObjectives(ostream& stream) {
 	getQuestLocations(*a, *this);
 }
 
-void questChtml::questGivers(Spawns::IdPair sp) {
+void questChtml::questGivers(Spawns::IntPair sp) {
 	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eBlue);
 }
-void questChtml::questFinishers(Spawns::IdPair sp) {
+void questChtml::questFinishers(Spawns::IntPair sp) {
 	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eYellow);
 }
-void questChtml::questObjectives(Spawns::IdPair sp) {
+void questChtml::questObjectives(Spawns::IntPair sp) {
 	mSpawnPoints.addSpawns(sp, spawnPointsChtml::eRed);
 }
 void questChtml::questAreaObjective(const AreaTrigger& at) {

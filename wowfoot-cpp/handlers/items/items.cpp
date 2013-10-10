@@ -38,7 +38,7 @@ void itemsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	if(mItemClass >= 0) {
 		gItems.load();
 		if(mSubClass < 0) {
-			mPair = new ItrPairImpl<Item, Items::ClassItr>(gItems.findClass(mItemClass));
+			mPair = new ItrPairImpl<Item, Items::IntItr>(gItems.findClass(mItemClass));
 		} else {
 			mPair = new ItrPairImpl<Item, Items::ClassSubclassItr>(gItems.findClassSubclass(mItemClass, mSubClass));
 		}

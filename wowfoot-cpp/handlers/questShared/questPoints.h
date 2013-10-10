@@ -4,9 +4,9 @@
 
 class QuestPointListener {
 public:
-	virtual void questGivers(Spawns::IdPair) = 0;
-	virtual void questFinishers(Spawns::IdPair) = 0;
-	virtual void questObjectives(Spawns::IdPair) = 0;
+	virtual void questGivers(Spawns::IntPair) = 0;
+	virtual void questFinishers(Spawns::IntPair) = 0;
+	virtual void questObjectives(Spawns::IntPair) = 0;
 	virtual void questAreaObjective(const AreaTrigger&) = 0;
 };
 

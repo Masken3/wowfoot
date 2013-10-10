@@ -5,9 +5,9 @@
 #include "util/arraySize.h"
 #include "win32.h"
 
-typedef void (QuestPointListener::*QplFunc)(Spawns::IdPair);
+typedef void (QuestPointListener::*QplFunc)(Spawns::IntPair);
 
-static void getQuestLocationPair(Spawns::IdPair sp, QuestPointListener& l, QplFunc func) {
+static void getQuestLocationPair(Spawns::IntPair sp, QuestPointListener& l, QplFunc func) {
 	(l.*func)(sp);
 }
 static void getQuestLocationByRelation(const Quest& q, QuestPointListener& l, QplFunc func,
