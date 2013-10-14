@@ -88,6 +88,14 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 % }
 </p>
 
+% if(a->srcItemId) {
+<p>Item given at start: <%NAMELINK(gItems, a->srcItemId);%>
+% }
+
+% if(a->srcSpell) {
+<p>Spell cast on you at start: <%NAMELINK(gSpells, a->srcSpell);%>
+% }
+
 <p>Encoded objectives:<br>
 % streamEncodedObjectives(stream);
 </p>

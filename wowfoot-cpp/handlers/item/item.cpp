@@ -32,6 +32,8 @@ static const int ITEM_FLAG_HEROIC = 8;
 static void createTabs(vector<Tab*>& tabs, const Item& a);
 static Tab* questObjective(const Item& a);
 static Tab* questObjectiveSource(const Item& a);
+static Tab* questReward(const Item& a);
+static Tab* questSourced(const Item& a);
 static Tab* soldBy(const Item& a);
 #if HAVE_EXTENDED_COST
 static Tab* currencyFor(const Item& a);
@@ -109,6 +111,8 @@ void itemChtml::title(ostream& stream) {
 static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	tabs.push_back(questObjective(a));
 	tabs.push_back(questObjectiveSource(a));
+	tabs.push_back(questReward(a));
+	tabs.push_back(questSourced(a));
 	// Sold by (npc)
 	tabs.push_back(soldBy(a));
 #if HAVE_EXTENDED_COST
@@ -234,11 +238,9 @@ Tab* questObjectiveT(const Item& a, const char* id, const char* title,
 	t.title = title;
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
 	t.columns.push_back(Column(MAX_COUNT, "Count"));
-	printf("Searching for entry %i:\n", a.entry);
 	auto res = (gQuests.*finder)(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Quest& q(*res.first->second);
-		printf("Found q %i\n", q.id);
 		Row r;
 		r[ENTRY] = toString(q.id);
 		r[NAME] = q.title;
@@ -260,12 +262,67 @@ static Tab* questObjective(const Item& a) {
 }
 
 static Tab* questObjectiveSource(const Item& a) {
+#if 0
 	auto map = gQuests.getReqSourceIdMap();
 	for(auto itr = map.begin(); itr != map.end(); ++itr) {
 		printf("%i: %i (%s)\n", itr->first, itr->second->id, itr->second->title.c_str());
 	}
+#endif
 	return questObjectiveT(a, "questObjectiveSource", "Quest objective source",
 		&Quests::findReqSourceId, &Quest::Objective::reqSourceId, &Quest::Objective::reqSourceCount);
+}
+
+static Tab* questReward(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "questReward";
+	t.title = "Quest reward";
+	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	t.columns.push_back(Column(MAX_COUNT, "Count"));
+	auto res = gQuests.findRewItemId(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Quest& q(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(q.id);
+		r[NAME] = q.title;
+		for(size_t i=0; i<ARRAY_SIZE(q.rewardItemId); i++) {
+			if(q.rewardItemId[i] == a.entry) {
+				r[MAX_COUNT] = toString(q.rewardItemCount[i]);
+			}
+		}
+		t.array.push_back(r);
+	}
+	res = gQuests.findRewChoiceItemId(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Quest& q(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(q.id);
+		r[NAME] = q.title;
+		for(size_t i=0; i<ARRAY_SIZE(q.rewardChoiceItemId); i++) {
+			if(q.rewardChoiceItemId[i] == a.entry) {
+				r[MAX_COUNT] = toString(q.rewardChoiceItemCount[i]);
+			}
+		}
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* questSourced(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "questSourced";
+	t.title = "Given at quest start";
+	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	auto res = gQuests.findSrcItemId(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Quest& q(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(q.id);
+		r[NAME] = q.title;
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
 }
 
 static Tab* soldBy(const Item& a) {
