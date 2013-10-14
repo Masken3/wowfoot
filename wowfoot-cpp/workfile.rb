@@ -410,7 +410,10 @@ DbcWork.new('dbcSkillLineCategory')
 DbcWork.new('dbcLock', ['db_creature_template', 'db_gameobject_template', 'db_item'])
 
 HandlerWork.new('pageContext')
-HandlerWork.new('tabs')
+HandlerWork.new('tabs') do
+	@EXTRA_CPPFLAGS ||= ''
+	@EXTRA_CPPFLAGS += " -DCONFIG_HIDE_EMPTY_TABS=#{CONFIG_HIDE_EMPTY_TABS}"
+end
 HandlerWork.new('tabTable', ['tabs'])
 HandlerWork.new('mapSize')
 HandlerWork.new('skillShared', ['dbcLock', 'dbcSkillLine'])

@@ -12,9 +12,9 @@ VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
 <!-- Tab-table :) -->
 % if(!mTabs.empty()) {
 <table id="tabs" class="tabs" summary="tabs"><tr>
-% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
+% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]); if(t.count != 0 || !CONFIG_HIDE_EMPTY_TABS) {
 <td><a id="<%= t.id %>"><%= t.title %> (<%= t.count %>)</a></td>
-% }
+% }}
 </tr></table>
 % }
 
