@@ -46,9 +46,9 @@ document.getElementById("tabs").style.display = "block";
 currentTab = "<%= largestTabId %>"
 activateTab(document.getElementById(currentTab))
 
-% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]);
+% VECTOR_EACH(mTabs, i) { Tab& t(*mTabs[i]); if(t.count != 0 || !CONFIG_HIDE_EMPTY_TABS) {
 document.getElementById("<%= t.id %>").onclick = tab_onclick;
-% }
+% }}
 % }
 </SCRIPT>
 

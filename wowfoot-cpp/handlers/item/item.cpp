@@ -44,6 +44,10 @@ static Tab* pickpocketedFrom(const Item& a);
 static Tab* skinnedFrom(const Item& a);
 static Tab* containedInObject(const Item& a);
 static Tab* referenceLoot(const Item& a);
+static Tab* disenchantsTo(const Item& a);
+static Tab* disenchantedFrom(const Item& a);
+static Tab* containedInItem(const Item& a);
+static Tab* contains(const Item& a);
 
 void init() __attribute((constructor));
 void init() {
@@ -64,6 +68,8 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gCreatureLoots.load();
 	gPickpocketingLoots.load();
 	gSkinningLoots.load();
+	gDisenchantLoots.load();
+	gItemLoots.load();
 	gNpcs.load();
 	gNpcVendors.load();
 	gItems.load();
@@ -122,12 +128,17 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	// Same model as (item)
 	tabs.push_back(sharesModel(a));
 	// Disenchants to (item)
+	tabs.push_back(disenchantsTo(a));
 	// Disenchanted from (item)
+	tabs.push_back(disenchantedFrom(a));
 	// Dropped by (npc)
 	tabs.push_back(droppedBy(a));
 	// Contained in (gameobject)
 	tabs.push_back(containedInObject(a));
 	// Contained in (item)
+	tabs.push_back(containedInItem(a));
+	// Contains (items)
+	tabs.push_back(contains(a));
 	// Milled from (item)
 	// Mills to (item)
 	// Pickpocketed from (npc)
@@ -403,6 +414,80 @@ static Tab* pickpocketedFrom(const Item& a) {
 }
 static Tab* skinnedFrom(const Item& a) {
 	return npcLoot(a, gSkinningLoots, "skinnedFrom", "Skinned from");
+}
+
+class NameGetter {
+public:
+	virtual string operator()(int id) = 0;
+};
+
+template <class T> class NameGetterT : public NameGetter {
+public:
+	const T& m;
+	NameGetterT(const T& map) : m(map) {}
+	string operator()(int id) {
+		auto p = m.find(id);
+		if(p) {
+			return p->name;
+		} else {
+			return m.name + toString(" ") + toString(id);
+		}
+	}
+};
+
+static Tab* simpleItemLoot(Loots::IntPair res, const char* id, const char* title, int Loot::*lp, NameGetter& name) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	lootColumns(t);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		int entry = loot.*lp;
+		r[ENTRY] = toString(entry);
+		r[NAME] = name(entry);
+		lootRow(r, loot);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+NameGetterT<Items> sItemNamer(gItems);
+
+static Tab* disenchantsTo(const Item& a) {
+	return simpleItemLoot(gDisenchantLoots.findEntry(a.disenchantId),
+		"disenchantsTo", "Disenchants to", &Loot::item, sItemNamer);
+}
+static Tab* disenchantedFrom(const Item& a) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "disenchantedFrom";
+	t.title = "Disenchanted from";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	lootColumns(t);
+	Loots::IntPair res = gDisenchantLoots.findItem(a.entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		for(auto nres = gItems.findDisenchantId(loot.entry); nres.first != nres.second; ++nres.first) {
+			Row r;
+			int entry = nres.first->second->entry;
+			r[ENTRY] = toString(entry);
+			r[NAME] = sItemNamer(entry);
+			lootRow(r, loot);
+			t.array.push_back(r);
+		}
+	}
+	t.count = t.array.size();
+	return &t;
+}
+static Tab* containedInItem(const Item& a) {
+	return simpleItemLoot(gItemLoots.findItem(a.entry), "containedInItem", "Contained in item",
+		&Loot::entry, sItemNamer);
+}
+static Tab* contains(const Item& a) {
+	return simpleItemLoot(gItemLoots.findEntry(a.entry), "contains", "Contains",
+		&Loot::item, sItemNamer);
 }
 
 static Tab* containedInObject(const Item& a) {

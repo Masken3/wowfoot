@@ -64,7 +64,7 @@ c(:int, :totemCategory) if(CONFIG_WOW_VERSION > 20000)
 c(:int, :requiredDisenchantSkill) if(CONFIG_WOW_VERSION > 20000)
 @struct += [
 c(:int, :duration),
-c(:int, :disenchantId),
+c(:int, :disenchantId),	# if 0, can't be disenchanted.
 c(:int, :foodType),
 c(:int, :minMoneyLoot),
 c(:int, :maxMoneyLoot),
@@ -81,4 +81,5 @@ mc(:float, [:spellPpmRate], 5, '_'),
 [:itemset],
 [:startQuest],
 [:lockId],
+[:disenchantId],
 ]

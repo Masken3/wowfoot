@@ -80,10 +80,13 @@ Feature list, per page, with YES/NO for "implemented?":
 ** currency for	YES
 ** same look as	YES
 ** dropped by	YES
+** quest objective/reward/startItem YES
 ** contained in object	YES
-** contained in item	NO
+** contained in item	YES
+** contains items YES
+** disenchant to/from YES
 ** pickpocketed from	YES
-** skinned from	NO
+** skinned from	YES
 ** reference loot	PARTIAL
 ** comments	YES
 ** created by (spell) NO
