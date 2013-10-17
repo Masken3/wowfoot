@@ -61,3 +61,18 @@ TINY.table=function(){
 	};
 	return{sorter:sorter}
 }();
+
+TINY.standard=function() {
+	var sorter = new TINY.table.sorter("sorter");
+	sorter.head = "head";
+	sorter.asc = "asc";
+	sorter.desc = "desc";
+	//sorter.even = "evenrow";
+	//sorter.odd = "oddrow";
+	//sorter.evensel = "evenselected";
+	//sorter.oddsel = "oddselected";
+	sorter.paginate = false;
+	//sorter.currentid = "currentpage";
+	//sorter.limitid = "pagelimit";
+	sorter.init("tab",1);
+}

@@ -1,11 +1,11 @@
 
 <p>List skills:</p>
 
-<table id="tab" class="sortable" summary="skills">
+<table id="tab" class="tab" summary="skills">
 <!-- Title row -->
 <thead>
 <tr><td>ID</td>
-<td>↑↓↕ spellIcon</td>
+<td>spellIcon</td>
 <td>Name</td>
 <td>skillCost</td>
 <td>description</td>
@@ -53,17 +53,4 @@ Warning: invalid icon id (<%=s.spellIcon%>)
 <p><%=count%> skills.</p>
 
 <script type="text/javascript" src="static/sorter.js"></script>
-<script type="text/javascript">
-var sorter = new TINY.table.sorter("sorter");
-sorter.head = "head";
-sorter.asc = "asc";
-sorter.desc = "desc";
-//sorter.even = "evenrow";
-//sorter.odd = "oddrow";
-//sorter.evensel = "evenselected";
-//sorter.oddsel = "oddselected";
-sorter.paginate = false;
-//sorter.currentid = "currentpage";
-//sorter.limitid = "pagelimit";
-sorter.init("tab",1);
-</script>
+<script type="text/javascript">TINY.standard();</script>
