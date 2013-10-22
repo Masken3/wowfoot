@@ -400,7 +400,9 @@ DBC_ITEM_EXTENDED_COST_COND = []
 end
 DbcWork.new('dbcChrClasses')
 DbcWork.new('dbcChrRaces')
-#DbcWork.new('dbcSpellEffectNames')	# missing from mpqSet. TODO: investigate.
+# missing from mpqSet. Investigated. Not missing, but file size is zero.
+#DbcWork.new('dbcSpellEffectNames')
+#DbcWork.new('dbcSpellAuraNames')
 DbcWork.new('dbcSpellMechanic')
 DbcWork.new('dbcSpellDuration')
 DbcWork.new('dbcSpellRange')

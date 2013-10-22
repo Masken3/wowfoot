@@ -171,8 +171,17 @@ void spellChtml::streamEffects(ostream& stream) {
 			}
 			stream << "<p>"<<i<<": ";
 			const char* name = spellEffectName(e.id);
-			if(name)
-				stream << "<span class=\"itemDescription\">" << name << "</span>: ";
+			const char* auraName = NULL;
+			if(e.id == 6) {	// Apply Aura
+				auraName = spellAuraName(e.applyAuraName);
+			}
+			if(name) {
+				stream << "<span class=\"itemDescription\">" << name;
+				if(auraName) {
+					stream << " ("<<auraName<<")";
+				}
+				stream << "</span>: ";
+			}
 #define STREAM_EFFECT_MEMBER(m) stream << " " #m ": "<<e.m;
 			SPELL_EFFECT_MEMBERS(STREAM_EFFECT_MEMBER);
 			stream << "</p>\n";
