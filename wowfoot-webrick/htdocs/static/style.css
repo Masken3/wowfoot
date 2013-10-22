@@ -69,3 +69,6 @@ span.r2 { color:#FF0; }
 /*.head:before { content: "↑↓↕ " }*/
 .desc:before { content: "↑ " }
 .asc:before { content: "↓ " }
+.asc { cursor: pointer }
+.desc { cursor: pointer }
+.head { cursor: pointer }

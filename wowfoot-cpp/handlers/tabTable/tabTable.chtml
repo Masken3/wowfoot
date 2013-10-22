@@ -1,12 +1,12 @@
 
-<table class="tab" summary="tab">
-<!-- Title row -->
+<table id="<%=id%>Table" class="tab" summary="tab">
+<thead><!-- Title row -->
 <tr>
 <td>ID</td>
 % VECTOR_EACH(columns, i) { Column& c(columns[i]);
 <td><%= c.title %></td>
 % }
-</tr>
+</tr></thead>
 
 <!-- Data row -->
 % VECTOR_EACH(array, i) { Row& row(array[i]);
@@ -17,11 +17,15 @@
 
 <!-- Other columns -->
 %  VECTOR_EACH(columns, j) { Column& c(columns[j]);
-<td>
+%// there must not be any space between <td> and the sorting-data tag,
+%// or the space will become a text node and take over the sorting process, breaking it.
+%="<td>"
 %   if(c.noEscape) {
 %= row[c.rowId]
 %   } else {
 %    if(c.hasLink) {
+%// allow this column to be sorted properly.
+<!--<%= htmlEscape(row[c.rowId]) %>-->
 <a href="<%= c.linkTarget<<"="<<row[c.linkId] %>">
 %    }
 %= htmlEscape(row[c.rowId])
@@ -34,3 +38,8 @@
 </tr>
 % }
 </table>
+
+<script type="text/javascript">
+	var <%=id%>Sorter = new TINY.table.sorter("<%=id%>Sorter");
+	<%=id%>Sorter.stdInit("<%=id%>Table");
+</script>

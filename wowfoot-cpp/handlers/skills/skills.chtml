@@ -53,4 +53,7 @@ Warning: invalid icon id (<%=s.spellIcon%>)
 <p><%=count%> skills.</p>
 
 <script type="text/javascript" src="static/sorter.js"></script>
-<script type="text/javascript">TINY.standard();</script>
+<script type="text/javascript">
+	var sorter = new TINY.table.sorter("sorter");
+	sorter.stdInit("tab");
+</script>

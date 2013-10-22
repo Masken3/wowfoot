@@ -191,7 +191,10 @@ static void streamCostHtml(ostream& html, const Item& a, int extendedCostId) {
 #if HAVE_EXTENDED_COST
 	if(a.buyPrice != 0 && (extendedCostId <= 0 || a.flagsExtra == 3))
 #endif
+	{
+		html << "<!--"<<a.buyPrice<<"-->";	// improved sorting.
 		moneyHtml(html, a.buyPrice);
+	}
 	if(extendedCostId <= 0)
 		return;
 

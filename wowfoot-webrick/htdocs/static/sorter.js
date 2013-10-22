@@ -23,6 +23,7 @@ TINY.table=function(){
 		for(i;i<this.l;i++){
       t.a[i].o=i; var v=t.r[i].cells[y]; t.r[i].style.display='';
       while(v.hasChildNodes()){v=v.firstChild}
+			//console.log(v.nodeValue)
       t.a[i].v=v.nodeValue?v.nodeValue:''
     }
 		for(i=0;i<t.w;i++){var c=t.h.cells[i]; if(c.className!='nosort'){c.className=this.head}}
@@ -59,20 +60,18 @@ TINY.table=function(){
 		if(!isNaN(i)&&!isNaN(n)){g=i; h=n}
 		return g>h?1:(g<h?-1:0)
 	};
+	sorter.prototype.stdInit=function(id) {
+		this.head = "head";
+		this.asc = "asc";
+		this.desc = "desc";
+		//sorter.even = "evenrow";
+		//sorter.odd = "oddrow";
+		//sorter.evensel = "evenselected";
+		//sorter.oddsel = "oddselected";
+		this.paginate = false;
+		//sorter.currentid = "currentpage";
+		//sorter.limitid = "pagelimit";
+		this.init(id, 1);
+	}
 	return{sorter:sorter}
 }();
-
-TINY.standard=function() {
-	var sorter = new TINY.table.sorter("sorter");
-	sorter.head = "head";
-	sorter.asc = "asc";
-	sorter.desc = "desc";
-	//sorter.even = "evenrow";
-	//sorter.odd = "oddrow";
-	//sorter.evensel = "evenselected";
-	//sorter.oddsel = "oddselected";
-	sorter.paginate = false;
-	//sorter.currentid = "currentpage";
-	//sorter.limitid = "pagelimit";
-	sorter.init("tab",1);
-}
