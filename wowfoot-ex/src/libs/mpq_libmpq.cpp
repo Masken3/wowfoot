@@ -6,9 +6,10 @@
 
 ArchiveSet gOpenArchives;
 
-MPQArchive::MPQArchive(const char* filename)
+MPQArchive::MPQArchive(const char* filename, bool verbose)
 {
     int result = libmpq__archive_open(&mpq_a, filename, -1);
+	if(verbose)
     printf("Opening %s\n", filename);
     if(result) {
         switch(result) {

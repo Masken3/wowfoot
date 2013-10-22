@@ -12,8 +12,8 @@
 
 static CriticalSectionLoadGuard sCS;
 
-void DBC::load() {
+void DBC::load(bool verbose) {
 	LOCK_AND_LOAD;
 
-	loadMpqFiles();
+	loadMpqFiles(verbose);
 }

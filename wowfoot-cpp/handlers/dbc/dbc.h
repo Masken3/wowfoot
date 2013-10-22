@@ -4,7 +4,7 @@
 #include "dllHelpers.h"
 
 namespace DBC {
-	void load() VISIBLE;
+	void load(bool verbose=true) VISIBLE;
 }
 
 #endif	//DBC_H

@@ -48,6 +48,7 @@ class DbcCppTask < MemoryGeneratedFileTask
 		@prerequisites << DbcHeaderTask.new(name, options)
 		@options = options
 		@options[:criticalSection] = true if(options[:criticalSection] != false)
+		@options[:logging] = true if(options[:logging] != false)
 
 		template = %q(
 #define __STDC_FORMAT_MACROS
@@ -107,15 +108,19 @@ static DBCFile sDbc("DBFilesClient\\\\<%=@dbcName%>.dbc");
 void <%=@plural%>::load() {
 <%if(@options[:criticalSection])%>
 	LOCK_AND_LOAD;
-	DBC::load();
+	DBC::load(<%=@options[:logging]?'true':'false'%>);
 <%else%>
-	loadMpqFiles();
+	loadMpqFiles(<%=@options[:logging]?'true':'false'%>);
 <%end%>
 
+<%if(@options[:logging])%>
 	printf("Opening <%=@dbcName%>.dbc...\n");
+<%end%>
 	bool res = sDbc.open();
 	assert(res);
+<%if(@options[:logging])%>
 	printf("Extracting %" PRIuPTR " <%=@plural%>...\n", sDbc.getRecordCount());
+<%end%>
 	for(DBCFile::Iterator itr = sDbc.begin(); itr != sDbc.end(); ++itr) {
 		<%=@preRow%>
 		const DBCFile::Record& r(*itr);

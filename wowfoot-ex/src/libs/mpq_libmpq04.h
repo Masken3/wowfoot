@@ -25,7 +25,7 @@ class MPQArchive
 public:
     mpq_archive_s *mpq_a;
 
-    MPQArchive(const char* filename);
+		MPQArchive(const char* filename, bool verbose = true);
     void close();
 
 		void GetFileListCallback(void (*callback)(const string&)) {

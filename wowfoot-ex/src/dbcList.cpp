@@ -42,28 +42,29 @@ bool fileExists(const char* name) {
 	return true;
 }
 
-static void LoadCommonMPQFiles() {
+static void LoadCommonMPQFiles(bool verbose) {
 	char filename[512];
 	int count = sizeof(CONF_mpq_list)/sizeof(char*);
 	for(int i = 0; i < count; ++i)
 	{
 		sprintf(filename, WOW_INSTALL_DIR "Data/%s", CONF_mpq_list[i]);
 		if(fileExists(filename))
-			new MPQArchive(filename);
+			new MPQArchive(filename, verbose);
 	}
 }
 
-void loadMpqFiles() {
+void loadMpqFiles(bool verbose) {
 	static bool loaded = false;
 	if(loaded)
 		return;
 	loaded = true;
-	printf("Opening MPQ files:\n");
+	if(verbose)
+		printf("Opening MPQ files:\n");
 #if CONFIG_WOW_VERSION >= 20000
-	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ");
-	MPQArchive patch(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ");
-	MPQArchive patch2(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ");
-	MPQArchive patch3(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ");
+	MPQArchive locale(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/locale-" WOW_LOCALE ".MPQ", verbose);
+	MPQArchive patch(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE ".MPQ", verbose);
+	MPQArchive patch2(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-2.MPQ", verbose);
+	MPQArchive patch3(WOW_INSTALL_DIR "Data/" WOW_LOCALE "/patch-" WOW_LOCALE "-3.MPQ", verbose);
 #endif
-	LoadCommonMPQFiles();
+	LoadCommonMPQFiles(verbose);
 }
