@@ -71,6 +71,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** phrase	YES
 ** multi-word	NO
 ** areas?	NO
+** spawnCount YES
 
 * item
 ** icon	YES
