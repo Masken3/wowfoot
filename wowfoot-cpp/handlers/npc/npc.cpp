@@ -12,6 +12,9 @@
 #include "Spell.index.h"
 #include "money.h"
 #include "dbcSkillLine.h"
+#include "db_loot_template.h"
+#include "db_quest.h"
+#include "questObjectiveT.h"
 #include "util/arraySize.h"
 
 #include <string.h>
@@ -25,6 +28,9 @@ static Tab* sells(int npcId);
 static Tab* teaches(int npcId);
 static Tab* spawnedBy(int npcId);
 static Tab* usesSpells(int npcId);
+static Tab* drops(int npcId);
+static Tab* pickpocketLoot(int npcId);
+static Tab* questObjective(int npcId);
 
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gNpcs.load();
@@ -38,6 +44,9 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gSpells.load();
 	SpellIndex::load();
 	gSkillLines.load();
+	gQuests.load();
+	gPickpocketingLoots.load();
+	gCreatureLoots.load();
 	spawnPointsPrepare();
 
 	int id = toInt(urlPart);
@@ -51,6 +60,9 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 		mTabs.push_back(sells(id));
 		mTabs.push_back(teaches(id));
 		mTabs.push_back(usesSpells(id));
+		mTabs.push_back(drops(id));
+		mTabs.push_back(pickpocketLoot(id));
+		mTabs.push_back(questObjective(id));
 		mTabs.push_back(getComments("npc", id));
 
 		mSpawnPointsChtml.addSpawns(gCreatureSpawns.findId(id));
@@ -62,6 +74,42 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 
 void npcChtml::title(ostream& stream) {
 	ESCAPE(mTitle);
+}
+
+static Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots& loots) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	itemColumns(t);
+	lootColumns(t);
+	Loots::IntPair res = loots.findEntry(npcId);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		const Item* item = gItems.find(loot.item);
+		if(item) {
+			itemRow(r, *item);
+		} else {
+			r[ENTRY] = toString(loot.item);
+		}
+		lootRow(r, loot);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* drops(int npcId) {
+	return simpleLoot(npcId, "drops", "Drops", gCreatureLoots);
+}
+
+static Tab* pickpocketLoot(int npcId) {
+	return simpleLoot(npcId, "pickpocketLoot", "Pickpocket", gPickpocketingLoots);
+}
+
+static Tab* questObjective(int npcId) {
+	return questObjectiveT(npcId, "questObjective", "Quest objective",
+		&Quests::findReqCreatureOrGOId, &Quest::Objective::reqCreatureOrGOId, &Quest::Objective::reqCreatureOrGOCount);
 }
 
 static Tab* sells(int npcId) {

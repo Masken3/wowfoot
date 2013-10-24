@@ -15,6 +15,7 @@
 #include "ItemExtendedCost.index.h"
 #endif
 #include "money.h"
+#include "questObjectiveT.h"
 #include "util/exception.h"
 
 #include <string.h>
@@ -243,16 +244,15 @@ void npcRow(Row& r, const Npc& npc) {
 	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
 }
 
-template<typename T>
-Tab* questObjectiveT(const Item& a, const char* id, const char* title,
-	T (Quests::*finder)(int)const, int Quest::Objective::*entryP, int Quest::Objective::*countP)
+Tab* questObjectiveT(int entry, const char* id, const char* title,
+	Quests::IntPair (Quests::*finder)(int)const, int Quest::Objective::*entryP, int Quest::Objective::*countP)
 {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = id;
 	t.title = title;
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
 	t.columns.push_back(Column(MAX_COUNT, "Count"));
-	auto res = (gQuests.*finder)(a.entry);
+	auto res = (gQuests.*finder)(entry);
 	for(; res.first != res.second; ++res.first) {
 		const Quest& q(*res.first->second);
 		Row r;
@@ -260,7 +260,7 @@ Tab* questObjectiveT(const Item& a, const char* id, const char* title,
 		r[NAME] = q.title;
 		for(size_t i=0; i<ARRAY_SIZE(q.objective); i++) {
 			const Quest::Objective& o(q.objective[i]);
-			if(o.*entryP == a.entry) {
+			if(o.*entryP == entry) {
 				r[MAX_COUNT] = toString(o.*countP);
 			}
 		}
@@ -271,7 +271,7 @@ Tab* questObjectiveT(const Item& a, const char* id, const char* title,
 }
 
 static Tab* questObjective(const Item& a) {
-	return questObjectiveT(a, "questObjective", "Quest objective",
+	return questObjectiveT(a.entry, "questObjective", "Quest objective",
 		&Quests::findReqItemId, &Quest::Objective::reqItemId, &Quest::Objective::reqItemCount);
 }
 
@@ -282,7 +282,7 @@ static Tab* questObjectiveSource(const Item& a) {
 		printf("%i: %i (%s)\n", itr->first, itr->second->id, itr->second->title.c_str());
 	}
 #endif
-	return questObjectiveT(a, "questObjectiveSource", "Quest objective source",
+	return questObjectiveT(a.entry, "questObjectiveSource", "Quest objective source",
 		&Quests::findReqSourceId, &Quest::Objective::reqSourceId, &Quest::Objective::reqSourceCount);
 }
 

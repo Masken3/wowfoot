@@ -483,6 +483,7 @@ PageWork.new('npc', ['db_creature_template', 'item', 'db_item', 'tabTable',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'db_npc_vendor', 'db_npc_trainer', 'dbcSpell', 'dbcSkillLine',
 	'db_creature_template_spells',
+	'db_loot_template', 'db_quest',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',

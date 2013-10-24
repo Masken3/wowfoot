@@ -91,6 +91,7 @@ c(:int, :srcSpell),
 	[:reqSpellCast],	# objective: cast this spell.
 	[:reqItemId],	# objective: get Count of these items.
 	[:reqSourceId],	# quest item, not an objetive by itself, but is used to finish the objective.
+	[:reqCreatureOrGOId],	# objective: positive npcId or negative gameobjectId.
 	[:rewItemId],	# reward: you will get Count of these items.
 	[:rewChoiceItemId],	# reward: choose one.
 	[:rewardSpell],
