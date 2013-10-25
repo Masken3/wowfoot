@@ -6,6 +6,30 @@
 % }
 </p>
 
+<p>
+Level: <%=a->minLevel%>
+% if(a->minLevel != a->maxLevel) {
+- <%=a->maxLevel%>
+% }
+<br>
+Rank: <%=rankName(a->rank)%><br>
+Health: <%=a->minHealth%>
+% if(a->minHealth != a->maxHealth) {
+- <%=a->maxHealth%>
+% }
+<br>
+Mana: <%=a->minMana%>
+% if(a->minMana != a->maxMana) {
+- <%=a->maxMana%>
+% }
+<br>
+Damage: <%=a->minDmg%>
+% if(fabsf(a->minDmg - a->maxDmg) > FLT_EPSILON) {
+- <%=a->maxDmg%>
+% }
+<br>
+</p>
+
 % const FactionTemplate* ft = gFactionTemplates.find(a->faction);
 % if(ft) {
 <p>Faction: <%NAMELINK(gFactions, ft->nameId);%></p>

@@ -125,8 +125,8 @@ Feature list, per page, with YES/NO for "implemented?":
 
 * npc
 ** faction	YES
-** rank (elite/rare)  NO
-** stats	NO
+** rank (elite/rare)  YES
+** stats	YES
 ** spawnpoints	YES
 *** out-of-map points	NO
 *** conjured-by-others points NO
@@ -188,7 +188,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** comments	YES
 
 * skills
-** sort by any column NO
+** sort by any column YES
 
 * skill NO
 ** comments NO

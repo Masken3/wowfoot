@@ -28,8 +28,9 @@ static Tab* sells(int npcId);
 static Tab* teaches(int npcId);
 static Tab* spawnedBy(int npcId);
 static Tab* usesSpells(int npcId);
-static Tab* drops(int npcId);
-static Tab* pickpocketLoot(int npcId);
+static Tab* drops(int lootId);
+static Tab* pickpocketLoot(int lootId);
+static Tab* skinningLoot(int lootId);
 static Tab* questObjective(int npcId);
 
 void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
@@ -47,6 +48,7 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 	gQuests.load();
 	gPickpocketingLoots.load();
 	gCreatureLoots.load();
+	gSkinningLoots.load();
 	spawnPointsPrepare();
 
 	int id = toInt(urlPart);
@@ -60,8 +62,9 @@ void npcChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& 
 		mTabs.push_back(sells(id));
 		mTabs.push_back(teaches(id));
 		mTabs.push_back(usesSpells(id));
-		mTabs.push_back(drops(id));
-		mTabs.push_back(pickpocketLoot(id));
+		mTabs.push_back(drops(a->lootId));
+		mTabs.push_back(pickpocketLoot(a->pickpocketLoot));
+		mTabs.push_back(skinningLoot(a->skinLoot));
 		mTabs.push_back(questObjective(id));
 		mTabs.push_back(getComments("npc", id));
 
@@ -99,12 +102,16 @@ static Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots
 	return &t;
 }
 
-static Tab* drops(int npcId) {
-	return simpleLoot(npcId, "drops", "Drops", gCreatureLoots);
+static Tab* drops(int lootId) {
+	return simpleLoot(lootId, "drops", "Drops", gCreatureLoots);
 }
 
-static Tab* pickpocketLoot(int npcId) {
-	return simpleLoot(npcId, "pickpocketLoot", "Pickpocket", gPickpocketingLoots);
+static Tab* pickpocketLoot(int lootId) {
+	return simpleLoot(lootId, "pickpocketLoot", "Pickpocket", gPickpocketingLoots);
+}
+
+static Tab* skinningLoot(int lootId) {
+	return simpleLoot(lootId, "skinningLoot", "Skinning", gSkinningLoots);
 }
 
 static Tab* questObjective(int npcId) {
@@ -221,4 +228,16 @@ static Tab* usesSpells(int npcId) {
 	}
 	t.count = t.array.size();
 	return &t;
+}
+
+const char* rankName(int rank) {
+	switch(rank) {
+	case 0: return "Normal";
+	case 1: return "Elite";
+	case 2: return "Rare Elite";
+	case 3: return "World Boss";
+	case 4: return "Rare";
+	case 5: return "Unknown";
+	default: return "Undefined";
+	}
 }

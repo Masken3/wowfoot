@@ -4,6 +4,8 @@
 #include "spawnPoints.h"
 #include "dbcFaction.h"
 #include "dbcFactionTemplate.h"
+#include <float.h>
+#include <math.h>
 
 class npcChtml : public tabsChtml, public PageContext {
 public:
@@ -19,3 +21,5 @@ public:
 	int mFactionId;
 	spawnPointsChtml mSpawnPointsChtml;
 };
+
+const char* rankName(int rank);
