@@ -70,17 +70,20 @@ char* readFileForHTTP(const char* filename, uint64_t& size, time_t reqDate, time
 	{
 		struct stat s;
 		if(fstat(fd, &s) < 0) {
+			close(fd);
 			HANDLE_ERRNO;
 		}
 		fileDate = s.st_mtime;
 	}
 	if(fileDate <= reqDate) {
 		code = MHD_HTTP_NOT_MODIFIED;
+		close(fd);
 		return NULL;
 	}
 	// get size
 	off_t offset = lseek(fd, 0, SEEK_END);
 	if(offset < 0) {
+		close(fd);
 		HANDLE_ERRNO;
 	}
 	size = offset;
@@ -89,23 +92,27 @@ char* readFileForHTTP(const char* filename, uint64_t& size, time_t reqDate, time
 	if(!buf) {
 		size = asprintf(&buf, "Internal server error. Could not allocate file buffer of size: %" PRIu64, size);
 		code = 500;
+		close(fd);
 		return buf;
 	}
 	// read file
 	offset = lseek(fd, 0, SEEK_SET);
 	if(offset < 0) {
+		close(fd);
 		HANDLE_ERRNO;
 	}
 	uint64_t pos = 0;
 	while(pos < size) {
 		ssize_t res = read(fd, buf + pos, size - pos);
 		if(res <= 0) {
+			close(fd);
 			HANDLE_ERRNO;
 		}
 		pos += res;
 	}
 	// report success
 	code = 200;
+	close(fd);
 	return buf;
 }
 
