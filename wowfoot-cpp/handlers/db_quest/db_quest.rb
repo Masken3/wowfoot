@@ -86,6 +86,7 @@ c(:int, :srcSpell),
 ]
 
 @index = [
+	[:zoneOrSort],
 	[:srcItemId],	# given at start, auto-deleted at abandon.
 	[:srcSpell],	# cast on player at start.
 	[:reqSpellCast],	# objective: cast this spell.

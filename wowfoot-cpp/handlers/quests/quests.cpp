@@ -9,6 +9,10 @@ void questsChtml::httpArgument(const char* key, const char* value) {
 	if(*value == 0)
 		return;
 	printf("p %s: %s\n", key, value);
+	if(!strcmp(key, "z")) {
+		int id = toInt(value);
+		mPair = new ItrPairImpl<Quest, Quests::IntItr>(gQuests.findZoneOrSort(id));
+	}
 }
 
 struct QuestMaxRepTest {
@@ -23,7 +27,8 @@ void questsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 
 	getArguments(drd);
 
-	mPair = new SimpleItrPair<Quests, QuestMaxRepTest>(gQuests.begin(), gQuests.end());
+	if(!mPair)
+		mPair = new SimpleItrPair<Quests, QuestMaxRepTest>(gQuests.begin(), gQuests.end());
 }
 
 void questsChtml::title(std::ostream& os) {
