@@ -469,6 +469,7 @@ PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitle
 	'db_item', 'db_creature_template', 'db_achievement_reward'])
 end
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
+	'tabTable', 'comments', 'db_quest',
 	'db_questrelation', 'db_spawn'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'db_gameobject_template', 'db_quest',
