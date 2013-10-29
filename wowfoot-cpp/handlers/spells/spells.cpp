@@ -107,7 +107,7 @@ spellsChtml::~spellsChtml() {
 
 void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
 	if(id != 0) {
-		stream << "<a href=\"item="<<id<<"\">";
+		stream << "<a href=\"item="<<id<<"\" style=\"white-space:nowrap\">";
 		const Item* item = gItems.find(id);
 		if(item) {
 			mItemQuality = &ITEM_QUALITY(item->quality);
@@ -139,6 +139,41 @@ static void streamItemSource(ostream& stream, const Item& item) {
 	// todo: determine if the thing is sold or dropped, and if so, by how many.
 }
 
+// returns trainerCount.
+static int streamNpcTrainers(ostream& stream, int id, int& requiredSkillLevel, bool pass) {
+	int trainerCount = 0;
+	for(auto p = SpellIndex::findLearnSpell(id); p.first != p.second; ++p.first) {
+		for(auto t = gNpcTrainers.findSpell(p.first->second->id); t.first != t.second; ++t.first) {
+			const NpcTrainer& nt(*t.first->second);
+			if(nt.reqSkill) {
+				requiredSkillLevel = nt.reqSkillValue;
+			}
+			if(!gNpcs.find(nt.entry)) {
+				int count = 0;
+				for(auto n = gNpcTrainers.findSpell(-nt.entry); n.first != n.second; ++n.first) {
+					const NpcTrainer& nn(*n.first->second);
+					if(pass) {
+						if(trainerCount + count > 0)
+							stream << ", ";
+						NAMELINK(gNpcs, nn.entry);
+					}
+					count++;
+				}
+				EASSERT(count > 0);
+				trainerCount += count;
+			} else {
+				if(pass) {
+					if(trainerCount > 0)
+						stream << ", ";
+					NAMELINK(gNpcs, nt.entry);
+				}
+				trainerCount++;
+			}
+		}
+	}
+	return trainerCount;
+}
+
 int spellsChtml::streamSource(ostream& stream, int id) {
 	int requiredSkillLevel = -1;
 	// Find spells that teach this spell, and items that use the teacher spell.
@@ -165,31 +200,16 @@ int spellsChtml::streamSource(ostream& stream, int id) {
 		}
 	}
 
-	// todo: Find trainers.
-	int trainerCount = 0;
-	for(auto t = gNpcTrainers.findSpell(id); t.first != t.second; ++t.first) {
-		const NpcTrainer& nt(*t.first->second);
-		if(nt.reqSkill) {
-			requiredSkillLevel = nt.reqSkillValue;
-		}
-		if(!gNpcs.find(nt.entry)) {
-			int count = 0;
-			for(auto n = gNpcTrainers.findSpell(-nt.entry); n.first != n.second; ++n.first) {
-				const NpcTrainer& nn(*n.first->second);
-				count++;
-				NAMELINK(gNpcs, nn.entry);
-				stream << "\n";
-			}
-			EASSERT(count > 0);
-			trainerCount += count;
-		} else {
-			trainerCount++;
-			NAMELINK(gNpcs, nt.entry);
-			stream << "\n";
-		}
-	}
+	// todo: some spells are learned as part of starting the skill line.
+
+	int trainerCount = streamNpcTrainers(stream, id, requiredSkillLevel, false);
 	if(trainerCount > 0) {
-		stream << "("<<trainerCount<<" trainers)\n";
+		if(trainerCount < 5) {
+			streamNpcTrainers(stream, id, requiredSkillLevel, true);
+			stream << " ("<<trainerCount<<" trainers)\n";
+		} else {
+			stream << trainerCount<<" trainers\n";
+		}
 	}
 	return requiredSkillLevel;
 }

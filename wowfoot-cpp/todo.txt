@@ -91,6 +91,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** reference loot	PARTIAL
 ** comments	YES
 ** created by (spell) NO
+** reagent for (spell)  NO
 
 * itemset
 ** DBC items?	YES
@@ -110,10 +111,11 @@ Feature list, per page, with YES/NO for "implemented?":
 ** tooltip	RAW
 ** used by
 *** item	YES
-*** object	NO
-*** npc		NO
+*** object	YES
+*** npc		YES
 *** player class	NO
 *** script?	NO
+** taught by  NO
 ** comments	YES
 
 * spells
@@ -121,6 +123,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** input form	NO
 ** professions	PARTIAL
 ** player classes	NO
+** teachers YES
 ** more?	NO
 
 * npc
