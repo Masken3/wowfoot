@@ -442,6 +442,8 @@ HandlerWork.new('questShared', ['db_quest',
 	'db_loot_template',
 	'dbcSpell',
 	'dbcAreaTrigger',
+	'tabs',
+	'tabTable',
 ])
 
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
@@ -470,6 +472,7 @@ PageWork.new('achievement', ['dbcAchievement', 'tabs', 'comments', 'dbcCharTitle
 end
 PageWork.new('zone', ['dbcArea', 'dbcWorldMapArea', 'mapSize', 'tabs', 'spawnPoints',
 	'tabTable', 'comments', 'db_quest',
+	'questShared',
 	'db_questrelation', 'db_spawn'])
 PageWork.new('search', ['dbcArea', 'dbcWorldMapArea', 'tabs', 'tabTable', 'dbcSpell', 'db_item',
 	'db_creature_template', 'db_gameobject_template', 'db_quest',

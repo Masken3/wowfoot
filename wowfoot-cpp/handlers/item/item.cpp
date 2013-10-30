@@ -16,6 +16,7 @@
 #endif
 #include "money.h"
 #include "questObjectiveT.h"
+#include "questTable.h"
 #include "util/exception.h"
 
 #include <string.h>
@@ -250,14 +251,13 @@ Tab* questObjectiveT(int entry, const char* id, const char* title,
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = id;
 	t.title = title;
-	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	questColumns(t);
 	t.columns.push_back(Column(MAX_COUNT, "Count"));
 	auto res = (gQuests.*finder)(entry);
 	for(; res.first != res.second; ++res.first) {
 		const Quest& q(*res.first->second);
 		Row r;
-		r[ENTRY] = toString(q.id);
-		r[NAME] = q.title;
+		questRow(r, q);
 		for(size_t i=0; i<ARRAY_SIZE(q.objective); i++) {
 			const Quest::Objective& o(q.objective[i]);
 			if(o.*entryP == entry) {
@@ -290,14 +290,13 @@ static Tab* questReward(const Item& a) {
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = "questReward";
 	t.title = "Quest reward";
-	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	questColumns(t);
 	t.columns.push_back(Column(MAX_COUNT, "Count"));
 	auto res = gQuests.findRewItemId(a.entry);
 	for(; res.first != res.second; ++res.first) {
 		const Quest& q(*res.first->second);
 		Row r;
-		r[ENTRY] = toString(q.id);
-		r[NAME] = q.title;
+		questRow(r, q);
 		for(size_t i=0; i<ARRAY_SIZE(q.rewardItemId); i++) {
 			if(q.rewardItemId[i] == a.entry) {
 				r[MAX_COUNT] = toString(q.rewardItemCount[i]);
@@ -323,20 +322,7 @@ static Tab* questReward(const Item& a) {
 }
 
 static Tab* questSourced(const Item& a) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = "questSourced";
-	t.title = "Given at quest start";
-	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
-	auto res = gQuests.findSrcItemId(a.entry);
-	for(; res.first != res.second; ++res.first) {
-		const Quest& q(*res.first->second);
-		Row r;
-		r[ENTRY] = toString(q.id);
-		r[NAME] = q.title;
-		t.array.push_back(r);
-	}
-	t.count = t.array.size();
-	return &t;
+	return getQuestsTab("questSourced", "Given at quest start", a.entry, &Quests::findSrcItemId);
 }
 
 static Tab* soldBy(const Item& a) {
