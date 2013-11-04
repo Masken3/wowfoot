@@ -14,6 +14,7 @@ using namespace SpellIndex;
 static CriticalSectionLoadGuard sCS;
 static SpellMap sLearnSpellMap;
 static SpellMap sSpawnCreatureSpellMap;
+static SpellMap sReagentSpellMap;
 
 void SpellIndex::load() {
 	LOCK_AND_LOAD;
@@ -43,6 +44,10 @@ void SpellIndex::load() {
 				insert(sSpawnCreatureSpellMap, e.miscValue, &s);
 			}
 		}
+		for(uint i=0; i<ARRAY_SIZE(s.reagent); i++) {
+			const Spell::Reagent& r(s.reagent[i]);
+			insert(sReagentSpellMap, r.id, &s);
+		}
 	}
 
 	printf("SpellIndex: Loaded %" PRIuPTR " rows into %s\n",
@@ -59,4 +64,9 @@ SpellPair SpellIndex::findLearnSpell(int entry) {
 SpellPair SpellIndex::findSpawnCreature(int entry) {
 	EASSERT(!sSpawnCreatureSpellMap.empty());
 	return sSpawnCreatureSpellMap.equal_range(entry);
+}
+
+SpellPair SpellIndex::findReagent(int entry) {
+	EASSERT(!sReagentSpellMap.empty());
+	return sReagentSpellMap.equal_range(entry);
 }

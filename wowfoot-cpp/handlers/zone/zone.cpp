@@ -4,7 +4,7 @@
 #include "tabTable.h"
 #include "questTable.h"
 #include "db_quest.h"
-#include "../item/item_shared.h"
+#include "../itemShared/item_shared.h"
 
 #include <string.h>
 #include <stdlib.h>

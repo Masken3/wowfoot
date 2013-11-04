@@ -12,7 +12,7 @@
 #include "util/stl_map_insert.h"
 #include <map>
 
-class spellsChtml : public PageContext {
+class spellsChtml : public tabsChtml, public PageContext {
 public:
 	spellsChtml();
 	void title(ostream&);
@@ -21,15 +21,5 @@ public:
 	void httpArgument(const char* key, const char* value);
 	virtual ~spellsChtml();
 private:
-	ItrPair<Spell>* mPair;
 	string mTitle;
-	const Quality* mItemQuality;
-
-	void streamMultiItem(ostream& stream, int id, int count);
-
-	// returns RequiredSkillLevel, if found, -1 otherwise.
-	int streamSource(ostream& stream, int id);
-
-	// returns spell's SkillLineAbility.minValue.
-	int slaYellow(int id);
 };

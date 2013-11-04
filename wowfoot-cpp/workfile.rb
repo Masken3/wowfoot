@@ -445,6 +445,20 @@ HandlerWork.new('questShared', ['db_quest',
 	'tabs',
 	'tabTable',
 ])
+HandlerWork.new('itemShared', ['tabTable', 'tabs',
+	'dbcChrClasses', 'dbcChrRaces',
+	'dbcItemSubClass', 'dbcItemClass',
+	'dbcItemDisplayInfo', 'db_item',
+	'db_creature_template', 'db_loot_template', 'db_npc_vendor',
+	'db_quest', 'questShared',
+])
+HandlerWork.new('spellShared', ['tabTable', 'tabs', 'dbcSpell',
+	'dbcItemDisplayInfo', 'db_item',
+	'dbcSpellIcon', 'icon',
+	'dbcSkillLineAbility', 'dbcSkillLine',
+	'db_npc_trainer', 'db_creature_template',
+	'skillShared', 'itemShared',
+])
 
 commentDeps = ['tabs', 'dbcSpell', 'db_item', 'dbcWorldMapArea',
 	'db_quest', 'db_creature_template',
@@ -482,23 +496,25 @@ PageWork.new('item', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'icon', 'dbcItemDisplayInfo',
 	'dbcSkillLine', 'questShared',
+	'spellShared',
+	'itemShared',
 	'db_questrelation', 'db_quest'] + DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
-PageWork.new('npc', ['db_creature_template', 'item', 'db_item', 'tabTable',
+PageWork.new('npc', ['db_creature_template', 'itemShared', 'db_item', 'tabTable',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize',
 	'db_npc_vendor', 'db_npc_trainer', 'dbcSpell', 'dbcSkillLine',
 	'db_creature_template_spells',
 	'db_loot_template', 'db_quest',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
-PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'item',
+PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'itemShared',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
 	'db_creature_onkill_reputation'])
 PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_npc_vendor', 'db_creature_template', 'dbcSpell',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
-	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'item'] +
+	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'itemShared'] +
 	DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
 PageWork.new('object', ['db_gameobject_template', 'dbcLock',
-	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'item', 'tabTable',
+	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'itemShared', 'tabTable',
 	'db_loot_template', 'db_item', 'db_questrelation'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template', 'dbcSpellIcon', 'icon',
@@ -511,13 +527,14 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'db_creature_template_spells',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
-	'dbcItemDisplayInfo', 'db_item', 'item',
+	'dbcItemDisplayInfo', 'db_item', 'itemShared',
 	'dbcSpellIcon', 'icon',
 	'dbcSkillLineAbility', 'dbcSkillLine',
 	'db_npc_trainer', 'db_creature_template',
 	'skillShared',
+	'spellShared',
 	], {:constructor => true})
-PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'item', 'tabTable', 'tabs'],
+PageWork.new('items', ['db_item', 'dbcItemClass', 'dbcItemSubClass', 'itemShared', 'tabTable', 'tabs'],
 	{:constructor => true})
 PageWork.new('skills', ['tabs', 'tabTable', 'dbcSkillLine', 'dbcSkillLineCategory',
 	'dbcSpellIcon', 'icon'])

@@ -33,7 +33,6 @@ public:
 	static const Resistance mResistances[];
 	static const int mnResistances;
 
-	static const char* ITEM_EQUIP(int id);
 	static const char* ITEM_BONDING(int id);
 	static const char* ITEM_MATERIAL(int id);
 	static const char* ITEM_DAMAGE_TYPE(int id);

@@ -1,5 +1,6 @@
 #include "questTable.h"
-#include "../item/item_shared.h"
+#include "../itemShared/item_shared.h"
+#include <stdio.h>
 
 void questColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));

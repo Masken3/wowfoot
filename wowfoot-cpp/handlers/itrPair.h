@@ -1,6 +1,8 @@
 #ifndef ITR_PAIR_H
 #define ITR_PAIR_H
 
+#include <utility>
+
 template<class T> class ItrPair {
 public:
 	virtual bool hasNext() = 0;

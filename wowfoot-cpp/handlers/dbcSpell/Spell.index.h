@@ -17,6 +17,8 @@ namespace SpellIndex {
 	SpellPair findLearnSpell(int entry) VISIBLE;
 
 	SpellPair findSpawnCreature(int entry) VISIBLE;
+
+	SpellPair findReagent(int entry) VISIBLE;
 };
 
 #endif	//SPELL_INDEX_H

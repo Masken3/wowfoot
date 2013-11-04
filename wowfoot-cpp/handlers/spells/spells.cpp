@@ -8,6 +8,7 @@
 #include "db_npc_trainer.h"
 #include "db_creature_template.h"
 #include "skillShared.h"
+#include "spellShared.h"
 #include "win32.h"
 
 void spellsChtml::httpArgument(const char* key, const char* value) {
@@ -80,7 +81,8 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 
 	if(urlPart[0] == 0) {
 		printf("default: list spells with 2 icons.\n");
-		mPair = new SimpleItrPair<Spells, SpellActiveIconTest>(gSpells.begin(), gSpells.end());
+		auto p(SimpleItrPair<Spells, SpellActiveIconTest>(gSpells.begin(), gSpells.end()));
+		mTabs.push_back(spellsTab("spells", "Spells", p, false));
 	} else {
 		// otherwise: list category spells.
 		const SkillLine* sl = parseSkillId(os, urlPart);
@@ -90,7 +92,8 @@ void spellsChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 			return;
 		}
 		mTitle = sl->name;
-		mPair = new SkillLinePair(sl->id);
+		auto p(SkillLinePair(sl->id));
+		mTabs.push_back(spellsTab("spells", "Spells", p, false));
 	}
 }
 
@@ -98,129 +101,9 @@ void spellsChtml::title(ostream& stream) {
 	stream << mTitle;
 }
 
-spellsChtml::spellsChtml() : PageContext("Spells"), mPair(NULL) {}
+spellsChtml::spellsChtml() : PageContext("Spells") {}
 
 spellsChtml::~spellsChtml() {
-	if(mPair)
-		delete mPair;
-}
-
-void spellsChtml::streamMultiItem(ostream& stream, int id, int count) {
-	if(id != 0) {
-		stream << "<a href=\"item="<<id<<"\" style=\"white-space:nowrap\">";
-		const Item* item = gItems.find(id);
-		if(item) {
-			mItemQuality = &ITEM_QUALITY(item->quality);
-			stream << "<span style=\"color:#"<<mItemQuality->color<<";\">";
-			const ItemDisplayInfo* di = gItemDisplayInfos.find(item->displayId);
-			if(di) {
-				stream << "<img src=\"";
-				ESCAPE_URL(getIcon(di->icon));
-				stream << "\" alt=\""<<item->name<<"\" title=\""<<item->name<<"\">";
-			} else {
-				stream << "displayId ("<<item->displayId<<")";
-			}
-		} else {
-			stream << "item ("<<id<<")";
-		}
-		stream << count;
-		if(item)
-			stream << "</span>";
-		stream << "</a>\n";
-	}
-}
-
-static void streamItemSource(ostream& stream, const Item& item) {
-	stream << "<a href=\"item="<<item.entry<<"\">";
-	stream << "<span style=\"color:#"<<ITEM_QUALITY(item.quality).color<<";\">";
-	streamName(stream, item);
-	stream << "</span>";
-	stream << "</a>\n";
-	// todo: determine if the thing is sold or dropped, and if so, by how many.
-}
-
-// returns trainerCount.
-static int streamNpcTrainers(ostream& stream, int id, int& requiredSkillLevel, bool pass) {
-	int trainerCount = 0;
-	for(auto p = SpellIndex::findLearnSpell(id); p.first != p.second; ++p.first) {
-		for(auto t = gNpcTrainers.findSpell(p.first->second->id); t.first != t.second; ++t.first) {
-			const NpcTrainer& nt(*t.first->second);
-			if(nt.reqSkill) {
-				requiredSkillLevel = nt.reqSkillValue;
-			}
-			if(!gNpcs.find(nt.entry)) {
-				int count = 0;
-				for(auto n = gNpcTrainers.findSpell(-nt.entry); n.first != n.second; ++n.first) {
-					const NpcTrainer& nn(*n.first->second);
-					if(pass) {
-						if(trainerCount + count > 0)
-							stream << ", ";
-						NAMELINK(gNpcs, nn.entry);
-					}
-					count++;
-				}
-				EASSERT(count > 0);
-				trainerCount += count;
-			} else {
-				if(pass) {
-					if(trainerCount > 0)
-						stream << ", ";
-					NAMELINK(gNpcs, nt.entry);
-				}
-				trainerCount++;
-			}
-		}
-	}
-	return trainerCount;
-}
-
-int spellsChtml::streamSource(ostream& stream, int id) {
-	int requiredSkillLevel = -1;
-	// Find spells that teach this spell, and items that use the teacher spell.
-	for(auto p = SpellIndex::findLearnSpell(id); p.first != p.second; ++p.first) {
-		const Spell& s(*p.first->second);
-		for(auto r = gItems.findSpellId(s.id); r.first != r.second; ++r.first) {
-			const Item& item(*r.first->second);
-			streamItemSource(stream, item);
-			if(item.requiredSkill) {
-				requiredSkillLevel = item.requiredSkillRank;
-			}
-		}
-	}
-	// Find items that teach this spell directly (SPELLTRIGGER 6).
-	for(auto r = gItems.findSpellId(id); r.first != r.second; ++r.first) {
-		const Item& item(*r.first->second);
-		for(uint i=0; i<ARRAY_SIZE(item.spellTrigger); i++) {
-			if(item.spellTrigger[i] == 6) {
-				streamItemSource(stream, item);
-				if(item.requiredSkill) {
-					requiredSkillLevel = item.requiredSkillRank;
-				}
-			}
-		}
-	}
-
-	// todo: some spells are learned as part of starting the skill line.
-
-	int trainerCount = streamNpcTrainers(stream, id, requiredSkillLevel, false);
-	if(trainerCount > 0) {
-		if(trainerCount < 5) {
-			streamNpcTrainers(stream, id, requiredSkillLevel, true);
-			stream << " ("<<trainerCount<<" trainers)\n";
-		} else {
-			stream << trainerCount<<" trainers\n";
-		}
-	}
-	return requiredSkillLevel;
-}
-
-int spellsChtml::slaYellow(int id) {
-	auto slas = SkillLineAbilityIndex::findSpell(id);
-	for(; slas.first != slas.second; ++slas.first) {
-		const SkillLineAbility* sla = slas.first->second;
-		return sla->minValue;
-	}
-	return -1;
 }
 
 #if 0

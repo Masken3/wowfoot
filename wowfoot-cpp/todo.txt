@@ -116,6 +116,7 @@ Feature list, per page, with YES/NO for "implemented?":
 *** player class	NO
 *** script?	NO
 ** taught by  NO
+** other spell (effect_trigger)	NO
 ** comments	YES
 
 * spells
@@ -169,6 +170,7 @@ Feature list, per page, with YES/NO for "implemented?":
 *** givers, targets YES, MOSTLY.
 **** summoned objects and creatures.
 ** isDaily	NO
+** quest connections (opens/closes/requires)	NO
 
 * quests
 ** max rep	HARD-CODED
@@ -177,6 +179,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** class	NO
 ** profession	NO
 ** faction?	NO
+** dungeon	NO
 
 * faction
 ** members	YES

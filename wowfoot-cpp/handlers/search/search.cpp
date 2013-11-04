@@ -9,7 +9,7 @@
 #include "db_quest.h"
 #include "dbcItemSet.h"
 #include "dbcFaction.h"
-#include "../item/item_shared.h"
+#include "../itemShared/item_shared.h"
 
 #if CONFIG_WOW_VERSION > 30000
 #include "dbcAchievement.h"

@@ -21,6 +21,8 @@ class Row;
 class Loot;
 class Npc;
 
+static const int ITEM_FLAG_HEROIC = 8;
+
 struct Quality {
 	const char* color;
 	const char* name;
@@ -28,11 +30,13 @@ struct Quality {
 
 void streamAllCostHtml(std::ostream&, const Item&) VISIBLE;
 void streamItemClassHtml(std::ostream&, const Item&) VISIBLE;
+void streamCostHtml(ostream& html, const Item& a, int extendedCostId) VISIBLE;
 
 // has "Heroic" prefix.
 template<> void streamName(ostream& os, const Item& t) VISIBLE;
 
 const Quality& ITEM_QUALITY(int id) VISIBLE;
+const char* ITEM_EQUIP(int id) VISIBLE;
 
 void addItem(tabTableChtml& t, const Item& i) VISIBLE;
 void itemColumns(tabTableChtml& t) VISIBLE;
@@ -60,6 +64,9 @@ enum TableRowId {
 	MAX_COUNT,
 	SPAWN_COUNT,
 	UTILITY,
+	ICON,
+	REAGENTS,
+	SKILL,
 };
 
 #endif	//ITEM_SHARED_H

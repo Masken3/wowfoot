@@ -1,3 +1,4 @@
+#include "db_quest.h"
 
 Tab* questObjectiveT(int entry, const char* id, const char* title,
 	Quests::IntPair (Quests::*finder)(int)const, int Quest::Objective::*entryP,
