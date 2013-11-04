@@ -86,6 +86,7 @@ void itemChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream&
 	gSpells.load();
 	gObjects.load();
 	gGameobjectLoots.load();
+	SpellIndex::load();
 
 	string buffer;
 

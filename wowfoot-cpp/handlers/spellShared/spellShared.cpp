@@ -24,6 +24,9 @@
 Tab* spellsTab(const char* tabId, const char* tabTitle, ItrPair<Spell>& spells,
 	bool haveSkillName)
 {
+	gNpcTrainers.load();
+	SkillLineAbilityIndex::load();
+
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = tabId;
 	t.title = tabTitle;
@@ -95,6 +98,15 @@ Tab* spellsTab(const char* tabId, const char* tabTitle, ItrPair<Spell>& spells,
 		auto slas = SkillLineAbilityIndex::findSpell(s.id);
 		for(; slas.first != slas.second; ++slas.first) {
 			const SkillLineAbility* sla = slas.first->second;
+			stream << "<!--";
+			if(haveSkillName) {
+				stream << gSkillLines[sla->skill].name;
+			}
+			{
+				char buf[32];
+				sprintf(buf, "%04i", sla->minValue);
+				stream <<buf<<"-->";
+			}
 			if(haveSkillName) {
 				stream <<"<a href=\"spells="<<sla->skill<<"\">"<<gSkillLines[sla->skill].name<<"</a>\n";
 			}
