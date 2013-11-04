@@ -94,6 +94,7 @@ void questChtml::streamEncodedObjectives(ostream& stream) {
 		if(!o.text.empty()) {
 			empty = false;
 			streamWowFormattedText(stream, o.text);
+			stream << ". ";
 		}
 		if(o.reqSourceCount != 0) {
 			empty = false;
@@ -114,18 +115,18 @@ void questChtml::streamEncodedObjectives(ostream& stream) {
 			if(o.reqCreatureOrGOCount != 0) {
 				stream << "on ";
 			}
-		} else if(o.reqCreatureOrGOCount > 0) {
+		} else if(o.reqCreatureOrGOId > 0) {
 			empty = false;
 			stream << "Kill ";
-		} else if(o.reqCreatureOrGOCount < 0) {
+		} else if(o.reqCreatureOrGOId < 0) {
 			empty = false;
 			stream << "Use ";
 		}
-		if(o.reqCreatureOrGOCount > 0) {
+		if(o.reqCreatureOrGOId > 0) {
 			stream << "creature ";
 			NAMELINK(gNpcs, o.reqCreatureOrGOId);
 			stream << " "<<o.reqCreatureOrGOCount<<" times.\n";
-		} else if(o.reqCreatureOrGOCount < 0) {
+		} else if(o.reqCreatureOrGOId < 0) {
 			stream << "object ";
 			NAMELINK(gObjects, -o.reqCreatureOrGOId);
 			stream << " "<<o.reqCreatureOrGOCount<<" times.\n";
