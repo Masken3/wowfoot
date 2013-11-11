@@ -162,6 +162,7 @@ void lootRow(Row& r, const Loot& loot) {
 
 void npcColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(NAME, "Name", ENTRY, "npc"));
+	t.columns.push_back(Column(CLEVEL, "Level", Column::NoEscape));
 	//t.columns.push_back(Column(LOCATION, "Location", ZONE, "zone"));
 }
 
@@ -170,7 +171,11 @@ void npcRow(Row& r, const Npc& npc) {
 	r[NAME] = npc.name;
 	if(npc.subName.size() > 0)
 		r[NAME] += " <"+npc.subName+">";
-	r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
+	r[CLEVEL] = toString(npc.minLevel);
+	if(npc.minLevel != npc.maxLevel)
+		// non-breaking hyphen
+		r[CLEVEL] += "&#8209;" + toString(npc.maxLevel);
+	//r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
 	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
 }
 

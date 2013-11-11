@@ -92,6 +92,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** comments	YES
 ** created by (spell) NO
 ** reagent for (spell)  NO
+** block (shield)	NO
 
 * itemset
 ** DBC items?	YES
