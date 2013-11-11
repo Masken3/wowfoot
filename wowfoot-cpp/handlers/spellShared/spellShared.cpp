@@ -25,6 +25,8 @@ Tab* spellsTab(const char* tabId, const char* tabTitle, ItrPair<Spell>& spells,
 	bool haveSkillName)
 {
 	gNpcTrainers.load();
+	gSpellIcons.load();
+	gSkillLines.load();
 	SkillLineAbilityIndex::load();
 
 	tabTableChtml& t = *new tabTableChtml();
