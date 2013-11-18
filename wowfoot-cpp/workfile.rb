@@ -369,6 +369,7 @@ TdbWork.new('db_creature_template', ['db_spawn'])
 TdbWork.new('db_gameobject_template', ['db_spawn'])
 TdbWork.new('db_creature_onkill_reputation')
 TdbWork.new('db_creature_template_spells')
+TdbWork.new('db_questrelation')
 
 DbcWork.new('dbcMap')
 DbcWork.new('dbcAreaTrigger')
@@ -433,9 +434,6 @@ end
 
 HandlerWork.new('spawnPoints', ['mapSize', 'dbcArea', 'dbcWorldMapArea', 'areaMap', 'db_spawn'])
 
-TdbWork.new('db_questrelation', ['tabs', 'tabTable', 'db_quest', 'db_spawn',
-	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize'])
-
 HandlerWork.new('questShared', ['db_quest',
 	'db_questrelation',
 	'db_spawn',
@@ -444,6 +442,7 @@ HandlerWork.new('questShared', ['db_quest',
 	'dbcAreaTrigger',
 	'tabs',
 	'tabTable',
+	'db_creature_template', 'db_gameobject_template', 'spawnPoints', 'mapSize',
 ])
 HandlerWork.new('itemShared', ['tabTable', 'tabs',
 	'dbcChrClasses', 'dbcChrRaces',
@@ -504,6 +503,7 @@ PageWork.new('npc', ['db_creature_template', 'itemShared', 'db_item', 'tabTable'
 	'db_npc_vendor', 'db_npc_trainer', 'dbcSpell', 'dbcSkillLine',
 	'db_creature_template_spells',
 	'db_loot_template', 'db_quest',
+	'questShared',
 	'dbcFaction', 'dbcFactionTemplate', 'db_questrelation'])
 PageWork.new('faction', ['tabTable', 'tabs', 'comments', 'dbcFaction', 'itemShared',
 	'db_quest', 'db_creature_template', 'dbcFactionTemplate',
@@ -513,7 +513,7 @@ PageWork.new('itemset', ['tabs', 'tabTable', 'db_item', 'comments',
 	'db_loot_template', 'dbcChrClasses', 'dbcChrRaces', 'db_gameobject_template',
 	'dbcItemClass', 'dbcItemSubClass', 'dbcItemSet', 'itemShared'] +
 	DBC_TOTEM_CATEGORY_COND + DBC_ITEM_EXTENDED_COST_COND)
-PageWork.new('object', ['db_gameobject_template', 'dbcLock',
+PageWork.new('object', ['db_gameobject_template', 'dbcLock', 'questShared',
 	'db_spawn', 'tabs', 'comments', 'spawnPoints', 'mapSize', 'itemShared', 'tabTable',
 	'db_loot_template', 'db_item', 'db_questrelation'])
 PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',

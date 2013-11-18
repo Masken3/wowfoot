@@ -5,6 +5,7 @@
 #include "util/criticalSection.h"
 #include "db_spawn.h"
 #include "spawnPoints.h"
+#include "questTable.h"
 #include "util/stl_map_insert.h"
 #include <stdio.h>
 
@@ -21,17 +22,18 @@ Tab* getQuestRelations(const char* tabId, const char* title, QuestRelations& set
 	tabTableChtml& t = *new tabTableChtml();
 	t.id = tabId;
 	t.title = title;
-	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	questColumns(t);
 	auto p = set.findId(id);
 	for(; p.first != p.second; ++p.first) {
 		const QuestRelation& qr(*p.first->second);
 		const Quest* q = gQuests.find(qr.quest);
 		Row r;
-		r[ENTRY] = toString(qr.quest);
-		if(q)
-			r[NAME] = q->title;
-		else
+		if(q) {
+			questRow(r, *q);
+		} else {
+			r[ENTRY] = toString(qr.quest);
 			r[NAME] = "Unknown quest "+r[ENTRY];
+		}
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();

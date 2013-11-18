@@ -157,3 +157,7 @@ void questChtml::questObjectives(Spawns::IntPair sp) {
 void questChtml::questAreaObjective(const AreaTrigger& at) {
 	mSpawnPoints.addSpawn(at.map, at.x, at.y, spawnPointsChtml::eGreen);
 }
+
+// The difficulty of this is equivalent to graphviz.
+void questChtml::streamQuestChain(ostream& stream) {
+}

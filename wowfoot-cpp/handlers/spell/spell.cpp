@@ -48,6 +48,8 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 		mTabs.push_back(usedByItem(id));
 		mTabs.push_back(usedByGameobject(id));
 		mTabs.push_back(usedByCreature(id));
+		/*mTabs.push_back(taughtByNpc(id));
+		mTabs.push_back(taughtByItem(id));*/
 
 		mTabs.push_back(getComments("spell", id));
 	} else {

@@ -31,6 +31,7 @@ private:
 
 	int rewRepValue(int index);
 	void streamEncodedObjectives(ostream&);
+	void streamQuestChain(ostream&);
 
 	//QuestPointListener
 	void questGivers(Spawns::IntPair);

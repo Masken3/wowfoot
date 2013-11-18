@@ -10,7 +10,7 @@
 #include "db_creature_template.h"
 #include "db_loot_template.h"
 #include "db_item.h"
-#include "db_questrelation.h"
+#include "questrelation.h"
 #include "db_spawn.h"
 #include "dbcSpell.h"
 #include "dbcMap.h"

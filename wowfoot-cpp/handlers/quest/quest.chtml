@@ -122,6 +122,30 @@ Spell: <%NAMELINK(gSpells, castId);%><br>
 </p>
 %#endif
 
+% if(a->prevQuestId != 0) {
+Previous quest: <%NAMELINK(gQuests, a->prevQuestId);%><br>
+% }
+% if(a->nextQuestId != 0) {
+Next quest: <%NAMELINK(gQuests, a->nextQuestId);%><br>
+% }
+% if(a->nextQuestInChain != 0) {
+Next quest in chain: <%NAMELINK(gQuests, a->nextQuestInChain);%><br>
+% }
+
+%//exclusiveGroup	// todo
+% if(a->exclusiveGroup != 0) { bool first = true;
+Exclusive with:
+% for(auto p = gQuests.findExclusiveGroup(a->id); p.first != p.second; ++p.first) {
+% auto q = *p.first->second;
+<%=(first ? "" : "| ")%><%NAMELINK(gQuests, a->prevQuestId);%>
+% first = false;
+% }
+<br>
+% }
+
+%// quest chain
+% streamQuestChain(stream);
+
 % mSpawnPoints.run(stream);
 
 % returnCode = tabsChtml::run(stream);

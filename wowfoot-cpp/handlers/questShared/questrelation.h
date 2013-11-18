@@ -1,6 +1,7 @@
 #include "db_questrelation.h"
-#include "tabs.h"
 #include "db_spawn.h"
+
+class Tab;
 
 Tab* getQuestRelations(const char* tabId, const char* title, QuestRelations&, int id) VISIBLE;
 

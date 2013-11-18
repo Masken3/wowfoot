@@ -97,6 +97,10 @@ c(:int, :srcSpell),
 	[:rewChoiceItemId],	# reward: choose one.
 	[:rewardSpell],
 	[:rewardSpellCast],
+	[:prevQuestId],
+	[:nextQuestId],
+	[:nextQuestInChain],
+	[:exclusiveGroup],
 ]
 
 if(CONFIG_WOW_VERSION > 30000)

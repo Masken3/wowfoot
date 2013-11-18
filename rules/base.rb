@@ -266,6 +266,7 @@ class Works
 					runThread(i)
 				rescue Exception => e
 					# stop the other threads from starting new tasks, but let them finish their current ones.
+					exit(1)
 					@@mutex.synchronize do
 						prettyPrintException(e, 0, WorkError)
 						@@abort = true

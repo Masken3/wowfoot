@@ -91,7 +91,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** reference loot	PARTIAL
 ** comments	YES
 ** created by (spell) NO
-** reagent for (spell)  NO
+** reagent for (spell)  YES
 ** block (shield)	NO
 
 * itemset
