@@ -12,7 +12,11 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <map>
 #include "win32.h"
+#include "util/minmax.h"
+#include "util/stl_map_insert.h"
 
 using namespace std;
 
@@ -158,6 +162,167 @@ void questChtml::questAreaObjective(const AreaTrigger& at) {
 	mSpawnPoints.addSpawn(at.map, at.x, at.y, spawnPointsChtml::eGreen);
 }
 
+struct QuestInfo {
+	int visitCount;
+	int parentChainLength;
+	int childChainLength;
+	QuestInfo() {
+		memset(this, 0, sizeof(*this));
+	}
+};
+
+class QuestChainWalker {
+private:
+	unordered_map<int, QuestInfo*> mInfo;
+public:
+	~QuestChainWalker() {
+		for(auto itr=mInfo.begin(); itr != mInfo.end(); ++itr) {
+			delete itr->second;
+		}
+	}
+protected:
+	virtual void parent(const QuestInfo&, int) = 0;
+	virtual void child(const QuestInfo&, int) = 0;
+	virtual QuestInfo* create(const Quest&) = 0;
+
+	QuestInfo& get(const Quest& q) {
+		QuestInfo* info(mInfo[q.id]);
+		if(!info) {
+			info = mInfo[q.id] = create(q);
+		}
+		return *info;
+	}
+	void modVisit(QuestInfo& info, int id, int QuestInfo::* chainLength) {
+		QuestInfo* res = visit(id);
+		if(!res) return;
+		info.*chainLength = MAX(info.*chainLength, res->*chainLength + 1);
+	}
+	void process(const Quest& q, QuestInfo& info) {
+		// parents
+		parent(info, q.prevQuestId);
+		modVisit(info, q.prevQuestId, &QuestInfo::parentChainLength);
+		for(auto p = gQuests.findNextQuestId(q.id); p.first != p.second; ++p.first) {
+			parent(info, p.first->second->id);
+			modVisit(info, p.first->second->id, &QuestInfo::parentChainLength);
+		}
+		for(auto p = gQuests.findNextQuestInChain(q.id); p.first != p.second; ++p.first) {
+			parent(info, p.first->second->id);
+			modVisit(info, p.first->second->id, &QuestInfo::parentChainLength);
+		}
+
+		// children
+		child(info, q.nextQuestId);
+		modVisit(info, q.nextQuestId, &QuestInfo::childChainLength);
+		if(q.nextQuestInChain != q.nextQuestId) {
+			child(info, q.nextQuestInChain);
+			modVisit(info, q.nextQuestInChain, &QuestInfo::childChainLength);
+		}
+		for(auto p = gQuests.findPrevQuestId(q.id); p.first != p.second; ++p.first) {
+			child(info, p.first->second->id);
+			modVisit(info, p.first->second->id, &QuestInfo::childChainLength);
+		}
+	};
+	QuestInfo* visit(int id) {
+		if(id == 0)
+			return 0;
+		if(id < 0)
+			id *= -1;
+		const Quest* qp = gQuests.find(id);
+		if(!qp) {
+			printf("Quest %i not found!\n", id);
+			return 0;
+		}
+		QuestInfo& info(get(*qp));
+		info.visitCount++;
+		if(info.visitCount == 1)
+			process(*qp, info);
+		return &info;
+	}
+};
+
+struct GraphNode : QuestInfo {
+	// quest dependencies, prerequisites.
+	vector<GraphNode*> out, in;
+	const Quest* q;
+
+	// distance from root quest.
+	// may be negative, positive or zero.
+	int maxDistance;
+
+	bool used;
+};
+
+class GraphQuestChainWalker : QuestChainWalker {
+private:
+	void relative(const QuestInfo& qi, int id, vector<GraphNode*> GraphNode::* chain) {
+		GraphNode& gn = (GraphNode&)qi;
+		if(!id) {
+			return;
+		}
+		const Quest* pp = gQuests.find(id);
+		if(!pp) {
+			printf("relative %i not found!\n", id);
+			return;
+		}
+		(gn.*chain).push_back((GraphNode*)&get(*pp));
+	}
+protected:
+	virtual void parent(const QuestInfo& qi, int parentId) {
+		relative(qi, parentId, &GraphNode::in);
+	}
+	virtual void child(const QuestInfo& qi, int childId) {
+		relative(qi, childId, &GraphNode::out);
+	}
+	virtual QuestInfo* create(const Quest& q) {
+		GraphNode* gn = new GraphNode;
+		gn->q = &q;
+		gn->maxDistance = 0;
+		gn->used = false;
+		return gn;
+	}
+public:
+	// return value becomes invalid when this is deleted.
+	GraphNode* walk(const Quest& q) {
+		QuestInfo& info(get(q));
+		process(q, info);
+		return (GraphNode*)&info;
+	}
+};
+
+static void addToTree(GraphNode* node, multimap<int, GraphNode*>& sortedTree) {
+	if(node->used)
+		return;
+	insert(sortedTree, node->maxDistance, node);
+	node->used = true;
+	for(size_t i=0; i<node->out.size(); i++)
+		addToTree(node->out[i], sortedTree);
+	for(size_t i=0; i<node->in.size(); i++)
+		addToTree(node->in[i], sortedTree);
+}
+
 // The difficulty of this is equivalent to graphviz.
 void questChtml::streamQuestChain(ostream& stream) {
+	// construct graph. throw error on loops.
+	GraphQuestChainWalker w;
+	GraphNode* root = w.walk(*a);
+	// sort by y-level: maximum distance from root quest, exclusiveGroup priority.
+	multimap<int, GraphNode*> sortedTree;
+	addToTree(root, sortedTree);
+	// generate HTML
+	int level = sortedTree.begin()->first;
+	stream << level << ": ";
+	for(auto itr=sortedTree.begin(); itr != sortedTree.end(); ++itr) {
+		if(itr->first != level) {
+			stream << "<br>\n";
+			level = itr->first;
+			stream << level << ": ";
+		}
+		const Quest& q(*itr->second->q);
+		if(q.id == a->id) {
+			stream << q.title;
+		} else {
+			NAMELINK(gQuests, q.id);
+		}
+		stream << "\n";
+	}
 }
