@@ -164,8 +164,12 @@ void questChtml::questAreaObjective(const AreaTrigger& at) {
 
 struct QuestInfo {
 	int visitCount;
-	int parentChainLength;
-	int childChainLength;
+	bool hasRootVisit;
+
+	// distance from root quest.
+	// may be negative, positive or zero.
+	int maxDistance;
+
 	QuestInfo() {
 		memset(this, 0, sizeof(*this));
 	}
@@ -181,8 +185,10 @@ public:
 		}
 	}
 protected:
-	virtual void parent(const QuestInfo&, int) = 0;
-	virtual void child(const QuestInfo&, int) = 0;
+	enum Direction { eNone, eUp, eDown, eBoth };
+
+	virtual void parent(const QuestInfo&, int qid, Direction d) = 0;
+	virtual void child(const QuestInfo&, int qid, Direction d) = 0;
 	virtual QuestInfo* create(const Quest&) = 0;
 
 	QuestInfo& get(const Quest& q) {
@@ -192,37 +198,45 @@ protected:
 		}
 		return *info;
 	}
-	void modVisit(QuestInfo& info, int id, int QuestInfo::* chainLength) {
-		QuestInfo* res = visit(id);
+	void doParent(QuestInfo& info, int id, Direction d) {
+		parent(info, id, d);
+		QuestInfo* res = visit(id, d, info.maxDistance);
 		if(!res) return;
-		info.*chainLength = MAX(info.*chainLength, res->*chainLength + 1);
 	}
-	void process(const Quest& q, QuestInfo& info) {
+	void doChild(QuestInfo& info, int id, Direction d) {
+		child(info, id, d);
+		QuestInfo* res = visit(id, d, info.maxDistance);
+		if(!res) return;
+	}
+	void process(const Quest& q, QuestInfo& info, Direction d) {
+		Direction up=eNone, down=eNone;
+		if(d != eNone) {
+			info.hasRootVisit = true;
+			if(d == eUp || d == eBoth)
+				up = eUp;
+			if(d == eDown || d == eBoth)
+				down = eDown;
+		}
+
 		// parents
-		parent(info, q.prevQuestId);
-		modVisit(info, q.prevQuestId, &QuestInfo::parentChainLength);
+		doParent(info, q.prevQuestId, up);
 		for(auto p = gQuests.findNextQuestId(q.id); p.first != p.second; ++p.first) {
-			parent(info, p.first->second->id);
-			modVisit(info, p.first->second->id, &QuestInfo::parentChainLength);
+			doParent(info, p.first->second->id, up);
 		}
 		for(auto p = gQuests.findNextQuestInChain(q.id); p.first != p.second; ++p.first) {
-			parent(info, p.first->second->id);
-			modVisit(info, p.first->second->id, &QuestInfo::parentChainLength);
+			doParent(info, p.first->second->id, up);
 		}
 
 		// children
-		child(info, q.nextQuestId);
-		modVisit(info, q.nextQuestId, &QuestInfo::childChainLength);
+		doChild(info, q.nextQuestId, down);
 		if(q.nextQuestInChain != q.nextQuestId) {
-			child(info, q.nextQuestInChain);
-			modVisit(info, q.nextQuestInChain, &QuestInfo::childChainLength);
+			doChild(info, q.nextQuestInChain, down);
 		}
 		for(auto p = gQuests.findPrevQuestId(q.id); p.first != p.second; ++p.first) {
-			child(info, p.first->second->id);
-			modVisit(info, p.first->second->id, &QuestInfo::childChainLength);
+			doChild(info, p.first->second->id, down);
 		}
 	};
-	QuestInfo* visit(int id) {
+	QuestInfo* visit(int id, Direction d, int maxDist) {
 		if(id == 0)
 			return 0;
 		if(id < 0)
@@ -233,10 +247,17 @@ protected:
 			return 0;
 		}
 		QuestInfo& info(get(*qp));
+		if(d == eUp)
+			info.maxDistance = MIN(maxDist - 1, info.maxDistance);
+		if(d == eDown)
+			info.maxDistance = MAX(maxDist + 1, info.maxDistance);
 		info.visitCount++;
-		if(info.visitCount == 1)
-			process(*qp, info);
-		return &info;
+		if(info.visitCount == 1 || (!info.hasRootVisit && d != eNone)) {
+			process(*qp, info, d);
+			return &info;
+		} else {
+			return 0;
+		}
 	}
 };
 
@@ -244,10 +265,6 @@ struct GraphNode : QuestInfo {
 	// quest dependencies, prerequisites.
 	vector<GraphNode*> out, in;
 	const Quest* q;
-
-	// distance from root quest.
-	// may be negative, positive or zero.
-	int maxDistance;
 
 	bool used;
 };
@@ -267,10 +284,10 @@ private:
 		(gn.*chain).push_back((GraphNode*)&get(*pp));
 	}
 protected:
-	virtual void parent(const QuestInfo& qi, int parentId) {
+	virtual void parent(const QuestInfo& qi, int parentId, Direction d) {
 		relative(qi, parentId, &GraphNode::in);
 	}
-	virtual void child(const QuestInfo& qi, int childId) {
+	virtual void child(const QuestInfo& qi, int childId, Direction d) {
 		relative(qi, childId, &GraphNode::out);
 	}
 	virtual QuestInfo* create(const Quest& q) {
@@ -284,7 +301,7 @@ public:
 	// return value becomes invalid when this is deleted.
 	GraphNode* walk(const Quest& q) {
 		QuestInfo& info(get(q));
-		process(q, info);
+		process(q, info, eBoth);
 		return (GraphNode*)&info;
 	}
 };
@@ -305,6 +322,7 @@ void questChtml::streamQuestChain(ostream& stream) {
 	// construct graph. throw error on loops.
 	GraphQuestChainWalker w;
 	GraphNode* root = w.walk(*a);
+	//EASSERT(root->level == 0);	// enable once we've fixed the bugs.
 	// sort by y-level: maximum distance from root quest, exclusiveGroup priority.
 	multimap<int, GraphNode*> sortedTree;
 	addToTree(root, sortedTree);
