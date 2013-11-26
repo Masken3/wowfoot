@@ -5,7 +5,9 @@
 #include <crblib/fileutil.h>
 #ifndef _MSC_VER
 #include <dirent.h>
+#ifndef _stat
 #define _stat stat
+#endif
 #define a_name d_name
 #include <unistd.h>
 #endif

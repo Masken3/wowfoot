@@ -21,7 +21,7 @@ class FileTask < Task
 				d = newDate
 				@prerequisites.each do |n|
 					if(n.respond_to?(:newDate) && n.newDate > d)
-						@needed = "Because prerequisite '#{n}'(#{n.class}) is newer:"
+						@needed = "Because prerequisite '#{n}'(#{n.class}) is newer (#{n.newDate} > #{d}):"
 						break
 					end
 				end
@@ -228,7 +228,7 @@ class MultiFileTask < FileTask
 				d = File.mtime(fn)
 				@prerequisites.each do |n|
 					if(n.respond_to?(:newDate) && n.newDate > d)
-						@needed = "Because prerequisite '#{n}'(#{n.class}) is newer:"
+						@needed = "Because prerequisite '#{n}'(#{n.class}) is newer (#{n.newDate} > #{d}):"
 						break
 					end
 				end
@@ -251,6 +251,7 @@ class MultiFileTask < FileTask
 			super(name)
 		end
 		def fileExecute
+			FileUtils.touch(@NAME)
 		end
 	end
 
