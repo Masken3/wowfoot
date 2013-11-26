@@ -319,6 +319,10 @@ static void addToTree(GraphNode* node, multimap<int, GraphNode*>& sortedTree) {
 
 // The difficulty of this is equivalent to graphviz.
 void questChtml::streamQuestChain(ostream& stream) {
+	// First we must construct a complete, bidirectional graph of the connected quests.
+	// Then we can assign a vertical position to each quest.
+	// Exclusive-group quests have priority grouping; all must be in the same vertical position.
+
 	// construct graph. throw error on loops.
 	GraphQuestChainWalker w;
 	GraphNode* root = w.walk(*a);

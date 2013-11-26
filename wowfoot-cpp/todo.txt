@@ -127,6 +127,7 @@ Feature list, per page, with YES/NO for "implemented?":
 ** player classes	NO
 ** teachers YES
 ** more?	NO
+** Source: Quest reward.	NO
 
 * npc
 ** faction	YES
