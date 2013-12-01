@@ -8,6 +8,7 @@
 #include "item_shared.h"
 #include "FactionTemplate.index.h"
 #include "util/numof.h"
+#include "util/arraySize.h"
 
 using namespace std;
 
@@ -70,6 +71,7 @@ static Tab* members(int factionId) {
 			Row r;
 			npcRow(r, npc);
 			r[SPAWN_COUNT] = toString(npc.spawnCount);
+			// todo: add rep loss for killing.
 			t.array.push_back(r);
 		}
 	}
@@ -82,6 +84,7 @@ static Tab* quests(int factionId) {
 	t.id = "quests";
 	t.title = "Quests";
 	t.columns.push_back(Column(NAME, "Title", ENTRY, "quest"));
+	t.columns.push_back(Column(UTILITY, "Reputation"));
 #if (CONFIG_WOW_VERSION > 30000)
 	Quests::RewardFactionIdPair p = gQuests.findRewardFactionId(factionId);
 #else
@@ -92,6 +95,11 @@ static Tab* quests(int factionId) {
 		Row r;
 		r[ENTRY] = toString(q.id);
 		r[NAME] = q.title;
+		for(size_t i=0; i<ARRAY_SIZE(q.rewardRepFaction); i++) {
+			if(q.rewardRepFaction[i] == factionId) {
+				r[UTILITY] = toString(q.rewardRepValue[i]);
+			}
+		}
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();
