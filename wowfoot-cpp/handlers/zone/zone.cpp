@@ -26,8 +26,8 @@ void zoneChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os) {
 		if(mAT) {
 			mTitle = mAT->name;
 
-			mSpawnPointsChtml.addSpawns(creatureZoneQuestGiverSpawns(mId));
-			mSpawnPointsChtml.addSpawns(objectZoneQuestGiverSpawns(mId));
+			mSpawnPointsChtml.addSpawns(creatureZoneQuestGiverSpawns(mId), spawnPointsChtml::eYellow, "npc");
+			mSpawnPointsChtml.addSpawns(objectZoneQuestGiverSpawns(mId), spawnPointsChtml::eYellow, "object");
 			//mTabs.push_back(getZoneQuestGivers(mId));
 		} else if(mWMA) {
 			mTitle = mWMA->name;

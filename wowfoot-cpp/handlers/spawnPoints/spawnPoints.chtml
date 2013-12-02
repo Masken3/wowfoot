@@ -27,7 +27,11 @@ zones[<%= id %>] = {name:'<%= jsEscape(a->name) %>',
 displayName:'<%= jsEscape(z.name) %>',
 coords:[<% VECTOR_EACH(z.coords, j) {
 const SpawnCoord& c(z.coords[j]); %>
-{y:<%=c.c.x*100%>,x:<%=c.c.y*100%>,t:'oi<%=typeString(c.t)%>'},<% } %>
+{y:<%=c.c.x*100%>,x:<%=c.c.y*100%>,t:'oi<%=typeString(c.t)%>',
+% if(c.linkBase) {
+link:'<%=c.linkBase%>=<%=c.id%>',
+% }
+},<% } %>
 ]};
 % } else {
 // unknown zone: <%=id%>
@@ -54,7 +58,14 @@ function setMap(zoneId) {
 		img = document.createElement("img");
 		img.src = "output/Interface/Minimap/ObjectIcons.png";
 		img.className = c.t;
-		div.appendChild(img);
+		if(c.link) {
+			a = document.createElement("a");
+			a.href = c.link;
+			a.appendChild(img);
+			div.appendChild(a);
+		} else {
+			div.appendChild(img);
+		}
 		map.appendChild(div);
 	}
 }

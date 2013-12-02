@@ -32,11 +32,11 @@ const char* spawnPointsChtml::typeString(Type t) {
 	}
 }
 
-void spawnPointsChtml::addSpawn(int map, float x, float y, Type t) {
+void spawnPointsChtml::addSpawn(int map, float x, float y, Type t, const char* linkBase, int id) {
 	mSpawnCount++;
 	int zoneId = zoneFromCoords(map, x, y);
 	//printf("zone %i, map %i, %f, %f\n", zoneId, map, x, y);
-	SpawnCoord c = { percentagesInZone(zoneId, x, y), t};
+	SpawnCoord c = { percentagesInZone(zoneId, x, y), t, linkBase, id};
 	unordered_map<int, Zone>::iterator itr = mZones.find(zoneId);
 	Zone* zone = NULL;
 	if(itr == mZones.end()) {	// first point in this zone
@@ -57,10 +57,10 @@ void spawnPointsChtml::addSpawn(int map, float x, float y, Type t) {
 	}
 }
 
-void spawnPointsChtml::addSpawns(Spawns::IntPair spawns, Type t) {
+void spawnPointsChtml::addSpawns(Spawns::IntPair spawns, Type t, const char* linkBase) {
 	for(; spawns.first != spawns.second; ++spawns.first) {
 		const Spawn& s(*spawns.first->second);
-		addSpawn(s.map, s.position_x, s.position_y, t);
+		addSpawn(s.map, s.position_x, s.position_y, t, linkBase, s.id);
 	}
 }
 

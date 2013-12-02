@@ -22,9 +22,10 @@ public:
 	};
 
 	// call this before calling run().
-	void addSpawns(Spawns::IntPair, Type t=eYellow) VISIBLE;
+	// linkBase may be NULL.
+	void addSpawns(Spawns::IntPair, Type t=eYellow, const char* linkBase=NULL) VISIBLE;
 
-	void addSpawn(int map, float x, float y, Type t=eYellow) VISIBLE;
+	void addSpawn(int map, float x, float y, Type t=eYellow, const char* linkBase=NULL, int id=0) VISIBLE;
 
 	int run(ostream& stream) VISIBLE;
 private:
@@ -34,6 +35,8 @@ private:
 	struct SpawnCoord {
 		Coord2D c;
 		Type t;
+		const char* linkBase;
+		int id;
 	};
 
 	struct Zone {
