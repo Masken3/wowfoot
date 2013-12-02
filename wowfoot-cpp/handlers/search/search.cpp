@@ -140,6 +140,7 @@ void searchChtml::getResponse2(const char* u, DllResponseData* drd, ostream& os)
 			t.array.push_back(r);
 		}
 	}
+	standardSearchPart<WorldMapAreas, const char*>(t, gWorldMapAreas, urlPart, &WorldMapArea::name, NULL);
 	t.count = t.array.size();
 	mTabs.push_back(tp);
 	}
