@@ -2,6 +2,9 @@
 @plural = 'SkillLines'
 @upperCase = 'SKILL_LINES'
 
+# alternative: 'skill', for lockpicking/gathering skillLines.
+@linkBase = 'spells'
+
 @id = 0
 @struct = [
 	m(:int, 'id', 0),

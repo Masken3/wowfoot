@@ -43,6 +43,7 @@ void questChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gCreatureLoots.load();
 	gPickpocketingLoots.load();
 	gGameobjectLoots.load();
+	gSkillLines.load();
 
 	int id = toInt(urlPart);
 	a = gQuests.find(id);

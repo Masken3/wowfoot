@@ -161,6 +161,7 @@ class DbcHeaderTask < MemoryGeneratedFileTask
 		@prerequisites ||= []
 		@prerequisites << DirTask.new(dir)
 		@options = options
+		@linkBase ||= @singular.downcase
 
 		hasCoord2D = false
 		@struct.each do |col|
@@ -189,7 +190,7 @@ struct <%=@singular%> {<% @struct.each do |col| if(col.type == :as) then s = col
 
 class <%=@plural%> : public ConstMap<int, <%=@singular%>> {
 public:
-	<%=@plural%>() : name("<%=@singular.downcase%>") {}
+	<%=@plural%>() : name("<%=@linkBase%>") {}
 	void load() VISIBLE;
 
 	const char* const name;

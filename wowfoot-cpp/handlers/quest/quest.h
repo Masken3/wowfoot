@@ -11,6 +11,7 @@
 #include "dbcAreaTrigger.h"
 #include "dbcMap.h"
 #include "dbcFaction.h"
+#include "dbcSkillLine.h"
 #include "money.h"
 #include "questPoints.h"
 #include "spawnPoints.h"
