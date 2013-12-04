@@ -42,7 +42,9 @@ typedef unsigned int uint;
 typedef unsigned __int64 uint64_t;
 #define INT64_MAX _I64_MAX
 #define TM_YEAR_BASE 1900
+#ifndef strncasecmp
 #define strncasecmp strnicmp
+#endif
 
 static struct tm* localtime_r(const time_t* timer, struct tm* result) {
 	memcpy(result, localtime(timer), sizeof(struct tm));

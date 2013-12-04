@@ -9,7 +9,9 @@ typedef unsigned int uint;
 int asprintf( char **, const char *, ... ) __attribute((format(ms_printf, 2, 3)));
 int vasprintf( char **, const char *, va_list );
 
+#ifndef strcasecmp
 #define strcasecmp stricmp
+#endif
 const char* strcasestr(const char* s1, const char* s2);
 
 time_t timegm(struct tm*);
