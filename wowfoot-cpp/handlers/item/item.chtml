@@ -45,6 +45,9 @@ Requires character level <%= a->requiredLevel %><br>
 % if(a->requiredSkill != 0) {
 Requires skill <%NAMELINK(gSkillLines, a->requiredSkill);%> (<%= a->requiredSkillRank %>)<br>
 % }
+% if(a->requiredSpell != 0) {
+Requires spell <%NAMELINK(gSpells, a->requiredSpell);%><br>
+% }
 
 %// todo: skill, honorrank, cityrank
 % string classes = chrClasses(a->allowableClass);
