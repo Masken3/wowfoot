@@ -11,8 +11,10 @@
 #include <unordered_map>
 #include <fcntl.h>
 #include <set>
+#include <map>
 #include <stdio.h>
 #include <unistd.h>
+#include <string>
 
 using namespace std;
 
@@ -44,6 +46,7 @@ static void extractWorldMap(const WorldMapArea&);
 static void applyOverlay(MemImage& combine, const WorldMapArea& a,
 	const WorldMapOverlay& o);
 static void extractImage(const char* blpName, const char* pngName);
+static void dumpMinimaps();
 
 #if defined( __GNUC__ )
 #define _open   open
@@ -164,12 +167,20 @@ static void extractImage(const char* blpName, const char* pngName) {
 	img.SaveToPNG(pngName);
 }
 
-static void writeBlob(FILE* out, void* data, size_t size) {
+static void writeBlob(FILE* out, const void* data, size_t size) {
 	int res = fwrite(data, size, 1, out);
 	assert(res == 1);
 }
 static void writeInt(FILE* out, int data) {
 	writeBlob(out, &data, sizeof(int));
+}
+
+// create/truncate a file, write data and close it.
+static void writeFile(const char* filename, void* data, size_t size) {
+	FILE* f = fopen(filename, "wb");
+	assert(f);
+	writeBlob(f, data, size);
+	fclose(f);
 }
 
 static void dumpAdt(FILE* out, const char* adt_filename) {
@@ -298,6 +309,15 @@ int main() {
 	loadMpqFiles();
 
 	mkdir("output");
+
+	// dump md5translate.trs
+	{
+		MPQFile trs("textures\\Minimap\\md5translate.trs");
+		writeFile("output/md5translate.trs", trs.getBuffer(), trs.getSize());
+	}
+
+	// dump minimaps described in md5translate.trs
+	dumpMinimaps();
 
 	//if(rand() == 42)
 	{
@@ -852,4 +872,131 @@ static void extractWorldMap(const WorldMapArea& a) {
 	// save as JPEG.
 	// Effective area: 1002 x 668 pixels.
 	combine.SaveToJPEG(outputFileName, 1002, 668);
+}
+
+typedef unsigned int uint;
+struct Minimap {
+	string name;
+private:
+	uint minX, minY, maxX, maxY;
+	typedef pair<uint,uint> upair;
+	typedef map<upair, string> TileMap;
+	TileMap tiles;
+
+public:
+	void reset() {
+		name.clear();
+		tiles.clear();
+		minX=minY = INT_MAX;
+		maxX=maxY = 0;
+	}
+	void addTile(uint x, uint y, const char* md5) {
+		tiles[upair(x,y)] = md5;
+		minX = MIN(minX,x);
+		maxX = MAX(maxX,x);
+		minY = MIN(minY,y);
+		maxY = MAX(maxY,y);
+	}
+	void write() {
+		char outputFileName[256];
+		sprintf(outputFileName, "output/Minimap\\%s.jpeg", name.c_str());
+		if(fileExists(outputFileName)) {
+			printf("%s already exists, skipping...\n", outputFileName);
+			return;
+		}
+		if(tiles.empty()) {
+			printf("Minimap %s empty, not writing.\n", name.c_str());
+			return;
+		}
+		printf("Writing %s\n", outputFileName);
+		MemImage comb;
+		assert(maxX >= minX);
+		assert(maxY >= minY);
+		comb.Init((maxX+1 - minX)*TILE_WIDTH, (maxY+1 - minY)*TILE_HEIGHT, false, false);
+		for(uint x=minX; x<=maxX; x++) {
+			for(uint y=minY; y<=maxY; y++) {
+				auto itr = tiles.find(upair(x, y));
+				if(itr == tiles.end())
+					continue;
+				char buf[256];
+				sprintf(buf, "textures\\Minimap\\%s", itr->second.c_str());
+				MPQFile tileBlp(buf);
+				if(tileBlp.getSize() <= 256) {	//sanity
+					printf("Warning: cannot extract %s\n", buf);
+					exit(1);
+				}
+				MemImage tile;
+				bool res = tile.LoadFromBLP((const BYTE*)tileBlp.getBuffer(),
+					(DWORD)tileBlp.getSize());
+				assert(res);
+				assert(tile.GetWidth() == TILE_WIDTH);
+				assert(tile.GetWidth() == TILE_HEIGHT);
+				comb.Blit(tile, (x-minX)*TILE_WIDTH, (y-minY)*TILE_HEIGHT);
+			}
+		}
+		comb.SaveToJPEG(outputFileName);
+	}
+};
+
+static void dumpMinimaps() {
+	MPQFile trs("textures\\Minimap\\md5translate.trs");
+	uint lineNumber = 1;
+	const char* ptr = trs.getBuffer();
+	const char* end = ptr + trs.getSize();
+#define REM uint(end - ptr)
+
+	Minimap m;
+	m.reset();
+
+	while(ptr < end) {
+		const char* eol = (char*)memchr(ptr, 0xD, REM);
+		assert(eol);
+#define LINELEN uint(eol - ptr)
+		assert(LINELEN < 256);
+		// windows-style line endings.
+		assert(eol[1] == 0xA);
+
+		if(strncmp(ptr, "dir: ", MIN(REM, 5U)) == 0) {
+			if(!m.name.empty()) {
+				m.write();
+				m.reset();
+			}
+			ptr += 5;
+			m.name = string(ptr, LINELEN);
+			//printf("Minimap: %s\n", m.name.c_str());
+			if(m.name.find("\\") != string::npos ||
+				m.name.find("WMO") != string::npos)
+			{
+				//printf("Skipping subdirectory: %s\n", m.name.c_str());
+				m.reset();
+			}
+		} else if(!m.name.empty()) {
+			//AhnQiraj\map27_46.blp	1fcd95d6d410e7557d6b62081c5e87b5.blp
+			if(strncmp(ptr, m.name.c_str(), MIN(REM, m.name.size())) != 0) {
+				//printf("ERROR: bad line:\n%*s\n", LINELEN, ptr);
+				printf("ERROR: bad line %u: %i\n", lineNumber, LINELEN);
+				writeBlob(stdout, ptr, LINELEN);
+				printf("\n");
+				exit(1);
+			}
+			ptr += m.name.size();
+			uint x, y;
+			char md5[256];
+			int n;
+			int res = sscanf(ptr, "\\map%u_%u.blp %s%n", &x, &y, md5, &n);
+			if(res != 3 || (ptr+n) != eol) {
+				//printf("ERROR: bad line:\n%*s\n", LINELEN, ptr);
+				printf("ERROR: bad lineB %u: %i, %i, %i\n", lineNumber, LINELEN, res, n);
+				writeBlob(stdout, ptr, LINELEN);
+				printf("\n");
+				exit(1);
+			}
+			//printf(" tile: %u_%u %s\n", x, y, md5);
+			m.addTile(x, y, md5);
+		}
+		ptr = eol+2;
+		lineNumber++;
+	}
+
+	exit(0);	//temp
 }
