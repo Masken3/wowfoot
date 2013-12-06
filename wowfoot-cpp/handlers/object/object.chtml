@@ -1,3 +1,4 @@
+% if(a) {
 <p>Object: <%ESCAPE(mTitle);%></p>
 
 <p>Type: <% type(stream); %></p>
@@ -14,7 +15,6 @@ Item <%NAMELINK(gItems, e.index);%>
 <%=lockSkillType(e.index)%> <%=e.skill%>
 % } } }
 
-% if(a) {
 % mSpawnPointsChtml.run(stream);
 % returnCode = tabsChtml::run(stream);
 % } else {
