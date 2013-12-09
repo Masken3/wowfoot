@@ -8,6 +8,8 @@
 //#include "dbcSpellEffectNames.h"
 #include "db_item.h"
 #include "db_creature_template_spells.h"
+#include "dbcSpellItemEnchantment.h"
+#include "util/arraySize.h"
 
 using namespace std;
 
@@ -22,6 +24,7 @@ enum TableRowId {
 #define MAX_COUNT 100
 
 void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
+	gSpellItemEnchantments.load();
 	gSpellIcons.load();
 	gNpcs.load();
 	gItems.load();
@@ -187,6 +190,18 @@ void spellChtml::streamEffects(ostream& stream) {
 #define STREAM_EFFECT_MEMBER(m) stream << " " #m ": "<<e.m;
 			SPELL_EFFECT_MEMBERS(STREAM_EFFECT_MEMBER);
 			stream << "</p>\n";
+			if(e.id == 53) {	// Enchant Item Permanent
+				const auto& en = gSpellItemEnchantments[e.miscValue];
+				stream << "<p>Enchantment:<br>\n";
+				stream << "description: "<<en.description<<"<br>\n";
+				stream << "auraId: "<<en.auraId<<"<br>\n";
+				stream << "flags: "<<en.flags<<"<br>\n";
+				for(size_t j=0; j<ARRAY_SIZE(en.effect); j++) {
+					const auto& ef(en.effect[j]);
+					stream << "effect "<<j<<": type "<<ef.type<<", amount "<<ef.amount<<", "
+						" <a href=\"spell="<<ef.spellId<<"\">spell "<<ef.spellId<<"</a><br>\n";
+				}
+			}
 		}
 	}
 	if(!hasEffect) {

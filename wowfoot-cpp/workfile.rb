@@ -410,6 +410,7 @@ DbcWork.new('dbcSpellRange')
 DbcWork.new('dbcSkillLineAbility')
 DbcWork.new('dbcSkillLine')
 DbcWork.new('dbcSkillLineCategory')
+DbcWork.new('dbcSpellItemEnchantment')
 DbcWork.new('dbcLock', ['db_creature_template', 'db_gameobject_template', 'db_item'])
 
 HandlerWork.new('pageContext')
@@ -524,6 +525,7 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'dbcSkillLineAbility',
 	'dbcSpellDuration',
 	'dbcSpellRange',
+	'dbcSpellItemEnchantment',
 	'db_gameobject_template',
 	'db_creature_template_spells',
 	])
