@@ -1,6 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stddef.h>
+
 bool fileExists(const char* name);
 
 #ifdef WIN32
@@ -33,5 +35,7 @@ template<class T> T MIN(T a, T b) {
 template<class T> T MAX(T a, T b) {
 	return a > b ? a : b;
 }
+
+void writeFile(const char* filename, void* data, size_t size);
 
 #endif	//UTIL_H

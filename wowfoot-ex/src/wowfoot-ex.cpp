@@ -6,6 +6,7 @@
 #include "libs/blp/MemImage.h"
 #include "util.h"
 #include "dbcList.h"
+#include "wmo.h"
 #include "libs/map/wdt.h"
 #include "libs/map/adt.h"
 #include <unordered_map>
@@ -176,7 +177,7 @@ static void writeInt(FILE* out, int data) {
 }
 
 // create/truncate a file, write data and close it.
-static void writeFile(const char* filename, void* data, size_t size) {
+void writeFile(const char* filename, void* data, size_t size) {
 	FILE* f = fopen(filename, "wb");
 	assert(f);
 	writeBlob(f, data, size);
@@ -317,6 +318,7 @@ int main() {
 	}
 
 	// dump minimaps described in md5translate.trs
+	mkdir("output/Minimap");
 	dumpMinimaps();
 
 	//if(rand() == 42)
@@ -899,7 +901,7 @@ public:
 	}
 	void write() {
 		char outputFileName[256];
-		sprintf(outputFileName, "output/Minimap\\%s.jpeg", name.c_str());
+		sprintf(outputFileName, "output/Minimap/%s.jpeg", name.c_str());
 		if(fileExists(outputFileName)) {
 			printf("%s already exists, skipping...\n", outputFileName);
 			return;
@@ -939,6 +941,10 @@ public:
 };
 
 static void dumpMinimaps() {
+	// temp
+	dumpWDT();
+	//dumpWMO();
+
 	MPQFile trs("textures\\Minimap\\md5translate.trs");
 	uint lineNumber = 1;
 	const char* ptr = trs.getBuffer();
@@ -972,7 +978,7 @@ static void dumpMinimaps() {
 			}
 		} else if(!m.name.empty()) {
 			//AhnQiraj\map27_46.blp	1fcd95d6d410e7557d6b62081c5e87b5.blp
-			if(strncmp(ptr, m.name.c_str(), MIN(REM, m.name.size())) != 0) {
+			if(strncmp(ptr, m.name.c_str(), MIN(REM, (uint)m.name.size())) != 0) {
 				//printf("ERROR: bad line:\n%*s\n", LINELEN, ptr);
 				printf("ERROR: bad line %u: %i\n", lineNumber, LINELEN);
 				writeBlob(stdout, ptr, LINELEN);
