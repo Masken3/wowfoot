@@ -61,6 +61,8 @@ struct MOGI {
 static void dumpWMO(const char* mpqPath) {
 	MPQFile wmo(mpqPath);
 	writeFile("output/OrgrimmarLavaDungeon.wmo", wmo.getBuffer(), wmo.getSize());
+	char cmd[2048];
+	char* cmdPtr = cmd;
 
 	ChunkedFile cf(wmo.getBuffer(), wmo.getSize());
 	bool hasMVER = false;
@@ -95,6 +97,9 @@ static void dumpWMO(const char* mpqPath) {
 #define arg_F3(name) name.x, name.y, name.z
 #define LOG_MEMBER(type, name) LOG(" %s:" format_##type "\n", #name, arg_##type(a.name));
 			MOHD_members(LOG_MEMBER);
+			assert(a.cornerB >= a.cornerA);
+			cmdPtr = cmdPtr + sprintf(cmdPtr, "convert -size %ix%i canvas:none -gravity NorthWest",
+				int(a.cornerB.y - a.cornerA.y)+3, int(a.cornerB.x - a.cornerA.x)+3);
 			continue;
 		}
 		assert(hasMOHD);
@@ -119,10 +124,21 @@ static void dumpWMO(const char* mpqPath) {
 				// the A/B corners of the MOGI.
 				// like all world coordinates, north is negative x and west is negative y.
 				// minimap textures' origin (0,0) is their northwest corner.
+
+				int width = int(a.cornerB.y - a.cornerA.y), height = int(a.cornerB.x - a.cornerA.x);
+				int left = int(a.cornerA.y - mohd->cornerA.y)+1, top = int(a.cornerA.x - mohd->cornerA.x)+1;
+				cmdPtr = cmdPtr + sprintf(cmdPtr,
+					" -fill none -stroke black -draw 'rectangle %i,%i,%i,%i'"
+					" -fill black -stroke none -draw 'text %i,%i \"%03i\"'",
+					left, top, left+width, top+height,
+					left+2, top+1, i);
 			}
 		}
 	}
-	exit(0);
+	cmdPtr = cmdPtr + sprintf(cmdPtr, " output/OrgrimmarLavaDungeon.png");
+	puts(cmd);
+	if(system(cmd))
+		exit(0);
 }
 
 void dumpWDT() {
