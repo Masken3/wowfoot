@@ -4,6 +4,10 @@ Works.registerArgHandler(:CONFIG) do |value|
 	CCompileWork.setConfig(value)
 end
 
+Works.registerArgHandler(:PROFILING) do |value|
+	CCompileWork.setProfiling(value)
+end
+
 require "#{File.dirname(__FILE__)}/work.rb"
 require "#{File.dirname(__FILE__)}/config.rb"
 require "#{File.dirname(__FILE__)}/flags.rb"
@@ -92,12 +96,17 @@ class CCompileWork < FileTask
 	def self.setConfig(value)
 		@@CONFIG = value
 	end
+	def self.setProfiling(value)
+		@@PROFILING = value
+	end
 
 	# Called before the block passed to initialize().
 	def earlyDefaults
 		# String. 'release' or 'debug'.
 		@CONFIG = @@CONFIG if(defined?(@@CONFIG))
 		default(:CONFIG, CONFIG_CCOMPILE_DEFAULT)
+		@PROFILING = @@PROFILING if(defined?(@@PROFILING))
+		default(:PROFILING, false)
 	end
 
 	# Called after the block passed to initialize().

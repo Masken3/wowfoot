@@ -43,11 +43,14 @@ module GccCompilerModule
 	end
 
 	def builddir_postfix
+		postfix = ''
 		if(USE_COMPILER_VERSION_IN_BUILDDIR_NAME)
-			return '-' + gccVersionInfo[:string]
-		else
-			return ''
+			postfix << '-' + gccVersionInfo[:string]
 		end
+		if(@PROFILING)
+			postfix << '-p'
+		end
+		return postfix
 	end
 
 	def loadDependencies
@@ -156,6 +159,9 @@ public
 
 	def linkCmd
 		flags = "#{@FLAGS}#{@EXTRA_LINKFLAGS}"
+		if(@PROFILING)
+			flags << ' -pg'
+		end
 		@LIBRARIES.each do |lib|
 			flags += " -l#{lib}"
 		end
