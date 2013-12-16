@@ -12,6 +12,7 @@ struct Chunk {
 
 class ChunkedFile {
 private:
+	const char* mStart;
 	const char* mPtr;
 	const char* mEnd;
 public:

@@ -2,6 +2,7 @@
 
 require File.expand_path '../rules/host.rb'
 require File.expand_path '../rules/cExe.rb'
+Works.parseArgs()
 require './libs.rb'
 require './config.rb'
 

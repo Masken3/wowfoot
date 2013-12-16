@@ -1,1 +1,1 @@
-void dumpWDT();
+void dumpAllWDT(DBCFile& mapDbc);

@@ -27,6 +27,7 @@ struct F3 {
 	}
 };
 
+typedef unsigned int uint;
 typedef uint32_t hex32;
 
 #define MOHD_members(m)\
@@ -58,18 +59,23 @@ struct MOGI {
 	MOGI_members(DECLARE_MEMBER);
 };
 
-static void dumpWMO(const char* mpqPath) {
+static void dumpWDT(const char* mapName);
+
+static void dumpWMO(const char* mpqPath, const char* mapName) {
 	MPQFile wmo(mpqPath);
-	writeFile("output/OrgrimmarLavaDungeon.wmo", wmo.getBuffer(), wmo.getSize());
-	char cmd[2048];
-	char* cmdPtr = cmd;
+	//writeFile("output/OrgrimmarLavaDungeon.wmo", wmo.getBuffer(), wmo.getSize());
+
+	char cmd[1024];
+	char imsOutputPath[1024];
+	sprintf(imsOutputPath, "output/%s.ims", mapName);
+	FILE* ims = fopen(imsOutputPath, "w");
 
 	ChunkedFile cf(wmo.getBuffer(), wmo.getSize());
 	bool hasMVER = false;
 	bool hasMOHD = false;
 	MOHD* mohd = NULL;
 	while(Chunk c = cf.getChunk()) {
-		LOG("chunk %c%c%c%c: %i bytes.\n", c.id[3], c.id[2], c.id[1], c.id[0], c.size);
+		//LOG("chunk %c%c%c%c: %i bytes.\n", c.id[3], c.id[2], c.id[1], c.id[0], c.size);
 		if(memcmp(c.id, "REVM", 4) == 0) {
 			assert(!hasMVER);
 			assert(c.size == 4);
@@ -86,7 +92,7 @@ static void dumpWMO(const char* mpqPath) {
 			hasMOHD = true;
 			mohd = (MOHD*)c.data;
 			MOHD& a(*mohd);
-			LOG("MOHD:\n");
+			//LOG("MOHD:\n");
 #define format_uint "%u"
 #define format_int "%i"
 #define format_hex32 "0x%08x"
@@ -96,10 +102,12 @@ static void dumpWMO(const char* mpqPath) {
 #define arg_hex32(name) name
 #define arg_F3(name) name.x, name.y, name.z
 #define LOG_MEMBER(type, name) LOG(" %s:" format_##type "\n", #name, arg_##type(a.name));
-			MOHD_members(LOG_MEMBER);
+			//MOHD_members(LOG_MEMBER);
 			assert(a.cornerB >= a.cornerA);
-			cmdPtr = cmdPtr + sprintf(cmdPtr, "convert -size %ix%i canvas:none -gravity NorthWest",
-				int(a.cornerB.y - a.cornerA.y)+3, int(a.cornerB.x - a.cornerA.x)+3);
+			sprintf(cmd, "convert -size %ix%i @%s output/%s.png",
+				int(a.cornerB.y - a.cornerA.y)+3, int(a.cornerB.x - a.cornerA.x)+3,
+				imsOutputPath, mapName);
+			fprintf(ims, "canvas:none -gravity NorthWest");
 			continue;
 		}
 		assert(hasMOHD);
@@ -108,12 +116,12 @@ static void dumpWMO(const char* mpqPath) {
 			const uint count = c.size / sizeof(MOGI);
 			const MOGI* mogi = (MOGI*)c.data;
 			for(uint i=0; i<count; i++) {
-				LOG("MOGI %u:\n", i);
+				//LOG("MOGI %u:\n", i);
 				const MOGI& a(mogi[i]);
-				MOGI_members(LOG_MEMBER);
+				//MOGI_members(LOG_MEMBER);
 				// check each coordinate element.
-				assert(a.cornerA >= mohd->cornerA);
-				assert(a.cornerB <= mohd->cornerB);
+				//assert(a.cornerA >= mohd->cornerA);
+				//assert(a.cornerB <= mohd->cornerB);
 
 				// WMO root files are all named world\wmo\<path>.wmo
 				// each MOGI in a WMO root file refers to a WMO group file, named on this pattern:
@@ -127,7 +135,7 @@ static void dumpWMO(const char* mpqPath) {
 
 				int width = int(a.cornerB.y - a.cornerA.y), height = int(a.cornerB.x - a.cornerA.x);
 				int left = int(a.cornerA.y - mohd->cornerA.y)+1, top = int(a.cornerA.x - mohd->cornerA.x)+1;
-				cmdPtr = cmdPtr + sprintf(cmdPtr,
+				fprintf(ims,
 					" -fill none -stroke black -draw 'rectangle %i,%i,%i,%i'"
 					" -fill black -stroke none -draw 'text %i,%i \"%03i\"'",
 					left, top, left+width, top+height,
@@ -135,20 +143,47 @@ static void dumpWMO(const char* mpqPath) {
 			}
 		}
 	}
-	cmdPtr = cmdPtr + sprintf(cmdPtr, " output/OrgrimmarLavaDungeon.png");
+	fclose(ims);
 	puts(cmd);
 	if(system(cmd))
 		exit(0);
 }
 
-void dumpWDT() {
-	MPQFile wdt("World\\Maps\\OrgrimmarInstance\\OrgrimmarInstance.wdt");
-	writeFile("output/OrgrimmarInstance.wdt", wdt.getBuffer(), wdt.getSize());
+void dumpAllWDT(DBCFile& mapDbc) {
+	for(DBCFile::Iterator itr = mapDbc.begin(); itr != mapDbc.end(); ++itr) {
+		const DBCFile::Record& r(*itr);
+		//int id = r.getInt(0);
+		const char* name = r.getString(1);
+
+		dumpWDT(name);
+	}
+}
+
+static void dumpWDT(const char* mapName) {
+	char wdtMpqPath[1024];
+	sprintf(wdtMpqPath, "World\\Maps\\%s\\%s.wdt", mapName, mapName);
+	MPQFile wdt(wdtMpqPath);
+
+#if 1
+	char wdtOutputPath[1024];
+	sprintf(wdtOutputPath, "output/%s.wdt", mapName);
+	writeFile(wdtOutputPath, wdt.getBuffer(), wdt.getSize());
+#endif
+
+	char wdlMpqPath[1024];
+	sprintf(wdlMpqPath, "World\\Maps\\%s\\%s.wdl", mapName, mapName);
+	MPQFile wdl(wdlMpqPath);
+
+#if 1
+	char wdlOutputPath[1024];
+	sprintf(wdlOutputPath, "output/%s.wdl", mapName);
+	writeFile(wdlOutputPath, wdl.getBuffer(), wdl.getSize());
+#endif
 
 	ChunkedFile cf(wdt.getBuffer(), wdt.getSize());
 	bool hasMVER = false;
 	while(Chunk c = cf.getChunk()) {
-		LOG("chunk %c%c%c%c: %i bytes.\n", c.id[3], c.id[2], c.id[1], c.id[0], c.size);
+		//LOG("chunk %c%c%c%c: %i bytes.\n", c.id[3], c.id[2], c.id[1], c.id[0], c.size);
 		if(memcmp(c.id, "REVM", 4) == 0) {
 			assert(!hasMVER);
 			uint32_t version = *(uint32_t*)c.data;
@@ -159,7 +194,7 @@ void dumpWDT() {
 		}
 		assert(hasMVER);
 		if(memcmp(c.id, "OMWM", 4) == 0) {
-			dumpWMO(c.data);
+			dumpWMO(c.data, mapName);
 		}
 	}
 }

@@ -19,6 +19,8 @@
 
 using namespace std;
 
+DBCFile sMapDbc("DBFilesClient\\Map.dbc");
+
 struct F2 {
 	float x, y;
 };
@@ -211,19 +213,12 @@ struct {
 #endif
 
 static void dumpAreaMap(bool dumpArea) {
-	bool res;
 	FILE* out = NULL;
 	FILE* mapOut;
 
 	//TODO: dump Map.rb, as a companion to AreaMap.rb
+	DBCFile& mapDbc(sMapDbc);
 
-	printf("Opening Map.dbc...\n");
-	DBCFile mapDbc("DBFilesClient\\Map.dbc");
-	res = mapDbc.open();
-	if(!res) {
-		printf("Failed to open Map.dbc.\n");
-		exit(1);
-	}
 	printf("Extracting %" PRIuPTR " maps...\n", mapDbc.getRecordCount());
 	if(dumpArea) {
 		out = fopen("output/AreaMap.bin", "wb");
@@ -317,15 +312,22 @@ int main() {
 		writeFile("output/md5translate.trs", trs.getBuffer(), trs.getSize());
 	}
 
-	// dump minimaps described in md5translate.trs
-	mkdir("output/Minimap");
-	dumpMinimaps();
+	printf("Opening Map.dbc...\n");
+	res = sMapDbc.open();
+	if(!res) {
+		printf("Failed to open Map.dbc.\n");
+		exit(1);
+	}
 
 	//if(rand() == 42)
 	{
 		dumpArchiveSet();
 		extractImages();
 	}
+
+	// dump minimaps described in md5translate.trs
+	mkdir("output/Minimap");
+	dumpMinimaps();
 
 	if(fileExists("output/AreaMap.bin")) {
 		printf("AreaMap.bin already exists, skipping...\n");
@@ -942,7 +944,7 @@ public:
 
 static void dumpMinimaps() {
 	// temp
-	dumpWDT();
+	dumpAllWDT(sMapDbc);
 	//dumpWMO();
 
 	MPQFile trs("textures\\Minimap\\md5translate.trs");
@@ -1003,6 +1005,9 @@ static void dumpMinimaps() {
 		ptr = eol+2;
 		lineNumber++;
 	}
+
+	// todo: WDT (World\Maps\OrgrimmarInstance\OrgrimmarInstance.wdt)
+	// points to: WMO (World\wmo\Dungeon\KL_OrgrimmarLavaDungeon\LavaDungeon.wmo)
 
 	exit(0);	//temp
 }
