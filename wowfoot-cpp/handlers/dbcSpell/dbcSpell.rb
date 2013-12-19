@@ -82,6 +82,10 @@ effectMembers = effectMembers.collect do |c|
 	convertEffectMember(c)
 end
 
+effectMembers += [
+	m(:float, 'DmgMultiplier', 167)
+]
+
 plainMembers = []
 @memberPos = 1
 if(CONFIG_WOW_VERSION < 20000)
@@ -191,7 +195,6 @@ plainMembers += [
 	f(:int, 'DmgClass'),
 	f(:int, 'PreventionType'),
 	f(:int, 'StanceBarOrder'),
-	fa(:float, 'DmgMultiplier', 3),	# TODO: move to effect
 	f(:int, 'MinFactionId'),
 	f(:int, 'MinReputation'),
 	f(:int, 'RequiredAuraVision'),
