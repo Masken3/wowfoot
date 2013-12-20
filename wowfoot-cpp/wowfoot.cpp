@@ -66,6 +66,7 @@ int main(int argc, const char** argv) {
 	mountIdPage("comment");
 	mountFormPage("skills");
 	mountIdPage("skill");
+	mountIdPage("refloot");
 
 	mountUnload();
 	mountStaticDirectory("output", "../wowfoot-ex/output/");

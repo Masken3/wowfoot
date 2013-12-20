@@ -150,14 +150,45 @@ void itemColumns(tabTableChtml& t) {
 
 void lootColumns(tabTableChtml& t) {
 	t.columns.push_back(Column(CHANCE, "Chance %"));
-	t.columns.push_back(Column(MIN_COUNT, "MinCount"));
+	t.columns.push_back(Column(GROUP, "Group"));
+	t.columns.push_back(Column(MIN_COUNT, "MinCount", Column::NoEscape));
 	t.columns.push_back(Column(MAX_COUNT, "MaxCount"));
 }
 
 void lootRow(Row& r, const Loot& loot) {
 	r[CHANCE] = toString(loot.chance);
+	r[GROUP] = toString(loot.groupId);
 	r[MIN_COUNT] = toString(loot.minCountOrRef);
 	r[MAX_COUNT] = toString(loot.maxCount);
+}
+
+Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots& loots) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	itemColumns(t);
+	lootColumns(t);
+	Loots::IntPair res = loots.findEntry(npcId);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		if(loot.minCountOrRef >= 0) {
+			const Item* item = gItems.find(loot.item);
+			if(item) {
+				itemRow(r, *item);
+			} else {
+				r[ENTRY] = toString(loot.item);
+			}
+			lootRow(r, loot);
+		} else {
+			lootRow(r, loot);
+			string s = toString(-loot.minCountOrRef);
+			r[MIN_COUNT] = "<a href=\"refloot="+s+"\">"+s+"</a>";
+		}
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
 }
 
 void npcColumns(tabTableChtml& t) {

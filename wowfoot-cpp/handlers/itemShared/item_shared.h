@@ -19,6 +19,7 @@
 class Item;
 class Row;
 class Loot;
+class Loots;
 class Npc;
 
 static const int ITEM_FLAG_HEROIC = 8;
@@ -45,6 +46,7 @@ void lootRow(Row& r, const Loot& loot) VISIBLE;
 void itemRow(Row& r, const Item& i) VISIBLE;
 void npcColumns(tabTableChtml&) VISIBLE;
 void npcRow(Row&, const Npc&) VISIBLE;
+Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots&) VISIBLE;
 
 enum TableRowId {
 	NAME = ENTRY+1,
@@ -60,6 +62,7 @@ enum TableRowId {
 	SLOT,
 	TYPE,
 	CHANCE,
+	GROUP,
 	MIN_COUNT,
 	MAX_COUNT,
 	SPAWN_COUNT,

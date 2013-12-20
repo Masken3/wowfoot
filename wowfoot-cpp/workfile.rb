@@ -545,6 +545,8 @@ PageWork.new('skill', ['tabTable', 'tabs', 'comments', 'dbcLock', 'dbcSpell', 'i
 	'dbcItemDisplayInfo', 'dbcSkillLineAbility', 'dbcSkillLine', 'skillShared',
 	'db_gameobject_template', 'db_item', 'db_creature_template'],
 	{:constructor => true})
+PageWork.new('refloot', ['db_creature_template', 'itemShared', 'db_item', 'tabTable',
+	'tabs',	'db_loot_template'])
 
 WFC = @wfc = ExeWork.new do
 	@SOURCES = ['.']

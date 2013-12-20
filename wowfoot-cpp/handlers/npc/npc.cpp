@@ -79,29 +79,6 @@ void npcChtml::title(ostream& stream) {
 	ESCAPE(mTitle);
 }
 
-static Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots& loots) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = id;
-	t.title = title;
-	itemColumns(t);
-	lootColumns(t);
-	Loots::IntPair res = loots.findEntry(npcId);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		Row r;
-		const Item* item = gItems.find(loot.item);
-		if(item) {
-			itemRow(r, *item);
-		} else {
-			r[ENTRY] = toString(loot.item);
-		}
-		lootRow(r, loot);
-		t.array.push_back(r);
-	}
-	t.count = t.array.size();
-	return &t;
-}
-
 static Tab* drops(int lootId) {
 	return simpleLoot(lootId, "drops", "Drops", gCreatureLoots);
 }
