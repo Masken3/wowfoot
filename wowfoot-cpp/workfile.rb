@@ -353,7 +353,7 @@ HandlerWork.new('icon', ['dbc']) do
 	@prerequisites ||= []
 	@prerequisites << DirTask.new('build/icon')
 	@EXTRA_OBJECTS += [(LIBMPQ), (BLP), (SQUISH), (PALBMP), (CRBLIB)]
-	@LIBRARIES += ['png', 'jpeg']
+	@LIBRARIES += ['png16', 'jpeg', 'z']
 end
 
 if(CONFIG_WOW_VERSION > 30000)

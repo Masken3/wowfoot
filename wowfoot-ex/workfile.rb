@@ -17,7 +17,7 @@ wfe = ExeWork.new do
 		'adt.cpp' => ' -Wno-multichar',
 		'wdt.cpp' => ' -Wno-multichar',
 	}
-	@LIBRARIES = ['png', 'jpeg']
+	@LIBRARIES = ['png16', 'jpeg', 'z']
 	@EXTRA_LINKFLAGS = CONFIG_LOCAL_LIB
 
 	@NAME = 'wowfoot-ex'
