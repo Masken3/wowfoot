@@ -95,6 +95,9 @@ class TdbGenTask < MemoryGeneratedFileTask
 		# make sure indexes are valid.
 		if(@index)
 			@index.each do |i|
+				if(i.is_a?(Hash))
+					i = i[:keys]
+				end
 				i.each do |iPart|
 					valid = false
 					@names.each do |colName, col|
@@ -121,9 +124,15 @@ class TdbGenTask < MemoryGeneratedFileTask
 	end
 end
 
-IF_INDEX = %q{<%
-if(@index) then @index.each do |args|
-capArgs = args.collect {|arg| arg.to_s.tdbCapitalize; }.join
+DO_INDEX = %q{ @index.each do |args|
+if(args.is_a?(Hash))
+	capArgs = args[:name]
+	customCpp = args[:customCpp]
+	args = args[:keys]
+else
+	capArgs = args.collect {|arg| arg.to_s.tdbCapitalize; }.join
+	customCpp = false
+end
 if(args.size == 1 && @names[args[0]].type == :int)
 	iitr = 'IntItr'
 	imap = 'IntMap'
@@ -136,7 +145,8 @@ else
 	istruct = capArgs + 'Struct'
 	ipair = capArgs + 'Pair'
 	isInt = false
-end%>}
+end}
+IF_INDEX = '<% if(@index) then' + DO_INDEX + '%>'
 IF_DEFINE = %q{<%
 if(isInt)
 if(!@intMapDefined)
@@ -256,9 +266,9 @@ class CriticalSectionLoadGuard;
 
 class <%=@structName%>s : public <%=@cppContainer%> {
 private:
-	const char* const mTableName;
 	CriticalSectionLoadGuard& mCS;
 public:
+	const char* const mTableName;
 	const char* const name;
 
 	<%=@structName%>s(const char* tableName, CriticalSectionLoadGuard&);
@@ -301,16 +311,18 @@ class TdbCppTask < TdbGenTask
 
 <%=@structName%>s::<%=@structName%>s(const char* tableName,
 	CriticalSectionLoadGuard& cs)
-	: mTableName(tableName), mCS(cs),
+	: mCS(cs), mTableName(tableName),
 name("<%=@structName.downcase%>")
 {}
 
 void <%=@structName%>s::load() {
 	LOCK_AND_LOAD_EX(mCS);
 	TDB<<%=@structName%>>::fetchTable(mTableName, s<%=@structName%>Formats,
-		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);
-) + IF_INDEX + %q(
-	for(<%=@structName%>s::citr itr = begin(); itr != end(); ++itr) {<%
+		sizeof(s<%=@structName%>Formats) / sizeof(ColumnFormat), (super&)*this);<%
+if(@index and @index.size > 0)%>
+	for(<%=@structName%>s::citr itr = begin(); itr != end(); ++itr) {
+		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
+) + DO_INDEX + %q(
 	col = @names[args[0]];
 	isArray = (args.size == 1 && !col.cName)
 	struct = col.parentStruct
@@ -330,9 +342,10 @@ void <%=@structName%>s::load() {
 		count = nil
 		postfix = ""
 	end
-	%>
-		const <%=@structName%>& _ref(<%if(@containerType == :set)%>*itr<%else%>itr->second<%end%>);<%
-		if(count)%>
+	if(customCpp)
+%><%=customCpp%><%
+else
+	if(count)%>
 		for(int i=0; i<<%=count%>; i++) {<%end%>
 		if(_ref<%=primary%> != 0) {<%if(isInt)%>
 			int key = <%="_ref#{prefix}.#{cEscape(args[0])}#{postfix}"%>;<% else%>
@@ -340,10 +353,12 @@ void <%=@structName%>s::load() {
 				<%="_ref#{prefix}.#{cEscape(arg)}#{postfix}"%>,<%end%>
 			};<%end%>
 			m<%=capArgs%>Map.insert(pair<<%=istruct%>, const <%=@structName%>*>(key, &_ref));
-		}<%if(count)%>}<%end%>
-	}
-	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=capArgs%>Map.size(), "mm<%=capArgs%>Map");
-<%end; end%>
+		}<%if(count)%>}<%end; end
+end%>
+	}<%
+) + DO_INDEX + %q(%>
+	printf("Loaded %" PRIuPTR " rows into %s\n", m<%=capArgs%>Map.size(), "m<%=capArgs%>Map");<%end%>
+<%end%>
 <%=@extraInitCode%>
 }
 
@@ -355,8 +370,8 @@ static CriticalSectionLoadGuard sCS<%=t.structName%>;
 <%=@structName%>s::<%=ipair%> <%=@structName%>s::find<%=capArgs%>(<%args.each_with_index do |arg, i|%>
 	<%if(i!=0)%>,<%end%><%=@names[arg].type%> <%=cEscape(arg)%><%end%>
 	) const
-{
-	EASSERT(!m<%=capArgs%>Map.empty());<%if(isInt)
+{<%if(!customCpp)%>
+	EASSERT(!m<%=capArgs%>Map.empty());<%end; if(isInt)
 	key = cEscape(args[0]) else key = 'key'%>
 	<%=istruct%> key = {<%args.each_with_index do |arg, i|%>
 		<%=cEscape(arg)%>,<%end%>

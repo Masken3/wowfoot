@@ -41,15 +41,6 @@ static Tab* soldBy(const Item& a);
 static Tab* currencyFor(const Item& a);
 #endif
 static Tab* sharesModel(const Item& a);
-static Tab* droppedBy(const Item& a);
-static Tab* pickpocketedFrom(const Item& a);
-static Tab* skinnedFrom(const Item& a);
-static Tab* containedInObject(const Item& a);
-static Tab* referenceLoot(const Item& a);
-static Tab* disenchantsTo(const Item& a);
-static Tab* disenchantedFrom(const Item& a);
-static Tab* containedInItem(const Item& a);
-static Tab* contains(const Item& a);
 static Tab* reagentFor(const Item& a);
 
 void init() __attribute((constructor));
@@ -137,29 +128,16 @@ static void createTabs(vector<Tab*>& tabs, const Item& a) {
 	tabs.push_back(sharesModel(a));
 	// Disenchants to (item)
 	tabs.push_back(disenchantsTo(a));
-	// Disenchanted from (item)
-	tabs.push_back(disenchantedFrom(a));
-	// Dropped by (npc)
-	tabs.push_back(droppedBy(a));
-	// Contained in (gameobject)
-	tabs.push_back(containedInObject(a));
-	// Contained in (item)
-	tabs.push_back(containedInItem(a));
+
+	referentialLoots(tabs, a.entry);
+
 	// Contains (items)
-	tabs.push_back(contains(a));
-	// Milled from (item)
+	tabs.push_back(contains(a.entry));
 	// Mills to (item)
-	// Pickpocketed from (npc)
-	tabs.push_back(pickpocketedFrom(a));
-	// Prospected from (item)
 	// Prospects (item)
-	// Skinned from (npc)
-	tabs.push_back(skinnedFrom(a));
 	// Created by (spell)
 	// Reagent for (spell)
 	tabs.push_back(reagentFor(a));
-	// Reference loot (debug)
-	tabs.push_back(referenceLoot(a));
 }
 
 static Tab* questObjective(const Item& a) {
@@ -243,167 +221,6 @@ static Tab* soldBy(const Item& a) {
 #endif
 		);
 		r[COST] = oss.str();
-		t.array.push_back(r);
-	}
-	t.count = t.array.size();
-	return &t;
-}
-
-static Tab* npcLoot(const Item& a, const Loots& loots, const char* id, const char* title) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = id;
-	t.title = title;
-	npcColumns(t);
-	lootColumns(t);
-	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
-	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
-	Loots::IntPair res = loots.findItem(a.entry);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		Npcs::IntPair nres = gNpcs.findLootId(loot.entry);
-		for(; nres.first != nres.second; ++nres.first) {
-			const Npc& npc(*nres.first->second);
-			Row r;
-			npcRow(r, npc);
-			lootRow(r, loot);
-			r[SPAWN_COUNT] = toString(npc.spawnCount);
-			r[UTILITY] = toString(loot.chance * npc.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
-			t.array.push_back(r);
-		}
-	}
-	t.count = t.array.size();
-	return &t;
-}
-
-static Tab* droppedBy(const Item& a) {
-	return npcLoot(a, gCreatureLoots, "droppedBy", "Dropped by");
-}
-static Tab* pickpocketedFrom(const Item& a) {
-	return npcLoot(a, gPickpocketingLoots, "pickpocketedFrom", "Pickpocketed from");
-}
-static Tab* skinnedFrom(const Item& a) {
-	return npcLoot(a, gSkinningLoots, "skinnedFrom", "Skinned from");
-}
-
-class NameGetter {
-public:
-	virtual string operator()(int id) = 0;
-};
-
-template <class T> class NameGetterT : public NameGetter {
-public:
-	const T& m;
-	NameGetterT(const T& map) : m(map) {}
-	string operator()(int id) {
-		auto p = m.find(id);
-		if(p) {
-			return p->name;
-		} else {
-			return m.name + toString(" ") + toString(id);
-		}
-	}
-};
-
-static Tab* simpleItemLoot(Loots::IntPair res, const char* id, const char* title, int Loot::*lp, NameGetter& name) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = id;
-	t.title = title;
-	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
-	lootColumns(t);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		Row r;
-		int entry = loot.*lp;
-		r[ENTRY] = toString(entry);
-		r[NAME] = name(entry);
-		lootRow(r, loot);
-		t.array.push_back(r);
-	}
-	t.count = t.array.size();
-	return &t;
-}
-
-NameGetterT<Items> sItemNamer(gItems);
-
-static Tab* disenchantsTo(const Item& a) {
-	return simpleItemLoot(gDisenchantLoots.findEntry(a.disenchantId),
-		"disenchantsTo", "Disenchants to", &Loot::item, sItemNamer);
-}
-static Tab* disenchantedFrom(const Item& a) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = "disenchantedFrom";
-	t.title = "Disenchanted from";
-	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
-	lootColumns(t);
-	Loots::IntPair res = gDisenchantLoots.findItem(a.entry);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		for(auto nres = gItems.findDisenchantId(loot.entry); nres.first != nres.second; ++nres.first) {
-			Row r;
-			int entry = nres.first->second->entry;
-			r[ENTRY] = toString(entry);
-			r[NAME] = sItemNamer(entry);
-			lootRow(r, loot);
-			t.array.push_back(r);
-		}
-	}
-	t.count = t.array.size();
-	return &t;
-}
-static Tab* containedInItem(const Item& a) {
-	return simpleItemLoot(gItemLoots.findItem(a.entry), "containedInItem", "Contained in item",
-		&Loot::entry, sItemNamer);
-}
-static Tab* contains(const Item& a) {
-	return simpleItemLoot(gItemLoots.findEntry(a.entry), "contains", "Contains",
-		&Loot::item, sItemNamer);
-}
-
-static Tab* containedInObject(const Item& a) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = "containedInObject";
-	t.title = "Contained in object";
-	t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
-	lootColumns(t);
-	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
-	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
-	Loots::IntPair res = gGameobjectLoots.findItem(a.entry);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		auto nres = gObjects.findLoot(loot.entry);
-		for(; nres.first != nres.second; ++nres.first) {
-			const Object& o(*nres.first->second);
-			Row r;
-			r[ENTRY] = toString(o.entry);
-			r[NAME] = o.name;
-			lootRow(r, loot);
-			r[SPAWN_COUNT] = toString(o.spawnCount);
-			r[UTILITY] = toString(loot.chance * o.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
-			t.array.push_back(r);
-		}
-	}
-	t.count = t.array.size();
-	return &t;
-}
-
-static Tab* referenceLoot(const Item& a) {
-	tabTableChtml& t = *new tabTableChtml();
-	t.id = "referenceLoot";
-	t.title = "Reference loot";
-	lootColumns(t);
-	t.columns.push_back(Column(SPAWN_COUNT, "Other items count"));
-	Loots::IntPair res = gReferenceLoots.findItem(a.entry);
-	for(; res.first != res.second; ++res.first) {
-		const Loot& loot(*res.first->second);
-		Row r;
-		r[ENTRY] = toString(loot.entry);
-		lootRow(r, loot);
-		size_t count = 0;
-		Loots::IntPair ep = gReferenceLoots.findEntry(loot.entry);
-		for(; ep.first != ep.second; ++ep.first) {
-			count++;
-		}
-		r[SPAWN_COUNT] = toString(count);
 		t.array.push_back(r);
 	}
 	t.count = t.array.size();

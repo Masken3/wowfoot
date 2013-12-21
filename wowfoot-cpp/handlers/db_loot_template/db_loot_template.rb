@@ -25,8 +25,15 @@ c(:int, :minCountOrRef),
 c(:int, :maxCount),
 ]
 
+refCpp = %q(
+		if(_ref.minCountOrRef < 0) {
+			int key = -_ref.minCountOrRef;
+			mRefMap.insert(pair<int, const Loot*>(key, &_ref));
+		})
+
 @index = [
 	[:entry],
 	[:item],
 	[:groupId],
+	{:keys=>[:minCountOrRef],:customCpp=>refCpp,:name=>'Ref'}
 ]

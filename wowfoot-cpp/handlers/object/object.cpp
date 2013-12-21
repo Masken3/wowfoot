@@ -17,7 +17,7 @@ using namespace std;
 static int GAMEOBJECT_TYPE_CHEST = 3;
 static int GAMEOBJECT_TYPE_FISHINGHOLE = 25;
 
-static Tab* contains(int entry);
+static Tab* containsEntry(int entry);
 
 void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream& os) {
 	gObjects.load();
@@ -36,7 +36,7 @@ void objectChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostrea
 		if(a->type == GAMEOBJECT_TYPE_CHEST ||
 			a->type == GAMEOBJECT_TYPE_FISHINGHOLE)
 		{
-			mTabs.push_back(contains(a->data1));
+			mTabs.push_back(containsEntry(a->data1));
 		}
 		mTabs.push_back(getComments("object", id));
 
@@ -51,7 +51,7 @@ void objectChtml::title(ostream& stream) {
 	ESCAPE(mTitle);
 }
 
-static Tab* contains(int entry) {
+static Tab* containsEntry(int entry) {
 	gGameobjectLoots.load();
 	gItems.load();
 

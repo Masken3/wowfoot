@@ -4,6 +4,7 @@
 #include "db_item.h"
 #include "db_loot_template.h"
 #include "db_creature_template.h"
+#include "db_gameobject_template.h"
 #include "dbcItemSubClass.h"
 #include "dbcItemClass.h"
 #include "chrClasses.h"
@@ -208,6 +209,187 @@ void npcRow(Row& r, const Npc& npc) {
 		r[CLEVEL] += "&#8209;" + toString(npc.maxLevel);
 	//r[ZONE] = toString(-1);//mainZoneForNpc(nv.entry);
 	//r[LOCATION] = "not implemented";//gAreaTable[r[ZONE]].name;
+}
+
+static Tab* npcLoot(int entry, const Loots& loots, const char* id, const char* title) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	npcColumns(t);
+	lootColumns(t);
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
+	Loots::IntPair res = loots.findItem(entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Npcs::IntPair nres = gNpcs.findLootId(loot.entry);
+		for(; nres.first != nres.second; ++nres.first) {
+			const Npc& npc(*nres.first->second);
+			Row r;
+			npcRow(r, npc);
+			lootRow(r, loot);
+			r[SPAWN_COUNT] = toString(npc.spawnCount);
+			r[UTILITY] = toString(loot.chance * npc.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
+			t.array.push_back(r);
+		}
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* droppedBy(int entry) {
+	return npcLoot(entry, gCreatureLoots, "droppedBy", "Dropped by");
+}
+static Tab* pickpocketedFrom(int entry) {
+	return npcLoot(entry, gPickpocketingLoots, "pickpocketedFrom", "Pickpocketed from");
+}
+static Tab* skinnedFrom(int entry) {
+	return npcLoot(entry, gSkinningLoots, "skinnedFrom", "Skinned from");
+}
+
+class NameGetter {
+public:
+	virtual string operator()(int id) = 0;
+};
+
+template <class T> class NameGetterT : public NameGetter {
+public:
+	const T& m;
+	NameGetterT(const T& map) : m(map) {}
+	string operator()(int id) {
+		auto p = m.find(id);
+		if(p) {
+			return p->name;
+		} else {
+			return m.name + toString(" ") + toString(id);
+		}
+	}
+};
+
+static Tab* simpleItemLoot(Loots::IntPair res, const char* id, const char* title, int Loot::*lp, NameGetter& name) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = id;
+	t.title = title;
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	lootColumns(t);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		int entry = loot.*lp;
+		r[ENTRY] = toString(entry);
+		r[NAME] = name(entry);
+		lootRow(r, loot);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+NameGetterT<Items> sItemNamer(gItems);
+
+static Tab* containedInObject(int entry) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "containedInObject";
+	t.title = "Contained in object";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "object"));
+	lootColumns(t);
+	t.columns.push_back(Column(SPAWN_COUNT, "Spawn count"));
+	t.columns.push_back(Column(UTILITY, "Farming value (spawn * chance * (max+min)/2 / eliteFactor)"));
+	Loots::IntPair res = gGameobjectLoots.findItem(entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		auto nres = gObjects.findLoot(loot.entry);
+		for(; nres.first != nres.second; ++nres.first) {
+			const Object& o(*nres.first->second);
+			Row r;
+			r[ENTRY] = toString(o.entry);
+			r[NAME] = o.name;
+			lootRow(r, loot);
+			r[SPAWN_COUNT] = toString(o.spawnCount);
+			r[UTILITY] = toString(loot.chance * o.spawnCount * (loot.minCountOrRef + loot.maxCount) / 200.0);
+			t.array.push_back(r);
+		}
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* referenceLoot(int entry) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "referenceLoot";
+	t.title = "Reference loot";
+	lootColumns(t);
+	t.columns.push_back(Column(SPAWN_COUNT, "Other items count"));
+	Loots::IntPair res = gReferenceLoots.findItem(entry);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		Row r;
+		r[ENTRY] = toString(loot.entry);
+		lootRow(r, loot);
+		size_t count = 0;
+		Loots::IntPair ep = gReferenceLoots.findEntry(loot.entry);
+		for(; ep.first != ep.second; ++ep.first) {
+			count++;
+		}
+		r[SPAWN_COUNT] = toString(count);
+		t.array.push_back(r);
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* disenchantedFrom(int sourceId) {
+	tabTableChtml& t = *new tabTableChtml();
+	t.id = "disenchantedFrom";
+	t.title = "Disenchanted from";
+	t.columns.push_back(Column(NAME, "Name", ENTRY, "item"));
+	lootColumns(t);
+	Loots::IntPair res = gDisenchantLoots.findItem(sourceId);
+	for(; res.first != res.second; ++res.first) {
+		const Loot& loot(*res.first->second);
+		for(auto nres = gItems.findDisenchantId(loot.entry); nres.first != nres.second; ++nres.first) {
+			Row r;
+			int entry = nres.first->second->entry;
+			r[ENTRY] = toString(entry);
+			r[NAME] = sItemNamer(entry);
+			lootRow(r, loot);
+			t.array.push_back(r);
+		}
+	}
+	t.count = t.array.size();
+	return &t;
+}
+
+static Tab* containedInItem(int entry) {
+	return simpleItemLoot(gItemLoots.findItem(entry), "containedInItem", "Contained in item",
+		&Loot::entry, sItemNamer);
+}
+
+Tab* disenchantsTo(const Item& a) {
+	return simpleItemLoot(gDisenchantLoots.findEntry(a.disenchantId),
+		"disenchantsTo", "Disenchants to", &Loot::item, sItemNamer);
+}
+
+Tab* contains(int entry) {
+	return simpleItemLoot(gItemLoots.findEntry(entry), "contains", "Contains",
+		&Loot::item, sItemNamer);
+}
+
+void referentialLoots(vector<Tab*>& tabs, int entry) {
+	gNpcs.load();
+	gObjects.load();
+	tabs.push_back(containedInObject(entry));
+	tabs.push_back(containedInItem(entry));
+	tabs.push_back(disenchantedFrom(entry));
+	tabs.push_back(droppedBy(entry));
+	tabs.push_back(pickpocketedFrom(entry));
+	tabs.push_back(skinnedFrom(entry));
+#if CONFIG_WOW_VERSION > 20000
+	// TODO: Milled from (item)
+	// TODO: Prospected from (item)
+#endif
+	// TODO: Fished from (hole or zone)
+	tabs.push_back(referenceLoot(entry));
 }
 
 class streamIfNonFirstClass {

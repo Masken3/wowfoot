@@ -47,6 +47,9 @@ void itemRow(Row& r, const Item& i) VISIBLE;
 void npcColumns(tabTableChtml&) VISIBLE;
 void npcRow(Row&, const Npc&) VISIBLE;
 Tab* simpleLoot(int npcId, const char* id, const char* title, const Loots&) VISIBLE;
+void referentialLoots(vector<Tab*>& tabs, int entry) VISIBLE;
+Tab* contains(int entry) VISIBLE;
+Tab* disenchantsTo(const Item& a) VISIBLE;
 
 enum TableRowId {
 	NAME = ENTRY+1,

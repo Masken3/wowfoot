@@ -451,6 +451,7 @@ HandlerWork.new('itemShared', ['tabTable', 'tabs',
 	'dbcItemDisplayInfo', 'db_item',
 	'db_creature_template', 'db_loot_template', 'db_npc_vendor',
 	'db_quest', 'questShared',
+	'db_gameobject_template',
 ])
 HandlerWork.new('spellShared', ['tabTable', 'tabs', 'dbcSpell',
 	'dbcItemDisplayInfo', 'db_item',
