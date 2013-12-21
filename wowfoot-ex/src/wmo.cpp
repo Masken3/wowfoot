@@ -65,10 +65,15 @@ static void dumpWMO(const char* mpqPath, const char* mapName) {
 	MPQFile wmo(mpqPath);
 	//writeFile("output/OrgrimmarLavaDungeon.wmo", wmo.getBuffer(), wmo.getSize());
 
-	char cmd[1024];
+	char cmd[1024*16];
+#if 0
 	char imsOutputPath[1024];
 	sprintf(imsOutputPath, "output/%s.ims", mapName);
 	FILE* ims = fopen(imsOutputPath, "w");
+#else
+	char* cmdPtr = cmd;
+#define CMDPRINTF(...) cmdPtr = cmdPtr + sprintf(cmdPtr, __VA_ARGS__)
+#endif
 
 	ChunkedFile cf(wmo.getBuffer(), wmo.getSize());
 	bool hasMVER = false;
@@ -104,10 +109,9 @@ static void dumpWMO(const char* mpqPath, const char* mapName) {
 #define LOG_MEMBER(type, name) LOG(" %s:" format_##type "\n", #name, arg_##type(a.name));
 			//MOHD_members(LOG_MEMBER);
 			assert(a.cornerB >= a.cornerA);
-			sprintf(cmd, "convert -size %ix%i @%s output/%s.png",
-				int(a.cornerB.y - a.cornerA.y)+3, int(a.cornerB.x - a.cornerA.x)+3,
-				imsOutputPath, mapName);
-			fprintf(ims, "canvas:none -gravity NorthWest");
+			CMDPRINTF("convert -size %ix%i",
+				int(a.cornerB.y - a.cornerA.y)+3, int(a.cornerB.x - a.cornerA.x)+3);
+			CMDPRINTF(" canvas:none -gravity NorthWest");
 			continue;
 		}
 		assert(hasMOHD);
@@ -135,7 +139,7 @@ static void dumpWMO(const char* mpqPath, const char* mapName) {
 
 				int width = int(a.cornerB.y - a.cornerA.y), height = int(a.cornerB.x - a.cornerA.x);
 				int left = int(a.cornerA.y - mohd->cornerA.y)+1, top = int(a.cornerA.x - mohd->cornerA.x)+1;
-				fprintf(ims,
+				CMDPRINTF(
 					" -fill none -stroke black -draw 'rectangle %i,%i,%i,%i'"
 					" -fill black -stroke none -draw 'text %i,%i \"%03i\"'",
 					left, top, left+width, top+height,
@@ -143,7 +147,8 @@ static void dumpWMO(const char* mpqPath, const char* mapName) {
 			}
 		}
 	}
-	fclose(ims);
+	//fclose(ims);
+	CMDPRINTF(" output/%s.png", mapName);
 	puts(cmd);
 	if(system(cmd))
 		exit(0);

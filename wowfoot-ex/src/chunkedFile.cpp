@@ -1,3 +1,6 @@
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "chunkedFile.h"
 #include <assert.h>
 #include <stdio.h>
@@ -17,7 +20,7 @@ Chunk ChunkedFile::getChunk() {
 		}
 		c.data = mPtr + 8;
 		if(c.data >= mEnd) {
-			printf("%i < %i\n", (mPtr-mStart), (mEnd-mStart));
+			printf("%" PRIuPTR " < %" PRIuPTR "\n", (mPtr-mStart), (mEnd-mStart));
 		}
 		assert(c.data < mEnd);
 		mPtr += c.size + 8;
