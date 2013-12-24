@@ -2,13 +2,13 @@
 #include "spell.chtml.h"
 #include "comments.h"
 #include "db_creature_template.h"
-#include "db_gameobject_template.h"
 #include "money.h"
 #include "dbcSpell.h"
 //#include "dbcSpellEffectNames.h"
 #include "db_item.h"
 #include "db_creature_template_spells.h"
 #include "dbcSpellItemEnchantment.h"
+#include "dbcItemDisplayInfo.h"
 #include "util/arraySize.h"
 
 using namespace std;
@@ -35,6 +35,8 @@ void spellChtml::getResponse2(const char* urlPart, DllResponseData* drd, ostream
 	gSpellRanges.load();
 	SkillLineAbilityIndex::load();
 	gNpcSpells.load();
+	gItemDisplayInfos.load();
+	gObjects.load();
 
 #if 0
 	printf("SpellMechanics:\n");

@@ -529,6 +529,7 @@ PageWork.new('spell', ['tabs', 'tabTable', 'db_item', 'comments', 'dbcSpell',
 	'dbcSpellItemEnchantment',
 	'db_gameobject_template',
 	'db_creature_template_spells',
+	'spellShared', 'dbcItemDisplayInfo',
 	])
 PageWork.new('spells', ['tabs', 'tabTable', 'dbcSpell',
 	'dbcItemDisplayInfo', 'db_item', 'itemShared',

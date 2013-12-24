@@ -7,9 +7,9 @@
 class Tab;
 class Quality;
 
-int slaYellow(int id);
-int streamSource(ostream& stream, int id);
-const Quality* streamMultiItem(ostream& stream, int id, int count);
+int slaYellow(int id) VISIBLE;
+int streamSource(ostream& stream, int id) VISIBLE;
+const Quality* streamMultiItem(ostream& stream, int id, int count) VISIBLE;
 Tab* spellsTab(const char* tabId, const char* tabTitle, ItrPair<Spell>&,
 	bool haveSkillName) VISIBLE;
 

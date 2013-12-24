@@ -10,6 +10,9 @@
 #include "spellStrings.h"
 #include "dbcSpellDuration.h"
 #include "dbcSpellRange.h"
+#include "spellShared.h"
+#include "db_gameobject_template.h"
+#include "util/arraySize.h"
 
 class spellChtml : public tabsChtml, public PageContext {
 public:

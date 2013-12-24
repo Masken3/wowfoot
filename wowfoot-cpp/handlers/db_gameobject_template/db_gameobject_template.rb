@@ -41,11 +41,19 @@ public:
 	IntObjectPair findSpell(int spellId) const VISIBLE {
 		return mSpellMap.equal_range(spellId);
 	}
+
+private:
+	IntObjectMap mFocusMap;
+public:
+	IntObjectPair findFocus(int focusId) const VISIBLE {
+		return mFocusMap.equal_range(focusId);
+	}
 )
 
 require './handlers/db_spawn/spawnCount.rb'
 # 3 - chest
 # 6 - trap
+# 8 - focus
 # 10 - goober
 # 18 - summoning ritual
 # 22 - spellcaster
@@ -62,6 +70,8 @@ require './handlers/db_spawn/spawnCount.rb'
 # 18.2 - animSpell
 # 18.4 - casterTargetSpell
 # 22.0 - spellId
+
+# 8.0 - focusId
 spawnCount('gameobject', 'Object', %q(
 	if(t.type == 3 || t.type == 25) {
 		mLootMap.insert(pair<int, const Object*>(t.data1, &t));
@@ -80,6 +90,9 @@ spawnCount('gameobject', 'Object', %q(
 	if(spellId) {
 		::insert(mSpellMap, spellId, &t);
 	}
+	if(t.type == 8) {
+		::insert(mFocusMap, t.data0, &t);
+	}
 ))
 
 @extraHeaderCode << %q(
@@ -90,4 +103,5 @@ spawnCount('gameobject', 'Object', %q(
 printf("Loaded %" PRIuPTR " rows into %s\n", mLootMap.size(), "mLootMap");
 printf("Loaded %" PRIuPTR " rows into %s\n", mLockMap.size(), "mLockMap");
 printf("Loaded %" PRIuPTR " rows into %s\n", mSpellMap.size(), "mSpellMap");
+printf("Loaded %" PRIuPTR " rows into %s\n", mFocusMap.size(), "mFocusMap");
 )
