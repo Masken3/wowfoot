@@ -31,7 +31,7 @@ The problems :
 		course the optimal is
 
 				*
-		
+
 			  *   *
 
 		(where * = X and +)
@@ -57,7 +57,7 @@ The problems :
 
 /*******/
 
-typedef struct 
+typedef struct
 {
 	int totR,totG,totB,count;
 } palOptInfo;
@@ -132,8 +132,8 @@ int extraStepIndex,extraStepSize,samples,totSamples;
 
 			pal = closestPal(R,G,B,palInfo);
 
-			if ( pal >= palEntries ) pal = palEntries-1;			
-		
+			if ( pal >= palEntries ) pal = palEntries-1;
+
 			palPtr = palette + pal+pal+pal;
 			x = R - (*palPtr++);	mse += x*x;
 			x = G - (*palPtr++);	mse += x*x;
@@ -170,8 +170,8 @@ int extraStepIndex,extraStepSize,samples,totSamples;
 		{
 			memcpy(savePalette,palette,768);
 		}
-	
-		fprintf(stderr,"mse*256 = %d , extrastep = %d, samples = %d\n",mse,extraStepSize,samples);
+
+		fprintf(stderr,"mse*256 = %d , extrastep = %d, samples = %d\n",(int)mse,extraStepSize,samples);
 
 		if ( totSamples >= maxSamples )
 			break;
@@ -210,7 +210,7 @@ int extraStepIndex,extraStepSize,samples,totSamples;
 	}
 
 	destroy(optInfo);
-	
+
 	showPopTSC("palOptimize",stderr);
 }
 
